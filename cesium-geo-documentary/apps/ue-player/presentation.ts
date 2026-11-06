@@ -20,6 +20,7 @@ export type PreviewFlightOrigin = {
   camera: Camera;
   parentLabel: number;
   parentAccent: number;
+  childReveal: number;
   labels: Record<string, LabelStyle>;
   accents: Record<string, number>;
 };
@@ -112,7 +113,9 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
 
   const current = stop ? String(stop.id) : '';
   const reveal = smooth((mapTime - .35) / 1.25);
-  const parentOverview = openingOnly ? 1 : 1 - smooth((mapTime - Number(stops[0]?.start ?? Infinity)) / .45);
+  const sinceFirstVillage = mapTime - Number(stops[0]?.start ?? Infinity);
+  const parentOverview = openingOnly ? 1 : 1 - smooth(sinceFirstVillage / .45);
+  let childReveal = openingOnly ? 0 : smooth(sinceFirstVillage / .8);
   let parentLabel = .98 * parentOverview * smooth((mapTime - 1.16) / .48);
   let parentAccent = returning?.progress ?? parentOverview;
   const labels: Record<string, LabelStyle> = {};
@@ -150,6 +153,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   if (origin && transition < 1) {
     parentLabel = lerp(origin.parentLabel, parentLabel, transition);
     parentAccent = lerp(origin.parentAccent, parentAccent, transition);
+    childReveal = lerp(origin.childReveal, childReveal, transition);
     for (const id of new Set([...Object.keys(origin.labels), ...Object.keys(labels)])) {
       const start = origin.labels[id], end = labels[id];
       labels[id] = {
@@ -170,7 +174,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   return {
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
-    parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent,
+    parentReveal: reveal, childReveal, parentLabel, parentAccent,
     labels, accents, labelReferenceDistance, focusId, focus,
     clouds: cloudStateAt(time, opening, pose.height),
     trace: boundaryAnimation(mapTime, traceStart, current)
