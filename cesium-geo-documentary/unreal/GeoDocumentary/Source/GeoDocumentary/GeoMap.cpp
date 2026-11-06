@@ -724,8 +724,6 @@ void AGeoHUD::DrawHUD()
     const float Scale = Canvas->SizeX / (Map->RenderProfile == TEXT("landscape") ? 1920.f : 1080.f);
     const FIntPoint Size(Canvas->SizeX, Canvas->SizeY);
     const double Focus = N(F, TEXT("focus")), Reveal = N(F, TEXT("parentReveal"));
-    const float ParentAccent = N(F, TEXT("parentAccent"));
-    const float ChildReveal = N(F, TEXT("childReveal"));
     const auto Trace = O(F, TEXT("trace"));
     const auto Accents = O(F, TEXT("accents"));
     const auto Styles = O(F, TEXT("labels"));
@@ -739,8 +737,7 @@ void AGeoHUD::DrawHUD()
         CachedFrame = F;
         CachedSize = Size;
         Strokes.Reset();
-        ParentTriangles.Reset();
-        FocusedChildTriangles.Reset();
+        FocusTriangles.Reset();
         DimRects.Reset();
         for (auto &Layer : ShadowRects)
             Layer.Reset();
@@ -756,8 +753,8 @@ void AGeoHUD::DrawHUD()
             const bool Focused = FocusId.IsEmpty() ? Ring.Parent : Ring.Id == FocusId;
             if (Focused && Focus > .001)
                 FocusRings.Add(ProjectFocusRing(Ring.Points, Map->Camera, Size.X, Size.Y));
-            const double Accent = Ring.Parent ? ParentAccent : N(Accents, *Ring.Id);
-            const bool Show = Ring.Parent || ChildReveal > .01 || Accent > .01 || Styles->HasField(Ring.Id);
+            const double Accent = Ring.Parent ? N(F, TEXT("parentAccent")) : N(Accents, *Ring.Id);
+            const bool Show = Ring.Parent || Accent > .01 || Styles->HasField(Ring.Id);
             if (!Show || Ring.Points.Num() < 2)
                 continue;
             FVector2D A;
@@ -779,9 +776,8 @@ void AGeoHUD::DrawHUD()
         }
         for (const auto &Fill : Map->Fills)
         {
-            if (Fill.Parent ? Reveal <= .001 : Focus <= .001 || Fill.Id != FocusId)
+            if (Focus <= .001 || !(FocusId.IsEmpty() ? Fill.Parent : Fill.Id == FocusId))
                 continue;
-            auto &Triangles = Fill.Parent ? ParentTriangles : FocusedChildTriangles;
             TArray<FVector2D> Points;
             TArray<bool> Valid;
             for (const auto &Vertex : Fill.Vertices)
@@ -801,7 +797,7 @@ void AGeoHUD::DrawHUD()
                 Triangle.V2_Pos = Points[C];
                 Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
                 Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = FLinearColor::White;
-                Triangles.Add(Triangle);
+                FocusTriangles.Add(Triangle);
             }
         }
         // Active-edge sweep: mask outside all focused rings using even/odd parity,
@@ -903,26 +899,22 @@ void AGeoHUD::DrawHUD()
             Canvas->DrawItem(Tile);
         }
     };
-    const auto DrawFill = [this](TArray<FCanvasUVTri> &Triangles, const FLinearColor &Tint) {
-        if (Triangles.IsEmpty())
-            return;
-        for (auto &Triangle : Triangles)
-            Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
-        FCanvasTriangleItem Fill(Triangles, GWhiteTexture);
-        Fill.BlendMode = SE_BLEND_Translucent;
-        Canvas->DrawItem(Fill);
-    };
-    DrawRects(DimRects, FLinearColor(.018, .024, .022, (FocusId.IsEmpty() ? .30 : .13) * Focus));
-    // Keep the parent face through the handoff, grading it down to a muted
-    // green under the stronger blue of the village currently in focus.
-    const FLinearColor ParentTint = FMath::Lerp(FLinearColor(.16, .29, .11, .21), FLinearColor(.15, .55, .10, .38), ParentAccent);
-    DrawFill(ParentTriangles, ParentTint.CopyWithNewOpacity(ParentTint.A * FMath::SmoothStep(0., .85, Reveal)));
+    DrawRects(DimRects, FLinearColor(.018, .024, .022, (FocusId.IsEmpty() ? .30 : .22) * Focus));
     const double ShadowOpacity[] = {.08, .15, .33};
     for (int Layer = 0; Layer < UE_ARRAY_COUNT(ShadowRects); ++Layer)
         DrawRects(ShadowRects[Layer], FLinearColor(.006, .010, .010, ShadowOpacity[Layer] * Focus));
-    DrawFill(FocusedChildTriangles, FLinearColor(.075, .37, .64, .44 * Focus));
+    if (FocusTriangles.Num())
+    {
+        const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.15, .55, .10, .38 * Focus)
+                                                   : FLinearColor(.12, .45, .58, .30 * Focus);
+        for (auto &Triangle : FocusTriangles)
+            Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
+        FCanvasTriangleItem Fill(FocusTriangles, GWhiteTexture);
+        Fill.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Fill);
+    }
     const FLinearColor TownEdge(.031, .070, .026), VillageEdge(.035, .086, .092);
-    const FLinearColor ContextEdge(.64, .71, .65), DarkEdge(.009, .018, .021);
+    const FLinearColor ContextEdge(.35, .43, .41), DarkEdge(.009, .018, .021);
     TArray<FCanvasUVTri> BoundaryTriangles;
     const auto AddStroke = [&BoundaryTriangles](const FVector2D &A, const FVector2D &B, double Width,
                                                 const FLinearColor &ColorA, const FLinearColor &ColorB) {
@@ -943,26 +935,18 @@ void AGeoHUD::DrawHUD()
         Triangle.V1_Color = ColorB;
         BoundaryTriangles.Add(Triangle);
     };
-    // Lay down every casing before the light cores so coincident village
-    // edges stay readable where neighboring polygons meet.
-    for (int Pass = 0; Pass < 2; ++Pass)
-        for (const auto &Stroke : Strokes)
-        {
-            if (Stroke.Parent && Stroke.Start >= Reveal)
-                continue;
-            const FVector2D End = Stroke.Parent && Stroke.End > Reveal
-                ? FMath::Lerp(Stroke.A, Stroke.B, (Reveal - Stroke.Start) / (Stroke.End - Stroke.Start))
-                : Stroke.B;
-            const float Accent = Stroke.Accent;
-            const float Strength = Stroke.Parent ? 1.f : FMath::Max(Accent, ChildReveal);
-            const FLinearColor Core = Stroke.Parent
-                ? FMath::Lerp(FLinearColor(.49, .67, .40, .72), TownEdge.CopyWithNewOpacity(.92f), Accent)
-                : FMath::Lerp(ContextEdge.CopyWithNewOpacity(.70f), FLinearColor(.35, .72, .88, .95), Accent);
-            const FLinearColor Color = Pass == 0 ? DarkEdge.CopyWithNewOpacity(.86 * Strength)
-                                                 : Core.CopyWithNewOpacity(Core.A * Strength);
-            const double Width = FMath::Lerp(1.65f, 2.3f, Accent) + (Pass == 0 ? 2.5 : 0);
-            AddStroke(Stroke.A, End, Width * Scale, Color, Color);
-        }
+    for (const auto &Stroke : Strokes)
+    {
+        if (Stroke.Parent && Stroke.Start >= Reveal)
+            continue;
+        const FVector2D End = Stroke.Parent && Stroke.End > Reveal
+            ? FMath::Lerp(Stroke.A, Stroke.B, (Reveal - Stroke.Start) / (Stroke.End - Stroke.Start))
+            : Stroke.B;
+        const FLinearColor Edge = Stroke.Parent ? TownEdge : VillageEdge;
+        const FLinearColor Context = ContextEdge.CopyWithNewOpacity(Stroke.Parent ? .53f : .48f);
+        const FLinearColor Color = FMath::Lerp(Context, Edge.CopyWithNewOpacity(.78f), float(Stroke.Accent));
+        AddStroke(Stroke.A, End, FMath::Lerp(1.2f, 1.7f, float(Stroke.Accent)) * Scale, Color, Color);
+    }
     const double Head = N(Trace, TEXT("progress")), TraceAlpha = N(Trace, TEXT("alpha"));
     if (TraceAlpha > .01)
         for (int Pass = 0; Pass < 2; ++Pass)
@@ -1034,14 +1018,14 @@ void AGeoHUD::DrawHUD()
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
-        const float SizePx = (Label.Parent ? 74.f : FMath::Lerp(39.f, 68.f, Emphasis)) * Scale
+        const float SizePx = (Label.Parent ? 74.f : FMath::Lerp(35.f, 64.f, Emphasis)) * Scale
                              * FMath::Lerp(1.f, Primary ? .90f : .82f, Ramp(.5, 3));
         float Width, Height;
         Canvas->StrLen(LabelFont, Label.Name, Width, Height);
         const float TextScale = FMath::Min(SizePx / FMath::Max(1.f, GlyphHeight), Size.X * .80f / FMath::Max(1.f, Width));
         const FVector2D Extent = FVector2D(Width, Height) * TextScale * .5
                                  + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
-        const FLinearColor Color = FMath::Lerp(FLinearColor(.91, .95, .97), FLinearColor::White,
+        const FLinearColor Color = FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
                                                Primary ? 1.f : Emphasis).CopyWithNewOpacity(Opacity);
         DrawLabels.Add({Label.Id, Label.Name, Point, Extent, Color, TextScale, Emphasis,
                         CurrentVillage ? 2 : Label.Parent ? 1 : 0});
@@ -1125,16 +1109,10 @@ void AGeoHUD::DrawHUD()
         FCanvasTextItem Text(Position, FText::FromString(Label.Name), LabelFont, Label.Color);
         Text.bCentreX = true;
         Text.bCentreY = true;
-        Text.Scale = FVector2D(Label.TextScale);
-        const double Halo = FMath::Max(1.25, (Label.Priority ? 2.65 : 1.9) * Scale);
-        const FLinearColor Outline = DarkEdge.CopyWithNewOpacity(.93 * Label.Color.A);
-        Text.SetColor(Outline);
-        for (const FVector2D Offset : {FVector2D(-Halo, 0), FVector2D(Halo, 0), FVector2D(0, -Halo), FVector2D(0, Halo)})
-            Canvas->DrawItem(Text, Position + Offset);
-        Text.SetColor(Label.Color);
         Text.bOutlined = true;
-        Text.OutlineColor = Outline;
-        Canvas->DrawItem(Text, Position);
+        Text.OutlineColor = DarkEdge.CopyWithNewOpacity(Label.Color.A);
+        Text.Scale = FVector2D(Label.TextScale);
+        Canvas->DrawItem(Text);
     }
     LabelPlacements = MoveTemp(Placements);
     const auto Clouds = O(F, TEXT("clouds"));

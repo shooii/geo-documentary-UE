@@ -110,7 +110,7 @@ class AGeoHUD : public AHUD
     TArray<FGeoStroke> Strokes;
     TSharedPtr<FJsonObject> CachedFrame;
     FIntPoint CachedSize;
-    TArray<FCanvasUVTri> ParentTriangles, FocusedChildTriangles;
+    TArray<FCanvasUVTri> FocusTriangles;
     TArray<FVector4> DimRects;
     TArray<FVector4> ShadowRects[3];
     UPROPERTY() TObjectPtr<UFont> LabelFont;

@@ -27,10 +27,6 @@ test('UE tour starts at settled opening camera and returns to the same camera',(
  const stops=[{id:'one',start:10,end:20,flightDuration:4,cameraPreset:{...base,longitude:110.1,height:5000}}];
  const overview=frameAt(scene,stops,0,'portrait',4.4).camera;
  assert.deepEqual(frameAt(scene,stops,10,'portrait',4.4).camera,overview);
- assert.equal(frameAt(scene,stops,9,'portrait',4.4).childReveal,0);
- assert.equal(frameAt(scene,stops,10.4,'portrait',4.4).childReveal > 0,true);
- assert.equal(frameAt(scene,stops,14,'portrait',4.4).childReveal,1);
- assert.equal(frameAt(scene,stops,14,'portrait',4.4,true).childReveal,0);
  const returned=frameAt(scene,stops,30,'portrait',4.4).camera;
  assert.ok(Math.abs(returned.height-overview.height)<1e-8);
  assert.equal(returned.lon,overview.lon);
