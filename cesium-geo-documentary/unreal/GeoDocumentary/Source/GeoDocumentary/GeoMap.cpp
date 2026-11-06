@@ -8,6 +8,7 @@
 #include "Engine/Texture2D.h"
 #include "HAL/IConsoleManager.h"
 #include "HAL/PlatformFileManager.h"
+#include "HAL/PlatformMisc.h"
 #include "HttpModule.h"
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
@@ -899,7 +900,7 @@ void AGeoHUD::DrawHUD()
             Canvas->DrawItem(Tile);
         }
     };
-    DrawRects(DimRects, FLinearColor(.018, .024, .022, (FocusId.IsEmpty() ? .30 : .22) * Focus));
+    DrawRects(DimRects, FLinearColor(.018, .024, .022, (FocusId.IsEmpty() ? .48 : .22) * Focus));
     const double ShadowOpacity[] = {.08, .15, .33};
     for (int Layer = 0; Layer < UE_ARRAY_COUNT(ShadowRects); ++Layer)
         DrawRects(ShadowRects[Layer], FLinearColor(.006, .010, .010, ShadowOpacity[Layer] * Focus));
@@ -984,6 +985,22 @@ void AGeoHUD::DrawHUD()
     if (!LabelFont)
     {
         LabelFont = DuplicateObject<UFont>(GEngine->GetLargeFont(), this);
+#if PLATFORM_WINDOWS
+        // Use the bold face Chromium resolves for the Cesium labels on this Windows setup.
+        const FString WindowsDir = FPlatformMisc::GetEnvironmentVariable(TEXT("WINDIR"));
+        const FString FontPath = FPaths::Combine(WindowsDir, TEXT("Fonts/msyhbd.ttc"));
+        if (!WindowsDir.IsEmpty() && FPaths::FileExists(FontPath))
+        {
+            auto &Composite = LabelFont->GetMutableInternalCompositeFont();
+            if (const auto *DefaultFont = LabelFont->GetCompositeFont(); DefaultFont && DefaultFont != &Composite)
+                Composite.FallbackTypeface = DefaultFont->FallbackTypeface;
+            Composite.DefaultTypeface.Fonts.Reset();
+            Composite.DefaultTypeface.AppendFont(TEXT("Bold"), FontPath, EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
+            LabelFont->FontCacheType = EFontCacheType::Runtime;
+            LabelFont->RuntimeFontSource = ERuntimeFontSource::Asset;
+            LabelFont->LegacyFontName = TEXT("Bold");
+        }
+#endif
         // Rasterize Chinese glyphs near their display size instead of
         // enlarging the low-resolution legacy Canvas glyph atlas.
         if (LabelFont->FontCacheType == EFontCacheType::Runtime)
@@ -1109,10 +1126,16 @@ void AGeoHUD::DrawHUD()
         FCanvasTextItem Text(Position, FText::FromString(Label.Name), LabelFont, Label.Color);
         Text.bCentreX = true;
         Text.bCentreY = true;
-        Text.bOutlined = true;
-        Text.OutlineColor = DarkEdge.CopyWithNewOpacity(Label.Color.A);
         Text.Scale = FVector2D(Label.TextScale);
-        Canvas->DrawItem(Text);
+        const double Halo = FMath::Max(1.25, (Label.Priority ? 2.65 : 1.9) * Scale);
+        const FLinearColor Outline = DarkEdge.CopyWithNewOpacity(.93 * Label.Color.A);
+        Text.SetColor(Outline);
+        for (const FVector2D Offset : {FVector2D(-Halo, 0), FVector2D(Halo, 0), FVector2D(0, -Halo), FVector2D(0, Halo)})
+            Canvas->DrawItem(Text, Position + Offset);
+        Text.SetColor(Label.Color);
+        Text.bOutlined = true;
+        Text.OutlineColor = Outline;
+        Canvas->DrawItem(Text, Position);
     }
     LabelPlacements = MoveTemp(Placements);
     const auto Clouds = O(F, TEXT("clouds"));
