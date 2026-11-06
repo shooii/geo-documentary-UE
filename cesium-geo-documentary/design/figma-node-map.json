@@ -1,0 +1,84 @@
+{
+  "status": "connected",
+  "file": {
+    "name": "地理图说 Premium Map System",
+    "fileKey": "3o7fht8p72Aog2YnRzph5n",
+    "url": "https://www.figma.com/design/3o7fht8p72Aog2YnRzph5n",
+    "workspace": "xu yaoting's team"
+  },
+  "pages": {
+    "Cover": "0:1",
+    "Getting Started": "7:2",
+    "Foundations": "7:3",
+    "Map Title": "7:5",
+    "Region Label": "7:6",
+    "Subtitle": "7:7",
+    "Boundary States": "7:8",
+    "Showcase & Motion": "7:10",
+    "Brand Mark": "64:2",
+    "Video Cover": "64:3"
+  },
+  "components": {
+    "Map Title": {
+      "figmaNodeId": "17:11",
+      "variants": ["Landscape", "Portrait"],
+      "props": ["Title", "Show accent"],
+      "logoNodes": ["72:10", "75:2"],
+      "logoAsset": "design/generated/midnight-globe-emblem.png"
+    },
+    "Geography Brand Mark": {
+      "markNodeId": "72:10",
+      "horizontalLockupNodeId": "75:2",
+      "props": ["Brand", "Descriptor", "Show descriptor"],
+      "logoAsset": "design/generated/midnight-globe-emblem.png"
+    },
+    "Video Cover / Portrait": {
+      "figmaNodeId": "80:2",
+      "defaultHeroNodeId": "76:12",
+      "props": ["Topic", "Subtitle", "Content meta", "Hero visual"],
+      "exportAsset": "design/generated/midnight-globe-cover-background.png",
+      "visibleLanguagePolicy": "Chinese only; no hierarchy path, English copy, issue code, or aspect-ratio badge"
+    },
+    "Region Label": { "figmaNodeId": "19:8", "variants": ["Context", "Selected", "Previous", "Supplemental"], "props": ["Label", "Show anchor"] },
+    "Subtitle": { "figmaNodeId": "26:11", "variants": ["Landscape", "Portrait", "Square"], "props": ["Text"] },
+    "Boundary State": { "figmaNodeId": "31:20", "variants": ["Parent", "Context", "Selected", "Previous", "Supplemental"] }
+  },
+  "showcase": {
+    "root": "36:2",
+    "masterScene": "36:5",
+    "sceneContract": "36:32",
+    "typographyAndVoiceContract": "37:49",
+    "portrait": {
+      "root": "51:43",
+      "mapImage": "51:44",
+      "titleInstance": "51:46",
+      "evidenceImage": "51:55",
+      "overlay": "57:10",
+      "evidenceCaption": "57:11",
+      "subtitle": "57:12",
+      "providerCredit": "57:14"
+    }
+  },
+  "productionInstances": {
+    "440825111": {
+      "topic": "徐闻县和安镇",
+      "hierarchicalTitle": "地理图说·徐闻县和安镇",
+      "coverNodeId": "114:29",
+      "masterComponentNodeId": "80:2",
+      "exportAsset": "renders/final/covers/地理图说·徐闻县和安镇-cover.png"
+    }
+  },
+  "semanticVariables": {
+    "boundaryParent": "VariableID:3:6",
+    "boundaryContext": "VariableID:3:7",
+    "boundarySelected": "VariableID:3:8",
+    "boundaryParentFill": "VariableID:3:11",
+    "boundarySelectedFill": "VariableID:3:12"
+  },
+  "variableCollections": {
+    "Primitives": "VariableCollectionId:2:2",
+    "Color": "VariableCollectionId:2:3",
+    "Geometry": "VariableCollectionId:2:4",
+    "Motion": "VariableCollectionId:2:5"
+  }
+}

@@ -1,0 +1,75 @@
+# Dependencies and local runtimes
+**/node_modules/
+**/.python-packages/
+**/.python-geo/
+**/.hf-python/
+**/.venv/
+**/venv/
+
+# Build, cache, logs, and temporary files
+**/.build-state/
+**/dist/
+**/build/
+**/.cache/
+**/__pycache__/
+**/*.py[cod]
+**/tmp/
+**/*.log
+
+# Local measurement and comparison output (screenshots produced while tuning
+# things like the subtitle baseline). Evidence for a decision, not a deliverable.
+outputs/
+
+# Project data and generated render output
+**/data/
+**/renders/
+**/assets/audio/
+**/apps/video-compositor/media/
+**/apps/video-compositor/snapshots/
+
+# Video files
+**/*.mp4
+**/*.mov
+**/*.avi
+**/*.mkv
+**/*.webm
+**/*.wmv
+**/*.flv
+**/*.m4v
+**/*.mpg
+**/*.mpeg
+**/*.3gp
+**/*.mts
+**/*.m2ts
+
+# Audio and other large binary media
+**/*.mp3
+**/*.wav
+**/*.aac
+**/*.m4a
+**/*.flac
+**/*.ogg
+**/*.opus
+
+# Packaged exports
+**/*.zip
+**/*.7z
+**/*.rar
+**/*.tar
+**/*.gz
+
+# Editor and OS files
+.git-backup-*/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# cesium-geo-documentary local runtime & per-machine data (never tracked)
+cesium-geo-documentary/workspace/
+cesium-geo-documentary/runtime-qindou/
+cesium-geo-documentary/.tmp/
+cesium-geo-documentary/content/coverage-manifest-*.json
+
+# Agent working memory (local, never tracked)
+.workbuddy/

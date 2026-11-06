@@ -1,0 +1,251 @@
+{
+  "regionId": "440904",
+  "name": "电白区",
+  "duration": 52,
+  "scenes": [
+    {
+      "sceneId": "440904-scene-01",
+      "title": "电白区全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "电白位于茂名东南部，陆地向南伸入海岸，179.19千米大陆岸线把浅海、岛礁、丘陵和城镇串在一起。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440904",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "电白位于茂名东南部，陆地向南伸入海岸，179.19千米大陆岸线把浅海、岛礁、丘陵和城镇串在一起。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440904-location-001"
+      ],
+      "accessibility": "旁白说明电白区全域定位，地图高亮电白区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440904-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2025年末电白常住人口152.20万，城镇化率46.10%，人口分布兼具沿海密集和内陆分散两种形态。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440904",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2025年常住人口152.20万",
+        "body": "179.19千米海岸线连接浅海、岛礁与丘陵"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年末电白常住人口152.20万，城镇化率46.10%，人口分布兼具沿海密集和内陆分散两种形态。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440904-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮电白区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440904-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2025年地区生产总值884.33亿元，三次产业结构为19.6比31.9比48.5，海洋渔业、农业、制造业和服务业并行。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440904",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2025年GDP 884.33亿元",
+        "body": "农业、制造业与滨海服务共同发展"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年地区生产总值884.33亿元，三次产业结构为19.6比31.9比48.5，海洋渔业、农业、制造业和服务业并行。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440904-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮电白区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440904-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "电白长期属于古代高凉地域，冼夫人故里的历史记忆至今仍是地方文化的重要线索。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440904",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "高凉历史记忆与冼夫人文化延续",
+        "body": "电白长期属于古代高凉地域，冼夫人故里的历史记忆至今仍是地方文化的重要线索。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "电白长期属于古代高凉地域，冼夫人故里的历史记忆至今仍是地方文化的重要线索。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440904-history-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮电白区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440904-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "沉香、水东芥菜、海产干货和沿海节庆，呈现出山海资源在日常生活中的不同形态。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440904",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "沉香、海洋民俗与沿海物产鲜明",
+        "body": "沉香、水东芥菜、海产干货和沿海节庆，呈现出山海资源在日常生活中的不同形态。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "沉香、水东芥菜、海产干货和沿海节庆，呈现出山海资源在日常生活中的不同形态。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440904-culture-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮电白区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440904-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 8,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的电白继续在滨海产业、现代农业和公共服务之间寻找平衡，让漫长海岸成为生产空间，也成为生活空间。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440904",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的电白继续在滨海产业、现代农业和公共服务之间寻找平衡，让漫长海岸成为生产空间，也成为生活空间。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440904-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮电白区，所有重要文字保持在安全区。"
+    }
+  ]
+}

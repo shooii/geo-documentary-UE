@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-composition-variables="[]">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>遂溪县地理图说</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1080px;height:1080px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Microsoft YaHei")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(90deg,rgba(4,10,15,.72),transparent 48%),linear-gradient(0deg,rgba(4,10,15,.68),transparent 35%)}
+    .topbar{left:64px;top:64px;display:flex;align-items:center;gap:18px;font-size:24px;letter-spacing:.16em;color:#d1dbe1;text-shadow:0 2px 16px #000}.topbar:before{content:"";width:64px;height:3px;background:#ffd166;box-shadow:0 0 16px rgba(255,209,102,.75)}
+    .scene-title{left:64px;top:400px;width:720px;text-shadow:0 3px 24px #000}.scene-title span{display:inline-block;color:#ffd166;font-size:22px;letter-spacing:.16em;margin-bottom:12px;padding:4px 10px;border-radius:999px;background:rgba(4,10,15,.78);border:1px solid rgba(255,209,102,.42)}.scene-title h2{font-size:52px;line-height:1.1;margin:0;font-weight:760}#scene-4{top:600px}
+    .fact-card{right:64px;top:540px;width:430px;padding:28px 30px;border:1px solid rgba(255,255,255,.18);border-radius:20px;background:rgba(17,27,36,.84);box-shadow:0 18px 60px rgba(0,0,0,.34);backdrop-filter:blur(18px)}.fact-card b{font-size:28px;color:#ffd166}.fact-card p{font-size:24px;line-height:1.55;color:#d1dbe1;margin:14px 0 0}
+    .culture{right:64px;top:170px;width:680px;height:383px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.22);box-shadow:0 24px 80px rgba(0,0,0,.45);background:#111b24}.culture img{width:100%;height:100%;object-fit:cover}.badge{position:absolute;left:18px;top:18px;padding:8px 14px;border-radius:999px;background:rgba(4,10,15,.78);font-size:20px;color:#ffd166;border:1px solid rgba(255,209,102,.5)}
+    .subtitle{left:50%;bottom:72px;transform:translateX(-50%);max-width:920px;padding:12px 24px;border-radius:14px;background:rgba(4,10,15,.72);font-size:36px;line-height:1.42;text-align:center;font-weight:650;text-shadow:0 2px 8px #000;white-space:nowrap}
+    .source-card{left:64px;right:64px;bottom:64px;padding:26px 28px;border-radius:20px;background:rgba(8,16,23,.94);border:1px solid rgba(255,255,255,.16)}.source-card h3{margin:0 0 12px;font-size:30px}.source-card p{margin:0;color:#d1dbe1;font-size:20px;line-height:1.55}.source-card .notice{margin-top:10px;color:#ffd166}
+    .transition-host,.transition{inset:0;pointer-events:none}.transition{position:absolute;background:#081017}.credit{position:absolute;right:64px;bottom:18px;z-index:30;padding:5px 9px;border-radius:7px;background:rgba(4,10,15,.72);font-size:16px;color:#f4f7f9}
+  </style>
+</head>
+<body>
+<main data-hf-id="hf-g2d4" id="root" data-composition-id="440823-square" data-start="0" data-width="1080" data-height="1080" data-duration="50" data-fps="30">
+  <video data-hf-id="hf-4y0o" id="map" class="clip map" src="media/maps/440823-map-square.mp4" muted playsinline preload="auto" data-start="0" data-duration="50" data-track-index="0"></video>
+  <div data-hf-id="hf-q6mu" id="shade" class="clip shade" data-start="0" data-duration="50" data-track-index="1"></div>
+  <div data-hf-id="hf-0xxu" id="topbar" class="clip topbar" data-start="0" data-duration="50" data-track-index="10">湛江地理图说 · 区县系列</div>
+  <section data-hf-id="hf-rc9n" id="scene-0" class="clip scene-title" data-start="0" data-duration="7" data-track-index="2"><div data-hf-id="hf-0pqf" id="scene-inner-0"><span data-hf-id="hf-p81i">01</span><h2 data-hf-id="hf-dlvs">遂溪县，位于湛江何处</h2></div></section>
+<section data-hf-id="hf-m0g0" id="scene-1" class="clip scene-title" data-start="7" data-duration="8" data-track-index="2"><div data-hf-id="hf-uk0m" id="scene-inner-1"><span data-hf-id="hf-pmcj">02</span><h2 data-hf-id="hf-xvjq">边界与邻接关系</h2></div></section>
+<section data-hf-id="hf-hig1" id="scene-2" class="clip scene-title" data-start="15" data-duration="10" data-track-index="2"><div data-hf-id="hf-qlwl" id="scene-inner-2"><span data-hf-id="hf-q0nk">03</span><h2 data-hf-id="hf-zvr6">雷州半岛北部连接湾区与北部湾</h2></div></section>
+<section data-hf-id="hf-demd" id="scene-3" class="clip scene-title" data-start="25" data-duration="10" data-track-index="2"><div data-hf-id="hf-pu8s" id="scene-inner-3"><span data-hf-id="hf-n8id">04</span><h2 data-hf-id="hf-ed6a">县城与交通廊道长期汇聚</h2></div></section>
+<section data-hf-id="hf-gm6h" id="scene-4" class="clip scene-title" data-start="35" data-duration="9" data-track-index="2"><div data-hf-id="hf-dbqb" id="scene-inner-4"><span data-hf-id="hf-nmte">05</span><h2 data-hf-id="hf-ox7q">遂溪醒狮以高桩技艺传承</h2></div></section>
+<section data-hf-id="hf-qnaj" id="scene-5" class="clip scene-title" data-start="44" data-duration="6" data-track-index="2"><div data-hf-id="hf-9dma" id="scene-inner-5"><span data-hf-id="hf-o14f">06</span><h2 data-hf-id="hf-e8gw">农业、交通与县城服务共同发展</h2></div></section>
+  <aside data-hf-id="hf-txc3" id="fact-card" class="clip fact-card" data-start="15" data-duration="10" data-track-index="3"><b data-hf-id="hf-n7r8">雷州半岛北部连接湾区与北部湾</b><p data-hf-id="hf-403m">县城与交通廊道长期汇聚</p></aside>
+  <figure data-hf-id="hf-g4mc" id="culture" class="clip culture" data-start="35" data-duration="9" data-track-index="4"><img data-hf-id="hf-phka" src="media/images/440823-culture-001.png" alt="遂溪县文化章节辅助画面"><figcaption data-hf-id="hf-3h42" class="badge">生成失败 · 地图替代</figcaption></figure>
+  <div data-hf-id="hf-1s2i" id="caption-0" class="clip subtitle" data-start="0.100" data-duration="6.800" data-track-index="5">遂溪位于雷州半岛北部，西临北部湾<br data-hf-id="hf-x5px">，并与湛江主城区保持紧密联系。</div>
+<div data-hf-id="hf-sjea" id="caption-1" class="clip subtitle" data-start="6.900" data-duration="6.800" data-track-index="5">广阔平原、沿海滩涂和纵横交通线，<br data-hf-id="hf-rsrt">使它成为半岛北部的重要通道。</div>
+<div data-hf-id="hf-x0ve" id="caption-2" class="clip subtitle" data-start="13.700" data-duration="7.050" data-track-index="5">在这里，农业生产与县城集市长期<br data-hf-id="hf-szow">相互支撑，形成密集的乡镇网络。</div>
+<div data-hf-id="hf-zjdc" id="caption-3" class="clip subtitle" data-start="20.750" data-duration="7.337" data-track-index="5">遂溪醒狮则把地方精神写进鼓点与<br data-hf-id="hf-sldv">高桩动作，讲究新、高、难、险。</div>
+<div data-hf-id="hf-irgu" id="caption-4" class="clip subtitle" data-start="28.087" data-duration="6.025" data-track-index="5">这项传统已进入国家级非物质文化<br data-hf-id="hf-qluq">遗产名录，并通过传承基地延续。</div>
+<div data-hf-id="hf-306o" id="caption-5" class="clip subtitle" data-start="34.112" data-duration="6.941" data-track-index="5">今天的遂溪，一边连接现代交通和产<br data-hf-id="hf-q7jp">业，一边让狮鼓声继续穿过村镇与田</div>
+<div data-hf-id="hf-m4po" id="caption-6" class="clip subtitle" data-start="41.053" data-duration="0.434" data-track-index="5">野。</div>
+  <audio data-hf-id="hf-x7g2" id="narration-audio" class="clip" src="media/audio/440823-narration.wav" data-start="0" data-duration="41.540" data-track-index="6" data-volume="1"></audio>
+  <audio data-hf-id="hf-mv2o" id="music-bed" class="clip" src="media/music/ambient-map-bed.wav" data-start="0" data-duration="50" data-track-index="7" data-volume="0.5"></audio>
+  <section data-hf-id="hf-rm4u" id="sources" class="clip source-card" data-start="44" data-duration="6" data-track-index="8"><h3 data-hf-id="hf-hy2v">来源与说明</h3><p data-hf-id="hf-bf3x">遂溪县人民政府：《遂溪县概况》　遂溪县人民政府：《余钢到遂溪县调研：加快构建现代化产业体系》　遂溪县人民政府办公室：《同心同行 相聚狮乡——2023海峡两岸醒狮文化交流启动》</p><p data-hf-id="hf-eubi" class="notice">行政区边界仅作视频可视化，不作为法定界线依据。生成素材均标注艺术化复原；未通过 QA 的素材以地图画面替代。</p></section>
+  <div data-hf-id="hf-m0g6" class="clip transition-host" id="transition-host-1" data-start="6.7" data-duration="0.6" data-track-index="9"><div data-hf-id="hf-u6rk" class="transition" id="transition-1"></div></div>
+  <div data-hf-id="hf-df6c" class="clip transition-host" id="transition-host-2" data-start="14.7" data-duration="0.6" data-track-index="9"><div data-hf-id="hf-2unf" class="transition" id="transition-2"></div></div>
+  <div data-hf-id="hf-m55w" class="clip transition-host" id="transition-host-3" data-start="24.7" data-duration="0.6" data-track-index="9"><div data-hf-id="hf-ywje" class="transition" id="transition-3"></div></div>
+  <div data-hf-id="hf-n9nk" class="clip transition-host" id="transition-host-4" data-start="34.7" data-duration="0.6" data-track-index="9"><div data-hf-id="hf-icfh" class="transition" id="transition-4"></div></div>
+  <div data-hf-id="hf-ifk7" class="credit">CesiumJS · DataV 边界可视化 · Natural Earth II</div>
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".scene-title>div","#fact-card","#culture","#sources",".subtitle"],{opacity:0});
+  tl.fromTo("#scene-inner-0",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},0.1);
+tl.fromTo("#scene-inner-1",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},7.1);
+tl.fromTo("#scene-inner-2",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},15.1);
+tl.fromTo("#scene-inner-3",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},25.1);
+tl.fromTo("#scene-inner-4",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},35.1);
+tl.fromTo("#scene-inner-5",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},44.1);
+  tl.fromTo("#fact-card",{opacity:0,x:42},{opacity:1,x:0,duration:.65,ease:"power2.out"},15.15);
+  tl.fromTo("#culture",{opacity:0,scale:.96,x:36},{opacity:1,scale:1,x:0,duration:.75,ease:"power2.out"},35.1);
+  tl.fromTo("#sources",{opacity:0,y:28},{opacity:1,y:0,duration:.65,ease:"power2.out"},44.1);
+  tl.fromTo("#caption-0",{opacity:0,y:12},{opacity:1,y:0,duration:.18},0.100);
+tl.fromTo("#caption-1",{opacity:0,y:12},{opacity:1,y:0,duration:.18},6.900);
+tl.fromTo("#caption-2",{opacity:0,y:12},{opacity:1,y:0,duration:.18},13.700);
+tl.fromTo("#caption-3",{opacity:0,y:12},{opacity:1,y:0,duration:.18},20.750);
+tl.fromTo("#caption-4",{opacity:0,y:12},{opacity:1,y:0,duration:.18},28.087);
+tl.fromTo("#caption-5",{opacity:0,y:12},{opacity:1,y:0,duration:.18},34.112);
+tl.fromTo("#caption-6",{opacity:0,y:12},{opacity:1,y:0,duration:.18},41.053);
+  [1,2,3,4].forEach((n)=>{const starts=[6.7,14.7,24.7,34.7],selector="#transition-"+n;tl.fromTo(selector,{opacity:0},{opacity:.28,duration:.18},starts[n-1]).to(selector,{opacity:0,duration:.36},starts[n-1]+.2)});
+  window.__timelines=window.__timelines||{};window.__timelines["440823-square"]=tl;
+</script>
+</body></html>

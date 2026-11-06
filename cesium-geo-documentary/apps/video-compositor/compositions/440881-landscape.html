@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>廉江市地理图说</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1920px;height:1080px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Microsoft YaHei")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}
+    .topbar{left:72px;top:72px;display:flex;align-items:center;gap:18px;font-size:24px;letter-spacing:.16em;color:#d1dbe1;text-shadow:0 2px 16px #000}.topbar:before{content:"";width:64px;height:3px;background:#ffd166;box-shadow:0 0 16px rgba(255,209,102,.75)}
+    .subtitle{left:50%;bottom:72px;transform:translateX(-50%);max-width:1180px;font-size:38px;line-height:1.42;text-align:center;font-weight:650;text-shadow:0 2px 8px #000;white-space:nowrap}.subtitle-inner{display:block;padding:12px 24px;border-radius:14px;background:rgba(4,10,15,.72)}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440881-landscape" data-start="0" data-width="1920" data-height="1080" data-duration="50" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440881-map-landscape.mp4" muted playsinline preload="auto" data-start="0" data-duration="50" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="0" data-duration="50" data-track-index="1"></div>
+  <div id="topbar" class="clip topbar" data-start="0" data-duration="50" data-track-index="10">湛江地理图说 · 全域与区县</div>
+  <div id="caption-0" class="clip subtitle" data-start="0.100" data-duration="4.289" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">廉江位于雷州半岛北部，向西北连接广西，</span></div>
+<div id="caption-1" class="clip subtitle" data-start="4.389" data-duration="3.386" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">向南通往湛江主城区与半岛腹地。</span></div>
+<div id="caption-2" class="clip subtitle" data-start="7.775" data-duration="4.015" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">2025年末廉江常住人口138.08万，</span></div>
+<div id="caption-3" class="clip subtitle" data-start="11.790" data-duration="2.810" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">是湛江人口规模较大的县级市。</span></div>
+<div id="caption-4" class="clip subtitle" data-start="14.600" data-duration="4.771" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">2025年廉江地区生产总值588.08亿元，</span></div>
+<div id="caption-5" class="clip subtitle" data-start="19.371" data-duration="5.204" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">现代服务、特色农业与小家电制造共同支撑县域经济。</span></div>
+<div id="caption-6" class="clip subtitle" data-start="24.575" data-duration="4.235" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">九洲江流域长期孕育城镇、农业与区域商贸，</span></div>
+<div id="caption-7" class="clip subtitle" data-start="28.810" data-duration="2.965" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">形成廉江发展的基本空间骨架。</span></div>
+<div id="caption-8" class="clip subtitle" data-start="31.775" data-duration="5.679" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">红橙品牌和小家电产业，分别连接田野、工厂与地方生活，</span></div>
+<div id="caption-9" class="clip subtitle" data-start="37.454" data-duration="2.621" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">成为鲜明的城市文化名片。</span></div>
+<div id="caption-10" class="clip subtitle" data-start="40.075" data-duration="3.594" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">今天的廉江从九洲江延伸到产业园，</span></div>
+<div id="caption-11" class="clip subtitle" data-start="43.669" data-duration="4.043" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">在粤桂联系中展示县域经济的多重层次。</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440881-narration.wav" data-start="0" data-duration="47.780" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed" class="clip" src="media/music/ambient-map-bed.wav" data-start="0" data-duration="50" data-track-index="7" data-volume="0.5"></audio>
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner"],{opacity:0});
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.12},0.100).to("#caption-inner-0",{opacity:0,duration:.12},4.249).set("#caption-inner-0",{opacity:0},4.389);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.12},4.389).to("#caption-inner-1",{opacity:0,duration:.12},7.635).set("#caption-inner-1",{opacity:0},7.775);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.12},7.775).to("#caption-inner-2",{opacity:0,duration:.12},11.650).set("#caption-inner-2",{opacity:0},11.790);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.12},11.790).to("#caption-inner-3",{opacity:0,duration:.12},14.460).set("#caption-inner-3",{opacity:0},14.600);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.12},14.600).to("#caption-inner-4",{opacity:0,duration:.12},19.231).set("#caption-inner-4",{opacity:0},19.371);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.12},19.371).to("#caption-inner-5",{opacity:0,duration:.12},24.435).set("#caption-inner-5",{opacity:0},24.575);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.12},24.575).to("#caption-inner-6",{opacity:0,duration:.12},28.670).set("#caption-inner-6",{opacity:0},28.810);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.12},28.810).to("#caption-inner-7",{opacity:0,duration:.12},31.635).set("#caption-inner-7",{opacity:0},31.775);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.12},31.775).to("#caption-inner-8",{opacity:0,duration:.12},37.314).set("#caption-inner-8",{opacity:0},37.454);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.12},37.454).to("#caption-inner-9",{opacity:0,duration:.12},39.935).set("#caption-inner-9",{opacity:0},40.075);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.12},40.075).to("#caption-inner-10",{opacity:0,duration:.12},43.529).set("#caption-inner-10",{opacity:0},43.669);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.12},43.669).to("#caption-inner-11",{opacity:0,duration:.12},47.572).set("#caption-inner-11",{opacity:0},47.712);
+  window.__timelines=window.__timelines||{};window.__timelines["440881-landscape"]=tl;
+</script>
+</body></html>

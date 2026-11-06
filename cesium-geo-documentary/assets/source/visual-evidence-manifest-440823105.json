@@ -1,0 +1,19 @@
+{
+  "regionId": "440823105",
+  "title": "遂溪县江洪镇视觉证据与归因清单",
+  "presentationMode": "portrait-social-documentary",
+  "assets": [
+    {"id": "jianghong-harbor-fleet", "file": "assets/source/440823105/01-jianghong-harbor-fleet.png", "subject": "江洪渔港开渔船队航拍", "type": "verified-real", "publisher": "遂溪县融媒体中心", "sourceUrl": "http://www.suixi.gov.cn/sxxw/zwdt/content/post_2083081.html", "exactLocation": true, "publishedAt": "2025-08-18", "dimensions": "900x506", "reuseNote": "保留来源归因；仅用于本地纪实成片，公开商用前复核授权。"},
+    {"id": "tianguang-fish-market", "file": "assets/source/440823105/02-tianguang-fish-market.jpg", "subject": "江洪天光鱼市清晨交易航拍", "type": "verified-real", "publisher": "湛江云媒", "sourceUrl": "http://www.gdzjdaily.com.cn/p/2859497.html", "exactLocation": true, "publishedAt": "2023-08-17", "dimensions": "1000x711", "reuseNote": "保留来源归因；仅用于本地纪实成片，公开商用前复核授权。"},
+    {"id": "jianghong-dragon-boat", "file": "assets/source/440823105/03-jianghong-dragon-boat.jpg", "subject": "江洪渔港海上龙舟赛航拍", "type": "verified-real", "publisher": "湛江日报；遂溪县江洪镇人民政府转载", "sourceUrl": "http://www.suixi.gov.cn/gzzwz/jhzrmzf/gzdt/content/post_2051102.html", "exactLocation": true, "publishedAt": "2025-06-01", "dimensions": "1920x1218", "reuseNote": "保留来源归因；仅用于本地纪实成片，公开商用前复核授权。"},
+    {"id": "xianqun-island", "file": "assets/source/440823105/04-xianqun-island.jpg", "subject": "江洪仙裙岛林地与海岸", "type": "verified-real", "publisher": "携程用户实景", "sourceUrl": "https://gs.ctrip.com/html5/you/sight/suixi2950/69538401.html", "exactLocation": true, "publishedAt": "", "dimensions": "750x500", "reuseNote": "地点由页面标题和图集确认；仅用于本地纪实成片，公开商用前复核原作者授权。"},
+    {"id": "jianghong-middle-school", "file": "assets/source/440823105/05-jianghong-middle-school.jpg", "subject": "江洪初级中学校门与校园道路", "type": "verified-real", "publisher": "抖音原视频发布者", "sourceUrl": "https://www.douyin.com/video/7491437926266506496", "exactLocation": true, "publishedAt": "2025-04-10", "dimensions": "587x330", "verification": "视频标题明确写出遂溪县江洪镇中学、江洪中学；封面可见学校入口及校园道路字样。", "reuseNote": "仅使用原视频封面作本地纪实说明；保留原始URL和日期，公开商用前复核发布者授权。"}
+  ],
+  "excluded": [
+    {"file": "assets/source/440823105/candidates/*inspection*", "reason": "会议、培训、检查、调研和官员合影不作为地方生活或学校画面。"},
+    {"file": "assets/source/440823105/candidates/fishing-1.png", "reason": "舞台表演与当前选定龙舟、鱼市、学校、海岛主题重复，未纳入正式片。"},
+    {"file": "assets/source/440823105/candidates/fishing-2.png", "reason": "开幕致辞画面属于政务活动，不纳入成片。"},
+    {"file": "assets/source/440823105/candidates/fishing-3.png", "reason": "台上展示和人物合影不如真实渔港与鱼市直接，不纳入成片。"}
+  ],
+  "reviewedAt": "2026-08-11"
+}

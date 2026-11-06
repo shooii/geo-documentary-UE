@@ -1,0 +1,154 @@
+{
+  "parentId": "440825112",
+  "parentName": "新寮镇",
+  "levelRole": "township",
+  "officialLevelName": "镇",
+  "childRole": "administrative-village",
+  "source": "用户提供的新寮镇行政村 SHP 边界数据",
+  "effectiveDate": null,
+  "completeImmediateChildCoverage": true,
+  "children": [
+    {
+      "id": "440825112205",
+      "name": "八一村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 4
+    },
+    {
+      "id": "440825112208",
+      "name": "北尾村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 8
+    },
+    {
+      "id": "440825112201",
+      "name": "港六村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 9
+    },
+    {
+      "id": "440825112202",
+      "name": "南湾村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 10
+    },
+    {
+      "id": "440825112207",
+      "name": "塘口村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 5
+    },
+    {
+      "id": "440825112209",
+      "name": "东塘村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 6
+    },
+    {
+      "id": "440825112210",
+      "name": "堰头村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 7
+    },
+    {
+      "id": "440825112203",
+      "name": "新丰村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 1
+    },
+    {
+      "id": "440825112204",
+      "name": "三丰村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 2
+    },
+    {
+      "id": "440825112206",
+      "name": "后海村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 3
+    }
+  ],
+  "narrationCoverage": [
+    {
+      "id": "440825112203",
+      "start": 85.156,
+      "end": 95.468,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825112204",
+      "start": 95.468,
+      "end": 106.302,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825112206",
+      "start": 106.302,
+      "end": 116.77,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825112205",
+      "start": 116.77,
+      "end": 126.757,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825112207",
+      "start": 126.757,
+      "end": 137.135,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825112209",
+      "start": 137.135,
+      "end": 148.203,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825112210",
+      "start": 148.203,
+      "end": 160.559,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825112208",
+      "start": 160.559,
+      "end": 172.161,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825112201",
+      "start": 172.161,
+      "end": 183.294,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825112202",
+      "start": 183.294,
+      "end": 193.684,
+      "camera": true,
+      "highlight": true
+    }
+  ]
+}

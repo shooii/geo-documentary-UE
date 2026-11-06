@@ -1,0 +1,13 @@
+{
+  "parentId": "000000",
+  "parentName": "示例地区",
+  "parentLevelRole": "admin2",
+  "childLevelRole": "township",
+  "effectiveDate": "2026-01-01",
+  "classificationPolicy": "authoritative-current-administrative-list",
+  "editorialOrder": ["000001", "000002"],
+  "children": [
+    { "id": "000001", "name": "示例镇一", "included": true, "order": 1 },
+    { "id": "000002", "name": "示例镇二", "included": true, "order": 2 }
+  ]
+}

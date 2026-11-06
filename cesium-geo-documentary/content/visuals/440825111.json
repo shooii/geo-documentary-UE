@@ -1,0 +1,50 @@
+{
+  "regionId": "440825111",
+  "profilePriority": "portrait",
+  "timingMode": "narration-cue-required",
+  "policy": "Use verified Xuwen regional context photos only; captions explicitly avoid claiming exact village capture.",
+  "clips": [
+    {
+      "id": "coastal-aquaculture-context",
+      "path": "assets/source/440825112/11-coastal-aquaculture.jpg",
+      "label": "徐闻滨海养殖实景（县域语境，非具体村定位）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 2,
+      "requiredKeywords": [
+        "虾塘",
+        "养殖"
+      ],
+      "leadSeconds": 0.2,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "shrimp-pond-context",
+      "path": "assets/source/440825112/12-shrimp-sheds-aerial.jpg",
+      "label": "徐闻连片养殖区实景（县域语境，非具体村定位）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 8,
+      "requiredKeywords": [
+        "高位池",
+        "增氧机"
+      ],
+      "leadSeconds": 0.2,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "mangrove-context",
+      "path": "assets/source/440825112/03-mangrove-restoration.jpg",
+      "label": "徐闻红树林实景资料（县域语境，非具体村定位）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 13,
+      "requiredKeywords": [
+        "红树林",
+        "潮间滩涂"
+      ],
+      "leadSeconds": 0.2,
+      "tailSeconds": 0.2
+    }
+  ]
+}

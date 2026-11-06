@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>雷州市地理图说</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1920px;height:1080px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Microsoft YaHei")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}
+    .topbar{left:72px;top:72px;display:flex;align-items:center;gap:18px;font-size:24px;letter-spacing:.16em;color:#d1dbe1;text-shadow:0 2px 16px #000}.topbar:before{content:"";width:64px;height:3px;background:#ffd166;box-shadow:0 0 16px rgba(255,209,102,.75)}
+    .subtitle{left:50%;bottom:72px;transform:translateX(-50%);max-width:1180px;font-size:38px;line-height:1.42;text-align:center;font-weight:650;text-shadow:0 2px 8px #000;white-space:nowrap}.subtitle-inner{display:block;padding:12px 24px;border-radius:14px;background:rgba(4,10,15,.72)}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440882-landscape" data-start="0" data-width="1920" data-height="1080" data-duration="50" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440882-map-landscape.mp4" muted playsinline preload="auto" data-start="0" data-duration="50" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="0" data-duration="50" data-track-index="1"></div>
+  <div id="topbar" class="clip topbar" data-start="0" data-duration="50" data-track-index="10">湛江地理图说 · 全域与区县</div>
+  <div id="caption-0" class="clip subtitle" data-start="0.100" data-duration="4.840" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">雷州位于雷州半岛中部，东临雷州湾、西向北部湾，</span></div>
+<div id="caption-1" class="clip subtitle" data-start="4.940" data-duration="2.735" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">是半岛南北交通的关键地带。</span></div>
+<div id="caption-2" class="clip subtitle" data-start="7.675" data-duration="5.219" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">2024年末雷州常住人口133.46万，城镇、</span></div>
+<div id="caption-3" class="clip subtitle" data-start="12.894" data-duration="3.631" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">农田与漫长海岸共同组织广阔县域。</span></div>
+<div id="caption-4" class="clip subtitle" data-start="16.525" data-duration="4.784" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">2024年雷州地区生产总值390.36亿元，</span></div>
+<div id="caption-5" class="clip subtitle" data-start="21.309" data-duration="4.566" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">现代农业、能源与县域服务构成主要经济支撑。</span></div>
+<div id="caption-6" class="clip subtitle" data-start="25.875" data-duration="3.005" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">从古代郡州治所到今天的县级市，</span></div>
+<div id="caption-7" class="clip subtitle" data-start="28.880" data-duration="3.607" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">雷城长期承担雷州半岛区域中心的角色。</span></div>
+<div id="caption-8" class="clip subtitle" data-start="32.487" data-duration="5.106" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">雷州话、雷剧、雷祖祠和古城街巷，保存着移民、</span></div>
+<div id="caption-9" class="clip subtitle" data-start="37.593" data-duration="3.482" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">海洋与地方信俗交汇的文化系统。</span></div>
+<div id="caption-10" class="clip subtitle" data-start="41.075" data-duration="3.288" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">今天的雷州在推进产业建设的同时，</span></div>
+<div id="caption-11" class="clip subtitle" data-start="44.363" data-duration="3.699" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">继续维护国家历史文化名城的深厚根脉。</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440882-narration.wav" data-start="0" data-duration="48.120" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed" class="clip" src="media/music/ambient-map-bed.wav" data-start="0" data-duration="50" data-track-index="7" data-volume="0.5"></audio>
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner"],{opacity:0});
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.12},0.100).to("#caption-inner-0",{opacity:0,duration:.12},4.800).set("#caption-inner-0",{opacity:0},4.940);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.12},4.940).to("#caption-inner-1",{opacity:0,duration:.12},7.535).set("#caption-inner-1",{opacity:0},7.675);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.12},7.675).to("#caption-inner-2",{opacity:0,duration:.12},12.754).set("#caption-inner-2",{opacity:0},12.894);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.12},12.894).to("#caption-inner-3",{opacity:0,duration:.12},16.385).set("#caption-inner-3",{opacity:0},16.525);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.12},16.525).to("#caption-inner-4",{opacity:0,duration:.12},21.169).set("#caption-inner-4",{opacity:0},21.309);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.12},21.309).to("#caption-inner-5",{opacity:0,duration:.12},25.735).set("#caption-inner-5",{opacity:0},25.875);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.12},25.875).to("#caption-inner-6",{opacity:0,duration:.12},28.740).set("#caption-inner-6",{opacity:0},28.880);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.12},28.880).to("#caption-inner-7",{opacity:0,duration:.12},32.347).set("#caption-inner-7",{opacity:0},32.487);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.12},32.487).to("#caption-inner-8",{opacity:0,duration:.12},37.453).set("#caption-inner-8",{opacity:0},37.593);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.12},37.593).to("#caption-inner-9",{opacity:0,duration:.12},40.935).set("#caption-inner-9",{opacity:0},41.075);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.12},41.075).to("#caption-inner-10",{opacity:0,duration:.12},44.223).set("#caption-inner-10",{opacity:0},44.363);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.12},44.363).to("#caption-inner-11",{opacity:0,duration:.12},47.922).set("#caption-inner-11",{opacity:0},48.062);
+  window.__timelines=window.__timelines||{};window.__timelines["440882-landscape"]=tl;
+</script>
+</body></html>

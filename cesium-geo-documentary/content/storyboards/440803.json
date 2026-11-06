@@ -1,0 +1,251 @@
+{
+  "regionId": "440803",
+  "name": "霞山区",
+  "duration": 51,
+  "scenes": [
+    {
+      "sceneId": "440803-scene-01",
+      "title": "湛江全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "沿湛江湾西岸向南，霞山构成湛江主城区重要的滨海界面，并连接港区与城市中心。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440803",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "沿湛江湾西岸向南，霞山构成湛江主城区重要的滨海界面，并连接港区与城市中心。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440803-location-001"
+      ],
+      "accessibility": "旁白说明湛江全域定位，地图高亮霞山区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440803-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "霞山现有常住人口55.1万，城镇化率超过九成，人口与公共服务集中在连续城市空间。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440803",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "常住人口55.1万",
+        "body": "城市沿湛江湾西岸展开"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "霞山现有常住人口55.1万，城镇化率超过九成，人口与公共服务集中在连续城市空间。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440803-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮霞山区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440803-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2025年霞山地区生产总值470.12亿元，绿色石化、现代物流和商贸服务共同支撑城区经济。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440803",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2025年GDP 470.12亿元",
+        "body": "港口服务与临港产业相连"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年霞山地区生产总值470.12亿元，绿色石化、现代物流和商贸服务共同支撑城区经济。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440803-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮霞山区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440803-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "近代广州湾时期及其后的港城建设，在霞山留下欧陆建筑、骑楼和成片老街。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440803",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "近代港城留下多层建筑印记",
+        "body": "近代广州湾时期及其后的港城建设，在霞山留下欧陆建筑、骑楼和成片老街。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "近代广州湾时期及其后的港城建设，在霞山留下欧陆建筑、骑楼和成片老街。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440803-history-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮霞山区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440803-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "这些建筑与海港生活相互叠加，构成霞山独特的滨海城市文化。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440803",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "骑楼、欧陆建筑与滨海生活",
+        "body": "这些建筑与海港生活相互叠加，构成霞山独特的滨海城市文化。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "这些建筑与海港生活相互叠加，构成霞山独特的滨海城市文化。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440803-location-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮霞山区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440803-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 7,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的霞山继续连接湛江港、临港产业与现代服务，从老街到海湾延续港城更新的轨迹。",
+      "cesium": {
+        "cameraAction": "pullBackToParent",
+        "regionId": "440803",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的霞山继续连接湛江港、临港产业与现代服务，从老街到海湾延续港城更新的轨迹。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440803-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮霞山区，所有重要文字保持在安全区。"
+    }
+  ]
+}

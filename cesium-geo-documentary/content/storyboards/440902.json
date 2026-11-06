@@ -1,0 +1,251 @@
+{
+  "regionId": "440902",
+  "name": "茂南区",
+  "duration": 53,
+  "scenes": [
+    {
+      "sceneId": "440902-scene-01",
+      "title": "茂南区全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "从茂名全域看，茂南位于市域南部，是中心城区主体，587.78平方千米的低丘、河网与连续建成区彼此衔接。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440902",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "从茂名全域看，茂南位于市域南部，是中心城区主体，587.78平方千米的低丘、河网与连续建成区彼此衔接。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440902-location-001"
+      ],
+      "accessibility": "旁白说明茂南区全域定位，地图高亮茂南区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440902-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2025年末茂南常住人口106.71万，城镇化率71.63%，是全市人口和公共服务最密集的区域。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440902",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2025年常住人口106.71万",
+        "body": "中心城区与低丘、河网、农业腹地相接"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年末茂南常住人口106.71万，城镇化率71.63%，是全市人口和公共服务最密集的区域。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440902-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮茂南区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440902-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2025年地区生产总值1137.29亿元，第二、第三产业合计占96.6%，工业基础与现代服务业构成主要经济脉络。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440902",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2025年GDP 1137.29亿元",
+        "body": "工业、服务业与都市农业共同更新"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年地区生产总值1137.29亿元，第二、第三产业合计占96.6%，工业基础与现代服务业构成主要经济脉络。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440902-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮茂南区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440902-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "1958年茂名工矿区市设立，1959年城市成立，1985年茂南区建制形成，工矿开发深刻改变了原有聚落格局。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440902",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "现代工矿城市建设推动城区形成",
+        "body": "1958年茂名工矿区市设立，1959年城市成立，1985年茂南区建制形成，工矿开发深刻改变了原有聚落格局。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "1958年茂名工矿区市设立，1959年城市成立，1985年茂南区建制形成，工矿开发深刻改变了原有聚落格局。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440902-history-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮茂南区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440902-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "白话、雷话和客家话在区内并存，村镇年例把不同方言区的亲缘、饮食与节庆连接起来。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440902",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "白话、雷话与客家话并存，年例连接城乡",
+        "body": "白话、雷话和客家话在区内并存，村镇年例把不同方言区的亲缘、饮食与节庆连接起来。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "白话、雷话和客家话在区内并存，村镇年例把不同方言区的亲缘、饮食与节庆连接起来。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440902-culture-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮茂南区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440902-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 9,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的茂南一边承载中心城区更新，一边保留蔬菜、罗非鱼和荔枝等都市农业，让工业城市仍与乡土腹地相连。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440902",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的茂南一边承载中心城区更新，一边保留蔬菜、罗非鱼和荔枝等都市农业，让工业城市仍与乡土腹地相连。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440902-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮茂南区，所有重要文字保持在安全区。"
+    }
+  ]
+}

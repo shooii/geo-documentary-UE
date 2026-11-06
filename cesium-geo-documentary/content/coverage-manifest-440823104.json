@@ -1,0 +1,274 @@
+{
+  "parentId": "440823104",
+  "parentName": "乐民镇",
+  "levelRole": "township",
+  "officialLevelName": "镇",
+  "childRole": "administrative-village",
+  "source": "User-provided SHP boundary dataset",
+  "effectiveDate": null,
+  "completeImmediateChildCoverage": true,
+  "coverageScope": "12 reliable boundary units: 12 tour children and 0 supplemental management units",
+  "tourChildIds": [
+    "440823104200",
+    "440823104201",
+    "440823104202",
+    "440823104209",
+    "440823104213",
+    "440823104214",
+    "440823104207",
+    "440823104203",
+    "440823104204",
+    "440823104205",
+    "440823104206",
+    "440823104208"
+  ],
+  "boundaryUnitIds": [
+    "440823104200",
+    "440823104201",
+    "440823104202",
+    "440823104209",
+    "440823104213",
+    "440823104214",
+    "440823104207",
+    "440823104203",
+    "440823104204",
+    "440823104205",
+    "440823104206",
+    "440823104208"
+  ],
+  "children": [
+    {
+      "id": "440823104200",
+      "name": "陈铁村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 10
+    },
+    {
+      "id": "440823104201",
+      "name": "乐民村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 7
+    },
+    {
+      "id": "440823104202",
+      "name": "松树村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 8
+    },
+    {
+      "id": "440823104209",
+      "name": "安埠村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 12
+    },
+    {
+      "id": "440823104213",
+      "name": "乐民镇北坡林场",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 11
+    },
+    {
+      "id": "440823104214",
+      "name": "乐民镇河头林场",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 9
+    },
+    {
+      "id": "440823104207",
+      "name": "盐灶村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 1
+    },
+    {
+      "id": "440823104203",
+      "name": "海山村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 6
+    },
+    {
+      "id": "440823104204",
+      "name": "余村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 5
+    },
+    {
+      "id": "440823104205",
+      "name": "墩文村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 4
+    },
+    {
+      "id": "440823104206",
+      "name": "埠头村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 3
+    },
+    {
+      "id": "440823104208",
+      "name": "调神村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 2
+    }
+  ],
+  "boundaryUnits": [
+    {
+      "id": "440823104200",
+      "name": "陈铁村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104201",
+      "name": "乐民村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104202",
+      "name": "松树村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104209",
+      "name": "安埠村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104213",
+      "name": "乐民镇北坡林场",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104214",
+      "name": "乐民镇河头林场",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104207",
+      "name": "盐灶村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104203",
+      "name": "海山村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104204",
+      "name": "余村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104205",
+      "name": "墩文村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104206",
+      "name": "埠头村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823104208",
+      "name": "调神村",
+      "unitRole": "administrative-village"
+    }
+  ],
+  "supplementalUnits": [],
+  "narrationCoverage": [
+    {
+      "id": "440823104207",
+      "start": 110.26,
+      "end": 118.02,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104208",
+      "start": 118.02,
+      "end": 126.64,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104206",
+      "start": 126.64,
+      "end": 132.317,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104205",
+      "start": 132.317,
+      "end": 141.94,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104204",
+      "start": 141.94,
+      "end": 148.763,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104203",
+      "start": 148.763,
+      "end": 155.52,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104201",
+      "start": 155.52,
+      "end": 163.528,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104202",
+      "start": 163.528,
+      "end": 170.768,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104214",
+      "start": 170.768,
+      "end": 177.317,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104200",
+      "start": 177.317,
+      "end": 184.244,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104213",
+      "start": 184.244,
+      "end": 191.314,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823104209",
+      "start": 191.314,
+      "end": 197.291,
+      "camera": true,
+      "highlight": true
+    }
+  ]
+}

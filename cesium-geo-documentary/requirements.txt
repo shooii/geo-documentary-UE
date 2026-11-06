@@ -1,0 +1,8 @@
+shapely==2.1.2
+pyshp==2.3.1
+pyproj==3.7.2
+edge-tts==7.2.8
+# 正式配音用的 Edge TTS。7.2.8 之后微软把合成端点迁到 api.msedgeservices.com，
+# 旧域名一律 403（导出会在「生成或复用正式配音」失败）。装完依赖后必须再跑一次：
+#   python scripts/patch-edge-tts.py
+# 该脚本幂等，可重复执行；`.python-packages/` 被 gitignore，补丁只能靠它复现。

@@ -1,0 +1,31 @@
+{
+  "features": [
+    {
+      "id": "river-example",
+      "name": "示例河",
+      "aliases": [],
+      "type": "river",
+      "geometryPath": "data/features/river-example.geojson",
+      "source": "official-hydrography-source",
+      "labelPoint": [110.0, 21.0],
+      "narrationCueIds": ["cue-river-01"],
+      "confidence": "high"
+    }
+  ],
+  "photos": [
+    {
+      "id": "culture-photo-example",
+      "regionId": "000000",
+      "subject": "示例地区的具体文化表演",
+      "title": "原始图片标题",
+      "creator": "作者或机构",
+      "sourceUrl": "https://example.org/original",
+      "license": "verified-reuse-license",
+      "localityVerified": true,
+      "subjectVerified": true,
+      "originalDimensions": [4000, 3000],
+      "narrationCueIds": ["cue-culture-01"],
+      "placement": "collision-aware-negative-space"
+    }
+  ]
+}

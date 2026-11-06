@@ -1,0 +1,31 @@
+import { resolve } from "node:path";
+import { generateCoverAsset, resolveCoverDefinition, type CoverOverrides } from "./cover.js";
+
+const root = resolve(process.cwd());
+const args = process.argv.slice(2);
+const valueAfter = (flag: string): string | undefined => {
+  const index = args.indexOf(flag);
+  return index >= 0 ? args[index + 1] : undefined;
+};
+const regionId = valueAfter("--region");
+if (!regionId) throw new Error("Usage: generate-video-cover.ts --region <administrative-code> [--output path]");
+const introRaw = valueAfter("--cover-intro-seconds");
+const overrides: CoverOverrides = {};
+const manifestPath = valueAfter("--manifest");
+const topic = valueAfter("--topic");
+const regionPath = valueAfter("--region-path");
+const subtitle = valueAfter("--subtitle");
+const seriesIndex = valueAfter("--series-index");
+const issue = valueAfter("--issue");
+const footerLabel = valueAfter("--footer-label");
+if (manifestPath) overrides.manifestPath = manifestPath;
+if (topic) overrides.topic = topic;
+if (regionPath) overrides.regionPath = regionPath;
+if (subtitle) overrides.subtitle = subtitle;
+if (seriesIndex) overrides.seriesIndex = seriesIndex;
+if (issue) overrides.issue = issue;
+if (footerLabel) overrides.footerLabel = footerLabel;
+if (introRaw) overrides.coverIntroSeconds = Number(introRaw);
+const definition = await resolveCoverDefinition(root, regionId, overrides);
+const output = await generateCoverAsset(root, definition, valueAfter("--output"));
+process.stdout.write(`COVER_READY ${regionId} ${output}\n`);

@@ -1,0 +1,120 @@
+{
+  "regionId": "440882102",
+  "profilePriority": "portrait",
+  "timingMode": "narration-cue-required",
+  "policy": "Selected real public-report photographs from town and regional sources are used as evidence cards. No government-meeting imagery is used.",
+  "clips": [
+    {
+      "id": "town-entrance",
+      "path": "assets/source/440882102/01-town-entrance.png",
+      "label": "????????????????????",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 0,
+      "requiredKeywords": [
+        "207??",
+        "????"
+      ],
+      "leadSeconds": 0.15,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "town-market",
+      "path": "assets/source/440882102/03-market.png",
+      "label": "?????????????????",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 1,
+      "requiredKeywords": [
+        "???",
+        "???"
+      ],
+      "leadSeconds": 0.15,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "white-cut-dog",
+      "path": "assets/source/440882102/05-white-cut-dog.jpg",
+      "label": "???????????",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 2,
+      "requiredKeywords": [
+        "???"
+      ],
+      "leadSeconds": 0.15,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "leaf-pancake",
+      "path": "assets/source/440882102/06-leaf-pancake.png",
+      "label": "???????????",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 3,
+      "requiredKeywords": [
+        "???"
+      ],
+      "leadSeconds": 0.15,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "canal-greenway",
+      "path": "assets/source/440882102/04-canal-greenway.png",
+      "label": "??????????????????????",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 4,
+      "requiredKeywords": [
+        "????",
+        "??",
+        "??"
+      ],
+      "leadSeconds": 0.15,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "opera-stage",
+      "path": "assets/source/440882102/07-opera-stage.jpg",
+      "label": "??????????????????",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 5,
+      "requiredKeywords": [
+        "??"
+      ],
+      "leadSeconds": 0.15,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "nianli-procession",
+      "path": "assets/source/440882102/08-nianli-procession.jpeg",
+      "label": "??????????????",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 6,
+      "requiredKeywords": [
+        "????",
+        "???",
+        "???"
+      ],
+      "leadSeconds": 0.15,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "sugarcane-field",
+      "path": "assets/source/440882102/09-sugarcane-field.png",
+      "label": "????????????",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 7,
+      "requiredKeywords": [
+        "???",
+        "???",
+        "??"
+      ],
+      "leadSeconds": 0.15,
+      "tailSeconds": 0.12
+    }
+  ]
+}

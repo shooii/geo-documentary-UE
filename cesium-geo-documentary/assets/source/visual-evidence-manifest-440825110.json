@@ -1,0 +1,69 @@
+{
+  "regionId": "440825110",
+  "title": "徐闻县锦和镇视觉证据与归因清单",
+  "presentationMode": "portrait-social-documentary",
+  "assets": [
+    {
+      "id": "pineapple-training",
+      "file": "assets/source/440825110/01-pineapple-training.jpg",
+      "subject": "锦和镇菠萝网络销售技术培训",
+      "type": "verified-real",
+      "publisher": "徐闻县锦和镇人民政府",
+      "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/content/1/1735/post_1735809.html",
+      "exactLocation": true,
+      "reuseNote": "保留官方来源归因；公开发布前复核图片授权。"
+    },
+    {
+      "id": "baimao-governance",
+      "file": "assets/source/440825110/03-baimao-governance.png",
+      "subject": "白茅村积分制乡村治理活动",
+      "type": "verified-real",
+      "publisher": "徐闻县锦和镇人民政府",
+      "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/content/1/1655/post_1655624.html",
+      "exactLocation": true,
+      "reuseNote": "保留官方来源归因；公开发布前复核图片授权。"
+    },
+    {
+      "id": "jinhe-middle-school",
+      "file": "assets/source/440825110/04-jinhe-middle-school.jpg",
+      "subject": "锦和中学校园安全检查",
+      "type": "verified-real",
+      "publisher": "徐闻县锦和镇人民政府",
+      "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/content/2/2185/post_2185275.html",
+      "exactLocation": true,
+      "reuseNote": "图片是办公室检查现场，不表述为校园全景；公开发布前复核授权。"
+    },
+    {
+      "id": "naban-awards",
+      "file": "assets/source/440825110/05-naban-awards.jpg",
+      "subject": "那板村2024年奖学颁奖活动",
+      "type": "verified-real",
+      "publisher": "徐闻县锦和镇人民政府",
+      "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/content/1/1948/post_1948582.html",
+      "exactLocation": true,
+      "reuseNote": "不将颁奖活动误称毕业照；公开发布前复核授权。"
+    },
+    {
+      "id": "liuji-wharf",
+      "file": "assets/source/440825110/06-liuji-wharf.jpg",
+      "subject": "六极码头防台检查",
+      "type": "verified-real",
+      "publisher": "徐闻县锦和镇人民政府",
+      "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/content/2/2085/post_2085206.html",
+      "exactLocation": true,
+      "reuseNote": "页面同时涉及外罗、六极码头，画面仅按官方页面主题用于码头防台语境；公开发布前复核授权。"
+    },
+    {
+      "id": "gouxi-harbor",
+      "file": "assets/source/440825110/07-gouxi-harbor.jpg",
+      "subject": "沟西避风港消防与安全检查",
+      "type": "verified-real",
+      "publisher": "徐闻县锦和镇人民政府",
+      "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/content/2/2200/post_2200988.html",
+      "exactLocation": true,
+      "reuseNote": "保留官方来源归因；公开发布前复核图片授权。"
+    }
+  ],
+  "excluded": [],
+  "reviewedAt": "2026-08-11"
+}

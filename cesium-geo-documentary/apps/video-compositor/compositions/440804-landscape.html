@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>坡头区地理图说</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1920px;height:1080px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Microsoft YaHei")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}
+    .topbar{left:72px;top:72px;display:flex;align-items:center;gap:18px;font-size:24px;letter-spacing:.16em;color:#d1dbe1;text-shadow:0 2px 16px #000}.topbar:before{content:"";width:64px;height:3px;background:#ffd166;box-shadow:0 0 16px rgba(255,209,102,.75)}
+    .subtitle{left:50%;bottom:72px;transform:translateX(-50%);max-width:1180px;font-size:38px;line-height:1.42;text-align:center;font-weight:650;text-shadow:0 2px 8px #000;white-space:nowrap}.subtitle-inner{display:block;padding:12px 24px;border-radius:14px;background:rgba(4,10,15,.72)}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440804-landscape" data-start="0" data-width="1920" data-height="1080" data-duration="50" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440804-map-landscape.mp4" muted playsinline preload="auto" data-start="0" data-duration="50" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="0" data-duration="50" data-track-index="1"></div>
+  <div id="topbar" class="clip topbar" data-start="0" data-duration="50" data-track-index="10">湛江地理图说 · 全域与区县</div>
+  <div id="caption-0" class="clip subtitle" data-start="0.100" data-duration="3.770" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">越过湛江海湾向东，坡头位于海湾东岸，</span></div>
+<div id="caption-1" class="clip subtitle" data-start="3.870" data-duration="3.980" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">是湛江一湾两岸城市格局的重要组成部分。</span></div>
+<div id="caption-2" class="clip subtitle" data-start="7.850" data-duration="3.803" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">2024年末坡头常住人口34.4万，</span></div>
+<div id="caption-3" class="clip subtitle" data-start="11.653" data-duration="4.647" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">人口分布在东岸城区、沿海镇街与岛屿聚落之间。</span></div>
+<div id="caption-4" class="clip subtitle" data-start="16.300" data-duration="4.764" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">2024年坡头地区生产总值407.42亿元，</span></div>
+<div id="caption-5" class="clip subtitle" data-start="21.064" data-duration="4.548" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">临港制造、现代服务和海洋相关产业共同发展。</span></div>
+<div id="caption-6" class="clip subtitle" data-start="25.612" data-duration="3.350" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">三面临海的地理条件，使渔业、</span></div>
+<div id="caption-7" class="clip subtitle" data-start="28.962" data-duration="3.350" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">盐业和海岸聚落长期相互依存。</span></div>
+<div id="caption-8" class="clip subtitle" data-start="32.312" data-duration="3.161" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">南三岛盐田、滩涂与滨海村落，</span></div>
+<div id="caption-9" class="clip subtitle" data-start="35.473" data-duration="4.064" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">记录着潮汐塑造的生产方式和地方文化。</span></div>
+<div id="caption-10" class="clip subtitle" data-start="39.537" data-duration="3.145" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">今天的坡头承接城市向东拓展，</span></div>
+<div id="caption-11" class="clip subtitle" data-start="42.682" data-duration="4.268" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">让湛江从单一西岸港城转向跨越海湾展开。</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440804-narration.wav" data-start="0" data-duration="47.020" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed" class="clip" src="media/music/ambient-map-bed.wav" data-start="0" data-duration="50" data-track-index="7" data-volume="0.5"></audio>
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner"],{opacity:0});
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.12},0.100).to("#caption-inner-0",{opacity:0,duration:.12},3.730).set("#caption-inner-0",{opacity:0},3.870);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.12},3.870).to("#caption-inner-1",{opacity:0,duration:.12},7.710).set("#caption-inner-1",{opacity:0},7.850);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.12},7.850).to("#caption-inner-2",{opacity:0,duration:.12},11.513).set("#caption-inner-2",{opacity:0},11.653);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.12},11.653).to("#caption-inner-3",{opacity:0,duration:.12},16.160).set("#caption-inner-3",{opacity:0},16.300);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.12},16.300).to("#caption-inner-4",{opacity:0,duration:.12},20.924).set("#caption-inner-4",{opacity:0},21.064);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.12},21.064).to("#caption-inner-5",{opacity:0,duration:.12},25.472).set("#caption-inner-5",{opacity:0},25.612);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.12},25.612).to("#caption-inner-6",{opacity:0,duration:.12},28.822).set("#caption-inner-6",{opacity:0},28.962);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.12},28.962).to("#caption-inner-7",{opacity:0,duration:.12},32.172).set("#caption-inner-7",{opacity:0},32.312);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.12},32.312).to("#caption-inner-8",{opacity:0,duration:.12},35.333).set("#caption-inner-8",{opacity:0},35.473);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.12},35.473).to("#caption-inner-9",{opacity:0,duration:.12},39.397).set("#caption-inner-9",{opacity:0},39.537);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.12},39.537).to("#caption-inner-10",{opacity:0,duration:.12},42.542).set("#caption-inner-10",{opacity:0},42.682);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.12},42.682).to("#caption-inner-11",{opacity:0,duration:.12},46.810).set("#caption-inner-11",{opacity:0},46.950);
+  window.__timelines=window.__timelines||{};window.__timelines["440804-landscape"]=tl;
+</script>
+</body></html>

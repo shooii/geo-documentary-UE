@@ -1,0 +1,251 @@
+{
+  "regionId": "440983",
+  "name": "信宜市",
+  "duration": 58,
+  "scenes": [
+    {
+      "sceneId": "440983-scene-01",
+      "title": "信宜市全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "信宜位于茂名北部、粤桂交界，3101.7平方千米山地向两省展开，森林覆盖率68.28%，是全市最鲜明的山地单元。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440983",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "信宜位于茂名北部、粤桂交界，3101.7平方千米山地向两省展开，森林覆盖率68.28%，是全市最鲜明的山地单元。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440983-location-001"
+      ],
+      "accessibility": "旁白说明信宜市全域定位，地图高亮信宜市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440983-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2025年末信宜常住人口103.08万，城镇化率45.79%，人口沿山间盆地、河谷和交通走廊形成串珠式分布。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440983",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2025年常住人口103.08万",
+        "body": "粤桂交界山地，森林覆盖率68.28%"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年末信宜常住人口103.08万，城镇化率45.79%，人口沿山间盆地、河谷和交通走廊形成串珠式分布。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440983-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮信宜市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440983-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2025年地区生产总值595.03亿元，第一产业占28.9%，规模以上工业增加值增长12.9%，农业与加工制造同时发力。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440983",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2025年GDP 595.03亿元",
+        "body": "生态保护、特色农业与加工制造并进"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年地区生产总值595.03亿元，第一产业占28.9%，规模以上工业增加值增长12.9%，农业与加工制造同时发力。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440983-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮信宜市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440983-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "唐武德四年置信义县，宋太平兴国元年改名信宜，1995年撤县设市，名称和建制记录着千余年地方治理变迁。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440983",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "唐置信义县，宋改信宜，1995年撤县设市",
+        "body": "唐武德四年置信义县，宋太平兴国元年改名信宜，1995年撤县设市，名称和建制记录着千余年地方治理变迁。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "唐武德四年置信义县，宋太平兴国元年改名信宜，1995年撤县设市，名称和建制记录着千余年地方治理变迁。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440983-history-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮信宜市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440983-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "南玉、三华李、竹编和山地鸡，把矿产、果园、竹林与地方手艺转化为可识别的信宜物产文化。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440983",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "南玉、三华李与竹编体现山地物产",
+        "body": "南玉、三华李、竹编和山地鸡，把矿产、果园、竹林与地方手艺转化为可识别的信宜物产文化。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "南玉、三华李、竹编和山地鸡，把矿产、果园、竹林与地方手艺转化为可识别的信宜物产文化。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440983-culture-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮信宜市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440983-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 14,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的信宜在生态保护前提下发展特色农业、农产品加工和县域服务，让山地资源更多转化为稳定的城乡生计。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440983",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的信宜在生态保护前提下发展特色农业、农产品加工和县域服务，让山地资源更多转化为稳定的城乡生计。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440983-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮信宜市，所有重要文字保持在安全区。"
+    }
+  ]
+}

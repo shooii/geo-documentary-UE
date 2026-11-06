@@ -1,0 +1,152 @@
+{
+  "regionId": "440882102",
+  "regionName": "??????",
+  "reviewedAt": "2026-08-15",
+  "policy": "Selected real public-report photographs from town and regional sources are used as evidence cards. Reuse permission is not declared on the source pages; public commercial release should retain attribution and recheck authorization.",
+  "assets": [
+    {
+      "id": "town-entrance",
+      "localPath": "assets/source/440882102/01-town-entrance.png",
+      "caption": "????????????????????",
+      "subject": "??????????????",
+      "sourcePageTitle": "???????????????????",
+      "sourcePageUrl": "http://www.leizhou.gov.cn/pdml/klz/zwdt/content/post_2123430.html",
+      "imageUrl": "http://www.leizhou.gov.cn/img/0/795/795593/2123430.png",
+      "publisher": "????????",
+      "publishedAt": "2025-11-30",
+      "accessedAt": "2026-08-15",
+      "license": "source page public-report image; explicit open-license statement not found",
+      "usage": [
+        "visual-card"
+      ],
+      "narrationCueIndex": 0,
+      "visibleSubjectVerified": true
+    },
+    {
+      "id": "town-market",
+      "localPath": "assets/source/440882102/03-market.png",
+      "caption": "?????????????????",
+      "subject": "???????????????",
+      "sourcePageTitle": "???????????????????",
+      "sourcePageUrl": "http://www.leizhou.gov.cn/pdml/klz/zwdt/content/post_2123430.html",
+      "imageUrl": "http://www.leizhou.gov.cn/img/0/795/795601/2123430.png",
+      "publisher": "????????",
+      "publishedAt": "2025-11-30",
+      "accessedAt": "2026-08-15",
+      "license": "source page public-report image; explicit open-license statement not found",
+      "usage": [
+        "visual-card"
+      ],
+      "narrationCueIndex": 1,
+      "visibleSubjectVerified": true
+    },
+    {
+      "id": "white-cut-dog",
+      "localPath": "assets/source/440882102/05-white-cut-dog.jpg",
+      "caption": "???????????",
+      "subject": "????????",
+      "sourcePageTitle": "?????????????????????????",
+      "sourcePageUrl": "https://k.sina.cn/article_1580709864_5e37b7e800100bwu6.html",
+      "imageUrl": "https://k.sinaimg.cn/n/front/298/w640h458/20181025/vNRI-hmxrkzw7107019.jpg/w700d1q75cms.jpg",
+      "publisher": "????",
+      "publishedAt": "2018-10-25",
+      "accessedAt": "2026-08-15",
+      "license": "source page public image; explicit open-license statement not found",
+      "usage": [
+        "visual-card"
+      ],
+      "narrationCueIndex": 2,
+      "visibleSubjectVerified": true
+    },
+    {
+      "id": "leaf-pancake",
+      "localPath": "assets/source/440882102/06-leaf-pancake.png",
+      "caption": "???????????",
+      "subject": "????????",
+      "sourcePageTitle": "???????????????",
+      "sourcePageUrl": "https://best.pconline.com.cn/yuanchuang/13858961.html",
+      "imageUrl": "https://img.pconline.com.cn/images/upload/upc/tx/pc_best/2208/19/c67/329584811_1660881707857_best.png",
+      "publisher": "??????",
+      "publishedAt": "2022-08-19",
+      "accessedAt": "2026-08-15",
+      "license": "source page public image; explicit open-license statement not found",
+      "usage": [
+        "visual-card"
+      ],
+      "narrationCueIndex": 3,
+      "visibleSubjectVerified": true
+    },
+    {
+      "id": "canal-greenway",
+      "localPath": "assets/source/440882102/04-canal-greenway.png",
+      "caption": "??????????????????????",
+      "subject": "?????????????",
+      "sourcePageTitle": "???????????????????",
+      "sourcePageUrl": "http://www.leizhou.gov.cn/pdml/klz/zwdt/content/post_2123430.html",
+      "imageUrl": "http://www.leizhou.gov.cn/img/0/795/795595/2123430.png",
+      "publisher": "????????",
+      "publishedAt": "2025-11-30",
+      "accessedAt": "2026-08-15",
+      "license": "source page public-report image; explicit open-license statement not found",
+      "usage": [
+        "visual-card"
+      ],
+      "narrationCueIndex": 4,
+      "visibleSubjectVerified": true
+    },
+    {
+      "id": "opera-stage",
+      "localPath": "assets/source/440882102/07-opera-stage.jpg",
+      "caption": "??????????????????",
+      "subject": "???????",
+      "sourcePageTitle": "??,????/????/??/??",
+      "sourcePageUrl": "https://you.ctrip.com/sight/leizhou2936/69341719.html",
+      "imageUrl": "https://dimg03.c-ctrip.com/images/0106j1200087f4elz94BF_W_640_10000.jpg?proc=autoorient",
+      "publisher": "????",
+      "publishedAt": "2019-12-20",
+      "accessedAt": "2026-08-15",
+      "license": "source page public image; explicit open-license statement not found",
+      "usage": [
+        "visual-card"
+      ],
+      "narrationCueIndex": 5,
+      "visibleSubjectVerified": true
+    },
+    {
+      "id": "nianli-procession",
+      "localPath": "assets/source/440882102/08-nianli-procession.jpeg",
+      "caption": "??????????????",
+      "subject": "????????????",
+      "sourcePageTitle": "????????? ????????",
+      "sourcePageUrl": "https://www.gdzjdaily.com.cn/p/2913596.html",
+      "imageUrl": "https://new-img.gdzjdaily.com.cn/a/10001/202503/700ebb86daf977880d820f3448bd0c88.jpeg",
+      "publisher": "????",
+      "publishedAt": "2025-03-01",
+      "accessedAt": "2026-08-15",
+      "license": "source page public image; explicit open-license statement not found",
+      "usage": [
+        "visual-card"
+      ],
+      "narrationCueIndex": 6,
+      "visibleSubjectVerified": true
+    },
+    {
+      "id": "sugarcane-field",
+      "localPath": "assets/source/440882102/09-sugarcane-field.png",
+      "caption": "????????????",
+      "subject": "????????",
+      "sourcePageTitle": "?????????????????????",
+      "sourcePageUrl": "https://www.sohu.com/a/619362551_121123759",
+      "imageUrl": "https://p9.itc.cn/q_70/images03/20221220/9b4319b893ce412fb210fc929b7c4d00.png",
+      "publisher": "????",
+      "publishedAt": "2022-12-20",
+      "accessedAt": "2026-08-15",
+      "license": "source page public image; explicit open-license statement not found",
+      "usage": [
+        "visual-card"
+      ],
+      "narrationCueIndex": 7,
+      "visibleSubjectVerified": true
+    }
+  ]
+}

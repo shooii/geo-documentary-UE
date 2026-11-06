@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cesium 地理图说视频"
+  short_description: "生成全层级地理图说，支持GeoJSON与SHP边界严谨质检"
+  default_prompt: "使用 $cesium-geo-documentary 导入并验证 GeoJSON 或完整 SHP 边界，完整覆盖法定直接下级，先描绘父级边界再淡入子级边界，并以连续飞行、固定低斜视镜头和单行字幕生成专业可信的地理图说视频。"

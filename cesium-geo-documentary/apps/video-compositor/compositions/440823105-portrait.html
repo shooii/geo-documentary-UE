@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>江洪镇地理乡土情</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1080px;height:1920px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Noto Sans SC"),local("Source Han Sans SC"),local("Microsoft YaHei")}@font-face{font-family:"GeoNumber";src:local("Roboto Flex"),local("Roboto"),local("Arial")}@font-face{font-family:"STZhongsong";src:local("STZhongsong"),local("华文中宋"),local("Source Han Serif SC"),local("SimSun")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}.cover{inset:0;width:100%;height:100%;object-fit:cover;background:#06101a}
+    .visual{left:64px;top:278px;width:952px;height:780px;margin:0;overflow:hidden;border:1px solid rgba(215,235,237,.32);border-radius:28px;background:#07151d;box-shadow:0 24px 80px rgba(0,0,0,.46);isolation:isolate}.visual-bg,.visual-main{position:absolute;inset:0;width:100%;height:100%}.visual-bg{z-index:0;background-size:cover;background-position:center;filter:blur(34px) saturate(.82) brightness(.56);transform:scale(1.13)}.visual-main{z-index:1}.visual-main.fit-cover{object-fit:cover}.visual-main.fit-contain{object-fit:contain;padding:18px}.visual:after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(2,9,14,.76) 100%);pointer-events:none}.visual figcaption{position:absolute;z-index:3;left:28px;right:28px;bottom:24px;font-size:30px;font-weight:650;line-height:1.25;letter-spacing:.03em;color:#f4f7f9;text-shadow:0 2px 10px rgba(0,0,0,.9)}
+    .subtitle{left:50%;bottom:220px;transform:translateX(-50%);max-width:900px;font-size:44px;line-height:1.38;text-align:center;font-weight:650;letter-spacing:0;text-shadow:0 2px 8px rgba(0,0,0,.96);white-space:nowrap}.subtitle-inner{display:block;padding:10px 22px;border-radius:10px;background:rgba(4,10,15,.72)}
+    .provider-credit{right:21px;bottom:18px;padding:5px 9px;border-radius:6px;background:rgba(4,10,15,.58);font-size:15px;letter-spacing:.02em;color:rgba(244,247,249,.78);text-shadow:0 1px 4px #000;white-space:nowrap}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440823105-portrait" data-start="0" data-width="1080" data-height="1920" data-duration="160.400" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440823105-map-portrait.mp4" muted playsinline preload="auto" data-start="1.400" data-duration="159.000" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="1.400" data-duration="159.000" data-track-index="1"></div>
+  <div id="provider-credit" class="clip provider-credit" data-start="1.400" data-duration="159.000" data-track-index="11">Esri World Imagery · Esri, Maxar, Earthstar Geographics and contributors</div>
+  <figure id="visual-jianghong-harbor-fleet" class="clip visual visual-real" data-start="38.501" data-duration="5.695" data-track-index="20"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440823105-jianghong-harbor-fleet.png')"></div><img class="visual-main fit-cover" src="media/images/440823105-jianghong-harbor-fleet.png" alt="江洪渔港开渔船队航拍（2025年实景）"><figcaption id="visual-caption-jianghong-harbor-fleet">江洪渔港开渔船队航拍（2025年实景）</figcaption></figure>
+<figure id="visual-tianguang-fish-market" class="clip visual visual-real" data-start="53.006" data-duration="6.802" data-track-index="21"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440823105-tianguang-fish-market.jpg')"></div><img class="visual-main fit-cover" src="media/images/440823105-tianguang-fish-market.jpg" alt="江洪天光鱼市航拍（2023年实景）"><figcaption id="visual-caption-tianguang-fish-market">江洪天光鱼市航拍（2023年实景）</figcaption></figure>
+<figure id="visual-jianghong-dragon-boat" class="clip visual visual-real" data-start="59.308" data-duration="10.200" data-track-index="22"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440823105-jianghong-dragon-boat.jpg')"></div><img class="visual-main fit-cover" src="media/images/440823105-jianghong-dragon-boat.jpg" alt="江洪海上龙舟赛航拍（2025年实景）"><figcaption id="visual-caption-jianghong-dragon-boat">江洪海上龙舟赛航拍（2025年实景）</figcaption></figure>
+<figure id="visual-xianqun-island" class="clip visual visual-real" data-start="69.008" data-duration="9.433" data-track-index="23"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440823105-xianqun-island.jpg')"></div><img class="visual-main fit-cover" src="media/images/440823105-xianqun-island.jpg" alt="江洪仙裙岛林地与海岸（实景）"><figcaption id="visual-caption-xianqun-island">江洪仙裙岛林地与海岸（实景）</figcaption></figure>
+<figure id="visual-jianghong-middle-school" class="clip visual visual-real" data-start="77.941" data-duration="7.961" data-track-index="24"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440823105-jianghong-middle-school.jpg')"></div><img class="visual-main fit-contain" src="media/images/440823105-jianghong-middle-school.jpg" alt="江洪初级中学校门与校园道路（2025年实景）"><figcaption id="visual-caption-jianghong-middle-school">江洪初级中学校门与校园道路（2025年实景）</figcaption></figure>
+  <div id="caption-0" class="clip subtitle" data-start="4.500" data-duration="1.580" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">遂溪县西南角</span></div>
+<div id="caption-1" class="clip subtitle" data-start="6.080" data-duration="2.106" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">江洪镇贴着北部湾</span></div>
+<div id="caption-2" class="clip subtitle" data-start="8.186" data-duration="1.918" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">22公里海岸线</span></div>
+<div id="caption-3" class="clip subtitle" data-start="10.104" data-duration="2.466" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">把渔港、滩涂、村庄和近</span></div>
+<div id="caption-4" class="clip subtitle" data-start="12.570" data-duration="3.014" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">岸海岛放在同一片海风里</span></div>
+<div id="caption-5" class="clip subtitle" data-start="15.584" data-duration="2.917" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">镇域约59.6平方千米</span></div>
+<div id="caption-6" class="clip subtitle" data-start="18.501" data-duration="2.235" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">2023年总人口约</span></div>
+<div id="caption-7" class="clip subtitle" data-start="20.736" data-duration="1.987" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">3.7万人，官方名单</span></div>
+<div id="caption-8" class="clip subtitle" data-start="22.723" data-duration="2.484" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">有1个社区、8个行政村</span></div>
+<div id="caption-9" class="clip subtitle" data-start="25.207" data-duration="2.314" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">江洪港从1444年的小</span></div>
+<div id="caption-10" class="clip subtitle" data-start="27.521" data-duration="2.104" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">渔埠起步，后来成了雷州</span></div>
+<div id="caption-11" class="clip subtitle" data-start="29.625" data-duration="2.314" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">半岛西岸重要的渔业港口</span></div>
+<div id="caption-12" class="clip subtitle" data-start="31.939" data-duration="2.079" data-track-index="5"><span id="caption-inner-12" class="subtitle-inner">镇东的鲤鱼墩贝丘遗址</span></div>
+<div id="caption-13" class="clip subtitle" data-start="34.018" data-duration="1.664" data-track-index="5"><span id="caption-inner-13" class="subtitle-inner">距今约7000到</span></div>
+<div id="caption-14" class="clip subtitle" data-start="35.682" data-duration="1.663" data-track-index="5"><span id="caption-inner-14" class="subtitle-inner">8000年，被称为“</span></div>
+<div id="caption-15" class="clip subtitle" data-start="37.345" data-duration="1.456" data-track-index="5"><span id="caption-inner-15" class="subtitle-inner">雷州半岛第一村”</span></div>
+<div id="caption-16" class="clip subtitle" data-start="38.801" data-duration="1.732" data-track-index="5"><span id="caption-inner-16" class="subtitle-inner">江洪渔港港池接近</span></div>
+<div id="caption-17" class="clip subtitle" data-start="40.533" data-duration="1.298" data-track-index="5"><span id="caption-inner-17" class="subtitle-inner">90万平方米</span></div>
+<div id="caption-18" class="clip subtitle" data-start="41.831" data-duration="2.165" data-track-index="5"><span id="caption-inner-18" class="subtitle-inner">能停1000多艘渔船</span></div>
+<div id="caption-19" class="clip subtitle" data-start="43.996" data-duration="2.253" data-track-index="5"><span id="caption-inner-19" class="subtitle-inner">天还没亮，渔获一上岸</span></div>
+<div id="caption-20" class="clip subtitle" data-start="46.249" data-duration="2.252" data-track-index="5"><span id="caption-inner-20" class="subtitle-inner">天光鱼市就热闹起来</span></div>
+<div id="caption-21" class="clip subtitle" data-start="48.501" data-duration="1.770" data-track-index="5"><span id="caption-inner-21" class="subtitle-inner">2024年，全镇</span></div>
+<div id="caption-22" class="clip subtitle" data-start="50.271" data-duration="3.035" data-track-index="5"><span id="caption-inner-22" class="subtitle-inner">农林牧渔业总产值17亿元</span></div>
+<div id="caption-23" class="clip subtitle" data-start="53.306" data-duration="2.101" data-track-index="5"><span id="caption-inner-23" class="subtitle-inner">红鱼、马鲛鱼、对虾</span></div>
+<div id="caption-24" class="clip subtitle" data-start="55.407" data-duration="1.500" data-track-index="5"><span id="caption-inner-24" class="subtitle-inner">花蟹和扇贝</span></div>
+<div id="caption-25" class="clip subtitle" data-start="56.907" data-duration="2.701" data-track-index="5"><span id="caption-inner-25" class="subtitle-inner">是码头上常见的鲜味</span></div>
+<div id="caption-26" class="clip subtitle" data-start="59.608" data-duration="1.833" data-track-index="5"><span id="caption-inner-26" class="subtitle-inner">端午的海上龙舟赛</span></div>
+<div id="caption-27" class="clip subtitle" data-start="61.441" data-duration="1.604" data-track-index="5"><span id="caption-inner-27" class="subtitle-inner">就在港湾里开桨</span></div>
+<div id="caption-28" class="clip subtitle" data-start="63.045" data-duration="2.255" data-track-index="5"><span id="caption-inner-28" class="subtitle-inner">浪头、鼓点和两岸人声</span></div>
+<div id="caption-29" class="clip subtitle" data-start="65.300" data-duration="2.254" data-track-index="5"><span id="caption-inner-29" class="subtitle-inner">让老渔港多了一种很</span></div>
+<div id="caption-30" class="clip subtitle" data-start="67.554" data-duration="1.754" data-track-index="5"><span id="caption-inner-30" class="subtitle-inner">有江洪味的节奏</span></div>
+<div id="caption-31" class="clip subtitle" data-start="69.308" data-duration="2.525" data-track-index="5"><span id="caption-inner-31" class="subtitle-inner">近岸的仙裙岛保留着海</span></div>
+<div id="caption-32" class="clip subtitle" data-start="71.833" data-duration="2.020" data-track-index="5"><span id="caption-inner-32" class="subtitle-inner">岛林地和安静海岸</span></div>
+<div id="caption-33" class="clip subtitle" data-start="73.853" data-duration="1.706" data-track-index="5"><span id="caption-inner-33" class="subtitle-inner">港湾外是北部湾</span></div>
+<div id="caption-34" class="clip subtitle" data-start="75.559" data-duration="2.682" data-track-index="5"><span id="caption-inner-34" class="subtitle-inner">港湾内是渔船回家的水路</span></div>
+<div id="caption-35" class="clip subtitle" data-start="78.241" data-duration="2.435" data-track-index="5"><span id="caption-inner-35" class="subtitle-inner">镇里有江洪初级中学</span></div>
+<div id="caption-36" class="clip subtitle" data-start="80.676" data-duration="1.967" data-track-index="5"><span id="caption-inner-36" class="subtitle-inner">校园不只是一个地名</span></div>
+<div id="caption-37" class="clip subtitle" data-start="82.643" data-duration="1.748" data-track-index="5"><span id="caption-inner-37" class="subtitle-inner">也是周边孩子读书</span></div>
+<div id="caption-38" class="clip subtitle" data-start="84.391" data-duration="1.311" data-track-index="5"><span id="caption-inner-38" class="subtitle-inner">和长大的地方</span></div>
+<div id="caption-39" class="clip subtitle" data-start="85.702" data-duration="3.007" data-track-index="5"><span id="caption-inner-39" class="subtitle-inner">街头巷尾常能听见雷州话</span></div>
+<div id="caption-40" class="clip subtitle" data-start="88.709" data-duration="1.880" data-track-index="5"><span id="caption-inner-40" class="subtitle-inner">赶海、买鱼、喝早茶</span></div>
+<div id="caption-41" class="clip subtitle" data-start="90.589" data-duration="2.417" data-track-index="5"><span id="caption-inner-41" class="subtitle-inner">这些日常比口号更能</span></div>
+<div id="caption-42" class="clip subtitle" data-start="93.006" data-duration="2.149" data-track-index="5"><span id="caption-inner-42" class="subtitle-inner">说明江洪是什么样</span></div>
+<div id="caption-43" class="clip subtitle" data-start="95.155" data-duration="2.485" data-track-index="5"><span id="caption-inner-43" class="subtitle-inner">江洪社区靠近西南海岸</span></div>
+<div id="caption-44" class="clip subtitle" data-start="97.640" data-duration="1.989" data-track-index="5"><span id="caption-inner-44" class="subtitle-inner">镇区道路、居民点和</span></div>
+<div id="caption-45" class="clip subtitle" data-start="99.629" data-duration="1.491" data-track-index="5"><span id="caption-inner-45" class="subtitle-inner">渔港离得很近</span></div>
+<div id="caption-46" class="clip subtitle" data-start="101.120" data-duration="2.485" data-track-index="5"><span id="caption-inner-46" class="subtitle-inner">清晨最早醒来的是码头</span></div>
+<div id="caption-47" class="clip subtitle" data-start="103.605" data-duration="2.124" data-track-index="5"><span id="caption-inner-47" class="subtitle-inner">北草村在镇域南部</span></div>
+<div id="caption-48" class="clip subtitle" data-start="105.729" data-duration="1.859" data-track-index="5"><span id="caption-inner-48" class="subtitle-inner">村庄和耕地贴着</span></div>
+<div id="caption-49" class="clip subtitle" data-start="107.588" data-duration="2.124" data-track-index="5"><span id="caption-inner-49" class="subtitle-inner">江洪社区向东展开</span></div>
+<div id="caption-50" class="clip subtitle" data-start="109.712" data-duration="1.617" data-track-index="5"><span id="caption-inner-50" class="subtitle-inner">四联村位于中部</span></div>
+<div id="caption-51" class="clip subtitle" data-start="111.329" data-duration="2.079" data-track-index="5"><span id="caption-inner-51" class="subtitle-inner">多条村路从这里接向</span></div>
+<div id="caption-52" class="clip subtitle" data-start="113.408" data-duration="1.617" data-track-index="5"><span id="caption-inner-52" class="subtitle-inner">海边和北部农田</span></div>
+<div id="caption-53" class="clip subtitle" data-start="115.025" data-duration="2.016" data-track-index="5"><span id="caption-inner-53" class="subtitle-inner">坛头村伸到东南部</span></div>
+<div id="caption-54" class="clip subtitle" data-start="117.041" data-duration="1.763" data-track-index="5"><span id="caption-inner-54" class="subtitle-inner">成片农田一直铺</span></div>
+<div id="caption-55" class="clip subtitle" data-start="118.804" data-duration="1.260" data-track-index="5"><span id="caption-inner-55" class="subtitle-inner">到村庄外缘</span></div>
+<div id="caption-56" class="clip subtitle" data-start="120.064" data-duration="2.784" data-track-index="5"><span id="caption-inner-56" class="subtitle-inner">江洪镇河头林场在东部留下</span></div>
+<div id="caption-57" class="clip subtitle" data-start="122.848" data-duration="2.320" data-track-index="5"><span id="caption-inner-57" class="subtitle-inner">一片连贯林地，给沿海乡</span></div>
+<div id="caption-58" class="clip subtitle" data-start="125.168" data-duration="2.552" data-track-index="5"><span id="caption-inner-58" class="subtitle-inner">镇保留了难得的绿色空间</span></div>
+<div id="caption-59" class="clip subtitle" data-start="127.720" data-duration="2.582" data-track-index="5"><span id="caption-inner-59" class="subtitle-inner">昌洋村在北部中段，农田</span></div>
+<div id="caption-60" class="clip subtitle" data-start="130.302" data-duration="2.065" data-track-index="5"><span id="caption-inner-60" class="subtitle-inner">养殖区和村庄交错</span></div>
+<div id="caption-61" class="clip subtitle" data-start="132.367" data-duration="2.840" data-track-index="5"><span id="caption-inner-61" class="subtitle-inner">是江洪内陆一侧的生产区</span></div>
+<div id="caption-62" class="clip subtitle" data-start="135.207" data-duration="1.538" data-track-index="5"><span id="caption-inner-62" class="subtitle-inner">姑寮村再往北</span></div>
+<div id="caption-63" class="clip subtitle" data-start="136.745" data-duration="1.794" data-track-index="5"><span id="caption-inner-63" class="subtitle-inner">聚落沿道路分布</span></div>
+<div id="caption-64" class="clip subtitle" data-start="138.539" data-duration="2.306" data-track-index="5"><span id="caption-inner-64" class="subtitle-inner">和大路村的田野相连</span></div>
+<div id="caption-65" class="clip subtitle" data-start="140.845" data-duration="1.989" data-track-index="5"><span id="caption-inner-65" class="subtitle-inner">大路村位于最北端</span></div>
+<div id="caption-66" class="clip subtitle" data-start="142.834" data-duration="1.988" data-track-index="5"><span id="caption-inner-66" class="subtitle-inner">长条状村域顺着乡</span></div>
+<div id="caption-67" class="clip subtitle" data-start="144.822" data-duration="1.492" data-track-index="5"><span id="caption-inner-67" class="subtitle-inner">路和田块铺开</span></div>
+<div id="caption-68" class="clip subtitle" data-start="150.714" data-duration="2.807" data-track-index="5"><span id="caption-inner-68" class="subtitle-inner">从7000多年前的贝丘遗址</span></div>
+<div id="caption-69" class="clip subtitle" data-start="153.521" data-duration="2.376" data-track-index="5"><span id="caption-inner-69" class="subtitle-inner">到凌晨亮起灯的天光鱼市</span></div>
+<div id="caption-70" class="clip subtitle" data-start="155.897" data-duration="1.727" data-track-index="5"><span id="caption-inner-70" class="subtitle-inner">江洪一直靠海生活</span></div>
+<div id="caption-71" class="clip subtitle" data-start="157.624" data-duration="1.944" data-track-index="5"><span id="caption-inner-71" class="subtitle-inner">也把日子过在海风里</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440823105-narration.wav" data-start="4.400" data-duration="155.240" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed-0" class="clip" src="media/music/ambient-map-bed.wav" data-start="1.4" data-duration="50" data-track-index="70" data-volume="0.2"></audio>
+<audio id="music-bed-1" class="clip" src="media/music/ambient-map-bed.wav" data-start="47.4" data-duration="50" data-track-index="71" data-volume="0.2"></audio>
+<audio id="music-bed-2" class="clip" src="media/music/ambient-map-bed.wav" data-start="93.4" data-duration="50" data-track-index="72" data-volume="0.2"></audio>
+<audio id="music-bed-3" class="clip" src="media/music/ambient-map-bed.wav" data-start="139.4" data-duration="21" data-track-index="73" data-volume="0.2"></audio>
+  <img id="cover" class="clip cover" src="media/images/440823105-cover.png" alt="地理乡土情·遂溪县江洪镇视频封面" data-start="0" data-duration="1.400" data-track-index="100">
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner",".visual",".visual figcaption"],{opacity:0});
+  tl.fromTo("#cover",{opacity:1},{opacity:0,duration:0.308,ease:"power2.inOut"},1.092).set("#cover",{opacity:0},1.400);
+  
+  tl.fromTo("#visual-jianghong-harbor-fleet",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},38.501).to("#visual-jianghong-harbor-fleet",{opacity:0,y:-18,duration:.32,ease:"power2.in"},43.846).set("#visual-jianghong-harbor-fleet",{opacity:0},44.196);
+tl.fromTo("#visual-tianguang-fish-market",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},53.006).to("#visual-tianguang-fish-market",{opacity:0,y:-18,duration:.32,ease:"power2.in"},59.458).set("#visual-tianguang-fish-market",{opacity:0},59.808);
+tl.fromTo("#visual-jianghong-dragon-boat",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},59.308).to("#visual-jianghong-dragon-boat",{opacity:0,y:-18,duration:.32,ease:"power2.in"},69.158).set("#visual-jianghong-dragon-boat",{opacity:0},69.508);
+tl.fromTo("#visual-xianqun-island",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},69.008).to("#visual-xianqun-island",{opacity:0,y:-18,duration:.32,ease:"power2.in"},78.091).set("#visual-xianqun-island",{opacity:0},78.441);
+tl.fromTo("#visual-jianghong-middle-school",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},77.941).to("#visual-jianghong-middle-school",{opacity:0,y:-18,duration:.32,ease:"power2.in"},85.552).set("#visual-jianghong-middle-school",{opacity:0},85.902);
+  tl.fromTo("#visual-caption-jianghong-harbor-fleet",{opacity:0},{opacity:1,duration:.1},38.801).to("#visual-caption-jianghong-harbor-fleet",{opacity:0,duration:.1},43.876).set("#visual-caption-jianghong-harbor-fleet",{opacity:0},43.996);
+tl.fromTo("#visual-caption-tianguang-fish-market",{opacity:0},{opacity:1,duration:.1},53.306).to("#visual-caption-tianguang-fish-market",{opacity:0,duration:.1},59.488).set("#visual-caption-tianguang-fish-market",{opacity:0},59.608);
+tl.fromTo("#visual-caption-jianghong-dragon-boat",{opacity:0},{opacity:1,duration:.1},59.608).to("#visual-caption-jianghong-dragon-boat",{opacity:0,duration:.1},69.188).set("#visual-caption-jianghong-dragon-boat",{opacity:0},69.308);
+tl.fromTo("#visual-caption-xianqun-island",{opacity:0},{opacity:1,duration:.1},69.308).to("#visual-caption-xianqun-island",{opacity:0,duration:.1},78.121).set("#visual-caption-xianqun-island",{opacity:0},78.241);
+tl.fromTo("#visual-caption-jianghong-middle-school",{opacity:0},{opacity:1,duration:.1},78.241).to("#visual-caption-jianghong-middle-school",{opacity:0,duration:.1},85.582).set("#visual-caption-jianghong-middle-school",{opacity:0},85.702);
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.12},4.500).to("#caption-inner-0",{opacity:0,duration:.12},5.940).set("#caption-inner-0",{opacity:0},6.080);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.12},6.080).to("#caption-inner-1",{opacity:0,duration:.12},8.046).set("#caption-inner-1",{opacity:0},8.186);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.12},8.186).to("#caption-inner-2",{opacity:0,duration:.12},9.964).set("#caption-inner-2",{opacity:0},10.104);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.12},10.104).to("#caption-inner-3",{opacity:0,duration:.12},12.430).set("#caption-inner-3",{opacity:0},12.570);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.12},12.570).to("#caption-inner-4",{opacity:0,duration:.12},15.444).set("#caption-inner-4",{opacity:0},15.584);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.12},15.584).to("#caption-inner-5",{opacity:0,duration:.12},18.361).set("#caption-inner-5",{opacity:0},18.501);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.12},18.501).to("#caption-inner-6",{opacity:0,duration:.12},20.596).set("#caption-inner-6",{opacity:0},20.736);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.12},20.736).to("#caption-inner-7",{opacity:0,duration:.12},22.583).set("#caption-inner-7",{opacity:0},22.723);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.12},22.723).to("#caption-inner-8",{opacity:0,duration:.12},25.067).set("#caption-inner-8",{opacity:0},25.207);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.12},25.207).to("#caption-inner-9",{opacity:0,duration:.12},27.381).set("#caption-inner-9",{opacity:0},27.521);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.12},27.521).to("#caption-inner-10",{opacity:0,duration:.12},29.485).set("#caption-inner-10",{opacity:0},29.625);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.12},29.625).to("#caption-inner-11",{opacity:0,duration:.12},31.799).set("#caption-inner-11",{opacity:0},31.939);
+tl.fromTo("#caption-inner-12",{opacity:0,y:8},{opacity:1,y:0,duration:.12},31.939).to("#caption-inner-12",{opacity:0,duration:.12},33.878).set("#caption-inner-12",{opacity:0},34.018);
+tl.fromTo("#caption-inner-13",{opacity:0,y:8},{opacity:1,y:0,duration:.12},34.018).to("#caption-inner-13",{opacity:0,duration:.12},35.542).set("#caption-inner-13",{opacity:0},35.682);
+tl.fromTo("#caption-inner-14",{opacity:0,y:8},{opacity:1,y:0,duration:.12},35.682).to("#caption-inner-14",{opacity:0,duration:.12},37.205).set("#caption-inner-14",{opacity:0},37.345);
+tl.fromTo("#caption-inner-15",{opacity:0,y:8},{opacity:1,y:0,duration:.12},37.345).to("#caption-inner-15",{opacity:0,duration:.12},38.661).set("#caption-inner-15",{opacity:0},38.801);
+tl.fromTo("#caption-inner-16",{opacity:0,y:8},{opacity:1,y:0,duration:.12},38.801).to("#caption-inner-16",{opacity:0,duration:.12},40.393).set("#caption-inner-16",{opacity:0},40.533);
+tl.fromTo("#caption-inner-17",{opacity:0,y:8},{opacity:1,y:0,duration:.12},40.533).to("#caption-inner-17",{opacity:0,duration:.12},41.691).set("#caption-inner-17",{opacity:0},41.831);
+tl.fromTo("#caption-inner-18",{opacity:0,y:8},{opacity:1,y:0,duration:.12},41.831).to("#caption-inner-18",{opacity:0,duration:.12},43.856).set("#caption-inner-18",{opacity:0},43.996);
+tl.fromTo("#caption-inner-19",{opacity:0,y:8},{opacity:1,y:0,duration:.12},43.996).to("#caption-inner-19",{opacity:0,duration:.12},46.109).set("#caption-inner-19",{opacity:0},46.249);
+tl.fromTo("#caption-inner-20",{opacity:0,y:8},{opacity:1,y:0,duration:.12},46.249).to("#caption-inner-20",{opacity:0,duration:.12},48.361).set("#caption-inner-20",{opacity:0},48.501);
+tl.fromTo("#caption-inner-21",{opacity:0,y:8},{opacity:1,y:0,duration:.12},48.501).to("#caption-inner-21",{opacity:0,duration:.12},50.131).set("#caption-inner-21",{opacity:0},50.271);
+tl.fromTo("#caption-inner-22",{opacity:0,y:8},{opacity:1,y:0,duration:.12},50.271).to("#caption-inner-22",{opacity:0,duration:.12},53.166).set("#caption-inner-22",{opacity:0},53.306);
+tl.fromTo("#caption-inner-23",{opacity:0,y:8},{opacity:1,y:0,duration:.12},53.306).to("#caption-inner-23",{opacity:0,duration:.12},55.267).set("#caption-inner-23",{opacity:0},55.407);
+tl.fromTo("#caption-inner-24",{opacity:0,y:8},{opacity:1,y:0,duration:.12},55.407).to("#caption-inner-24",{opacity:0,duration:.12},56.767).set("#caption-inner-24",{opacity:0},56.907);
+tl.fromTo("#caption-inner-25",{opacity:0,y:8},{opacity:1,y:0,duration:.12},56.907).to("#caption-inner-25",{opacity:0,duration:.12},59.468).set("#caption-inner-25",{opacity:0},59.608);
+tl.fromTo("#caption-inner-26",{opacity:0,y:8},{opacity:1,y:0,duration:.12},59.608).to("#caption-inner-26",{opacity:0,duration:.12},61.301).set("#caption-inner-26",{opacity:0},61.441);
+tl.fromTo("#caption-inner-27",{opacity:0,y:8},{opacity:1,y:0,duration:.12},61.441).to("#caption-inner-27",{opacity:0,duration:.12},62.905).set("#caption-inner-27",{opacity:0},63.045);
+tl.fromTo("#caption-inner-28",{opacity:0,y:8},{opacity:1,y:0,duration:.12},63.045).to("#caption-inner-28",{opacity:0,duration:.12},65.160).set("#caption-inner-28",{opacity:0},65.300);
+tl.fromTo("#caption-inner-29",{opacity:0,y:8},{opacity:1,y:0,duration:.12},65.300).to("#caption-inner-29",{opacity:0,duration:.12},67.414).set("#caption-inner-29",{opacity:0},67.554);
+tl.fromTo("#caption-inner-30",{opacity:0,y:8},{opacity:1,y:0,duration:.12},67.554).to("#caption-inner-30",{opacity:0,duration:.12},69.168).set("#caption-inner-30",{opacity:0},69.308);
+tl.fromTo("#caption-inner-31",{opacity:0,y:8},{opacity:1,y:0,duration:.12},69.308).to("#caption-inner-31",{opacity:0,duration:.12},71.693).set("#caption-inner-31",{opacity:0},71.833);
+tl.fromTo("#caption-inner-32",{opacity:0,y:8},{opacity:1,y:0,duration:.12},71.833).to("#caption-inner-32",{opacity:0,duration:.12},73.713).set("#caption-inner-32",{opacity:0},73.853);
+tl.fromTo("#caption-inner-33",{opacity:0,y:8},{opacity:1,y:0,duration:.12},73.853).to("#caption-inner-33",{opacity:0,duration:.12},75.419).set("#caption-inner-33",{opacity:0},75.559);
+tl.fromTo("#caption-inner-34",{opacity:0,y:8},{opacity:1,y:0,duration:.12},75.559).to("#caption-inner-34",{opacity:0,duration:.12},78.101).set("#caption-inner-34",{opacity:0},78.241);
+tl.fromTo("#caption-inner-35",{opacity:0,y:8},{opacity:1,y:0,duration:.12},78.241).to("#caption-inner-35",{opacity:0,duration:.12},80.536).set("#caption-inner-35",{opacity:0},80.676);
+tl.fromTo("#caption-inner-36",{opacity:0,y:8},{opacity:1,y:0,duration:.12},80.676).to("#caption-inner-36",{opacity:0,duration:.12},82.503).set("#caption-inner-36",{opacity:0},82.643);
+tl.fromTo("#caption-inner-37",{opacity:0,y:8},{opacity:1,y:0,duration:.12},82.643).to("#caption-inner-37",{opacity:0,duration:.12},84.251).set("#caption-inner-37",{opacity:0},84.391);
+tl.fromTo("#caption-inner-38",{opacity:0,y:8},{opacity:1,y:0,duration:.12},84.391).to("#caption-inner-38",{opacity:0,duration:.12},85.562).set("#caption-inner-38",{opacity:0},85.702);
+tl.fromTo("#caption-inner-39",{opacity:0,y:8},{opacity:1,y:0,duration:.12},85.702).to("#caption-inner-39",{opacity:0,duration:.12},88.569).set("#caption-inner-39",{opacity:0},88.709);
+tl.fromTo("#caption-inner-40",{opacity:0,y:8},{opacity:1,y:0,duration:.12},88.709).to("#caption-inner-40",{opacity:0,duration:.12},90.449).set("#caption-inner-40",{opacity:0},90.589);
+tl.fromTo("#caption-inner-41",{opacity:0,y:8},{opacity:1,y:0,duration:.12},90.589).to("#caption-inner-41",{opacity:0,duration:.12},92.866).set("#caption-inner-41",{opacity:0},93.006);
+tl.fromTo("#caption-inner-42",{opacity:0,y:8},{opacity:1,y:0,duration:.12},93.006).to("#caption-inner-42",{opacity:0,duration:.12},95.015).set("#caption-inner-42",{opacity:0},95.155);
+tl.fromTo("#caption-inner-43",{opacity:0,y:8},{opacity:1,y:0,duration:.12},95.155).to("#caption-inner-43",{opacity:0,duration:.12},97.500).set("#caption-inner-43",{opacity:0},97.640);
+tl.fromTo("#caption-inner-44",{opacity:0,y:8},{opacity:1,y:0,duration:.12},97.640).to("#caption-inner-44",{opacity:0,duration:.12},99.489).set("#caption-inner-44",{opacity:0},99.629);
+tl.fromTo("#caption-inner-45",{opacity:0,y:8},{opacity:1,y:0,duration:.12},99.629).to("#caption-inner-45",{opacity:0,duration:.12},100.980).set("#caption-inner-45",{opacity:0},101.120);
+tl.fromTo("#caption-inner-46",{opacity:0,y:8},{opacity:1,y:0,duration:.12},101.120).to("#caption-inner-46",{opacity:0,duration:.12},103.465).set("#caption-inner-46",{opacity:0},103.605);
+tl.fromTo("#caption-inner-47",{opacity:0,y:8},{opacity:1,y:0,duration:.12},103.605).to("#caption-inner-47",{opacity:0,duration:.12},105.589).set("#caption-inner-47",{opacity:0},105.729);
+tl.fromTo("#caption-inner-48",{opacity:0,y:8},{opacity:1,y:0,duration:.12},105.729).to("#caption-inner-48",{opacity:0,duration:.12},107.448).set("#caption-inner-48",{opacity:0},107.588);
+tl.fromTo("#caption-inner-49",{opacity:0,y:8},{opacity:1,y:0,duration:.12},107.588).to("#caption-inner-49",{opacity:0,duration:.12},109.572).set("#caption-inner-49",{opacity:0},109.712);
+tl.fromTo("#caption-inner-50",{opacity:0,y:8},{opacity:1,y:0,duration:.12},109.712).to("#caption-inner-50",{opacity:0,duration:.12},111.189).set("#caption-inner-50",{opacity:0},111.329);
+tl.fromTo("#caption-inner-51",{opacity:0,y:8},{opacity:1,y:0,duration:.12},111.329).to("#caption-inner-51",{opacity:0,duration:.12},113.268).set("#caption-inner-51",{opacity:0},113.408);
+tl.fromTo("#caption-inner-52",{opacity:0,y:8},{opacity:1,y:0,duration:.12},113.408).to("#caption-inner-52",{opacity:0,duration:.12},114.885).set("#caption-inner-52",{opacity:0},115.025);
+tl.fromTo("#caption-inner-53",{opacity:0,y:8},{opacity:1,y:0,duration:.12},115.025).to("#caption-inner-53",{opacity:0,duration:.12},116.901).set("#caption-inner-53",{opacity:0},117.041);
+tl.fromTo("#caption-inner-54",{opacity:0,y:8},{opacity:1,y:0,duration:.12},117.041).to("#caption-inner-54",{opacity:0,duration:.12},118.664).set("#caption-inner-54",{opacity:0},118.804);
+tl.fromTo("#caption-inner-55",{opacity:0,y:8},{opacity:1,y:0,duration:.12},118.804).to("#caption-inner-55",{opacity:0,duration:.12},119.924).set("#caption-inner-55",{opacity:0},120.064);
+tl.fromTo("#caption-inner-56",{opacity:0,y:8},{opacity:1,y:0,duration:.12},120.064).to("#caption-inner-56",{opacity:0,duration:.12},122.708).set("#caption-inner-56",{opacity:0},122.848);
+tl.fromTo("#caption-inner-57",{opacity:0,y:8},{opacity:1,y:0,duration:.12},122.848).to("#caption-inner-57",{opacity:0,duration:.12},125.028).set("#caption-inner-57",{opacity:0},125.168);
+tl.fromTo("#caption-inner-58",{opacity:0,y:8},{opacity:1,y:0,duration:.12},125.168).to("#caption-inner-58",{opacity:0,duration:.12},127.580).set("#caption-inner-58",{opacity:0},127.720);
+tl.fromTo("#caption-inner-59",{opacity:0,y:8},{opacity:1,y:0,duration:.12},127.720).to("#caption-inner-59",{opacity:0,duration:.12},130.162).set("#caption-inner-59",{opacity:0},130.302);
+tl.fromTo("#caption-inner-60",{opacity:0,y:8},{opacity:1,y:0,duration:.12},130.302).to("#caption-inner-60",{opacity:0,duration:.12},132.227).set("#caption-inner-60",{opacity:0},132.367);
+tl.fromTo("#caption-inner-61",{opacity:0,y:8},{opacity:1,y:0,duration:.12},132.367).to("#caption-inner-61",{opacity:0,duration:.12},135.067).set("#caption-inner-61",{opacity:0},135.207);
+tl.fromTo("#caption-inner-62",{opacity:0,y:8},{opacity:1,y:0,duration:.12},135.207).to("#caption-inner-62",{opacity:0,duration:.12},136.605).set("#caption-inner-62",{opacity:0},136.745);
+tl.fromTo("#caption-inner-63",{opacity:0,y:8},{opacity:1,y:0,duration:.12},136.745).to("#caption-inner-63",{opacity:0,duration:.12},138.399).set("#caption-inner-63",{opacity:0},138.539);
+tl.fromTo("#caption-inner-64",{opacity:0,y:8},{opacity:1,y:0,duration:.12},138.539).to("#caption-inner-64",{opacity:0,duration:.12},140.705).set("#caption-inner-64",{opacity:0},140.845);
+tl.fromTo("#caption-inner-65",{opacity:0,y:8},{opacity:1,y:0,duration:.12},140.845).to("#caption-inner-65",{opacity:0,duration:.12},142.694).set("#caption-inner-65",{opacity:0},142.834);
+tl.fromTo("#caption-inner-66",{opacity:0,y:8},{opacity:1,y:0,duration:.12},142.834).to("#caption-inner-66",{opacity:0,duration:.12},144.682).set("#caption-inner-66",{opacity:0},144.822);
+tl.fromTo("#caption-inner-67",{opacity:0,y:8},{opacity:1,y:0,duration:.12},144.822).to("#caption-inner-67",{opacity:0,duration:.12},146.174).set("#caption-inner-67",{opacity:0},146.314);
+tl.fromTo("#caption-inner-68",{opacity:0,y:8},{opacity:1,y:0,duration:.12},150.714).to("#caption-inner-68",{opacity:0,duration:.12},153.381).set("#caption-inner-68",{opacity:0},153.521);
+tl.fromTo("#caption-inner-69",{opacity:0,y:8},{opacity:1,y:0,duration:.12},153.521).to("#caption-inner-69",{opacity:0,duration:.12},155.757).set("#caption-inner-69",{opacity:0},155.897);
+tl.fromTo("#caption-inner-70",{opacity:0,y:8},{opacity:1,y:0,duration:.12},155.897).to("#caption-inner-70",{opacity:0,duration:.12},157.484).set("#caption-inner-70",{opacity:0},157.624);
+tl.fromTo("#caption-inner-71",{opacity:0,y:8},{opacity:1,y:0,duration:.12},157.624).to("#caption-inner-71",{opacity:0,duration:.12},159.428).set("#caption-inner-71",{opacity:0},159.568);
+  window.__timelines=window.__timelines||{};window.__timelines["440823105-portrait"]=tl;
+</script>
+</body></html>

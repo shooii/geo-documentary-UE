@@ -1,0 +1,71 @@
+{
+  "regionId": "440825112",
+  "title": "徐闻县新寮镇视觉证据与归因清单",
+  "presentationMode": "portrait-social-documentary",
+  "assets": [
+    {
+      "id": "aquaculture",
+      "file": "assets/generated/images/440825112/02-small-shed-shrimp-illustrative.jpeg",
+      "subject": "小棚虾、海水养殖与沿海清洁能源",
+      "type": "generated-illustrative",
+      "generator": "user-configured OpenAI-compatible relay",
+      "exactLocation": false,
+      "labelRequirement": "成片及对外说明必须标注为产业示意，不得表述为新寮镇实景航拍。",
+      "verificationSources": [
+        "http://www.xuwen.gov.cn/zjxwxl/gkmlpt/content/1/1995/post_1995608.html",
+        "http://www.xuwen.gov.cn/zjxwxl/gkmlpt/content/1/1719/post_1719475.html"
+      ]
+    },
+    {
+      "id": "community-culture",
+      "file": "assets/source/440825112/09-childrens-performance.png",
+      "subject": "新寮镇儿童文化活动",
+      "type": "verified-real",
+      "publisher": "新寮镇公开政务资料",
+      "sourceUrl": "http://www.xuwen.gov.cn/zjxwxl/",
+      "exactLocation": true,
+      "reuseNote": "保留来源归因；页面图片再利用许可未单独声明，发布方应在公开商用前复核授权。"
+    },
+    {
+      "id": "xuwen-food",
+      "file": "assets/source/440825112/04-xuwen-intangible-heritage.jpg",
+      "subject": "徐闻八宝饭制作",
+      "type": "verified-real",
+      "publisher": "徐闻县人民政府公开资料",
+      "sourceUrl": "http://www.xuwen.gov.cn/gkmlpt/content/1/1590/post_1590686.html",
+      "exactLocation": "徐闻县域，不宣称为新寮镇拍摄",
+      "reuseNote": "保留来源归因；页面图片再利用许可未单独声明，发布方应在公开商用前复核授权。"
+    },
+    {
+      "id": "mangrove",
+      "file": "assets/source/440825112/03-mangrove-restoration.jpg",
+      "subject": "徐闻红树林营造修复",
+      "type": "verified-real",
+      "publisher": "徐闻县自然资源局",
+      "sourceUrl": "http://www.xuwen.gov.cn/zjxwzrzy/gkmlpt/content/1/1797/post_1797713.html",
+      "exactLocation": "徐闻县域生态修复资料",
+      "reuseNote": "保留来源归因；页面图片再利用许可未单独声明，发布方应在公开商用前复核授权。"
+    },
+    {
+      "id": "leidasha",
+      "file": "assets/source/440825112/01-leidasha-womens-day.png",
+      "subject": "新寮镇后海村雷打沙海滩活动",
+      "type": "verified-real",
+      "publisher": "新寮镇人民政府",
+      "sourceUrl": "http://www.xuwen.gov.cn/zjxwxl/gkmlpt/content/1/1737/post_1737159.html",
+      "exactLocation": true,
+      "reuseNote": "保留来源归因；页面图片再利用许可未单独声明，发布方应在公开商用前复核授权。"
+    }
+  ],
+  "excluded": [
+    {
+      "file": "assets/generated/images/440825112/01-peanut-sweet-potato-illustrative.jpeg",
+      "reason": "番薯形象可用，但花生荚视觉不够真实，避免误导而不纳入正式成片。"
+    },
+    {
+      "file": "assets/source/440825112/06-fishery-photovoltaic.jpg",
+      "reason": "图片是项目会议资料，不足以直观呈现渔光互补空间，保留为证据但不作为主要画面。"
+    }
+  ],
+  "reviewedAt": "2026-08-05"
+}

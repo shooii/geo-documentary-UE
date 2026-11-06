@@ -1,0 +1,251 @@
+{
+  "regionId": "440982",
+  "name": "化州市",
+  "duration": 54,
+  "scenes": [
+    {
+      "sceneId": "440982-scene-01",
+      "title": "化州市全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "化州位于茂名西部，市域南北狭长，2370.65平方千米的河谷、平原与丘陵形成向广西方向展开的地理通道。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440982",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "化州位于茂名西部，市域南北狭长，2370.65平方千米的河谷、平原与丘陵形成向广西方向展开的地理通道。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440982-location-001"
+      ],
+      "accessibility": "旁白说明化州市全域定位，地图高亮化州市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440982-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2025年末化州常住人口131.18万，城镇化率43.22%，人口主要分布在城区、河谷圩镇和农业平原。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440982",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2025年常住人口131.18万",
+        "body": "茂名西部狭长河谷与丘陵交错"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年末化州常住人口131.18万，城镇化率43.22%，人口主要分布在城区、河谷圩镇和农业平原。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440982-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮化州市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440982-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2025年地区生产总值657.11亿元，第一产业占25.06%，第三产业占56.14%，农业、医药健康和服务业特征突出。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440982",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2025年GDP 657.11亿元",
+        "body": "医药健康、农产品加工与服务业发展"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年地区生产总值657.11亿元，第一产业占25.06%，第三产业占56.14%，农业、医药健康和服务业特征突出。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440982-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮化州市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440982-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "古城遗存、书院传统和南路革命遗址，记录了化州从区域州治、乡土教育到近现代社会变迁的多重历史。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440982",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "古城、书院与南路革命遗址层累",
+        "body": "古城遗存、书院传统和南路革命遗址，记录了化州从区域州治、乡土教育到近现代社会变迁的多重历史。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "古城遗存、书院传统和南路革命遗址，记录了化州从区域州治、乡土教育到近现代社会变迁的多重历史。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440982-history-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮化州市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440982-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "化橘红把地方药材变成城市名片，端午龙舟与裹蒸粽则让河流、节令和饮食传统继续进入日常生活。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440982",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "化橘红、龙舟和裹蒸粽特色鲜明",
+        "body": "化橘红把地方药材变成城市名片，端午龙舟与裹蒸粽则让河流、节令和饮食传统继续进入日常生活。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "化橘红把地方药材变成城市名片，端午龙舟与裹蒸粽则让河流、节令和饮食传统继续进入日常生活。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440982-culture-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮化州市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440982-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 10,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的化州正推动化橘红等特色产业标准化、加工化，同时以县域商业和公共服务连接广阔乡镇。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440982",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的化州正推动化橘红等特色产业标准化、加工化，同时以县域商业和公共服务连接广阔乡镇。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440982-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮化州市，所有重要文字保持在安全区。"
+    }
+  ]
+}

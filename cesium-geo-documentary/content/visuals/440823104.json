@@ -1,0 +1,57 @@
+{
+  "regionId": "440823104",
+  "profilePriority": "portrait",
+  "policy": "Verified-real-only. Every clip is tied to an exact official report or newsroom source; no generated locality imagery is used.",
+  "clips": [
+    {
+      "id": "lemin-cheng",
+      "narrationCueIndex": 5,
+      "path": "assets/source/440823104/01-lemin-cheng.jpg",
+      "label": "乐民所城（珍珠城）遗址（实景资料）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "start": 48.385,
+      "end": 61.08
+    },
+    {
+      "id": "lemin-huaxie",
+      "narrationCueIndex": 3,
+      "path": "assets/source/440823104/02-lemin-huaxie.jpg",
+      "label": "乐民花蟹（2025年实景资料）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "start": 29.244,
+      "end": 39.309
+    },
+    {
+      "id": "yudeng-lantern",
+      "narrationCueIndex": 7,
+      "path": "assets/source/440823104/03-yudeng-lantern.jpg",
+      "label": "乐民二月二游鱼（2026年官方活动实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "start": 71.067,
+      "end": 80.559
+    },
+    {
+      "id": "xingshi",
+      "narrationCueIndex": 17,
+      "path": "assets/source/440823104/04-xingshi.jpg",
+      "label": "乐民二月二醒狮表演（2026年官方活动实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "start": 155.52,
+      "end": 163.528
+    },
+    {
+      "id": "lemin-middle-school-pool",
+      "narrationCueIndex": 9,
+      "path": "assets/source/440823104/05-lemin-middle-school-pool.png",
+      "label": "乐民中学越秀游泳馆（2025年实景资料）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "start": 90.39,
+      "end": 100.169
+    }
+  ]
+}

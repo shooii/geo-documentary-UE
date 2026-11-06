@@ -1,0 +1,251 @@
+{
+  "regionId": "440825",
+  "name": "徐闻县",
+  "duration": 50,
+  "scenes": [
+    {
+      "sceneId": "440825-scene-01",
+      "title": "湛江全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "地图向雷州半岛最南端推进，徐闻面向琼州海峡，与海南岛隔海相望。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440825",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "地图向雷州半岛最南端推进，徐闻面向琼州海峡，与海南岛隔海相望。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440825-location-001"
+      ],
+      "accessibility": "旁白说明湛江全域定位，地图高亮徐闻县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440825-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2024年徐闻户籍人口79.52万，县城、农场、沿海乡镇与港口共同组织人口分布。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440825",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2024年户籍人口79.52万",
+        "body": "中国大陆最南端面向琼州海峡"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2024年徐闻户籍人口79.52万，县城、农场、沿海乡镇与港口共同组织人口分布。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440825-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮徐闻县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440825-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2024年徐闻地区生产总值263.14亿元，特色农业、港航物流和对琼联系构成经济主线。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440825",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2024年GDP 263.14亿元",
+        "body": "港航、农业与对琼联系交汇"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2024年徐闻地区生产总值263.14亿元，特色农业、港航物流和对琼联系构成经济主线。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440825-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮徐闻县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440825-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "地方史资料把徐闻古港视作汉代海上丝绸之路的重要始发港。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440825",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "汉代海上丝路港口记忆",
+        "body": "地方史资料把徐闻古港视作汉代海上丝绸之路的重要始发港。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "地方史资料把徐闻古港视作汉代海上丝绸之路的重要始发港。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440825-history-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮徐闻县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440825-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "热带季风气候和红色土壤铺开连片菠萝田，形成鲜明的大地景观与农耕文化。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440825",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "菠萝田形成大地景观",
+        "body": "热带季风气候和红色土壤铺开连片菠萝田，形成鲜明的大地景观与农耕文化。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "热带季风气候和红色土壤铺开连片菠萝田，形成鲜明的大地景观与农耕文化。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440825-location-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮徐闻县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440825-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 6,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的徐闻既是大陆道路的南端，也是面向海峡、海南和更远海域的交通起点。",
+      "cesium": {
+        "cameraAction": "pullBackToParent",
+        "regionId": "440825",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的徐闻既是大陆道路的南端，也是面向海峡、海南和更远海域的交通起点。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440825-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮徐闻县，所有重要文字保持在安全区。"
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "regionId": "440883",
+  "name": "吴川市",
+  "duration": 50,
+  "scenes": [
+    {
+      "sceneId": "440883-scene-01",
+      "title": "湛江全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "吴川位于湛江东部，南濒南海，鉴江干流自北向南穿过市域并流向海岸。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440883",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "吴川位于湛江东部，南濒南海，鉴江干流自北向南穿过市域并流向海岸。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440883-location-001"
+      ],
+      "accessibility": "旁白说明湛江全域定位，地图高亮吴川市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440883-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2024年末吴川常住人口92.36万，人口沿鉴江、梅菉城区、平原乡镇与海湾分布。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440883",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2024年常住人口92.36万",
+        "body": "鉴江穿城入海的粤西滨海县级市"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2024年末吴川常住人口92.36万，人口沿鉴江、梅菉城区、平原乡镇与海湾分布。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440883-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮吴川市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440883-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2024年吴川地区生产总值约314.63亿元，食品加工、羽绒、鞋业和滨海服务构成县域产业基础。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440883",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2024年GDP约314.63亿元",
+        "body": "滨海发展与县域产业共同推进"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2024年吴川地区生产总值约314.63亿元，食品加工、羽绒、鞋业和滨海服务构成县域产业基础。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440883-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮吴川市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440883-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "沿河海交通发展起来的梅菉等城镇，长期积累了商贸与手工业传统。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440883",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "梅菉等城镇沿河海交通发展",
+        "body": "沿河海交通发展起来的梅菉等城镇，长期积累了商贸与手工业传统。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "沿河海交通发展起来的梅菉等城镇，长期积累了商贸与手工业传统。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440883-location-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮吴川市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440883-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "吴川飘色以人物造型凌空巡游，泥塑则把节庆、戏曲和民间故事凝固成形。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440883",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "飘色与泥塑形成活态民俗",
+        "body": "吴川飘色以人物造型凌空巡游，泥塑则把节庆、戏曲和民间故事凝固成形。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "吴川飘色以人物造型凌空巡游，泥塑则把节庆、戏曲和民间故事凝固成形。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440883-culture-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮吴川市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440883-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 6,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的吴川面向交通升级与滨海发展，也让鲜活民俗继续行走在城市街巷。",
+      "cesium": {
+        "cameraAction": "pullBackToParent",
+        "regionId": "440883",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的吴川面向交通升级与滨海发展，也让鲜活民俗继续行走在城市街巷。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440883-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮吴川市，所有重要文字保持在安全区。"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+# ---- 原有规则 ----
+workspace/amap-settings.json
+workspace/amap-cache/
+workspace/deepseek-settings.json
+
+# ---- 依赖 ----
+node_modules/
+unreal/**/Binaries/
+unreal/**/Intermediate/
+unreal/**/Saved/
+unreal/**/DerivedDataCache/
+apps/ue-player/public/player.js
+apps/ue-player/public/player.js.map
+workspace/ue-runtime.json
+workspace/ue-logs/
+
+# ---- 运行时日志 / 临时产物 ----
+*.log
+debug.log
+.tmp*
+.tmp-studio-*.log
+
+# ---- 渲染/导出运行时输出（大文件、可重生） ----
+renders/
+renders/*
+!**/renders/README.md
+
+# ---- 本地环境 ----
+.env
+.env.*
+*.local
+
+# ---- OS / 编辑器碎屑 ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

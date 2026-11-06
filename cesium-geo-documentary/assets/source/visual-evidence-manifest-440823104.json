@@ -1,0 +1,73 @@
+{
+  "regionId": "440823104",
+  "title": "遂溪县乐民镇视觉证据与归因清单",
+  "presentationMode": "portrait-social-documentary",
+  "assets": [
+    {
+      "id": "lemin-cheng",
+      "file": "assets/source/440823104/01-lemin-cheng.jpg",
+      "subject": "乐民所城（珍珠城）遗址与文明书院所在地",
+      "type": "verified-real",
+      "publisher": "湛江日报",
+      "sourceUrl": "https://www.gdzjdaily.com.cn/p/2678313.html",
+      "exactLocation": true,
+      "publishedAt": "2014-07-23",
+      "reuseNote": "保留来源归因；新闻图片仅用于本地纪实展示，发布方应在公开商用前复核授权。"
+    },
+    {
+      "id": "lemin-huaxie",
+      "file": "assets/source/440823104/02-lemin-huaxie.jpg",
+      "subject": "乐民花蟹",
+      "type": "verified-real",
+      "publisher": "南方+",
+      "sourceUrl": "https://static.nfnews.com/content/202508/25/c11656352.html",
+      "exactLocation": true,
+      "publishedAt": "2025-08-24",
+      "reuseNote": "保留来源归因；新闻图片仅用于本地纪实展示，发布方应在公开商用前复核授权。"
+    },
+    {
+      "id": "yudeng-lantern",
+      "file": "assets/source/440823104/03-yudeng-lantern.jpg",
+      "subject": "乐民镇二月二游鱼鱼灯",
+      "type": "verified-real",
+      "publisher": "遂溪县人民政府",
+      "sourceUrl": "http://www.suixi.gov.cn/sxxw/bmdt/content/post_2158791.html",
+      "exactLocation": true,
+      "publishedAt": "2026-03-01",
+      "reuseNote": "保留来源归因；官方活动实景仅用于本地纪实展示。"
+    },
+    {
+      "id": "xingshi",
+      "file": "assets/source/440823104/04-xingshi.jpg",
+      "subject": "乐民镇二月二醒狮表演",
+      "type": "verified-real",
+      "publisher": "遂溪县人民政府",
+      "sourceUrl": "http://www.suixi.gov.cn/sxxw/bmdt/content/post_2158791.html",
+      "exactLocation": true,
+      "publishedAt": "2026-03-01",
+      "reuseNote": "保留来源归因；官方活动实景仅用于本地纪实展示。"
+    },
+    {
+      "id": "lemin-middle-school-pool",
+      "file": "assets/source/440823104/05-lemin-middle-school-pool.png",
+      "subject": "乐民中学越秀游泳馆",
+      "type": "verified-real",
+      "publisher": "湛江云媒",
+      "sourceUrl": "https://m.gdzjdaily.com.cn/p/2916379.html",
+      "exactLocation": true,
+      "publishedAt": "2025-03-27",
+      "reuseNote": "保留来源归因；新闻图片仅用于本地纪实展示，发布方应在公开商用前复核授权。"
+    }
+  ],
+  "excluded": [
+    {
+      "file": "assets/source/440823104/candidates/2023-huaxie-*.png",
+      "reason": "官方花蟹嘉年华系列图未逐张核对主题，仅保留为候选证据，不纳入正式成片；成片使用2025年南方+花蟹主图。"
+    },
+    {
+      "file": "assets/source/440823104/candidates/2025-yudeng-*.jpg",
+      "reason": "2025年二月二报道系列图无逐图说明，主题核验不足，不纳入正式成片。"
+    }
+  ],
+  "reviewedAt": "2026-08-10"
+}

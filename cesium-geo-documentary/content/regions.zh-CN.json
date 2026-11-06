@@ -1,0 +1,5424 @@
+{
+  "440800": {
+    "name": "湛江市",
+    "facts": {
+      "population": "2025年常住人口712.29万",
+      "economy": "2025年GDP 3952.94亿元",
+      "physical": "雷州半岛连接南海、北部湾与琼州海峡",
+      "history": "雷州文化与近代港城记忆长期叠加",
+      "culture": "雷剧、醒狮、飘色、泥塑与海洋民俗",
+      "modern": "港口、临港产业与区域枢纽共同发展"
+    },
+    "narration": [
+      "湛江位于广东西南部，覆盖雷州半岛，东濒南海、西临北部湾，下辖四区、两县、三市。",
+      "2025年末，全市常住人口712.29万，城镇人口353.50万。",
+      "2025年地区生产总值3952.94亿元，港口、临港工业、服务业与热带农业共同发展。",
+      "古老聚落与近代港城叠加，海洋交通持续塑造湛江。",
+      "雷剧、醒狮、飘色、泥塑和海洋民俗，延续着半岛文化。",
+      "接下来，镜头依次走进赤坎、霞山、坡头、麻章、遂溪、徐闻、廉江、雷州和吴川。"
+    ],
+    "pronunciations": [
+      {
+        "term": "湛江",
+        "pinyin": "zhàn jiāng"
+      },
+      {
+        "term": "琼州海峡",
+        "pinyin": "qióng zhōu hǎi xiá"
+      },
+      {
+        "term": "雷剧",
+        "pinyin": "léi jù"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440800-location-001",
+        "claim": "湛江位于广东省西南部，覆盖雷州半岛，东濒南海、西临北部湾、南隔琼州海峡与海南相望。",
+        "sourceTitle": "湛江概况",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/mlzj/zjgk/content/post_1922682.html",
+        "publisher": "湛江市人民政府",
+        "publishedAt": "2026-05-12",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440800-administration-001",
+        "claim": "截至2024年底，湛江辖赤坎、霞山、坡头、麻章四区，徐闻、遂溪两县，代管雷州、廉江、吴川三市。",
+        "sourceTitle": "湛江概况",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/mlzj/zjgk/content/post_1922682.html",
+        "publisher": "湛江市人民政府",
+        "publishedAt": "2026-05-12",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440800-population-001",
+        "claim": "2025年末湛江市常住人口712.29万人，其中城镇常住人口353.50万人。",
+        "sourceTitle": "2025年湛江市国民经济和社会发展统计公报",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/zwgk/sjfb/tjgb/content/post_2172272.html",
+        "publisher": "湛江市统计局、国家统计局湛江调查队",
+        "publishedAt": "2026-04-23",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440800-economy-001",
+        "claim": "2025年湛江市地区生产总值3952.94亿元。",
+        "sourceTitle": "2025年湛江市国民经济和社会发展统计公报",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/zwgk/sjfb/tjgb/content/post_2172272.html",
+        "publisher": "湛江市统计局、国家统计局湛江调查队",
+        "publishedAt": "2026-04-23",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440800-history-001",
+        "claim": "湛江历史文化由雷州半岛传统文化、海洋文化与近代港城记忆共同构成。",
+        "sourceTitle": "湛江概况",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/mlzj/zjgk/content/post_1922682.html",
+        "publisher": "湛江市人民政府",
+        "publishedAt": "2026-05-12",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440800-culture-001",
+        "claim": "雷剧、遂溪高桩醒狮、吴川飘色与泥塑等是湛江代表性地方文化。",
+        "sourceTitle": "湛江概况",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/mlzj/zjgk/content/post_1922682.html",
+        "publisher": "湛江市人民政府",
+        "publishedAt": "2026-05-12",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440802": {
+    "name": "赤坎区",
+    "facts": {
+      "population": "2020年常住人口约39.03万",
+      "economy": "2025年GDP 380.98亿元",
+      "physical": "港湾与密集街区交织",
+      "history": "古商埠连接海上商路",
+      "culture": "骑楼、会馆与老街记忆",
+      "modern": "老城保护与现代服务业并行"
+    },
+    "narration": [
+      "从湛江全域看，赤坎位于主城区北部、湛江湾西岸，是全市行政与公共服务中心。",
+      "2020年第七次全国人口普查显示，赤坎常住人口约39.03万，人口高度集中于连续建成区。",
+      "2025年赤坎地区生产总值380.98亿元，总部经济、现代服务业和商贸文旅构成主要经济脉络。",
+      "赤坎古商埠在宋代渐成形，清代海运贸易兴盛后，多地商旅沿港湾在这里汇聚。",
+      "古码头、岭南骑楼、会馆和老街，共同保存着湛江城市成长的早期记忆。",
+      "今天的赤坎在保护历史街区的同时更新城市服务，让港湾、商路与现代生活继续相连。"
+    ],
+    "pronunciations": [
+      {
+        "term": "赤坎",
+        "pinyin": "chì kǎn"
+      },
+      {
+        "term": "商埠",
+        "pinyin": "shāng bù"
+      }
+    ],
+    "imagePromptTheme": "清末至民国初期赤坎古商埠、码头、岭南骑楼与会馆街巷的纪录片式艺术化复原",
+    "sources": [
+      {
+        "claimId": "440802-location-001",
+        "claim": "赤坎是湛江市重要中心城区，空间与湛江湾岸紧密相连。",
+        "sourceTitle": "赤坎概况",
+        "sourceUrl": "https://www.chikan.gov.cn/ckqzfw/zjck/gk/ckjj/index.html",
+        "publisher": "赤坎区人民政府",
+        "publishedAt": "2026-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440802-population-001",
+        "claim": "2020年第七次全国人口普查赤坎区常住人口约39.03万人。",
+        "sourceTitle": "湛江市第七次全国人口普查数据",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/zjsfw/bmdh/tjxxw/",
+        "publisher": "湛江市统计局",
+        "publishedAt": "2021-05-21",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440802-economy-001",
+        "claim": "2025年赤坎区地区生产总值380.98亿元。",
+        "sourceTitle": "赤坎区情概况",
+        "sourceUrl": "https://www.chikan.gov.cn/ckqzfw/zjck/gk/content/post_2159498.html",
+        "publisher": "赤坎区人民政府",
+        "publishedAt": "2026-03-23",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440802-history-001",
+        "claim": "赤坎古商埠在宋代渐成形，清代海运商贸发展后成为粤西重要商埠。",
+        "sourceTitle": "赤坎区旅游宣传视频征集开始啦！快来秀出你的创意！",
+        "sourceUrl": "https://www.chikan.gov.cn/gab/gsgg/content/post_1573786.html",
+        "publisher": "赤坎区人民政府",
+        "publishedAt": "2022-02-14",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "imagegen"
+        ]
+      },
+      {
+        "claimId": "440802-heritage-001",
+        "claim": "赤坎古商埠历史街区保留古码头、骑楼、会馆和老街肌理。",
+        "sourceTitle": "刘红兵到赤坎区调研历史文化街区保护开发工作",
+        "sourceUrl": "https://www.chikan.gov.cn/gab/ckyw/content/post_1888661.html",
+        "publisher": "赤坎区人民政府",
+        "publishedAt": "2024-03-28",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440803": {
+    "name": "霞山区",
+    "facts": {
+      "population": "常住人口55.1万",
+      "economy": "2025年GDP 470.12亿元",
+      "physical": "城市沿湛江湾西岸展开",
+      "history": "近代港城留下多层建筑印记",
+      "culture": "骑楼、欧陆建筑与滨海生活",
+      "modern": "港口服务与临港产业相连"
+    },
+    "narration": [
+      "沿湛江湾西岸向南，霞山构成湛江主城区重要的滨海界面，并连接港区与城市中心。",
+      "霞山现有常住人口55.1万，城镇化率超过九成，人口与公共服务集中在连续城市空间。",
+      "2025年霞山地区生产总值470.12亿元，绿色石化、现代物流和商贸服务共同支撑城区经济。",
+      "近代广州湾时期及其后的港城建设，在霞山留下欧陆建筑、骑楼和成片老街。",
+      "这些建筑与海港生活相互叠加，构成霞山独特的滨海城市文化。",
+      "今天的霞山继续连接湛江港、临港产业与现代服务，从老街到海湾延续港城更新的轨迹。"
+    ],
+    "pronunciations": [
+      {
+        "term": "霞山",
+        "pinyin": "xiá shān"
+      },
+      {
+        "term": "广州湾",
+        "pinyin": "guǎng zhōu wān"
+      }
+    ],
+    "imagePromptTheme": "二十世纪早期霞山港城街景、欧陆建筑与岭南骑楼并置的历史场景示意",
+    "sources": [
+      {
+        "claimId": "440803-location-001",
+        "claim": "霞山区是湛江中心城区，具有连续海岸线和高度城市化空间。",
+        "sourceTitle": "霞山概况",
+        "sourceUrl": "http://www.zjxs.gov.cn/zlxs/zjxs/xsgk/content/post_2190940.html",
+        "publisher": "霞山区人民政府",
+        "publishedAt": "2026-06-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440803-population-001",
+        "claim": "霞山区常住人口55.1万人，城镇化率94.1%。",
+        "sourceTitle": "霞山概况",
+        "sourceUrl": "http://www.zjxs.gov.cn/zlxs/zjxs/xsgk/content/post_2190940.html",
+        "publisher": "霞山区人民政府",
+        "publishedAt": "2026-06-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440803-economy-001",
+        "claim": "2025年霞山区地区生产总值470.12亿元。",
+        "sourceTitle": "霞山概况",
+        "sourceUrl": "http://www.zjxs.gov.cn/zlxs/zjxs/xsgk/content/post_2190940.html",
+        "publisher": "霞山区人民政府",
+        "publishedAt": "2026-06-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440803-history-001",
+        "claim": "霞山历史文化街区保留老街、欧陆建筑和骑楼等近现代城市遗存。",
+        "sourceTitle": "漫步霞山历史文化街区，打开穿梭时光之门",
+        "sourceUrl": "http://www.zjxs.gov.cn/zjxswgdlt/gkmlpt/content/1/1645/post_1645686.html",
+        "publisher": "霞山区文化广电旅游体育局",
+        "publishedAt": "2022-07-25",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "imagegen"
+        ]
+      },
+      {
+        "claimId": "440803-modern-001",
+        "claim": "霞山产业园包含临港片区，现代发展与港口和临港产业相连。",
+        "sourceTitle": "霞山概况",
+        "sourceUrl": "http://www.zjxs.gov.cn/zlxs/zjxs/xsgk/content/post_2190940.html",
+        "publisher": "霞山区人民政府",
+        "publishedAt": "2026-06-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440804": {
+    "name": "坡头区",
+    "facts": {
+      "population": "2024年常住人口34.4万",
+      "economy": "2024年GDP 407.42亿元",
+      "physical": "三面环海的东岸城区",
+      "history": "海湾聚落与盐业传统",
+      "culture": "南三岛海岸与盐田景观",
+      "modern": "湛江城市向东拓展的重要空间"
+    },
+    "narration": [
+      "越过湛江海湾向东，坡头位于海湾东岸，是湛江一湾两岸城市格局的重要组成部分。",
+      "2024年末坡头常住人口34.4万，人口分布在东岸城区、沿海镇街与岛屿聚落之间。",
+      "2024年坡头地区生产总值407.42亿元，临港制造、现代服务和海洋相关产业共同发展。",
+      "三面临海的地理条件，使渔业、盐业和海岸聚落长期相互依存。",
+      "南三岛盐田、滩涂与滨海村落，记录着潮汐塑造的生产方式和地方文化。",
+      "今天的坡头承接城市向东拓展，让湛江从单一西岸港城转向跨越海湾展开。"
+    ],
+    "pronunciations": [
+      {
+        "term": "坡头",
+        "pinyin": "pō tóu"
+      },
+      {
+        "term": "南三岛",
+        "pinyin": "nán sān dǎo"
+      }
+    ],
+    "imagePromptTheme": "坡头南三岛传统盐田、滨海村落与潮汐滩涂的电影纪录片艺术化复原",
+    "sources": [
+      {
+        "claimId": "440804-location-001",
+        "claim": "坡头位于湛江海湾东岸，三面环海，是一湾两岸城市格局的重要部分。",
+        "sourceTitle": "坡头概况",
+        "sourceUrl": "http://www.ptq.gov.cn/xxgk/qqgk/content/post_2082394.html",
+        "publisher": "坡头区人民政府",
+        "publishedAt": "2025-08-15",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440804-population-001",
+        "claim": "2024年末坡头区常住人口34.4万人。",
+        "sourceTitle": "坡头概况",
+        "sourceUrl": "http://www.ptq.gov.cn/xxgk/qqgk/content/post_2082394.html",
+        "publisher": "坡头区人民政府",
+        "publishedAt": "2025-08-15",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440804-economy-001",
+        "claim": "2024年坡头区地区生产总值407.42亿元。",
+        "sourceTitle": "坡头概况",
+        "sourceUrl": "http://www.ptq.gov.cn/xxgk/qqgk/content/post_2082394.html",
+        "publisher": "坡头区人民政府",
+        "publishedAt": "2025-08-15",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440804-culture-001",
+        "claim": "南三岛盐业和盐田景观是坡头滨海文化的重要表达。",
+        "sourceTitle": "坡头：以盐为媒激活文旅“春水”",
+        "sourceUrl": "http://www.ptq.gov.cn/ptyw/zwdt/zjdt/content/post_1813644.html",
+        "publisher": "坡头区人民政府",
+        "publishedAt": "2023-10-10",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "imagegen"
+        ]
+      },
+      {
+        "claimId": "440804-modern-001",
+        "claim": "坡头是湛江东海岸组团和城市向东拓展的重要空间。",
+        "sourceTitle": "坡头概况",
+        "sourceUrl": "http://www.ptq.gov.cn/zjgxtzzn/ptgl/ptgk/content/post_477119.html",
+        "publisher": "坡头区人民政府",
+        "publishedAt": "2024-04-23",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440811": {
+    "name": "麻章区",
+    "facts": {
+      "population": "2024年常住人口33.96万",
+      "economy": "2025年GDP 205.82亿元",
+      "physical": "雷州半岛东北部的城郊过渡地带",
+      "history": "火山活动留下玛珥湖",
+      "culture": "湖光岩连接地质与地方记忆",
+      "modern": "交通、农业与城市拓展交汇"
+    },
+    "narration": [
+      "麻章位于湛江中心城区西南部，是城市空间与雷州半岛腹地之间的过渡地带。",
+      "2024年末麻章常住人口33.96万，人口分布连接城区、乡镇、农场与交通走廊。",
+      "2025年麻章地区生产总值205.82亿元，现代农业、制造业、物流和城市配套共同推进。",
+      "湖光岩玛珥湖由远古蒸气岩浆爆发形成，湖底沉积记录着漫长的环境变化。",
+      "围绕湖光岩形成的地质认知与地方记忆，成为麻章最鲜明的文化坐标。",
+      "从火山口湖到不断延伸的城市道路，麻章把深时间、农业空间与当代发展放在同一幅地图上。"
+    ],
+    "pronunciations": [
+      {
+        "term": "麻章",
+        "pinyin": "má zhāng"
+      },
+      {
+        "term": "玛珥湖",
+        "pinyin": "mǎ ěr hú"
+      }
+    ],
+    "imagePromptTheme": "远古蒸气岩浆爆发形成湖光岩玛珥湖的科学纪录片式地质艺术化复原",
+    "sources": [
+      {
+        "claimId": "440811-location-001",
+        "claim": "麻章位于湛江中心城区西南部、雷州半岛东北部。",
+        "sourceTitle": "麻章区概况",
+        "sourceUrl": "http://www.zjmazhang.gov.cn/qqgk/content/post_2148211.html",
+        "publisher": "麻章区人民政府",
+        "publishedAt": "2026-02-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440811-population-001",
+        "claim": "2024年末麻章区常住人口33.96万人。",
+        "sourceTitle": "麻章区概况",
+        "sourceUrl": "http://www.zjmazhang.gov.cn/qqgk/content/post_2148211.html",
+        "publisher": "麻章区人民政府",
+        "publishedAt": "2026-02-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440811-economy-001",
+        "claim": "2025年麻章区地区生产总值205.82亿元。",
+        "sourceTitle": "麻章区概况",
+        "sourceUrl": "http://www.zjmazhang.gov.cn/qqgk/content/post_2148211.html",
+        "publisher": "麻章区人民政府",
+        "publishedAt": "2026-02-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440811-geo-001",
+        "claim": "湖光岩玛珥湖由约14至16万年前的蒸气岩浆爆发形成，火山地层和湖底沉积记录环境变化。",
+        "sourceTitle": "湛江市环境教育基地之三：湖光岩环境教育基地简介",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/sthjj/gkmlpt/content/1/1640/post_1640749.html",
+        "publisher": "湛江市生态环境局",
+        "publishedAt": "2022-07-12",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "imagegen"
+        ]
+      },
+      {
+        "claimId": "440811-modern-001",
+        "claim": "麻章具有连接湛江城区、海南方向和西南地区的交通区位，并发展现代农业。",
+        "sourceTitle": "麻章区举办典型村产业合作暨项目推介招商大会",
+        "sourceUrl": "http://www.zjmazhang.gov.cn/gab/mzyw/content/post_1979301.html",
+        "publisher": "麻章区人民政府",
+        "publishedAt": "2024-11-18",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440823": {
+    "name": "遂溪县",
+    "facts": {
+      "population": "2024年常住人口89.31万",
+      "economy": "2024年GDP 427.19亿元",
+      "physical": "雷州半岛北部连接湾区与北部湾",
+      "history": "县城与交通廊道长期汇聚",
+      "culture": "遂溪醒狮以高桩技艺传承",
+      "modern": "农业、交通与县城服务共同发展"
+    },
+    "narration": [
+      "从湛江九个区县的完整边界看，遂溪位于雷州半岛北部，西临北部湾并连接主城区。",
+      "2024年末遂溪常住人口89.31万，广阔平原与密集乡镇构成县域主要聚落格局。",
+      "2024年遂溪地区生产总值427.19亿元，农业、食品加工、商贸服务与交通区位共同支撑经济。",
+      "遂溪古称铁杷，县城、集市与半岛南北交通长期在这里汇聚。",
+      "遂溪醒狮以新、高、难、险的高桩技艺著称，并列入国家级非物质文化遗产名录。",
+      "今天的遂溪一边连接现代产业与交通，一边让醒狮鼓点继续穿过村镇和田野。"
+    ],
+    "pronunciations": [
+      {
+        "term": "遂溪",
+        "pinyin": "suì xī"
+      },
+      {
+        "term": "高桩",
+        "pinyin": "gāo zhuāng"
+      }
+    ],
+    "imagePromptTheme": "遂溪醒狮艺人在岭南村落高桩表演、鼓乐与狮头扎作细节的文化插画",
+    "sources": [
+      {
+        "claimId": "440823-location-001",
+        "claim": "遂溪位于雷州半岛北部，西临北部湾，与廉江、雷州和湛江城区相连。",
+        "sourceTitle": "遂溪县概况",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/sxgl/content/post_2126245.html",
+        "publisher": "遂溪县人民政府",
+        "publishedAt": "2025-12-09",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440823-population-001",
+        "claim": "2024年末遂溪县常住人口89.31万人。",
+        "sourceTitle": "遂溪县概况",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/sxgl/content/post_2126245.html",
+        "publisher": "遂溪县人民政府",
+        "publishedAt": "2025-12-09",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823-economy-001",
+        "claim": "2024年遂溪县地区生产总值427.19亿元。",
+        "sourceTitle": "遂溪县概况",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/sxgl/content/post_2126245.html",
+        "publisher": "遂溪县人民政府",
+        "publishedAt": "2025-12-09",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823-culture-001",
+        "claim": "遂溪醒狮于2006年列入第一批国家级非物质文化遗产名录。",
+        "sourceTitle": "余钢到遂溪县调研：加快构建现代化产业体系",
+        "sourceUrl": "http://www.suixi.gov.cn/sxxw/bmdt/content/post_1979710.html",
+        "publisher": "遂溪县人民政府",
+        "publishedAt": "2024-11-18",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "imagegen"
+        ]
+      },
+      {
+        "claimId": "440823-culture-002",
+        "claim": "遂溪醒狮高桩表演具有新、高、难、险的地方技艺特色。",
+        "sourceTitle": "同心同行 相聚狮乡——2023海峡两岸醒狮文化交流启动",
+        "sourceUrl": "http://www.suixi.gov.cn/gkmlpt/content/1/1816/post_1816302.html",
+        "publisher": "遂溪县人民政府办公室",
+        "publishedAt": "2023-10-16",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440825": {
+    "name": "徐闻县",
+    "facts": {
+      "population": "2024年户籍人口79.52万",
+      "economy": "2024年GDP 263.14亿元",
+      "physical": "中国大陆最南端面向琼州海峡",
+      "history": "汉代海上丝路港口记忆",
+      "culture": "菠萝田形成大地景观",
+      "modern": "港航、农业与对琼联系交汇"
+    },
+    "narration": [
+      "地图向雷州半岛最南端推进，徐闻面向琼州海峡，与海南岛隔海相望。",
+      "2024年徐闻户籍人口79.52万，县城、农场、沿海乡镇与港口共同组织人口分布。",
+      "2024年徐闻地区生产总值263.14亿元，特色农业、港航物流和对琼联系构成经济主线。",
+      "地方史资料把徐闻古港视作汉代海上丝绸之路的重要始发港。",
+      "热带季风气候和红色土壤铺开连片菠萝田，形成鲜明的大地景观与农耕文化。",
+      "今天的徐闻既是大陆道路的南端，也是面向海峡、海南和更远海域的交通起点。"
+    ],
+    "pronunciations": [
+      {
+        "term": "徐闻",
+        "pinyin": "xú wén"
+      },
+      {
+        "term": "琼州海峡",
+        "pinyin": "qióng zhōu hǎi xiá"
+      }
+    ],
+    "imagePromptTheme": "汉代徐闻古港帆船、海湾码头与远方航线的历史场景艺术化复原",
+    "sources": [
+      {
+        "claimId": "440825-location-001",
+        "claim": "徐闻位于中国大陆最南端，南临琼州海峡，与海南岛隔海相望。",
+        "sourceTitle": "徐闻概况",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxw/mlxw/content/post_2196786.html",
+        "publisher": "徐闻县人民政府",
+        "publishedAt": "2026-06-30",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440825-population-001",
+        "claim": "2024年徐闻县户籍总人口795226人，约79.52万人。",
+        "sourceTitle": "人口民族",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxw/mlxw/zg/content/post_445703.html",
+        "publisher": "徐闻县人民政府",
+        "publishedAt": "2026-05-02",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825-economy-001",
+        "claim": "2024年徐闻县地区生产总值2631436万元，约263.14亿元。",
+        "sourceTitle": "经济发展",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxw/mlxw/zg/content/post_445713.html",
+        "publisher": "徐闻县人民政府",
+        "publishedAt": "2026-05-02",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825-history-001",
+        "claim": "徐闻官方地方资料将徐闻古港表述为汉代海上丝绸之路始发港。",
+        "sourceTitle": "徐闻概况",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxw/mlxw/zg/content/post_471038.html",
+        "publisher": "徐闻县人民政府",
+        "publishedAt": "2026-05-02",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "imagegen"
+        ]
+      },
+      {
+        "claimId": "440825-agri-001",
+        "claim": "徐闻形成以菠萝种植和加工流通为代表的特色农业产业与大地景观。",
+        "sourceTitle": "学精神 践行动 谋实效，徐闻以菠萝“小切口”推动乡村产业“大发展”",
+        "sourceUrl": "http://www.xuwen.gov.cn/gkmlpt/content/1/1621/post_1621069.html",
+        "publisher": "徐闻县人民政府办公室",
+        "publishedAt": "2022-06-10",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440881": {
+    "name": "廉江市",
+    "facts": {
+      "population": "2025年常住人口138.08万",
+      "economy": "2025年GDP 588.08亿元",
+      "physical": "雷州半岛北部连接粤桂",
+      "history": "九洲江流域孕育城镇与农业",
+      "culture": "红橙构成鲜明地方物产名片",
+      "modern": "小家电产业形成制造集群"
+    },
+    "narration": [
+      "廉江位于雷州半岛北部，向西北连接广西，向南通往湛江主城区与半岛腹地。",
+      "2025年末廉江常住人口138.08万，是湛江人口规模较大的县级市。",
+      "2025年廉江地区生产总值588.08亿元，现代服务、特色农业与小家电制造共同支撑县域经济。",
+      "九洲江流域长期孕育城镇、农业与区域商贸，形成廉江发展的基本空间骨架。",
+      "红橙品牌和小家电产业，分别连接田野、工厂与地方生活，成为鲜明的城市文化名片。",
+      "今天的廉江从九洲江延伸到产业园，在粤桂联系中展示县域经济的多重层次。"
+    ],
+    "pronunciations": [
+      {
+        "term": "廉江",
+        "pinyin": "lián jiāng"
+      },
+      {
+        "term": "九洲江",
+        "pinyin": "jiǔ zhōu jiāng"
+      }
+    ],
+    "imagePromptTheme": "廉江红橙果园、九洲江河谷与岭南乡村丰收场景的编辑插画",
+    "sources": [
+      {
+        "claimId": "440881-location-001",
+        "claim": "廉江位于广东西南部、雷州半岛北部，与广西接壤并面向北部湾区域。",
+        "sourceTitle": "2022年广东省廉江市赴高校公开招聘中小学教师公告",
+        "sourceUrl": "http://www.lianjiang.gov.cn/zjljrsj/gkmlpt/content/1/1583/post_1583460.html",
+        "publisher": "廉江市人民政府",
+        "publishedAt": "2022-03-10",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440881-population-001",
+        "claim": "2025年末廉江市常住人口138.08万人。",
+        "sourceTitle": "2025年廉江市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.lianjiang.gov.cn/zwgk/gjzwxx/tjxx/tjnb/content/post_2189430.html",
+        "publisher": "廉江市人民政府",
+        "publishedAt": "2026-06-08",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440881-economy-001",
+        "claim": "2025年廉江市地区生产总值588.08亿元。",
+        "sourceTitle": "2025年廉江市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.lianjiang.gov.cn/zwgk/gjzwxx/tjxx/tjnb/content/post_2189430.html",
+        "publisher": "廉江市人民政府",
+        "publishedAt": "2026-06-08",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440881-agri-001",
+        "claim": "廉江以红橙为代表发展特色农业和区域公共品牌。",
+        "sourceTitle": "以橙为媒 文旅融合 廉江深入推进乡村振兴工作",
+        "sourceUrl": "http://www.lianjiang.gov.cn/zwgk/ljyw/content/post_1833625.html",
+        "publisher": "廉江市人民政府",
+        "publishedAt": "2023-11-21",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "imagegen"
+        ]
+      },
+      {
+        "claimId": "440881-industry-001",
+        "claim": "廉江建设中国小家电产业基地并推动小家电产业集群升级。",
+        "sourceTitle": "廉江市“中国小家电产业基地”专家组复评通过",
+        "sourceUrl": "http://www.lianjiang.gov.cn/zjljyt/gkmlpt/content/1/1795/post_1795937.html",
+        "publisher": "廉江市人民政府",
+        "publishedAt": "2023-08-21",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440882": {
+    "name": "雷州市",
+    "facts": {
+      "population": "2024年常住人口133.46万",
+      "economy": "2024年GDP 390.36亿元",
+      "physical": "雷州半岛中部两面临海",
+      "history": "古城长期是半岛区域中心",
+      "culture": "雷剧与雷州文化延续地方传统",
+      "modern": "农业、能源与历史名城保护并进"
+    },
+    "narration": [
+      "雷州位于雷州半岛中部，东临雷州湾、西向北部湾，是半岛南北交通的关键地带。",
+      "2024年末雷州常住人口133.46万，城镇、农田与漫长海岸共同组织广阔县域。",
+      "2024年雷州地区生产总值390.36亿元，现代农业、能源与县域服务构成主要经济支撑。",
+      "从古代郡州治所到今天的县级市，雷城长期承担雷州半岛区域中心的角色。",
+      "雷州话、雷剧、雷祖祠和古城街巷，保存着移民、海洋与地方信俗交汇的文化系统。",
+      "今天的雷州在推进产业建设的同时，继续维护国家历史文化名城的深厚根脉。"
+    ],
+    "pronunciations": [
+      {
+        "term": "雷州",
+        "pinyin": "léi zhōu"
+      },
+      {
+        "term": "雷剧",
+        "pinyin": "léi jù"
+      }
+    ],
+    "imagePromptTheme": "古代雷州城、雷祖祠周边街巷与雷剧舞台元素融合的历史文化艺术化复原",
+    "sources": [
+      {
+        "claimId": "440882-location-001",
+        "claim": "雷州位于雷州半岛中部，东临雷州湾、西濒北部湾。",
+        "sourceTitle": "雷州概况",
+        "sourceUrl": "http://www.leizhou.gov.cn/lzsq/lzjj/content/post_1865125.html",
+        "publisher": "雷州市人民政府",
+        "publishedAt": "2025-12-30",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440882-population-001",
+        "claim": "2024年末雷州市常住人口133.46万人。",
+        "sourceTitle": "2024年雷州市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.leizhou.gov.cn/xxgk/gmjj/content/post_2044460.html",
+        "publisher": "雷州市人民政府",
+        "publishedAt": "2025-04-18",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882-economy-001",
+        "claim": "2024年雷州市地区生产总值390.36亿元。",
+        "sourceTitle": "2024年雷州市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.leizhou.gov.cn/xxgk/gmjj/content/post_2044460.html",
+        "publisher": "雷州市人民政府",
+        "publishedAt": "2025-04-18",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882-history-001",
+        "claim": "雷州历史上长期为县、州、郡、道、府治，形成半岛区域中心和多元文化交汇。",
+        "sourceTitle": "雷州概况",
+        "sourceUrl": "http://www.leizhou.gov.cn/lzsq/lzjj/content/post_1865125.html",
+        "publisher": "雷州市人民政府",
+        "publishedAt": "2025-12-30",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "imagegen"
+        ]
+      },
+      {
+        "claimId": "440882-culture-001",
+        "claim": "雷剧是雷州文化的重要代表，并被纳入国家非物质文化遗产保护体系。",
+        "sourceTitle": "湛江市国民经济和社会发展第十三个五年规划纲要",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/szfwj/content/post_1280047.html",
+        "publisher": "湛江市人民政府",
+        "publishedAt": "2016-04-07",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440883": {
+    "name": "吴川市",
+    "facts": {
+      "population": "2024年常住人口92.36万",
+      "economy": "2024年GDP约314.63亿元",
+      "physical": "鉴江穿城入海的粤西滨海县级市",
+      "history": "梅菉等城镇沿河海交通发展",
+      "culture": "飘色与泥塑形成活态民俗",
+      "modern": "滨海发展与县域产业共同推进"
+    },
+    "narration": [
+      "吴川位于湛江东部，南濒南海，鉴江干流自北向南穿过市域并流向海岸。",
+      "2024年末吴川常住人口92.36万，人口沿鉴江、梅菉城区、平原乡镇与海湾分布。",
+      "2024年吴川地区生产总值约314.63亿元，食品加工、羽绒、鞋业和滨海服务构成县域产业基础。",
+      "沿河海交通发展起来的梅菉等城镇，长期积累了商贸与手工业传统。",
+      "吴川飘色以人物造型凌空巡游，泥塑则把节庆、戏曲和民间故事凝固成形。",
+      "今天的吴川面向交通升级与滨海发展，也让鲜活民俗继续行走在城市街巷。"
+    ],
+    "pronunciations": [
+      {
+        "term": "吴川",
+        "pinyin": "wú chuān"
+      },
+      {
+        "term": "梅菉",
+        "pinyin": "méi lù"
+      },
+      {
+        "term": "飘色",
+        "pinyin": "piāo sè"
+      }
+    ],
+    "imagePromptTheme": "吴川飘色巡游与泥塑工艺同场呈现的岭南节庆纪录片编辑插画",
+    "sources": [
+      {
+        "claimId": "440883-location-001",
+        "claim": "吴川位于广东西南部、南濒南海，鉴江干流自北向南贯穿，地势北高南低。",
+        "sourceTitle": "地理位置",
+        "sourceUrl": "https://www.gdwc.gov.cn/bmzz/wcsrmzfw/zjwc/wcgk/dlwz/content/post_378905.html",
+        "publisher": "吴川市人民政府",
+        "publishedAt": "2025-01-14",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440883-population-001",
+        "claim": "2024年末吴川市常住人口92.36万人。",
+        "sourceTitle": "人口概况",
+        "sourceUrl": "https://www.gdwc.gov.cn/bmzz/wcsrmzfw/zjwc/wcgk/rkgk/content/post_2109367.html",
+        "publisher": "吴川市人民政府",
+        "publishedAt": "2025-10-21",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440883-economy-001",
+        "claim": "2024年吴川市地区生产总值约314.63亿元，同比增长0.1%。",
+        "sourceTitle": "2025年政府工作报告",
+        "sourceUrl": "https://www.gdwc.gov.cn/bmzz/wcsrmzfw/zwgk/zfgb/zfgzbg/content/post_2028830.html",
+        "publisher": "吴川市人民政府",
+        "publishedAt": "2025-04-09",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440883-culture-001",
+        "claim": "吴川飘色和泥塑是当地具有代表性的民间文化艺术。",
+        "sourceTitle": "湛江市国民经济和社会发展第十三个五年规划纲要",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/szfwj/content/post_1280047.html",
+        "publisher": "湛江市人民政府",
+        "publishedAt": "2016-04-07",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "imagegen"
+        ]
+      },
+      {
+        "claimId": "440883-culture-002",
+        "claim": "吴川通过非遗展演、泥塑进校园等形式开展活态传承。",
+        "sourceTitle": "我市举行“可持续发展 非遗同行”泥塑进校园主题活动",
+        "sourceUrl": "https://www.gdwc.gov.cn/bmzz/wcsrmzfw/zwgk/wcdt/gab/zjdt/content/post_1862652.html",
+        "publisher": "吴川市人民政府",
+        "publishedAt": "2023-08-08",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440900": {
+    "name": "茂名市",
+    "title": "地理图说·茂名",
+    "voiceRate": "+20%",
+    "facts": {
+      "population": "2025年常住人口626.46万",
+      "economy": "2025年GDP 4106.40亿元",
+      "physical": "广东西南部由北部丘陵向南部海岸过渡",
+      "history": "高凉历史层累与现代工矿城市建设交汇",
+      "culture": "荔枝古树、年例与好心文化延续地方记忆",
+      "modern": "石化工业、现代服务业与特色农业协同发展"
+    },
+    "narration": [
+      "茂名位于广东西南部，地势由北部丘陵向南部海岸递降，下辖茂南、电白两区和高州、化州、信宜三市。",
+      "2025年末，全市常住人口626.46万，城镇化率49.54%，人口在中心城区、河谷平原和山地城镇间分布。",
+      "2025年地区生产总值4106.40亿元，第三产业占54.5%，石油化工、现代服务业和特色农业共同支撑城市经济。",
+      "这里承接古代高凉地域的历史脉络，1958年设茂名工矿区市，1959年正式成立茂名市，工业建设重塑了城市格局。",
+      "两千多年荔枝栽培、村镇年例和冼夫人相关历史记忆，让农业物产、节庆与好心文化彼此相连。",
+      "接下来，镜头由中心城区走向海岸，再转入内陆丘陵，依次进入茂南、电白、高州、化州和信宜。"
+    ],
+    "pronunciations": [
+      {
+        "term": "茂名",
+        "pinyin": "mào míng"
+      },
+      {
+        "term": "高凉",
+        "pinyin": "gāo liáng"
+      },
+      {
+        "term": "冼夫人",
+        "pinyin": "xiǎn fū rén"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440900-location-001",
+        "claim": "茂名位于广东西南部，现辖茂南区、电白区和高州、化州、信宜三个县级市。",
+        "sourceTitle": "走进茂名",
+        "sourceUrl": "http://www.maoming.gov.cn/ml/index.html",
+        "publisher": "茂名市人民政府",
+        "publishedAt": "2026-07-13",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440900-population-001",
+        "claim": "2025年末茂名市常住人口626.46万人，常住人口城镇化率49.54%。",
+        "sourceTitle": "2025年茂名市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.maoming.gov.cn/zwgk/sjfb/tjgb/content/post_1612930.html",
+        "publisher": "茂名市统计局、国家统计局茂名调查队",
+        "publishedAt": "2026-05-23",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440900-economy-001",
+        "claim": "2025年茂名市地区生产总值4106.40亿元，三次产业结构为18.1:27.3:54.5。",
+        "sourceTitle": "2025年茂名市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.maoming.gov.cn/zwgk/sjfb/tjgb/content/post_1612930.html",
+        "publisher": "茂名市统计局、国家统计局茂名调查队",
+        "publishedAt": "2026-05-23",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440900-history-001",
+        "claim": "1958年国务院批准成立茂名工矿区市，1959年茂名市成立。",
+        "sourceTitle": "建置沿革",
+        "sourceUrl": "http://www.maonan.gov.cn/zwgk/gkxx/ls/content/post_1567518.html",
+        "publisher": "茂南区人民政府地方志办公室",
+        "publishedAt": "2025-12-22",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440900-culture-001",
+        "claim": "茂名荔枝栽培历史超过两千年，荔枝古树与村镇农业文化延续至今。",
+        "sourceTitle": "茂名荔枝",
+        "sourceUrl": "http://www.maoming.gov.cn/zlmm/tsmm/content/post_1594538.html",
+        "publisher": "茂名市人民政府",
+        "publishedAt": "2026-03-20",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440900-culture-002",
+        "claim": "年例是茂名具有代表性的村镇民俗活动，承载乡土交往和节庆记忆。",
+        "sourceTitle": "茂南篇|2026茂名年例时序表",
+        "sourceUrl": "http://www.maoming.gov.cn/zlmm/lyzx/content/post_1584699.html",
+        "publisher": "茂名市人民政府",
+        "publishedAt": "2026-02-14",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440902": {
+    "name": "茂南区",
+    "title": "地理图说·茂南",
+    "voiceRate": "+20%",
+    "facts": {
+      "population": "2025年常住人口106.71万",
+      "economy": "2025年GDP 1137.29亿元",
+      "physical": "中心城区与低丘、河网、农业腹地相接",
+      "history": "现代工矿城市建设推动城区形成",
+      "culture": "白话、雷话与客家话并存，年例连接城乡",
+      "modern": "工业、服务业与都市农业共同更新"
+    },
+    "narration": [
+      "从茂名全域看，茂南位于市域南部，是中心城区主体，587.78平方千米的低丘、河网与连续建成区彼此衔接。",
+      "2025年末茂南常住人口106.71万，城镇化率71.63%，是全市人口和公共服务最密集的区域。",
+      "2025年地区生产总值1137.29亿元，第二、第三产业合计占96.6%，工业基础与现代服务业构成主要经济脉络。",
+      "1958年茂名工矿区市设立，1959年城市成立，1985年茂南区建制形成，工矿开发深刻改变了原有聚落格局。",
+      "白话、雷话和客家话在区内并存，村镇年例把不同方言区的亲缘、饮食与节庆连接起来。",
+      "今天的茂南一边承载中心城区更新，一边保留蔬菜、罗非鱼和荔枝等都市农业，让工业城市仍与乡土腹地相连。"
+    ],
+    "pronunciations": [
+      {
+        "term": "茂南",
+        "pinyin": "mào nán"
+      },
+      {
+        "term": "雷话",
+        "pinyin": "léi huà"
+      },
+      {
+        "term": "罗非鱼",
+        "pinyin": "luó fēi yú"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440902-location-001",
+        "claim": "茂南区行政区域面积587.78平方千米，北部和中部有油页岩低丘，水系与农业腹地环绕中心城区。",
+        "sourceTitle": "自然地理",
+        "sourceUrl": "http://www.maonan.gov.cn/zwgk/gkxx/dl/content/post_1567522.html",
+        "publisher": "茂南区人民政府地方志办公室",
+        "publishedAt": "2025-12-22",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440902-population-001",
+        "claim": "2025年末茂南区常住人口106.71万人，城镇化率71.63%。",
+        "sourceTitle": "2025年茂南区国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.maonan.gov.cn/zwgk/tjxx/content/post_1621180.html",
+        "publisher": "茂南区统计局",
+        "publishedAt": "2026-06-22",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440902-economy-001",
+        "claim": "2025年茂南区地区生产总值1137.29亿元，三次产业结构为3.4:40.4:56.2。",
+        "sourceTitle": "2025年茂南区国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.maonan.gov.cn/zwgk/tjxx/content/post_1621180.html",
+        "publisher": "茂南区统计局",
+        "publishedAt": "2026-06-22",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440902-history-001",
+        "claim": "1958年茂名工矿区市成立，1959年茂名市成立，1985年茂南区成立。",
+        "sourceTitle": "建置沿革",
+        "sourceUrl": "http://www.maonan.gov.cn/zwgk/gkxx/ls/content/post_1567518.html",
+        "publisher": "茂南区人民政府地方志办公室",
+        "publishedAt": "2025-12-22",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440902-culture-001",
+        "claim": "茂南区主要使用白话，同时分布雷话和客家方言，体现中心城区与周边乡镇的多元人文结构。",
+        "sourceTitle": "人口、语言、民族、宗教",
+        "sourceUrl": "http://www.maonan.gov.cn/zwgk/gkxx/rw/content/post_1630169.html",
+        "publisher": "茂南区人民政府地方志办公室",
+        "publishedAt": "2026-07-22",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440902-culture-002",
+        "claim": "茂南区村镇持续举办年例民俗活动。",
+        "sourceTitle": "茂南篇|2026茂名年例时序表",
+        "sourceUrl": "http://www.maoming.gov.cn/zlmm/lyzx/content/post_1584699.html",
+        "publisher": "茂名市人民政府",
+        "publishedAt": "2026-02-14",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440904": {
+    "name": "电白区",
+    "title": "地理图说·电白",
+    "voiceRate": "+20%",
+    "facts": {
+      "population": "2025年常住人口152.20万",
+      "economy": "2025年GDP 884.33亿元",
+      "physical": "179.19千米海岸线连接浅海、岛礁与丘陵",
+      "history": "高凉历史记忆与冼夫人文化延续",
+      "culture": "沉香、海洋民俗与沿海物产鲜明",
+      "modern": "农业、制造业与滨海服务共同发展"
+    },
+    "narration": [
+      "电白位于茂名东南部，陆地向南伸入海岸，179.19千米大陆岸线把浅海、岛礁、丘陵和城镇串在一起。",
+      "2025年末电白常住人口152.20万，城镇化率46.10%，人口分布兼具沿海密集和内陆分散两种形态。",
+      "2025年地区生产总值884.33亿元，三次产业结构为19.6比31.9比48.5，海洋渔业、农业、制造业和服务业并行。",
+      "电白长期属于古代高凉地域，冼夫人故里的历史记忆至今仍是地方文化的重要线索。",
+      "沉香、水东芥菜、海产干货和沿海节庆，呈现出山海资源在日常生活中的不同形态。",
+      "今天的电白继续在滨海产业、现代农业和公共服务之间寻找平衡，让漫长海岸成为生产空间，也成为生活空间。"
+    ],
+    "pronunciations": [
+      {
+        "term": "电白",
+        "pinyin": "diàn bái"
+      },
+      {
+        "term": "冼夫人",
+        "pinyin": "xiǎn fū rén"
+      },
+      {
+        "term": "水东芥菜",
+        "pinyin": "shuǐ dōng jiè cài"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440904-location-001",
+        "claim": "电白区位于茂名市东南部，土地面积2139.16平方千米，大陆海岸线179.19千米，分布大小岛礁21个。",
+        "sourceTitle": "电白区2025年概况",
+        "sourceUrl": "http://www.dianbai.gov.cn/zldb/dbgk/content/post_1627413.html",
+        "publisher": "电白区人民政府、区党史地志办",
+        "publishedAt": "2026-07-13",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440904-population-001",
+        "claim": "2025年末电白区常住人口152.20万人，常住人口城镇化率46.10%。",
+        "sourceTitle": "2025年电白国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.dianbai.gov.cn/zwgk/tjxx/content/post_1625690.html",
+        "publisher": "电白区统计局、国家统计局电白调查队",
+        "publishedAt": "2026-07-07",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440904-economy-001",
+        "claim": "2025年电白区地区生产总值884.33亿元，三次产业结构为19.6:31.9:48.5。",
+        "sourceTitle": "2025年电白国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.dianbai.gov.cn/zwgk/tjxx/content/post_1625690.html",
+        "publisher": "电白区统计局、国家统计局电白调查队",
+        "publishedAt": "2026-07-07",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440904-history-001",
+        "claim": "冼太夫人故里文化旅游景区位于电白，相关历史记忆是当地代表性文化资源。",
+        "sourceTitle": "电白区2025年概况",
+        "sourceUrl": "http://www.dianbai.gov.cn/zldb/dbgk/content/post_1627413.html",
+        "publisher": "电白区人民政府、区党史地志办",
+        "publishedAt": "2026-07-13",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440904-culture-001",
+        "claim": "电白的代表性物产包括沉香、水东芥菜、海产干货和荔枝龙眼等。",
+        "sourceTitle": "电白区2025年概况",
+        "sourceUrl": "http://www.dianbai.gov.cn/zldb/dbgk/content/post_1627413.html",
+        "publisher": "电白区人民政府、区党史地志办",
+        "publishedAt": "2026-07-13",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440981": {
+    "name": "高州市",
+    "title": "地理图说·高州",
+    "voiceRate": "+20%",
+    "facts": {
+      "population": "2025年常住人口133.29万",
+      "economy": "2025年GDP 832.65亿元",
+      "physical": "茂名中部丘陵与果园广布",
+      "history": "高凉文化与冼太历史记忆深厚",
+      "culture": "古荔园和高州木偶戏延续活态传统",
+      "modern": "特色农业、加工和县域服务业升级"
+    },
+    "narration": [
+      "高州位于茂名中部，3270.89平方千米的丘陵、河谷和果园构成内陆腹地，也是南北交通联系的重要过渡区。",
+      "2025年末高州常住人口133.29万，城镇化率44.92%，人口在城区、圩镇和广阔乡村之间呈多中心分布。",
+      "2025年地区生产总值832.65亿元，三次产业结构为23.4比20.6比56.0，水果农业、加工和服务业共同支撑县域经济。",
+      "高州承接古代高凉地域的历史脉络，冼夫人相关记忆在庙宇、节庆与地方叙事中长期延续。",
+      "千年古荔园保存着多样荔枝品种，高州木偶戏则以四百多年表演传统，把乡村戏台连接到今天的网络直播。",
+      "今天的高州正把荔枝龙眼等特色农业向加工、冷链和品牌延伸，同时强化县域公共服务与城乡联系。"
+    ],
+    "pronunciations": [
+      {
+        "term": "高州",
+        "pinyin": "gāo zhōu"
+      },
+      {
+        "term": "高凉",
+        "pinyin": "gāo liáng"
+      },
+      {
+        "term": "圩镇",
+        "pinyin": "xū zhèn"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440981-location-001",
+        "claim": "高州市位于茂名市中部，2025年辖23个镇和5个街道，行政区域土地面积3270.89平方千米。",
+        "sourceTitle": "走进茂名",
+        "sourceUrl": "http://www.maoming.gov.cn/ml/index.html",
+        "publisher": "茂名市人民政府",
+        "publishedAt": "2026-07-13",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440981-population-001",
+        "claim": "2025年末高州市常住人口133.29万人，常住人口城镇化率44.92%。",
+        "sourceTitle": "2025年高州市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.gaozhou.gov.cn/attachment/0/211/211288/1618179.pdf",
+        "publisher": "高州市统计局",
+        "publishedAt": "2026-06-10",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440981-economy-001",
+        "claim": "2025年高州市地区生产总值832.65亿元，三次产业结构为23.4:20.6:56.0。",
+        "sourceTitle": "2025年高州市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.gaozhou.gov.cn/attachment/0/211/211288/1618179.pdf",
+        "publisher": "高州市统计局",
+        "publishedAt": "2026-06-10",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440981-history-001",
+        "claim": "高州持续以冼太诞辰、更衣节等活动传承高凉与冼夫人相关历史文化。",
+        "sourceTitle": "非遗荟萃，好心永续！众人齐聚高州，共庆冼太诞辰",
+        "sourceUrl": "http://www.gaozhou.gov.cn/gzgk/rwls/content/post_1573623.html",
+        "publisher": "高州市人民政府",
+        "publishedAt": "2026-01-12",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440981-culture-001",
+        "claim": "高州木偶戏有四百多年历史，是国家级非遗，并通过网络直播等方式继续传播。",
+        "sourceTitle": "《光明日报》头版报道！不愧是高州木偶戏！",
+        "sourceUrl": "http://www.gaozhou.gov.cn/gzgk/rwls/content/post_1435280.html",
+        "publisher": "高州市人民政府",
+        "publishedAt": "2025-01-14",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440981-culture-002",
+        "claim": "高州滩底古荔园保存大量五百年以上古荔树和多种荔枝品种。",
+        "sourceTitle": "古荔芳华·滩底古荔园",
+        "sourceUrl": "http://www.gaozhou.gov.cn/gzgk/rwls/content/post_1167039.html",
+        "publisher": "高州市人民政府",
+        "publishedAt": "2023-04-25",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440982": {
+    "name": "化州市",
+    "title": "地理图说·化州",
+    "voiceRate": "+20%",
+    "facts": {
+      "population": "2025年常住人口131.18万",
+      "economy": "2025年GDP 657.11亿元",
+      "physical": "茂名西部狭长河谷与丘陵交错",
+      "history": "古城、书院与南路革命遗址层累",
+      "culture": "化橘红、龙舟和裹蒸粽特色鲜明",
+      "modern": "医药健康、农产品加工与服务业发展"
+    },
+    "narration": [
+      "化州位于茂名西部，市域南北狭长，2370.65平方千米的河谷、平原与丘陵形成向广西方向展开的地理通道。",
+      "2025年末化州常住人口131.18万，城镇化率43.22%，人口主要分布在城区、河谷圩镇和农业平原。",
+      "2025年地区生产总值657.11亿元，第一产业占25.06%，第三产业占56.14%，农业、医药健康和服务业特征突出。",
+      "古城遗存、书院传统和南路革命遗址，记录了化州从区域州治、乡土教育到近现代社会变迁的多重历史。",
+      "化橘红把地方药材变成城市名片，端午龙舟与裹蒸粽则让河流、节令和饮食传统继续进入日常生活。",
+      "今天的化州正推动化橘红等特色产业标准化、加工化，同时以县域商业和公共服务连接广阔乡镇。"
+    ],
+    "pronunciations": [
+      {
+        "term": "化州",
+        "pinyin": "huà zhōu"
+      },
+      {
+        "term": "化橘红",
+        "pinyin": "huà jú hóng"
+      },
+      {
+        "term": "裹蒸粽",
+        "pinyin": "guǒ zhēng zòng"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440982-location-001",
+        "claim": "化州市位于广东省西南部、茂名市西部，总面积2370.65平方千米，地形南北狭长。",
+        "sourceTitle": "化州概况",
+        "sourceUrl": "http://www.huazhou.gov.cn/hzgk/index.html",
+        "publisher": "化州市人民政府",
+        "publishedAt": "2026-08-03",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440982-population-001",
+        "claim": "2025年末化州市常住人口131.18万人，常住人口城镇化率43.22%。",
+        "sourceTitle": "2025年化州市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.huazhou.gov.cn/zwgk/tjxx/content/post_1615033.html",
+        "publisher": "化州市统计局",
+        "publishedAt": "2026-06-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440982-economy-001",
+        "claim": "2025年化州市地区生产总值657.11亿元，三次产业结构为25.06:18.80:56.14。",
+        "sourceTitle": "2025年化州市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.huazhou.gov.cn/zwgk/tjxx/content/post_1615033.html",
+        "publisher": "化州市统计局",
+        "publishedAt": "2026-06-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440982-history-001",
+        "claim": "化州保存古城、书院和广东南路革命相关历史遗存。",
+        "sourceTitle": "化州概况",
+        "sourceUrl": "http://www.huazhou.gov.cn/hzgk/index.html",
+        "publisher": "化州市人民政府",
+        "publishedAt": "2026-08-03",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440982-culture-001",
+        "claim": "化州端午赛龙舟传统可追溯到明末，民国时期已较为盛行。",
+        "sourceTitle": "化州赛龙舟",
+        "sourceUrl": "http://www.huazhou.gov.cn/hzgk/lswh/content/post_1351810.html",
+        "publisher": "化州市文化广电旅游体育局",
+        "publishedAt": "2024-06-19",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440982-culture-002",
+        "claim": "化州裹蒸粽是当地代表性的非物质文化遗产制作技艺。",
+        "sourceTitle": "非物质文化遗产——化州裹蒸粽制作技艺",
+        "sourceUrl": "http://www.huazhou.gov.cn/hzgk/lswh/content/post_1191609.html",
+        "publisher": "化州市文化广电旅游体育局",
+        "publishedAt": "2023-07-18",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440983": {
+    "name": "信宜市",
+    "title": "地理图说·信宜",
+    "voiceRate": "+20%",
+    "facts": {
+      "population": "2025年常住人口103.08万",
+      "economy": "2025年GDP 595.03亿元",
+      "physical": "粤桂交界山地，森林覆盖率68.28%",
+      "history": "唐置信义县，宋改信宜，1995年撤县设市",
+      "culture": "南玉、三华李与竹编体现山地物产",
+      "modern": "生态保护、特色农业与加工制造并进"
+    },
+    "narration": [
+      "信宜位于茂名北部、粤桂交界，3101.7平方千米山地向两省展开，森林覆盖率68.28%，是全市最鲜明的山地单元。",
+      "2025年末信宜常住人口103.08万，城镇化率45.79%，人口沿山间盆地、河谷和交通走廊形成串珠式分布。",
+      "2025年地区生产总值595.03亿元，第一产业占28.9%，规模以上工业增加值增长12.9%，农业与加工制造同时发力。",
+      "唐武德四年置信义县，宋太平兴国元年改名信宜，1995年撤县设市，名称和建制记录着千余年地方治理变迁。",
+      "南玉、三华李、竹编和山地鸡，把矿产、果园、竹林与地方手艺转化为可识别的信宜物产文化。",
+      "今天的信宜在生态保护前提下发展特色农业、农产品加工和县域服务，让山地资源更多转化为稳定的城乡生计。"
+    ],
+    "pronunciations": [
+      {
+        "term": "信宜",
+        "pinyin": "xìn yí"
+      },
+      {
+        "term": "三华李",
+        "pinyin": "sān huá lǐ"
+      },
+      {
+        "term": "南玉",
+        "pinyin": "nán yù"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440983-location-001",
+        "claim": "信宜位于粤西北部、粤桂交界，总面积3101.7平方千米，森林覆盖率68.28%。",
+        "sourceTitle": "基本概况",
+        "sourceUrl": "http://www.xinyi.gov.cn/zlxy/xygk/content/post_172645.html",
+        "publisher": "信宜市人民政府",
+        "publishedAt": "2025-07-09",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "timeline"
+        ]
+      },
+      {
+        "claimId": "440983-population-001",
+        "claim": "2025年末信宜市常住人口103.08万人，常住人口城镇化率45.79%。",
+        "sourceTitle": "2025年信宜市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.xinyi.gov.cn/zwgk/tjsj/content/post_1623883.html",
+        "publisher": "信宜市统计局",
+        "publishedAt": "2026-06-30",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440983-economy-001",
+        "claim": "2025年信宜市地区生产总值595.03亿元，三次产业结构为28.9:14.5:56.5，规模以上工业增加值增长12.9%。",
+        "sourceTitle": "2025年信宜市国民经济和社会发展统计公报",
+        "sourceUrl": "http://www.xinyi.gov.cn/zwgk/tjsj/content/post_1623883.html",
+        "publisher": "信宜市统计局",
+        "publishedAt": "2026-06-30",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440983-history-001",
+        "claim": "唐武德四年置信义县，宋太平兴国元年改信宜县，1995年撤县设市。",
+        "sourceTitle": "历史沿革",
+        "sourceUrl": "http://www.xinyi.gov.cn/zlxy/xygk/content/post_172644.html",
+        "publisher": "信宜市人民政府",
+        "publishedAt": "2018-06-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440983-culture-001",
+        "claim": "信宜以南玉、三华李、竹编、山地鸡等物产和产业形成鲜明地方特色。",
+        "sourceTitle": "基本概况",
+        "sourceUrl": "http://www.xinyi.gov.cn/zlxy/xygk/content/post_172645.html",
+        "publisher": "信宜市人民政府",
+        "publishedAt": "2025-07-09",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440306017": {
+    "name": "新安街道办事处",
+    "title": "地理乡土情·宝安区新安街道办事处",
+    "province": "广东省",
+    "city": "深圳市",
+    "county": "宝安区",
+    "town": "新安街道办事处",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "新安街道办事处位于广东省、深圳市、宝安区，本方案依据全国村级行政边界数据自动建立，下辖1个村级区域。",
+      "镜头将从高空穿过云层抵达新安街道办事处，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "新安街道是新安街道办事处下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回新安街道办事处全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440306001000"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440514103": {
+    "name": "成田镇",
+    "title": "地理乡土情·汕头市潮南区成田镇",
+    "province": "广东省",
+    "city": "汕头市",
+    "county": "潮南区",
+    "town": "成田镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "大南山在北，练江在西。中间这块平地，七百年前还是海。\n海退沙露，人把滩围成田——所以它叫成田。汕头潮南，十五个单位。",
+      "老镇区叫城前，家美、田中央、溪东三个社区。旧时潮阳、普宁、惠来三县，都来这里赶墟。\n南宋咸淳年间就有「成田」这个名字。七百多年，庙还在，墟换成了街。",
+      "上盐村，五百多年。中国第一部故事片，是这个村的人拍的。\n他叫郑正秋，1889年生在上海。1913年编导《难夫难妻》，中国第一部故事片。\n后来他办明星影片公司，一生编导五十多部。故居1886年盖的，四点金，二百六十平方。",
+      "故居2017年成了市级文保，2023年修旧如旧。全息投影里，他自己讲电影。\n2024年，上盐进了广东省文化和旅游特色村。夏夜，广场上还在放老电影。",
+      "大寮村，明永乐年间许善庆带家人来这搭寮定居，村名就这么来的。\n1906年，许石泉拜「嵌瓷祖师」吴丹成学艺。许家四代都做这一行，2008年成了国家级非遗。\n彩绘怕雨，两年就斑驳；瓷片不怕。所以潮汕人的屋脊，都交给嵌瓷。",
+      "西岐，一万五千多人。英歌队1953年就有了，快板对打，一路打一路走。\n它把南拳、戏剧、武术揉在一起。贾作光看完，题了五个字：英歌飘香万里。",
+      "田中央，九成五的家庭有海外关系。整个成田，二十万人在海外。\n最盛时，成田乡六到八家侨批局。批脚背褡裢、带油纸伞，翻山送到惠来、普宁。\n老人听到「批到了」，就是钱到了。寄回来的钱，先盖学校——中民学校1920年办。",
+      "成田第二个名字，织袜之乡。清朝就有手工作坊，三百年。\n1980年代换成机器，2006年成立袜业协会。2019年，六十家工业企业，十四家规上。\n2018年，工业产值二十六亿。一双袜子，织出一个镇的底气。",
+      "东盐村，一千七百多人，差不多都姓陈。溪边古时候叫东盐汀。\n村里把做粿做成工坊：红桃粿、甜粿、朴籽粿，二十多种。粿是拜神的，也是早餐。",
+      "粿。红桃粿、甜粿、朴籽粿，二十多种。拜神用它，早餐也用它。\n鸭脯。溪东一条街，鸭脯店一家挨一家，招牌都写着鸭脯。\n牛肉。现宰现切，清汤一烫。成田人吃牛肉，不蘸酱也甜。\n草粿。夏天一碗，撒红糖，凉到心里。你心里的那家，是哪一家？",
+      "上盐讲过了。剩下十四个村和社区，加一个镇农场，一村一句，找找有没有你的村。",
+      "家美，成田第一大工业社区。马化腾生在这，马介璋、马介钦的祖屋也在这。",
+      "宁湖，大南山东北面，离镇区六公里。寨门横匾四个字：万古宁湖。",
+      "田中央，明永乐年间创寨。八千人在家，五万人在外，最盛时八家侨批局同时开着。",
+      "溪东，老镇区的东边。一条街上，鸭脯店一家挨一家。",
+      "简朴，一万八千多人，成田最大的村。南宋叫港泊，明朝改港朴，后来念成了简朴。",
+      "华西，三千多人，姓王的村。港澳台同胞近一万，比村里人还多三倍。",
+      "西岐，一万五千多人，明永乐年间黄姓开村。英歌一响，半个镇都听得见。",
+      "深沟，两千六百人，许、王两姓。和惠公路从村边过，一路都是铺面。",
+      "蓝丰，四千四百人，五个自然村：刘厝寮、东寮、中寮、三湖、旧寮。",
+      "东盐，一千七百人，差不多都姓陈。做粿做了几百年，现在做成了工坊。",
+      "大寮，许、范两姓，明永乐年间许善庆来搭寮。屋脊上的嵌瓷，就是这个村的手艺。",
+      "沙陂，离镇区十七公里，全成田最远。元至正二十年建村，老八乡之一，出过潮剧老生张长城。",
+      "后坪，一千八百人，山上人家。烈士翁千是这个村的石匠，后坪石臼是区级非遗。",
+      "千山，一百四十五户，八百九十二人，成田最小的村。明朝叫千山寮，现在种茶。",
+      "成田镇农场，镇办农场，不叫村。十五个单位里，它是唯一用农场当名字的。",
+      "成田公开可查的最后一个镇级GDP，是2018年：十八点六亿。同年全镇税收，一千三百八十六万。\n出过多少企业家？没人统计。一个家美社区，数得出马化腾、马介璋、马介钦。\n马介璋捐一千万建中学，马泽琪夫妇捐一点五亿建成田高级中学。学位是侨捐出来的。\n三十年乡贤捐了近一个亿；最近一笔，是腾讯公益的四千万，投在上盐的民宿、东盐的粿品工坊。\n产值不进GDP——腾讯在深圳，佳宁娜在香港。他们给的是学校、自来水和路。\n一座故居，一条侨批，一片嵌瓷，一双袜子。\n成田人不太讲道理：把海围成田，把人送出海，再把钱送回来。转给你们村的群，让他们来补——你是哪个村？"
+    ],
+    "tourOrder": [
+      "440514103003",
+      "440514103209",
+      "440514103002",
+      "440514103001",
+      "440514103201",
+      "440514103202",
+      "440514103203",
+      "440514103205",
+      "440514103208",
+      "440514103206",
+      "440514103207",
+      "440514103212",
+      "440514103211",
+      "440514103210",
+      "440514103016"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440823104": {
+    "name": "乐民镇",
+    "title": "地理乡土情·遂溪县乐民镇",
+    "voiceRate": "-4%",
+    "voiceId": "zh-CN-YunyangNeural",
+    "tourIntroSentences": 11,
+    "tourFlightSeconds": 4.2,
+    "tourReturnSeconds": 4.4,
+    "tourOrder": [
+      "440823104207",
+      "440823104208",
+      "440823104206",
+      "440823104205",
+      "440823104204",
+      "440823104203",
+      "440823104201",
+      "440823104202",
+      "440823104214",
+      "440823104200",
+      "440823104213",
+      "440823104209"
+    ],
+    "subtitleProtectedPhrases": [
+      "广东省湛江市遂溪县",
+      "遂溪县乐民镇",
+      "北部湾",
+      "涠洲岛",
+      "十四点八千米",
+      "八十三点四五平方千米",
+      "四万七千六百八十六人",
+      "十个行政村",
+      "七十四自然村",
+      "海洋技术创新专业镇",
+      "一千万斤",
+      "五亿元",
+      "一点二亿元",
+      "乐民守御千户所城",
+      "文明书院",
+      "黄学增",
+      "革命老区",
+      "二月二",
+      "游鱼民俗",
+      "英歌舞",
+      "农事游车",
+      "乐民圩",
+      "圩日",
+      "圩街",
+      "雷州话",
+      "乐民初级中学",
+      "越秀游泳馆",
+      "渔光互补",
+      "典型村",
+      "盐灶天然渔港",
+      "陈懽墓",
+      "乐民镇河头林场",
+      "乐民镇北坡林场",
+      "泓茂农业",
+      "百香果",
+      "柠檬种植园",
+      "省级文化和旅游特色村",
+      "地方底色",
+      "海上风电",
+      "复合光伏",
+      "安陆侯",
+      "珍珠城",
+      "苏东坡",
+      "抢炮头",
+      "高桩",
+      "高杆"
+    ],
+    "facts": {
+      "area": "行政区域面积83.45平方千米（官方口径）",
+      "population": "2024年户籍人口47686人",
+      "economy": "2024年地区生产总值18.2283亿元；花蟹年捕捞量约1000万斤、年产值约5亿元",
+      "physical": "西临北部湾，海岸线14.8千米，乐民、盐灶两座天然渔港",
+      "history": "明洪武二十七年建乐民守御千户所城；大革命时期农运领袖黄学增故乡",
+      "culture": "二月二游鱼、醒狮、英歌舞与农事游车；圩日逢农历二、五、八",
+      "education": "乐民初级中学；2025年启用越秀游泳馆",
+      "modern": "渔光互补光伏并网，海上风电与复合光伏推进，余村典型村建设"
+    },
+    "narration": [
+      "广东省湛江市遂溪县西南部，乐民镇西临北部湾，与北海和涠洲岛隔海相望，海岸线长达十四点八千米。",
+      "行政区域面积按官方口径为八十三点四五平方千米，乐民、盐灶两座天然渔港坐落在沿海，三条河流横穿镇域。",
+      "二零二四年，全镇户籍人口四万七千六百八十六人，辖十个行政村和七十四自然村。",
+      "乐民是湛江市海洋技术创新专业镇，花蟹年捕捞量约一千万斤，年产值约五亿元，是这里最响亮的海产名片。",
+      "东风螺单品年产值超一点二亿元，对虾种业创新园等项目相继落地，渔光互补光伏也已并网发电。",
+      "明洪武二十七年，安陆侯吴杰在这里修建乐民守御千户所城，也就是今天所见的珍珠城；城内的文明书院，相传与苏东坡的南迁故事有关。",
+      "乐民还是大革命时期农运领袖黄学增的故乡，墩文、乐民城、海山、松树等村庄保留着革命老区的记忆。",
+      "农历二月二，乐民圩的游鱼民俗延续三百多年，鱼灯、醒狮、英歌舞和农事游车一起走上街头。",
+      "逢农历二、五、八日是乐民圩的圩日，圩街上的雷州话交谈、渔获和赶圩人潮，构成镇区日常的节奏。",
+      "乐民初级中学承担镇区中学教育，二零二五年启用的越秀游泳馆，让周边村庄的师生也拥有了专业泳池。",
+      "海上风电和复合光伏项目持续推进，余村等典型村的道路与村庄风貌也在更新，蓝色经济与乡村建设并行。",
+      "盐灶村位于镇域西南端，紧邻盐灶天然渔港，渔获与滩涂养殖是这里的主要生计。",
+      "调神村处在西南海岸，北宋刺史陈懽墓就在村西，村域连着滩涂、耕地与近岸水面。",
+      "埠头村位于中部西侧，村庄沿河涌分布，田块与河岸相接。",
+      "墩文村是黄学增烈士的故乡，村内纪念设施记录着大革命时期的农运历史，也入选省级文化和旅游特色村。",
+      "余村是典型村培育对象，道路拓宽、农房提升和村庄绿化正在铺开。",
+      "海山村地处北部沿海，是革命老区村庄，村域从海岸向内地展开。",
+      "乐民村贴着镇圩，乐民所城和文明书院坐落在这里，文化楼前的醒狮与游鱼也从这里出发。",
+      "松树村位于镇域南部，老区记忆与成片耕地共存，村道连接沿海与内地。",
+      "乐民镇河头林场是镇域中部的管理单元，林地与生态空间连片分布。",
+      "陈铁村在镇域东部，泓茂农业的百香果和柠檬种植园盘活了低效林地。",
+      "乐民镇北坡林场位于最东端，林带覆盖坡地，与安埠、陈铁等村域相接。",
+      "安埠村在镇域东北，村域连接林场与农田，与北坡林场相邻。",
+      "从乐民所城的城墙到北部湾的渔港，从二月二的鱼灯到圩日的集市，乐民镇的历史始终与海风连在一起。",
+      "十个行政村和两处林场彼此相邻，海岸、农田、林带与渔港共同组成这里完整而真实的地方底色。"
+    ],
+    "pronunciations": [
+      {
+        "term": "遂溪",
+        "pinyin": "suì xī"
+      },
+      {
+        "term": "乐民",
+        "pinyin": "lè mín"
+      },
+      {
+        "term": "涠洲岛",
+        "pinyin": "wéi zhōu dǎo"
+      },
+      {
+        "term": "圩日",
+        "pinyin": "xū rì",
+        "spokenForm": "墟日"
+      },
+      {
+        "term": "圩镇",
+        "pinyin": "xū zhèn",
+        "spokenForm": "墟镇"
+      },
+      {
+        "term": "市圩",
+        "pinyin": "shì xū",
+        "spokenForm": "市墟"
+      },
+      {
+        "term": "圩",
+        "pinyin": "xū",
+        "spokenForm": "墟"
+      },
+      {
+        "term": "盐灶",
+        "pinyin": "yán zào"
+      },
+      {
+        "term": "调神",
+        "pinyin": "diào shén"
+      },
+      {
+        "term": "墩文",
+        "pinyin": "dūn wén"
+      },
+      {
+        "term": "埠头",
+        "pinyin": "bù tóu"
+      },
+      {
+        "term": "黄学增",
+        "pinyin": "huáng xué zēng"
+      },
+      {
+        "term": "陈懽",
+        "pinyin": "chén huān"
+      },
+      {
+        "term": "东风螺",
+        "pinyin": "dōng fēng luó"
+      },
+      {
+        "term": "石斑鱼",
+        "pinyin": "shí bān yú"
+      },
+      {
+        "term": "金鲳鱼",
+        "pinyin": "jīn chāng yú"
+      },
+      {
+        "term": "吴杰",
+        "pinyin": "wú jié"
+      },
+      {
+        "term": "所城",
+        "pinyin": "suǒ chéng"
+      },
+      {
+        "term": "文明书院",
+        "pinyin": "wén míng shū yuàn"
+      },
+      {
+        "term": "英歌舞",
+        "pinyin": "yīng gē wǔ"
+      },
+      {
+        "term": "泓茂",
+        "pinyin": "hóng mào"
+      },
+      {
+        "term": "雷州话",
+        "pinyin": "léi zhōu huà"
+      },
+      {
+        "term": "安埠",
+        "pinyin": "ān bù"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440823104-boundary-001",
+        "claim": "用户提供的广东省村界SHP中，乐民镇代码前缀440823104包含10个行政村面和2个林场管理单元面，正式边界画面完整保留全部12个可靠面。",
+        "sourceTitle": "广东省CJ村级行政边界SHP",
+        "sourceUrl": "data/regions/01【25096】全国村级行政边界数据/广东村界/广东全省/广东省CJ.shp",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-10",
+        "confidence": "high",
+        "usage": [
+          "timeline",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440823104-profile-001",
+        "claim": "乐民镇位于遂溪县西南部，北连港门镇，东接河头镇，南靠江洪镇，西临北部湾，距县城80千米，行政区域面积83.45平方千米，海岸线14.8千米，辖10个行政村和74个自然村，2024年户籍人口47686人，2024年地区生产总值18.2283亿元。",
+        "sourceTitle": "乐民镇",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1846253.html",
+        "publisher": "遂溪县乐民镇人民政府",
+        "publishedAt": "2025-07-28",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440823104-crab-001",
+        "claim": "乐民镇花蟹捕捞渔民达2500人，花蟹年均捕捞量1000万斤，年产值5亿元，“乐民花蟹”品牌知名度不断提升。",
+        "sourceTitle": "湛江遂溪：膏肥蟹美！秋天的第一口鲜",
+        "sourceUrl": "https://static.nfnews.com/content/202508/25/c11656352.html",
+        "publisher": "南方+",
+        "publishedAt": "2025-08-24",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823104-crab-festival-001",
+        "claim": "2023年8月遂溪县乐民镇举办花蟹美食嘉年华暨奖教奖学助学颁奖募捐大会，官方报道提供了活动实景图片。",
+        "sourceTitle": "2023遂溪乐民花蟹美食嘉年华",
+        "sourceUrl": "http://www.suixi.gov.cn/sxxw/zwdt/content/post_1796382.html",
+        "publisher": "遂溪县人民政府",
+        "publishedAt": "2023-08-20",
+        "confidence": "high",
+        "usage": [
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823104-economy-001",
+        "claim": "2024年乐民镇推进东风螺规模化养殖，全镇东风螺单品年产值超1.2亿元；推进海茂南美白对虾种业创新园项目；投资8797万元的22MW渔光互补光伏项目竣工投用，江洪乐民100MW风电项目部分并网发电。",
+        "sourceTitle": "乐民镇",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1846253.html",
+        "publisher": "遂溪县乐民镇人民政府",
+        "publishedAt": "2025-07-28",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823104-history-001",
+        "claim": "乐民所城全称乐民守御千户所城，位于乐民镇乐民村委会乐民城村，明洪武二十七年（1394年）由安陆侯吴杰主持修建，为明清海防要塞，又称珍珠城，是省级文物保护单位。",
+        "sourceTitle": "湛江遂溪古色古香的村落——乐民城",
+        "sourceUrl": "https://www.gdzjdaily.com.cn/p/2678313.html",
+        "publisher": "湛江日报",
+        "publishedAt": "2014-07-23",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823104-civil-academy-001",
+        "claim": "文明书院位于乐民城南部，始建于北宋晚期，据《遂溪县志》记载与苏东坡南迁道经兴廉村赠言有关，为当时境内三大书院之一。",
+        "sourceTitle": "乐民所城",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1846253.html",
+        "publisher": "遂溪县乐民镇人民政府",
+        "publishedAt": "2025-07-28",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823104-red-001",
+        "claim": "乐民镇是大革命时期广东著名农民领袖黄学增烈士的故乡；乐民城、海山、松树等为革命老区村庄；黄学增烈士纪念亭是省、市党史学习教育基地。",
+        "sourceTitle": "乐民镇",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1846253.html",
+        "publisher": "遂溪县乐民镇人民政府",
+        "publishedAt": "2025-07-28",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823104-culture-001",
+        "claim": "2026年乐民镇二月二游鱼民俗盛会延续三百余载，根植于康熙年间，墩文中、墩文南醒狮团表演高桩高杆，英歌舞、农事游车、鱼灯与抢炮头相继登场。",
+        "sourceTitle": "鱼灯亮，民俗旺！遂溪乐民二月二盛会启新篇",
+        "sourceUrl": "http://www.suixi.gov.cn/sxxw/bmdt/content/post_2158791.html",
+        "publisher": "遂溪县人民政府",
+        "publishedAt": "2026-03-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823104-school-001",
+        "claim": "2025年3月27日，广州市越秀区帮扶协作驻遂溪县工作队等单位筹资115万元援建的乐民中学越秀游泳馆正式启用，馆内场地1000平方米，周边10个行政村约3300名师生群众受益，改写乐民镇中小学无专业游泳场馆的历史。",
+        "sourceTitle": "越秀援建游泳馆“泳”动遂溪乐民乡村教育新活力",
+        "sourceUrl": "https://m.gdzjdaily.com.cn/p/2916379.html",
+        "publisher": "湛江云媒",
+        "publishedAt": "2025-03-27",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823104-dialect-001",
+        "claim": "地方语言名称按用户的本地用语校正统一写为雷州话；遂溪县多数地区以雷州话为主的方言格局有政府公开资料支撑。",
+        "sourceTitle": "遂溪方言分布",
+        "sourceUrl": "http://www.suixi.gov.cn/hdjlpt/detail?pid=870479",
+        "publisher": "用户提供；遂溪县人民政府办公室",
+        "publishedAt": "2021-01-12",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823104-modern-001",
+        "claim": "2024年乐民镇预投入财政资金约800万元实施乡村振兴项目17个，余村被列为典型村培育对象并推进道路拓宽、农房提升和村庄绿化。",
+        "sourceTitle": "乐民镇",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1846253.html",
+        "publisher": "遂溪县乐民镇人民政府",
+        "publishedAt": "2025-07-28",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440823105": {
+    "name": "江洪镇",
+    "title": "地理乡土情·遂溪县江洪镇",
+    "voiceRate": "-4%",
+    "voiceId": "zh-CN-YunyangNeural",
+    "tourIntroSentences": 18,
+    "tourFlightSeconds": 4.1,
+    "tourReturnSeconds": 4.4,
+    "tourOrder": [
+      "440823105001",
+      "440823105201",
+      "440823105202",
+      "440823105203",
+      "440823105401",
+      "440823105204",
+      "440823105205",
+      "440823105200"
+    ],
+    "subtitleProtectedPhrases": [
+      "遂溪县江洪镇",
+      "北部湾",
+      "鲤鱼墩贝丘遗址",
+      "雷州半岛第一村",
+      "江洪渔港",
+      "天光鱼市",
+      "海上龙舟赛",
+      "仙裙岛",
+      "江洪初级中学",
+      "雷州话",
+      "江洪社区",
+      "北草村",
+      "四联村",
+      "坛头村",
+      "江洪镇河头林场",
+      "昌洋村",
+      "姑寮村",
+      "大路村"
+    ],
+    "facts": {
+      "area": "边界数据量算约59.6平方千米",
+      "population": "2023年总人口约3.7万人",
+      "economy": "2024年农林牧渔业总产值17亿元",
+      "physical": "西临北部湾，海岸线22公里，江洪渔港港池近90万平方米",
+      "history": "1444年江洪港由小渔埠起步；鲤鱼墩贝丘遗址距今约7000到8000年",
+      "culture": "天光鱼市、海上龙舟赛与开渔习俗",
+      "education": "遂溪县江洪镇江洪初级中学",
+      "modern": "国家级海洋牧场人工鱼礁、渔港升级与滨海文旅"
+    },
+    "narration": [
+      "遂溪县西南角，江洪镇贴着北部湾。22公里海岸线，把渔港、滩涂、村庄和近岸海岛放在同一片海风里。",
+      "镇域约59.6平方千米。2023年总人口约3.7万人，官方名单有1个社区、8个行政村。",
+      "江洪港从1444年的小渔埠起步，后来成了雷州半岛西岸重要的渔业港口。",
+      "镇东的鲤鱼墩贝丘遗址，距今约7000到8000年，被称为“雷州半岛第一村”。",
+      "江洪渔港港池接近90万平方米，能停1000多艘渔船。天还没亮，渔获一上岸，天光鱼市就热闹起来。",
+      "2024年，全镇农林牧渔业总产值17亿元。红鱼、马鲛鱼、对虾、花蟹和扇贝，是码头上常见的鲜味。",
+      "端午的海上龙舟赛就在港湾里开桨。浪头、鼓点和两岸人声，让老渔港多了一种很有江洪味的节奏。",
+      "近岸的仙裙岛保留着海岛林地和安静海岸。港湾外是北部湾，港湾内是渔船回家的水路。",
+      "镇里有江洪初级中学。校园不只是一个地名，也是周边孩子读书和长大的地方。",
+      "街头巷尾常能听见雷州话。赶海、买鱼、喝早茶，这些日常比口号更能说明江洪是什么样。",
+      "江洪社区靠近西南海岸，镇区道路、居民点和渔港离得很近，清晨最早醒来的是码头。",
+      "北草村在镇域南部，村庄和耕地贴着江洪社区向东展开。",
+      "四联村位于中部，多条村路从这里接向海边和北部农田。",
+      "坛头村伸到东南部，成片农田一直铺到村庄外缘。",
+      "江洪镇河头林场在东部留下一片连贯林地，给沿海乡镇保留了难得的绿色空间。",
+      "昌洋村在北部中段，农田、养殖区和村庄交错，是江洪内陆一侧的生产区。",
+      "姑寮村再往北，聚落沿道路分布，和大路村的田野相连。",
+      "大路村位于最北端，长条状村域顺着乡路和田块铺开。",
+      "从7000多年前的贝丘遗址，到凌晨亮起灯的天光鱼市，江洪一直靠海生活，也把日子过在海风里。"
+    ],
+    "pronunciations": [
+      {
+        "term": "遂溪",
+        "pinyin": "suì xī"
+      },
+      {
+        "term": "江洪",
+        "pinyin": "jiāng hóng"
+      },
+      {
+        "term": "鲤鱼墩",
+        "pinyin": "lǐ yú dūn"
+      },
+      {
+        "term": "贝丘",
+        "pinyin": "bèi qiū"
+      },
+      {
+        "term": "马鲛鱼",
+        "pinyin": "mǎ jiāo yú"
+      },
+      {
+        "term": "仙裙岛",
+        "pinyin": "xiān qún dǎo"
+      },
+      {
+        "term": "姑寮",
+        "pinyin": "gū liáo"
+      },
+      {
+        "term": "昌洋",
+        "pinyin": "chāng yáng"
+      },
+      {
+        "term": "雷州话",
+        "pinyin": "léi zhōu huà"
+      },
+      {
+        "term": "圩",
+        "pinyin": "xū",
+        "spokenForm": "墟"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440823105-boundary-001",
+        "claim": "用户提供的广东省村界SHP为江洪镇提供7个现行村居对应面和1个河头林场管理单元面；父级边界由全部8个源面融合得到。",
+        "sourceTitle": "广东省CJ村级行政边界SHP",
+        "sourceUrl": "data/regions/01【25096】全国村级行政边界数据/广东村界/广东全省/广东省CJ.shp",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-08",
+        "confidence": "high",
+        "usage": [
+          "timeline",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440823105-profile-001",
+        "claim": "江洪镇位于遂溪县西南部，西临北部湾，海岸线22公里；2023年总人口约3.7万人；江洪渔港港池近90万平方米，可停1000多艘渔船；2024年农林牧渔业总产值17亿元。",
+        "sourceTitle": "江洪镇",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1851533.html",
+        "publisher": "遂溪县江洪镇人民政府",
+        "publishedAt": "2025-08-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440823105-history-001",
+        "claim": "江洪港始于明正统九年（1444年）的小渔埠；鲤鱼墩贝丘遗址距今约7000到8000年，被誉为雷州半岛第一村。",
+        "sourceTitle": "江洪镇",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1851533.html",
+        "publisher": "遂溪县江洪镇人民政府",
+        "publishedAt": "2025-08-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823105-dragonboat-001",
+        "claim": "2025年广东遂溪（江洪）龙舟文化季在江洪渔港码头举行，报道包含海上龙舟赛与港湾航拍实景。",
+        "sourceTitle": "甜美遂溪 龙腾古港——2025年广东遂溪（江洪）龙舟文化季暨文旅周系列活动举行",
+        "sourceUrl": "http://www.suixi.gov.cn/gzzwz/jhzrmzf/gzdt/content/post_2051102.html",
+        "publisher": "湛江日报；遂溪县江洪镇人民政府转载",
+        "publishedAt": "2025-06-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823105-fishmarket-001",
+        "claim": "江洪天光鱼市在清晨渔获上岸时形成交易，新闻报道提供鱼市航拍与海鲜交易实景。",
+        "sourceTitle": "江洪“天光渔市”再营业 食客争尝“头啖鲜”",
+        "sourceUrl": "http://www.gdzjdaily.com.cn/p/2859497.html",
+        "publisher": "湛江云媒",
+        "publishedAt": "2023-08-17",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823105-island-001",
+        "claim": "仙裙岛是江洪近岸岛屿，公开旅行页面包含岛上林地与海岸实景。",
+        "sourceTitle": "遂溪仙裙岛游玩攻略",
+        "sourceUrl": "https://gs.ctrip.com/html5/you/sight/suixi2950/69538401.html",
+        "publisher": "携程用户实景",
+        "publishedAt": "",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823105-school-001",
+        "claim": "遂溪县教育局公开2025年遂溪县江洪镇江洪初级中学部门预算，确认学校全称和当前办学主体。",
+        "sourceTitle": "2025年遂溪县江洪镇江洪初级中学部门预算",
+        "sourceUrl": "http://www.suixi.gov.cn/zdlyxxgk/bmyjsjsgjf/bmys/2025bmys/content/post_2030570.html",
+        "publisher": "遂溪县教育局",
+        "publishedAt": "2025-04-14",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823105-school-visual-001",
+        "claim": "抖音视频标题明确标注遂溪县江洪镇中学、江洪中学，封面显示校门及校园道路实景；仅截取原始封面作本地纪实说明。",
+        "sourceTitle": "#广东省湛江市遂溪县江洪镇中学、江洪中学",
+        "sourceUrl": "https://www.douyin.com/video/7491437926266506496",
+        "publisher": "抖音原视频发布者",
+        "publishedAt": "2025-04-10",
+        "confidence": "medium",
+        "usage": [
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823105-dialect-001",
+        "claim": "遂溪县多数地区日常使用雷州话，江洪镇文案采用用户确认的本地方言名称。",
+        "sourceTitle": "遂溪方言分布",
+        "sourceUrl": "http://www.suixi.gov.cn/hdjlpt/detail?pid=870479",
+        "publisher": "遂溪县人民政府办公室；用户校正",
+        "publishedAt": "2021-01-12",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440823107": {
+    "name": "城月镇",
+    "title": "地理乡土情·遂溪县城月镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "遂溪县",
+    "town": "城月镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "城月镇位于广东省、湛江市、遂溪县，本方案依据全国村级行政边界数据自动建立，下辖26个村级区域。",
+      "镜头将从高空穿过云层抵达城月镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "官田水库是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "官田村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "迈坦村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "田头村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "广前社区，由原田头村区域分设而成，位于城月镇东部，与迈坦村接壤。作为新设立的社区单元，它的沿革、居民生活与产业特色，等待补充真实素材后再讲述。",
+      "陈家村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "扶良村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "雷州市林业局是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "邦机村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "仁里村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "高明村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "吴西村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "吴村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "平衡村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "坑仔村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "家寮村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "虎头坡村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "庄家村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "城月镇迈进林场是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "竹叶塘村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "东风村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "坡头村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "潭葛村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "石塘村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "城月村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "后溪村是城月镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回城月镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440823107222",
+      "440823107205",
+      "440823107212",
+      "440823107203",
+      "440823107401",
+      "440823107221",
+      "440823107204",
+      "440823402001",
+      "440823107210",
+      "440823107213",
+      "440823107220",
+      "440823107218",
+      "440823107217",
+      "440823107216",
+      "440823107219",
+      "440823107211",
+      "440823107214",
+      "440823107215",
+      "440823107226",
+      "440823107200",
+      "440823107209",
+      "440823107207",
+      "440823107208",
+      "440823107206",
+      "440823107201",
+      "440823107202"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440823110": {
+    "name": "岭北镇",
+    "title": "地理乡土情·遂溪县岭北镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "遂溪县",
+    "town": "岭北镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "岭北镇位于广东省、湛江市、遂溪县，本方案依据全国村级行政边界数据自动建立，下辖7个村级区域。",
+      "镜头将从高空穿过云层抵达岭北镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "横山村是岭北镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "调丰村是岭北镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "城里村是岭北镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "西塘村是岭北镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "田增村是岭北镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "迈生村是岭北镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "调楼村是岭北镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回岭北镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440823110200",
+      "440823110206",
+      "440823110201",
+      "440823110204",
+      "440823110202",
+      "440823110205",
+      "440823110203"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440823111": {
+    "name": "北坡镇",
+    "title": "地理乡土情·遂溪县北坡镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "遂溪县",
+    "town": "北坡镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "北坡镇位于广东省、湛江市、遂溪县，本方案依据全国村级行政边界数据自动建立，下辖15个村级区域。",
+      "镜头将从高空穿过云层抵达北坡镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "文典村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "虾沟村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "动土村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "新屋村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "赵屋村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北塘村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "上塘村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "下担村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "水南村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "下黎村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "三合村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "鹤门村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北坡村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "南渡村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "架岭村是北坡镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回北坡镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440823111202",
+      "440823111203",
+      "440823111204",
+      "440823111206",
+      "440823111207",
+      "440823111209",
+      "440823111208",
+      "440823111205",
+      "440823111210",
+      "440823111213",
+      "440823111212",
+      "440823111211",
+      "440823111201",
+      "440823111214",
+      "440823111200"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440823113": {
+    "name": "草潭镇",
+    "title": "地理乡土情·遂溪县草潭镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "遂溪县",
+    "town": "草潭镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "草潭镇位于广东省、湛江市、遂溪县，本方案依据全国村级行政边界数据自动建立，下辖21个村级区域。",
+      "镜头将从高空穿过云层抵达草潭镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "下六圩社区是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "珍布村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "泉水村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北坡林场是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "新建村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "钗仔村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "草潭社区是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "石九村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "石杨村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "麻公村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "天德村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "下六村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "罗屋村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北拉村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "路塘村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "旧庙村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "南洪村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北灶村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "荔枝村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "下六林场是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "东港村是草潭镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回草潭镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440823113002",
+      "440823113209",
+      "440823113215",
+      "440823113218",
+      "440823113201",
+      "440823113202",
+      "440823113001",
+      "440823113203",
+      "440823113204",
+      "440823113205",
+      "440823113214",
+      "440823113211",
+      "440823113206",
+      "440823113207",
+      "440823113200",
+      "440823113212",
+      "440823113213",
+      "440823113208",
+      "440823113210",
+      "440823113220",
+      "440823113216"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440823114": {
+    "name": "河头镇",
+    "title": "地理乡土情·遂溪县河头镇",
+    "voiceRate": "-4%",
+    "voiceId": "zh-CN-YunyangNeural",
+    "tourIntroSentences": 6,
+    "tourFlightSeconds": 4.2,
+    "tourReturnSeconds": 4.4,
+    "tourOrder": [
+      "440823114200",
+      "440823114201",
+      "440823114202",
+      "440823114203",
+      "440823114204",
+      "440823114205",
+      "440823114206",
+      "440823114207",
+      "440823114208",
+      "440823114209",
+      "440823114210"
+    ],
+    "subtitleProtectedPhrases": [
+      "河头镇地处遂溪县西南部",
+      "144平方千米",
+      "桐仔园水库",
+      "新市水库",
+      "田西河",
+      "雷州青年运河",
+      "2024年下辖12个行政村",
+      "107条自然村",
+      "总人口4.1万人",
+      "遂江路12号",
+      "清光绪八年",
+      "1882年",
+      "生产总值",
+      "8万多亩",
+      "年产量16万吨",
+      "年产值4.8亿元",
+      "甘薯之乡",
+      "红壤富硒番薯",
+      "番薯角",
+      "番薯粿",
+      "番薯芥菜煲",
+      "遂溪西南地区革命史馆",
+      "大革命时期",
+      "支援解放海南岛",
+      "支援解放海南岛的图片和实物",
+      "河头市圩",
+      "农贸市场和圩镇客厅",
+      "圩镇客厅",
+      "连着日常生活",
+      "家常交流里常听见雷州话",
+      "家常交流",
+      "雷州话",
+      "省道S375线",
+      "省道S290线",
+      "国道G207线",
+      "兰海高速",
+      "现代农业",
+      "土地整治",
+      "风电建设",
+      "圩镇更新一起展开",
+      "传统与新产业",
+      "公共服务",
+      "北翼现代农业片区",
+      "北菜南种基地",
+      "东北大葱",
+      "水系和耕地",
+      "东坡楼",
+      "还砚亭",
+      "乡土历史资源",
+      "台地和平原之间",
+      "台地向平原过渡",
+      "西部平原",
+      "农业景观",
+      "西南片区",
+      "是南翼种养结合片区的一部分",
+      "南翼种养结合片区",
+      "是东西两侧村域之间的联系节点",
+      "东西两侧村域之间",
+      "联系节点",
+      "也推进垦造水田和典型村建设",
+      "垦造水田",
+      "典型村建设",
+      "河头镇全景",
+      "油河塘村",
+      "全国文明村",
+      "爱也成河歌成河",
+      "12个行政村",
+      "甘薯的甜、甘蔗的蜜、红色的魂、古村的韵"
+    ],
+    "facts": {
+      "area": "行政区域面积144平方千米",
+      "population": "2024年总人口4.1万人，下辖12个行政村、107条自然村",
+      "economy": "甘薯种植面积8万多亩，年产量16万吨，年产值4.8亿元",
+      "physical": "玄武岩台地向平原过渡，水库、河流和雷州青年运河构成水网",
+      "history": "遂溪西南地区革命史馆位于河头村",
+      "culture": "双村古村、遂溪西南地区革命史馆与油河塘村共同构成地方文化",
+      "food": "红壤富硒番薯是主要物产，也进入清蒸、烤制和地方点心",
+      "education": "河头村设有河头中学和中心小学",
+      "modern": "省道S375线、S290线连接镇域农业、村庄与公共服务"
+    },
+    "narration": [
+      "遂溪县河头镇地处遂溪县西南部，东、南分别与雷州市客路镇和纪家镇接壤，西连乐民镇和江洪镇，北接北坡镇，镇人民政府距遂溪县城66千米，全镇行政区域面积144平方千米，2024年下辖12个行政村、107条自然村，总人口4.1万人，镇人民政府驻河头圩遂江路12号。",
+      "河头镇因圩东一眼大泉涌水成河，这里又是河的源头，因此得名河头；清光绪八年，也就是1882年，已有河头圩之称。",
+      "全镇地势东高西低、北高南低，中东部是玄武岩台地，东北部低丘与平原相间，北、西、南三面铺开平原，雷州青年运河和田西河流经境内，水源充足，土壤肥沃。",
+      "富硒红壤孕育出河头红壤富硒甘薯，全镇甘薯种植面积8万多亩，年产量16万吨，年产值4.8亿元，是名副其实的甘薯之乡。",
+      "省道S375线和S290线贯穿全镇，东距国道G207线20千米，规划中的G75兰海高速廉江至徐闻段也将在河头设置互通立交与停车区；道路一头连着番薯田和甘蔗林，一头连着革命史馆与古村落。",
+      "每天，甘薯和甘蔗沿省道运往各地，道路两旁番薯田与甘蔗林铺开，遂溪西南地区革命史馆、双村古村落和水库田园，共同串起河头真实的产业图景与生活气息。",
+      "河头村是河头圩和镇中心所在地，镇政府驻遂江路12号，商铺、市场和公共服务机构集中于此，遂江公路与北河公路在村内交汇；2019年建成开放的遂溪西南地区革命史馆也坐落在这里，村内还有河头中学、中心小学和文化活动中心。",
+      "虎溪村是特色农业发展的重点村之一，北菜南种基地在这里试种东北大葱并扩大规模，村里包括打虎溪、白银塘、余宅等多个自然村。",
+      "吴排村以传统农业种植为主，农田、村道和自然村落保持着乡村特有的宁静与质朴。",
+      "割山村与虎溪村相邻，同样引入北菜南种基地，传统农业正向现代种植转变，村内包括割山、溪头等自然村。",
+      "田西河流经田西村，充足水源和肥沃土壤支撑农作物种植，村里也盘活田西小学等闲置资源，为产业发展寻找新空间。",
+      "双村始建于宋徽宗崇宁五年，也就是1106年，已有近千年历史，村里保存东坡楼、陈氏宗祠、还砚亭和1914年落成的履端第，夯土古民居与年例共同留住雷州半岛的古村文脉。",
+      "山域村以农业种植为主，村庄、田园和老树共同保留着传统山村宁静质朴的样子。",
+      "新市村靠近新市水库，水库保障周边农田灌溉，水面、村庄与田园组成独特的山水农业景观。",
+      "干塘村包括干塘、下坑、塘仔、东坑等多个自然村，农业种植和养殖延续着传统村落的本色。",
+      "吾良村广泛种植甘蔗和番薯，是河头镇农业产业的重要组成部分，耕地、林地与村庄交错分布。",
+      "上坡村在发展农业种植的同时注重生态环境，农田、村道与整洁村貌共同构成这里的日常景观。",
+      "油河塘村开村已有400多年，早年因榨油小作坊而得名，村里先后获评全国文明村、广东省文明村等称号；池水、古树和整洁村巷构成鲜明村貌，村歌《爱也成河歌成河》还获得第13届全国村歌大赛金曲奖。",
+      "从河头圩的集市到双村的千年文脉，从油河塘村的全国文明村风貌到连片富硒番薯田，河头镇12个行政村串起遂溪西南部真实的样子；甘薯的甜、甘蔗的蜜、红色的魂、古村的韵，都在这里交融。"
+    ],
+    "pronunciations": [
+      {
+        "term": "遂溪",
+        "pinyin": "suì xī"
+      },
+      {
+        "term": "富硒",
+        "pinyin": "fù xī"
+      },
+      {
+        "term": "市圩",
+        "pinyin": "shì xū",
+        "spokenForm": "市墟"
+      },
+      {
+        "term": "圩镇",
+        "pinyin": "xū zhèn",
+        "spokenForm": "墟镇"
+      },
+      {
+        "term": "番薯粿",
+        "pinyin": "fān shǔ guǒ"
+      },
+      {
+        "term": "桐仔园",
+        "pinyin": "tóng zǎi yuán"
+      },
+      {
+        "term": "还砚亭",
+        "pinyin": "huán yàn tíng"
+      },
+      {
+        "term": "吾良",
+        "pinyin": "wú liáng"
+      },
+      {
+        "term": "山域",
+        "pinyin": "shān yù"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440823114-boundary-001",
+        "claim": "用户提供的广东省村界SHP中，河头镇代码前缀440823114包含11个行政村面；河头镇北坡林场、河头镇河头林场两处林场面已并入相邻村级面，正式边界画面保留全部11个可靠面。",
+        "sourceTitle": "广东省CJ村级行政边界SHP",
+        "sourceUrl": "data/regions/01【25096】全国村级行政边界数据/广东村界/广东全省/广东省CJ.shp",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-03",
+        "confidence": "high",
+        "usage": [
+          "timeline",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440823114-census-001",
+        "claim": "遂溪县第七次全国人口普查公报第二号公布，2020年11月1日零时河头镇常住人口为26618人。",
+        "sourceTitle": "遂溪县第七次全国人口普查公报（第二号）",
+        "sourceUrl": "http://www.suixi.gov.cn/zwgk/tjsj/content/post_1548796.html",
+        "publisher": "遂溪县统计局、遂溪县第七次全国人口普查领导小组办公室",
+        "publishedAt": "2021-07-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823114-profile-001",
+        "claim": "用户提供的2024年河头镇资料稿载明：河头镇行政区域面积144平方千米，下辖12个行政村、107条自然村，总人口4.1万人；地势东高西低、北高南低，雷州青年运河和田西河流经境内，省道S375线和S290线贯穿。",
+        "sourceTitle": "遂溪县河头镇视频文案与资料稿",
+        "sourceUrl": "user-provided://hetou-brief-2026-08-16",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-16",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440823114-economy-001",
+        "claim": "用户提供的河头镇资料稿载明：全镇甘薯种植面积8万多亩，年产量16万吨，年产值4.8亿元，红壤富硒甘薯是代表性产业。",
+        "sourceTitle": "遂溪县河头镇视频文案与资料稿",
+        "sourceUrl": "user-provided://hetou-brief-2026-08-16",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-16",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823114-food-001",
+        "claim": "遂溪甘薯常见清蒸、水煮、烤制，也用于番薯角、番薯芥菜煲、番薯粿等地方吃法；本片仅将县域吃法用于解释河头镇富硒番薯，不把县域照片冒充具体村庄现场。",
+        "sourceTitle": "遂溪甘薯",
+        "sourceUrl": "http://www.suixi.gov.cn/sxly/tcms/content/post_2191405.html",
+        "publisher": "遂溪文旅",
+        "publishedAt": "2026-06-12",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823114-history-001",
+        "claim": "遂溪西南地区革命史馆位于河头镇河头村委会，2019年建成开放，陈列从大革命时期至支援解放海南岛各时期的资料图片和相关物品。",
+        "sourceTitle": "遂溪西南地区革命史馆",
+        "sourceUrl": "http://www.suixi.gov.cn/attachment/0/46/46685/1183108.pdf",
+        "publisher": "中共遂溪县委党史研究室",
+        "publishedAt": "2021-08-26",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823114-township-001",
+        "claim": "河头镇将老旧文化中心改造成集历史展示、读书学习、便民服务、群众休闲和特色农产品展示于一体的美丽圩镇客厅。",
+        "sourceTitle": "变身“美丽圩镇客厅”！遂溪河头老旧文化中心盘活旧资产",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsxht/gkmlpt/content/2/2178/post_2178866.html",
+        "publisher": "湛江市遂溪县河头镇人民政府",
+        "publishedAt": "2026-05-14",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823114-culture-001",
+        "claim": "河头群兴龙狮团在2024年广东省龙狮锦标赛获得三项冠军。",
+        "sourceTitle": "河头镇",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1846217.html",
+        "publisher": "遂溪县河头镇人民政府",
+        "publishedAt": "2025-07-29",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823114-lion-visual-001",
+        "claim": "河头群兴龙狮团在2026年三亚杯国际龙狮精英赛获得南狮高桩自选套路冠军，公开报道提供了该团实景比赛和合影素材。",
+        "sourceTitle": "遂溪醒狮闪耀国际赛场！河头群兴龙狮团斩获2026“三亚杯”高桩冠军",
+        "sourceUrl": "https://mp.weixin.qq.com/s/AI_VhkDdW9pyJYfJR2ep0g",
+        "publisher": "遂溪文旅",
+        "publishedAt": "2026-01-23",
+        "confidence": "high",
+        "usage": [
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823114-school-001",
+        "claim": "河头中学2023届九年级师生参加暖心助考活动，官方报道提供了校园内师生合影。",
+        "sourceTitle": "暖心助考 护航梦想",
+        "sourceUrl": "http://www.suixi.gov.cn/gzzwz/htzrmzf/gzdt/content/post_1778406.html",
+        "publisher": "河头镇乡村振兴办",
+        "publishedAt": "2023-06-30",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440823114-dialect-001",
+        "claim": "地方语言名称按用户的本地用语校正统一写为雷州话；遂溪县政府互动页也记录了县内多数地区以雷州话为主的社会认知。",
+        "sourceTitle": "遂溪方言分布",
+        "sourceUrl": "http://www.suixi.gov.cn/hdjlpt/detail?pid=870479",
+        "publisher": "用户提供；遂溪县人民政府办公室",
+        "publishedAt": "2021-01-12",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440823114-modern-001",
+        "claim": "2024年河头镇推进虎溪、割山北菜南种基地、虎溪垦造水田、全域土地综合整治、风电建设和美丽圩镇更新。",
+        "sourceTitle": "河头镇",
+        "sourceUrl": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1846217.html",
+        "publisher": "遂溪县河头镇人民政府",
+        "publishedAt": "2025-07-29",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440825102": {
+    "name": "迈陈镇",
+    "title": "地理乡土情·徐闻县迈陈镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "徐闻县",
+    "town": "迈陈镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "迈陈镇位于广东省、湛江市、徐闻县，本方案依据全国村级行政边界数据自动建立，下辖14个村级区域。",
+      "镜头将从高空穿过云层抵达迈陈镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "迈市社区是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那朗村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "坑头村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "打银村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "迈陈村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "东莞村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "徐闻盐场新地工区是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "新地村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "官田村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "白坡村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "青桐村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "龙潭村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北街村是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北街林场是迈陈镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回迈陈镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440825102001",
+      "440825102207",
+      "440825102208",
+      "440825102206",
+      "440825102201",
+      "440825102205",
+      "440825102303",
+      "440825102204",
+      "440825102211",
+      "440825102210",
+      "440825102209",
+      "440825102203",
+      "440825102202",
+      "440825102302"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440825105": {
+    "name": "前山镇",
+    "title": "地理乡土情·徐闻县前山镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "徐闻县",
+    "town": "前山镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "前山镇位于广东省、湛江市、徐闻县，本方案依据全国村级行政边界数据自动建立，下辖15个村级区域。",
+      "镜头将从高空穿过云层抵达前山镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "前山村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "甲村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北松村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "云仔村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "丁村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "外墩村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "后坑村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "孙田村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "国称农场是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "西连农场是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "曹家村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "南安村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "下元村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "山海村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "前海村是前山镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回前山镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440825105201",
+      "440825105202",
+      "440825105203",
+      "440825105205",
+      "440825105206",
+      "440825105208",
+      "440825105209",
+      "440825105210",
+      "440825105305",
+      "440825105307",
+      "440825105204",
+      "440825105207",
+      "440825105211",
+      "440825105212",
+      "440825105213"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440825106": {
+    "name": "西连镇",
+    "title": "地理乡土情·徐闻县西连镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "徐闻县",
+    "town": "西连镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "西连镇位于广东省、湛江市、徐闻县，本方案依据全国村级行政边界数据自动建立，下辖18个村级区域。",
+      "镜头将从高空穿过云层抵达西连镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "龙腋村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北海村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "边板村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "西连村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "大井村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "石马村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "龙耳村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "乐琴村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "英邱村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "瓜藤村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "迈谷村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "承梧村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "田西村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金田盐场是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "徐闻盐场是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金土村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "水尾村是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "徐闻金水盐场是西连镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回西连镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440825106205",
+      "440825106204",
+      "440825106202",
+      "440825106201",
+      "440825106206",
+      "440825106208",
+      "440825106207",
+      "440825106215",
+      "440825106209",
+      "440825106214",
+      "440825106203",
+      "440825106212",
+      "440825106213",
+      "440825106303",
+      "440825106305",
+      "440825106210",
+      "440825106211",
+      "440825106304"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440825107": {
+    "name": "下桥镇",
+    "title": "地理乡土情·徐闻县下桥镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "徐闻县",
+    "town": "下桥镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "下桥镇位于广东省、湛江市、徐闻县，本方案依据全国村级行政边界数据自动建立，下辖11个村级区域。",
+      "镜头将从高空穿过云层抵达下桥镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "桥南村是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北插村是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那利村是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "南丰村是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "旋安村是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "拔园村是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "迈埚村是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "高田村是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "桥北村是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "东方红农场是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "合溪水库是下桥镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回下桥镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440825107202",
+      "440825107203",
+      "440825107204",
+      "440825107205",
+      "440825107206",
+      "440825107207",
+      "440825107208",
+      "440825107210",
+      "440825107213",
+      "440825107302",
+      "440825107303"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440825110": {
+    "name": "锦和镇",
+    "title": "地理乡土情·徐闻县锦和镇",
+    "voiceRate": "-4%",
+    "voiceId": "zh-CN-YunyangNeural",
+    "tourIntroSentences": 11,
+    "tourFlightSeconds": 4.2,
+    "tourReturnSeconds": 4.4,
+    "tourOrder": [
+      "440825110201",
+      "440825110304",
+      "440825110305",
+      "440825110303",
+      "440825110204",
+      "440825110207",
+      "440825110209",
+      "440825110211",
+      "440825110212",
+      "440825110210",
+      "440825110206",
+      "440825110205",
+      "440825110217",
+      "440825110216",
+      "440825110215",
+      "440825110002",
+      "440825110203",
+      "440825110202",
+      "440825110214",
+      "440825110208",
+      "440825110213"
+    ],
+    "subtitleProtectedPhrases": [
+      "徐闻县锦和镇",
+      "一百一十二点六八平方千米",
+      "第七次全国人口普查",
+      "锦囊卫所",
+      "古韵锦囊城",
+      "锦囊金钻菠萝",
+      "农林牧渔业总产值",
+      "海洋捕捞",
+      "海水养殖",
+      "外罗渔港综合体",
+      "海上风电",
+      "锦和中学",
+      "徐闻话",
+      "雷州话",
+      "建设社区",
+      "海角农场",
+      "海欧农场",
+      "锦和镇二堂农场",
+      "沟西避风港",
+      "六极码头",
+      "白茅村",
+      "那板村"
+    ],
+    "facts": {
+      "area": "可靠边界融合面积约112.68平方千米",
+      "population": "第七次全国人口普查公开资料约3.5万人",
+      "economy": "菠萝、水稻、甘蔗、蔬菜、海洋捕捞与海水养殖共同支撑镇域产业",
+      "physical": "徐闻县东部，陆地村落、农田与外罗湾沿海生产空间相接",
+      "history": "明洪武二十七年建锦囊卫所，古城脉络延续至城内一带",
+      "culture": "锦囊古城记忆、徐闻话与圩镇生活共同构成地方文化",
+      "education": "锦和中学承担镇域中学教育",
+      "modern": "外罗渔港综合体、产业园、海上风电与典型村建设持续推进"
+    },
+    "narration": [
+      "广东省湛江市徐闻县东部，锦和镇连接内陆农田与外罗湾沿海，可靠边界融合面积约一百一十二点六八平方千米。",
+      "第七次全国人口普查公开资料显示，锦和镇约有三点五万人；公开名录记载全镇设四个社区和十七个行政村。",
+      "锦和旧称新安村，明洪武二十七年设置锦囊卫所后，锦囊之名沿着城墙遗迹和聚落记忆留到今天。",
+      "二零二五年上半年，全镇农林牧渔业总产值十点三六亿元，水稻种植二点零五万亩，农业种植面积十一点六万亩。",
+      "菠萝是锦和重要的特色产业，官方培训把种植经验、网络销售和锦囊金钻菠萝品牌连接起来。",
+      "沿海一侧同样繁忙，二零二五年上半年海洋捕捞二千六百零六吨，海水养殖六千七百五十四吨。",
+      "外罗渔港综合体、锦和产业园和海上风电项目持续推进，海岸生产、能源建设与镇域交通在这里交汇。",
+      "以古韵锦囊城为文化基底，锦囊公园和城内古城项目把卫所历史转化为今天可阅读的公共空间。",
+      "锦和中学承担镇域中学教育，官方检查记录里的校园日常，也是圩镇公共服务的一部分。",
+      "这里常听见徐闻话，也就是雷州话的地方语音；圩日交谈、海产劳作和菠萝季节，共同构成锦和的生活节奏。",
+      "接下来，镜头沿可靠边界逐一走过十七个行政村、建设社区面和三个农场管理单元，不因农场类别省略任何已核验范围。",
+      "东山村位于镇域南端，也是官方推进建设的典型村之一，村域从南部农地向相邻聚落展开。",
+      "海欧农场靠近镇域南部，管理范围与东山、胜利等村域相接，构成连续的农业生产空间。",
+      "锦和镇二堂农场面积较紧凑，嵌在南部农场与村庄之间，边界虽小仍完整保留。",
+      "海角农场位于镇域南部偏中，官方工作报告也将其列入辖区工作范围，农业管理单元在地图上清晰可见。",
+      "坑口村向镇域中南部过渡，村界连接海角农场、锦丰村和那楚村一带。",
+      "锦丰村位于镇域中部，紧凑村域承接南北村落，是锦和腹地的重要连接点。",
+      "金门村位于锦丰以北，村界在城内、那板与洋尾之间形成一处清晰节点。",
+      "城内村保存着锦囊所城的历史线索，也是古韵锦囊城叙事最集中的地方。",
+      "那板村位于镇域北部，二零二四年奖学颁奖活动留下了村庄重视教育的真实记录。",
+      "六极村伸向镇域最北端，六极码头连接沿海生产与防台安全检查，海岸线是村域的重要一侧。",
+      "洋尾村位于镇域中东部，狭长村界连接六极、金门与沟西一带。",
+      "沟西村靠近东部沿海，沟西避风港的消防和防台检查，呈现渔业生产背后的安全秩序。",
+      "后湾村村域紧凑，位于沟西与北塘之间，村路和沿海生产空间彼此衔接。",
+      "北塘村处在镇域东部，边界连接后湾、白茅和建设社区一带。",
+      "白茅村位于镇域东缘，积分兑换等乡村治理实践，把公共事务落实到村民日常。",
+      "建设社区面紧邻北塘和那楚，作为可靠的社区边界单元，在整条巡游路线中完整呈现。",
+      "那楚村位于镇域中东部，村界连接建设社区、胜利和坑口一带。",
+      "胜利村向镇域南部展开，与东山、那楚及农场管理单元共同构成南部片区。",
+      "红星村位于镇域西南部，较宽村域连接胜利、锦市与东山一带的耕作空间。",
+      "锦市村位于镇域西部，也是官方推进建设的典型村之一，村域向西侧连续展开。",
+      "龙群村处在镇域西端，边界覆盖西部较开阔区域，为这次二十一个可靠单元的巡游收尾。",
+      "从锦囊古城到菠萝田，从学校与村庄治理到码头和避风港，锦和的地理并不只是一条边界线。",
+      "它把农业、海洋、历史和一座座村庄连接起来，组成今天徐闻县锦和镇真实而完整的乡土脉络。"
+    ],
+    "pronunciations": [
+      {
+        "term": "圩",
+        "pinyin": "xū",
+        "spokenForm": "墟"
+      },
+      {
+        "term": "锦囊",
+        "pinyin": "jǐn náng"
+      },
+      {
+        "term": "外罗",
+        "pinyin": "wài luó"
+      },
+      {
+        "term": "六极",
+        "pinyin": "liù jí"
+      },
+      {
+        "term": "那楚",
+        "pinyin": "nà chǔ"
+      },
+      {
+        "term": "那板",
+        "pinyin": "nà bǎn"
+      },
+      {
+        "term": "白茅",
+        "pinyin": "bái máo"
+      },
+      {
+        "term": "沟西",
+        "pinyin": "gōu xī"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440825110-boundary-001",
+        "claim": "用户提供的广东省村界SHP中，锦和镇代码440825110包含21个可靠面：17个行政村、建设社区面和3个农场管理单元；父级轮廓由这些面融合生成。",
+        "sourceTitle": "广东省CJ村级行政边界SHP",
+        "sourceUrl": "data/regions/01【25096】全国村级行政边界数据/广东村界/广东全省/广东省CJ.shp",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-11",
+        "confidence": "high",
+        "usage": [
+          "timeline",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440825110-government-2025",
+        "claim": "2025年上半年锦和镇GDP5.79亿元、农林牧渔业总产值10.36亿元、海洋捕捞2606吨、海水养殖6754吨，并推进外罗渔港综合体、产业园和海上风电项目。",
+        "sourceTitle": "锦和镇2025年年度政府工作报告",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/content/2/2136/post_2136714.html",
+        "publisher": "徐闻县锦和镇人民政府",
+        "publishedAt": "2025-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440825110-government-2024",
+        "claim": "2024年锦和镇发展甘蔗、蔬菜和水产品，推进圩镇提升、外罗湾治理及城内古城项目。",
+        "sourceTitle": "锦和镇2024年工作报告及2025年工作计划",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/content/2/2004/post_2004390.html",
+        "publisher": "徐闻县锦和镇人民政府",
+        "publishedAt": "2025-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825110-history-001",
+        "claim": "公开地名资料记载锦和旧称新安村，明洪武二十七年建锦囊卫所后改称锦囊；公开名录记载4社区、17行政村，第七次人口普查约3.5万人。",
+        "sourceTitle": "徐闻县锦和镇地名资料",
+        "sourceUrl": "http://www.tcmap.com.cn/guangdong/xuwenxian_jinhezhen.html",
+        "publisher": "博雅地名网",
+        "publishedAt": "2025-12-05",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825110-school-001",
+        "claim": "锦和镇官方公开页面记录了锦和中学校园安全检查，确认学校与现场图片的地点和主题。",
+        "sourceTitle": "锦和镇开展校园安全检查",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/content/2/2185/post_2185275.html",
+        "publisher": "徐闻县锦和镇人民政府",
+        "publishedAt": "2026-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440825110-governance-001",
+        "claim": "锦和镇官方公开页面提供白茅村积分制治理、那板村奖学活动、六极码头及沟西避风港检查的现场图片。",
+        "sourceTitle": "锦和镇政务动态实景资料",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwjh/gkmlpt/index",
+        "publisher": "徐闻县锦和镇人民政府",
+        "publishedAt": "2026-08-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      }
+    ]
+  },
+  "440825111": {
+    "name": "和安镇",
+    "title": "地理图说·徐闻县和安镇",
+    "voiceRate": "+2%",
+    "voiceId": "zh-CN-YunyangNeural",
+    "tourIntroSentences": 6,
+    "tourFlightSeconds": 3.8,
+    "tourOrder": [
+      "440825111201",
+      "440825111202",
+      "440825111203",
+      "440825111204",
+      "440825111205",
+      "440825111206",
+      "440825111207",
+      "440825111208",
+      "440825111209"
+    ],
+    "facts": {
+      "population": "下辖1个社区、9个行政村，共10个村居",
+      "economy": "对虾养殖、近海捕捞、网箱渔产与斑斓农业并进",
+      "physical": "徐闻东北部陆岛相依，港湾、滩涂、红树林与近海岛屿交织",
+      "history": "镇墟、老区渔村与海岛交通共同塑造地方记忆",
+      "culture": "潮起出海、潮落采海，香草田园与渔家生活相融",
+      "modern": "冬松岛大桥改善通行，养殖提质与滨海休闲持续发展"
+    },
+    "narration": [
+      "和安镇坐落在徐闻县东北部海岸，是一座陆岛相依的滨海镇；大陆岸线、近海岛屿、曲折港湾和广阔滩涂，共同组成五岛十湾的空间格局。",
+      "全镇下辖和安社区与九个行政村，共十个村居；现有村界数据包含九个行政村面，和安社区没有独立可靠边界，因此与和安村合并讲述，不绘制近似边界。",
+      "这里气候温暖，潮间带、红树林、虾塘和渔港交织；高位池对虾、近海捕捞和网箱养殖构成海洋支柱，斑斓叶、香兰鸡与沙地杂粮铺开陆上农业。",
+      "过去海岛交通更多依靠渡船，冬松岛大桥通车后岛陆往来明显改善；潮起时渔船出港，潮落后人们赶海采贝，海陆两种生活在同一阵海风里相遇。",
+      "接下来，镜头从镇墟出发，依次走进和安、云头、水头、公港、后湖、金鸡、佳平、北莉与冬松九个村域，并把和安社区纳入镇墟中心共同介绍。",
+      "所有村级产业与风貌描述以用户提供资料为叙事依据；县域实景照片只作徐闻滨海环境语境，不宣称拍摄于具体村庄。",
+      "和安社区与和安村共同构成镇墟中心；镇政府、中学、卫生院、市场和码头汇聚在这里，赶圩、客运与海陆物资流转，组织着全镇最热闹的日常。",
+      "云头村是和安最有辨识度的香草农业节点；连片斑斓叶田带着清香延伸，采收、加工与香兰鸡等特色农产品，一起构成清新的田园景观。",
+      "水头村紧邻内湾，虾塘、鱼塘与平缓滩涂交错；高位池增氧机昼夜运转，浅滩赶海仍在延续，村舍、防护林和养殖水面彼此相邻。",
+      "公港村是老牌滨海渔村，也保留革命老区记忆；港湾避风，渔船常年停靠，近海捕捞和小网箱养殖，让渔汛时节的码头格外忙碌。",
+      "后湖村以浅湖、塘堰和湿地水面为底色；咸淡水养殖、护岸林木与水鸟栖息地相互嵌合，呈现少见的内湖塘型滨海村落风貌。",
+      "金鸡村所在的金鸡岛拥有曲折岸线与宽阔潮间带；传统捕捞、贝类和鱼虾养殖历史悠久，退潮采贝、涨潮出海，是原生态港湾渔村的日常节奏。",
+      "佳平村是滨海养殖与外销节点；对虾和海产养殖塘沿岸排布，水产装运连接岛外市场，也为滨海休闲与村庄更新留下新的空间。",
+      "北莉村位于北莉岛，四面环海，红树林与潮间滩涂保存着安静的原生气质；近海捕捞、滩涂养殖、赶海与观鸟，共同塑造海岛生活。",
+      "冬松村所在的冬松岛，是和安最知名的海岛；大桥连接陆岛，大片滩涂、红树林、渔船群与网箱养殖铺向海面，日出日落也展现出文旅潜力。",
+      "从和安墟的码头烟火，到云头村漫野的斑斓清香，从大陆岸线的连片虾塘，到冬松、北莉与金鸡诸岛的潮间滩涂，和安把香草田园与耕海牧渔融在一起；潮起出海，潮落采海，香草伴海风，渔歌伴落日，这就是海陆共生的和安镇。"
+    ],
+    "pronunciations": [
+      {
+        "term": "和安",
+        "pinyin": "hé ān"
+      },
+      {
+        "term": "圩",
+        "pinyin": "xū"
+      },
+      {
+        "term": "北莉",
+        "pinyin": "běi lì"
+      },
+      {
+        "term": "斑斓叶",
+        "pinyin": "bān lán yè"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440825111-boundary-001",
+        "claim": "用户提供的广东省村界SHP中，和安镇代码440825111包含9个行政村面；父级轮廓由这9个面融合生成。",
+        "sourceTitle": "广东省CJ村级行政边界SHP",
+        "sourceUrl": "data/regions/01【25096】全国村级行政边界数据/广东村界/广东全省/广东省CJ.shp",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-06",
+        "confidence": "high",
+        "usage": [
+          "timeline",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440825111-population-001",
+        "claim": "第七次全国人口普查公开资料显示，和安镇人口约3.03万人。",
+        "sourceTitle": "和安镇地名与人口资料",
+        "sourceUrl": "https://www.tcmap.com.cn/guangdong/xuwenxian_heanzhen.html",
+        "publisher": "博雅地名网（普查数据转载）",
+        "publishedAt": "2021-06-01",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825111-industry-001",
+        "claim": "2024年和安镇推进水产行业高质量发展，并建设佳平—云头—水头连片示范带。",
+        "sourceTitle": "【镇街大比武】徐闻和安镇：多措并举打造强镇兴村富民新路径",
+        "sourceUrl": "http://www.xuwen.gov.cn/xwyw/xzdt/content/post_1968499.html",
+        "publisher": "徐闻县政府门户网站",
+        "publishedAt": "2024-10-21",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825111-seafood-001",
+        "claim": "驻镇帮扶工作推动成立海产品专业合作社，发展冬松村海产品销售与品牌。",
+        "sourceTitle": "广州市南沙区驻湛江市徐闻县和安镇工作队：聚焦产业引领",
+        "sourceUrl": "https://baijiahao.baidu.com/s?id=1818528679364443529&wfr=spider&for=pc",
+        "publisher": "岭南24小时公开报道",
+        "publishedAt": "2024-12-16",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825111-school-001",
+        "claim": "徐闻县教育局公开报道记录了教研人员深入和安中学开展教学调研，确认学校位于和安镇并承担中学教育。",
+        "sourceTitle": "县教育局教研室到和安中学开展教学调研",
+        "sourceUrl": "http://www.xuwen.gov.cn/zfxxgk/zjsxwxjyj/content/post_1615381.html",
+        "publisher": "徐闻县教育局",
+        "publishedAt": "2022-05-27",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825111-dialect-001",
+        "claim": "徐闻话俗称雷州话，是徐闻县主要地方语言，属于闽南语系统。",
+        "sourceTitle": "徐闻语言概况",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxw/mlxw/zg/content/post_471038.html",
+        "publisher": "徐闻县人民政府",
+        "publishedAt": "2018-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825111-history-001",
+        "claim": "公开地名资料记载和安圩形成于二十世纪上半叶，镇内部分自然村属于革命老区村庄。",
+        "sourceTitle": "徐闻县和安镇简介",
+        "sourceUrl": "https://baijiahao.baidu.com/s?id=1716666796385379361&wfr=spider&for=pc",
+        "publisher": "湛江随波探史",
+        "publishedAt": "2021-11-17",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825111-user-brief-002",
+        "claim": "和安镇整体格局、十个村居名称及逐村产业、生态、交通和风貌描述由用户提供；涉及精确面积、桥梁状态与五岛十湾等表述按用户资料使用。",
+        "sourceTitle": "用户提供的和安镇视频文案与配图建议",
+        "sourceUrl": "user://prompt/2026-08-14",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-14",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard",
+          "subtitles"
+        ]
+      }
+    ],
+    "tourReturnSeconds": 5
+  },
+  "440825112": {
+    "name": "新寮镇",
+    "title": "地理乡土情·徐闻县新寮镇",
+    "voiceRate": "-4%",
+    "voiceId": "zh-CN-YunyangNeural",
+    "subtitleLeadSeconds": -0.12,
+    "tourIntroSentences": 9,
+    "tourFlightSeconds": 3.6,
+    "tourReturnSeconds": 4.4,
+    "tourOrder": [
+      "440825112203",
+      "440825112204",
+      "440825112206",
+      "440825112205",
+      "440825112207",
+      "440825112209",
+      "440825112210",
+      "440825112208",
+      "440825112201",
+      "440825112202"
+    ],
+    "facts": {
+      "population": "2019年末户籍人口34247人",
+      "economy": "2023年GDP 7.9353亿元，农林牧渔业总产值7.62亿元",
+      "physical": "徐闻东海岸外、由海堤串联的滨海岛屿乡镇",
+      "history": "清末形成新寮圩，海堤逐段连接岛上聚落",
+      "culture": "雷州话、海岛聚落生活与徐闻饮食共同构成地方文化语境",
+      "modern": "红树林修复、渔业光伏与海上风电服务并进"
+    },
+    "narration": [
+      "徐闻县新寮镇位于徐闻东北部海域，是徐闻唯一的海岛建制镇，由新寮岛、后海岛等岛屿组成，下辖10个行政村。",
+      "新寮岛地势平缓，海风大、日照足，连片虾塘、盐田、风车和渔船，组成最鲜明的海岛景象。",
+      "2019年末，全镇户籍人口34247人，下辖10个行政村、81条自然村，村庄多沿镇圩、村路和海堤分布。",
+      "2023年，新寮镇地区生产总值79353万元，农林牧渔业总产值7.62亿元，海水养殖、晒盐和海洋捕捞是主要生计。",
+      "小棚虾和海水养殖连成片，增氧机一开，水面翻起白花；渔业光伏和海上风电运维，也带来新的产业空间。",
+      "番薯、花生和蔬菜适合这里的沙地，农田和虾塘挨在一起，海岛农业有自己的节奏。",
+      "海岸一侧有沙滩、红树林和木麻黄防风林，风车沿海排开，潮汐把滩涂和村庄连在一起。",
+      "新寮的日常也在一碗饭、一碗汤里。新寮腌粉是熟悉的味道，卫生院门口还有2块一杯的冰红薯粉汤水，便宜、冰凉，带着镇墟的烟火气。",
+      "新丰村位于西北内湾一侧，农田、村舍和海湾相连，安静的田园与养殖水面交织，呈现新寮朴实的海岛日常。",
+      "三丰村的沙地农业很有代表性，番薯、花生和蔬菜铺开一片绿意，旁边又是成片虾塘，农耕与养殖形成鲜明对比。",
+      "后海村面向东北外海，雷打沙海滩和木麻黄防风林沿岸展开，赶海、挖螺、看海，是本地人熟悉的休闲方式。",
+      "八一村朴实安静，农田、虾塘和村舍相互交织，农耕与养殖都占一份，日子不紧不慢，很有海岛慢生活的味道。",
+      "塘口村的鱼塘、虾塘一个接一个，水产养殖是重要收入，阳光照在水面上，从高处看就像一块块明亮的镜子。",
+      "东塘村是典型的对虾养殖片区，连片高位池很壮观，增氧机启动时水面翻白，收虾季里水产车沿村道不断往外开。",
+      "堰头村位于岛屿南端和湾口附近，盐田与养殖塘交错，晴天时盐田映着天空，传统晒盐和海水养殖共同组成村里的生产景象。",
+      "北尾村转入西南内湾，海岸风力资源丰富，风机、田园和大海常常同框，海风一直吹，也保留着烟楼革命联络站的历史记忆。",
+      "港六村承载新寮镇圩和公共服务，市场、道路与渔业生活在这里会合，渔船靠岸、渔获上岸，最能看见真实的海岛烟火。",
+      "南湾村面向平静内湾，滩涂和红树林较多，退潮时白鹭和海鸟在浅滩觅食，村庄也在湾岸生态里慢慢展开。",
+      "从镇圩的烟火到海边的风车，新寮镇10个村串起这座海岛最真实的样子；盐田的咸、虾塘的鲜、渔港的忙、海风的柔，都留在这里；如果你喜欢慢下来的海岛生活，徐闻新寮镇值得来走一趟。"
+    ],
+    "pronunciations": [
+      {
+        "term": "新寮",
+        "pinyin": "xīn liáo"
+      },
+      {
+        "term": "圩",
+        "pinyin": "xū"
+      },
+      {
+        "term": "结寮",
+        "pinyin": "jié liáo"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440825112-boundary-001",
+        "claim": "用户提供的 SHP 含新寮镇十个行政村面状边界，父级外轮廓由十个面要素融合生成。",
+        "sourceTitle": "新寮镇行政村 SHP 边界",
+        "sourceUrl": "data/regions/01新寮镇/新寮镇.shp",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-03",
+        "confidence": "high",
+        "usage": [
+          "timeline",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825112-population-001",
+        "claim": "截至2019年末，新寮镇户籍人口34247人，下辖10个行政村、81条自然村。",
+        "sourceTitle": "新寮镇：从孤岛到绿岛，一座海岛的百年蝶变",
+        "sourceUrl": "https://mp.weixin.qq.com/",
+        "publisher": "地方公开报道",
+        "publishedAt": "2026-07-22",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825112-economy-001",
+        "claim": "2023年新寮镇地区生产总值79353万元，农林牧渔业总产值7.62亿元。",
+        "sourceTitle": "徐闻县新寮镇2024年政府工作报告",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwxl/gkmlpt/content/1/1995/post_1995608.html",
+        "publisher": "新寮镇人民政府",
+        "publishedAt": "2024-12-31",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825112-industry-001",
+        "claim": "新寮镇发展小棚虾、海水养殖、红衣花生、板栗番薯、海水稻，并推进渔业光伏和海上风电运维服务。",
+        "sourceTitle": "徐闻县新寮镇2024年政府工作报告",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwxl/gkmlpt/content/1/1995/post_1995608.html",
+        "publisher": "新寮镇人民政府",
+        "publishedAt": "2024-12-31",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825112-produce-001",
+        "claim": "新寮红衣花生和板栗番薯具有长期种植与地方产业基础。",
+        "sourceTitle": "红衣花生与新寮板栗番薯产业资料",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwxl/gkmlpt/content/1/1045/post_1045558.html",
+        "publisher": "新寮镇人民政府",
+        "publishedAt": "2021-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440825112-energy-001",
+        "claim": "新寮镇推进渔业光伏等清洁能源项目建设与服务。",
+        "sourceTitle": "新寮镇渔业光伏项目建设资料",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwxl/gkmlpt/content/1/1719/post_1719475.html",
+        "publisher": "新寮镇人民政府",
+        "publishedAt": "2023-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440825112-beach-001",
+        "claim": "后海村雷打沙海滩承载村民运动和公共文化活动。",
+        "sourceTitle": "新寮镇后海村雷打沙海滩主题活动",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwxl/gkmlpt/content/1/1737/post_1737159.html",
+        "publisher": "新寮镇人民政府",
+        "publishedAt": "2023-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440825112-dialect-001",
+        "claim": "徐闻话俗称雷州话，是徐闻县主要方言，属于闽南语系统。",
+        "sourceTitle": "徐闻语言概况",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxw/mlxw/zg/content/post_471038.html",
+        "publisher": "徐闻县人民政府",
+        "publishedAt": "2018-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825112-food-001",
+        "claim": "徐闻代表性地方食物包括羊粥、腌粉、八宝饭和树叶搭饼等。",
+        "sourceTitle": "徐闻特色美食资料",
+        "sourceUrl": "http://www.xuwen.gov.cn/xwyw/shgz/content/post_467929.html",
+        "publisher": "徐闻县人民政府",
+        "publishedAt": "2018-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440825112-heritage-001",
+        "claim": "徐闻八宝饭制作与地方饮食文化具有非遗传播价值。",
+        "sourceTitle": "徐闻非遗与八宝饭文化",
+        "sourceUrl": "http://www.xuwen.gov.cn/gkmlpt/content/1/1590/post_1590686.html",
+        "publisher": "徐闻县人民政府",
+        "publishedAt": "2022-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440825112-ecology-001",
+        "claim": "新寮镇开展红树林生态营造修复，并将沿海生态修复纳入发展工作。",
+        "sourceTitle": "徐闻县红树林营造修复资料",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwzrzy/gkmlpt/content/1/1797/post_1797713.html",
+        "publisher": "徐闻县自然资源局",
+        "publishedAt": "2023-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440825112-courtyard-001",
+        "claim": "新寮镇推进美丽庭院与乡村人居环境建设。",
+        "sourceTitle": "新寮镇美丽庭院建设资料",
+        "sourceUrl": "http://www.xuwen.gov.cn/zjxwxl/gkmlpt/content/1/1973/post_1973057.html",
+        "publisher": "新寮镇人民政府",
+        "publishedAt": "2024-01-01",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825112-history-001",
+        "claim": "地方资料记载新寮圩形成于清末，早期居民以渡海捕鱼、搭寮定居为生。",
+        "sourceTitle": "徐闻县新寮镇概况",
+        "sourceUrl": "https://www.tcmap.com.cn/guangdong/xuwenxian_xinliaozhen.html",
+        "publisher": "博雅地名网",
+        "publishedAt": "2025-12-05",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440825112-culture-context-001",
+        "claim": "年例、游神和八音锣鼓属于徐闻及雷州半岛共享的节庆文化语境；解说不将其表述为新寮镇独有活动。",
+        "sourceTitle": "徐闻与雷州半岛公开文化资料汇编",
+        "sourceUrl": "http://www.xuwen.gov.cn/",
+        "publisher": "徐闻县人民政府",
+        "publishedAt": "2026-08-05",
+        "confidence": "medium",
+        "usage": [
+          "script"
+        ]
+      }
+    ]
+  },
+  "440825201": {
+    "name": "城北乡",
+    "title": "地理乡土情·徐闻县城北乡",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "徐闻县",
+    "town": "城北乡",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "城北乡位于广东省、湛江市、徐闻县，本方案依据全国村级行政边界数据自动建立，下辖19个村级区域。",
+      "镜头将从高空穿过云层抵达城北乡，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "头铺村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北水村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北岭村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "和家村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那松村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "文丰园村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "西埚村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "迈报村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "后坡寮村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "石岭村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "加乐园村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "大黄村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "桃园村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那练村是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "南华农场(城北乡)是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "城北乡农场是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "大黄林场是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "大水桥水库(城北乡)是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "徐城镇红埚砖厂是城北乡下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回城北乡全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440825201201",
+      "440825201202",
+      "440825201203",
+      "440825201204",
+      "440825201205",
+      "440825201206",
+      "440825201207",
+      "440825201208",
+      "440825201209",
+      "440825201210",
+      "440825201211",
+      "440825201212",
+      "440825201213",
+      "440825201214",
+      "440825201303",
+      "440825201304",
+      "440825201305",
+      "440825201306",
+      "440825201307"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440825204": {
+    "name": "角尾乡",
+    "title": "地理乡土情·徐闻县角尾乡",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "徐闻县",
+    "town": "角尾乡",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "中国最南端的陆地，不在海南。\n在湛江徐闻一个叫角尾的乡，北纬二十度十三分十四秒——很多人开几个小时车到这儿，就为了站一下。",
+      "灯楼角，旧名滘尾角，三面环海，一条沙洲直直伸进海里。\n清光绪十六年，一八九〇年，清廷在这里建起第一座导航灯塔。\n一八九四年法国人改成钢结构，一九九四年海事局建成现在这座白色灯塔。\n当年启渡的沙滩就在驿站外面——一九五〇年三月，木帆船从这儿起航，打向海南。",
+      "这里是琼州海峡和北部湾的交界。你站的位置，是两片海在打架。\n涨潮时两片海从不同方向涌来，撞出一条十字浪，本地人叫它接吻浪。",
+      "海底下，是中国大陆架连片面积最大的珊瑚礁群，比陆地上热闹得多。\n保护区一万四千三百多公顷，八十二种珊瑚，占全国海洋珊瑚种类的一成。",
+      "岸上是广东四大国有盐场之一，徐闻盐场，你餐桌上的盐可能就来自这儿。\n海水含盐三五十‰，日照两千一百小时，十几天就晒出一茬白盐。",
+      "来角尾，别只拍灯塔，三件事要试。\n住一晚珊瑚石房子——墙是珊瑚礁砌的，冬暖夏凉。\n再吃一顿刚上岸的鱼：马鲛、黄花、石斑，隔壁镇的菠萝一年七十万吨。",
+      "角尾乡十一个村，加两个盐场、一个林场，一村一句话。",
+      "北注村，纯农村，稻谷、蕃薯、花生、红葱。年降雨不到一千一百毫米，过去是望天田，一九九八年打井才种上。",
+      "包西村，包西港边的村。港湾能停三百吨的船，出海可通湛江、海南。",
+      "徐闻北洋盐场，湛江最大的民营盐场，八十四公顷盐田，一年产盐六千五百吨。",
+      "徐闻盐场，国营老盐场，广东四大之一，扬水晒盐的老工艺一直没停。",
+      "许家寮村，以渔为主，革命老区。大陆最南端的标志就立在村里，去年评上省文旅特色村。",
+      "上寮村，上寮和新村仔两条村，一千六百多人，养珍珠、对虾、石斑。",
+      "下寮仔村，角尾两个小集市之一。乡里人赶集，除了角尾圩就来这儿。",
+      "角尾村，辖放沟、南岭、定村仔、西坡仔、郑黄五条村。六十多条机船，南岭港离海南金牌港只有十六海里。",
+      "符宅村，五个村民小组，三千六百多人。四十六条机船，东河村一个村就占了三十多条。",
+      "沙土村，九百多人，西边就是包西港。三百多人下海养殖，田里主产花生和蕃薯。",
+      "仕寮村，角尾北片的一个行政村。村里人靠海也靠田，两边都占一点。",
+      "潭鳌村，四千一百多人。七十七户养华贵栉孔扇贝，四千六百多亩。",
+      "放坡村，明代建村，两千一百多人。湛江第一条民宿村，村旁就是国营盐场场部。",
+      "角尾乡林场，一条防风林带，替全乡挡着四十多公里海岸线上的风。",
+      "中国大陆最南端，一个乡，十一个村，两片海。\n下次来徐闻，别只去菠萝的海，把一天留给角尾：从灯楼角走到合水线，等一次日落。\n转给要来湛江的朋友。你是角尾哪个村的？"
+    ],
+    "tourOrder": [
+      "440825204209",
+      "440825204210",
+      "440825204302",
+      "440825204305",
+      "440825204204",
+      "440825204205",
+      "440825204203",
+      "440825204201",
+      "440825204206",
+      "440825204207",
+      "440825204208",
+      "440825204211",
+      "440825204202",
+      "440825204303"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440881108": {
+    "name": "安铺镇",
+    "title": "地理乡土情·廉江市安铺镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "廉江市",
+    "town": "安铺镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "安铺镇位于广东省、湛江市、廉江市，本方案依据全国村级行政边界数据自动建立，下辖22个村级区域。",
+      "镜头将从高空穿过云层抵达安铺镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "三墩村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "老马村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "久渔村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "合河村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "珠盘海村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "田头仔村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "急水村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "茅坡村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "博教村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "龙潭村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "欧家村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "茂桂路村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "夏插村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "东山社区是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "新区社区是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "港头村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "西大街社区是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "西郊村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "牛皮塘村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "洪坡村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "鹤塘村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "新建村是安铺镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回安铺镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440881108209",
+      "440881108208",
+      "440881108218",
+      "440881108217",
+      "440881108207",
+      "440881108206",
+      "440881108210",
+      "440881108215",
+      "440881108214",
+      "440881108213",
+      "440881108212",
+      "440881108211",
+      "440881108201",
+      "440881108011",
+      "440881108010",
+      "440881108012",
+      "440881108005",
+      "440881108219",
+      "440881108205",
+      "440881108204",
+      "440881108203",
+      "440881108216"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440882100": {
+    "name": "白沙镇",
+    "title": "地理乡土情·雷州市白沙镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "雷州市",
+    "town": "白沙镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "白沙镇位于广东省、湛江市、雷州市，本方案依据全国村级行政边界数据自动建立，下辖38个村级区域。",
+      "镜头将从高空穿过云层抵达白沙镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "湛江市华侨管理区八队(客路镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湛江市华侨管理区十队(客路镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湛江市华侨管理区十三队(客路镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湛江市华侨管理区九队(附城镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湛江市华侨管理区十八队(附城镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "白沙村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "麻扶村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "墨城村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "下井村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "白院村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "调爽村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "平原村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "石头村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "东岭村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "黎郭村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "官村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "瑚村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "和家村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "合兴村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "六余村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "草白村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那楠村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "符处村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "水美村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "北坡村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "帮塘村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "洪富村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "官茂村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "水店社区是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "麻含村是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "雷州市水土保持站(白沙镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "唐家林场帮塘林队(白沙镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湛江市华侨管理区十二队(白沙镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湛江市华侨管理区十三队(白沙镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湛江市华侨管理区十五队(白沙镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湛江市华侨管理区十一队(白沙镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湛江市华侨管理区四队(白沙镇)是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "符处林场是白沙镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回白沙镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440882102243",
+      "440882102238",
+      "440882102235",
+      "440882117235",
+      "440882117234",
+      "440882100200",
+      "440882100201",
+      "440882100202",
+      "440882100204",
+      "440882100203",
+      "440882100208",
+      "440882100209",
+      "440882100210",
+      "440882100211",
+      "440882100212",
+      "440882100213",
+      "440882100214",
+      "440882100215",
+      "440882100216",
+      "440882100217",
+      "440882100218",
+      "440882100219",
+      "440882100220",
+      "440882100221",
+      "440882100222",
+      "440882100024",
+      "440882100224",
+      "440882100225",
+      "440882100028",
+      "440882100029",
+      "440882100233",
+      "440882100232",
+      "440882100231",
+      "440882100230",
+      "440882100229",
+      "440882100227",
+      "440882100228",
+      "440882100401"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440882102": {
+    "name": "客路镇",
+    "title": "地理乡土情·雷州市客路镇",
+    "voiceRate": "-4%",
+    "voiceId": "zh-CN-YunyangNeural",
+    "subtitleLeadSeconds": -0.1,
+    "tourIntroSentences": 9,
+    "tourFlightSeconds": 3.8,
+    "tourReturnSeconds": 4.4,
+    "tourOrder": [
+      "440882102200",
+      "440882102201",
+      "440882102202",
+      "440882102203",
+      "440882102204",
+      "440882102205",
+      "440882102206",
+      "440882102207",
+      "440882102208",
+      "440882102209",
+      "440882102210",
+      "440882102211",
+      "440882102212",
+      "440882102213",
+      "440882102214",
+      "440882102215",
+      "440882102216",
+      "440882102227",
+      "440882102217",
+      "440882102218",
+      "440882102219",
+      "440882102220",
+      "440882102221",
+      "440882102222",
+      "440882102223",
+      "440882102224",
+      "440882102225",
+      "440882102226",
+      "440882102228",
+      "440882102229"
+    ],
+    "subtitleProtectedPhrases": [
+      "地理乡土情·雷州市客路镇",
+      "雷州市客路镇",
+      "客路镇",
+      "广东省中心镇",
+      "雷州北大门",
+      "户籍人口",
+      "32个村（社区）",
+      "288条自然村",
+      "地区生产总值",
+      "15.21亿元",
+      "207国道",
+      "客路墟",
+      "白切狗",
+      "叶搭饼",
+      "猪肠粉",
+      "雷剧",
+      "雷剧锣鼓",
+      "青年运河",
+      "水库",
+      "机井",
+      "甘蔗林",
+      "桉树林",
+      "糖厂",
+      "牛车",
+      "手扶拖拉机",
+      "年例游神",
+      "穿令箭",
+      "翻刺床",
+      "金河路",
+      "客路市场",
+      "1300米碧道",
+      "客路村",
+      "曲溪村",
+      "大家村",
+      "水标村",
+      "迈港村",
+      "高桥村",
+      "泰坡村",
+      "高上村",
+      "车路村",
+      "上梁村",
+      "东山村",
+      "恒山村",
+      "本立村",
+      "六梅村",
+      "湖南村",
+      "迈哉村",
+      "坡仔村",
+      "饶里村",
+      "迈坦村",
+      "湖仔村",
+      "塘塞村",
+      "赵宅村",
+      "顶尾村",
+      "宅仔村",
+      "上塘村",
+      "林排村",
+      "东坑村",
+      "深坑村",
+      "高坡村",
+      "三塘村"
+    ],
+    "facts": {
+      "population": "户籍人口15.3万人",
+      "economy": "2024年前三季度GDP 15.21亿元",
+      "physical": "雷州市北部，207国道和雷州青年运河穿镇而过",
+      "history": "镇圩、圩日、主街与村庄沿道路水岸生长",
+      "culture": "白切狗、叶搭饼、雷剧、年例和乡贤捐建并列出现",
+      "modern": "美丽圩镇、1300米碧道、市场升级和30个村庄共同展开"
+    },
+    "narration": [
+      "客路镇在雷州市北部，是雷州半岛的“北大门”，207国道从墟中穿过。",
+      "赶上客路墟趁圩日，白切狗先上桌。",
+      "叶搭饼、猪肠粉摆在路边，雷剧锣鼓一响，戏台前就围满人。",
+      "这里红土连片，坡地平缓，靠青年运河、水库和机井把旱地浇成粮田。",
+      "甘蔗林像海，桉树林成排，榨季时糖厂飘甜。",
+      "牛车和手扶拖拉机拉着甘蔗，在路边排队。",
+      "年例游神、穿令箭、翻刺床，是客路孩子认得的家乡符号。",
+      "2025年公开报道显示，客路镇户籍人口15.3万人；2024年工作报告记载，全镇有32个村（社区）、288条自然村。",
+      "2024年前三季度，客路镇完成地区生产总值15.21亿元，金河路、客路市场和1300米碧道一起把镇面慢慢理顺。",
+      "沿着运河碧道和入镇通道往里走，客路镇的故事也就从墟口，慢慢转向村口。",
+      "客路村靠近镇圩核心，市场、学校和日常街巷都在这一带聚起来。",
+      "曲溪村在镇域西北侧，村路绕着田块伸展，和镇区保持着很近的联系。",
+      "大家村位于镇域中部偏南，村委会旁的存量土地也被纳入产业盘活的视野。",
+      "水标村贴近207国道一线，入镇通道和绿化步道让村口更容易被看见。",
+      "迈港村向东铺开，农产品初加工和乡村产业在这一带寻找新的落点。",
+      "高桥村在镇域东北部，村名里的桥意，也像这里连接村路与田埂的生活方式。",
+      "泰坡村靠近东北边界，坡地、林地和村庄共同撑起一片安静的乡土空间。",
+      "高上村夹在镇区和东部村落之间，是从圩镇走向田野的一道缓冲。",
+      "车路村在镇域西南方向，村路、林带和田块交错，名字里也带着道路的记忆。",
+      "上梁村位于镇域北侧，大片田地和村庄边界把北部空间慢慢打开。",
+      "东山村贴近北部边缘，村域沿丘陵和田地伸展，视野比镇区更开阔。",
+      "恒山村在西北高地一带，林地和农田相接，镇域北端在这里转向。",
+      "本立村靠近镇域北部腹地，村庄沿道路散开，和周边村界紧密相邻。",
+      "六梅村位于北部中间地带，田块与村路像网格一样接住日常生产。",
+      "湖南村在北部腹地展开，村域面积宽阔，连着多条相邻村界。",
+      "迈哉村一带有糖蔗和红糖加工项目，田地与厂房在这里发生连接。",
+      "坡仔村靠近镇域中部，村庄尺度不大，却稳稳嵌在周边道路和田畴之间。",
+      "饶里村位于镇域南端，207国道饶里至迈哉段的路灯工程也从这里延伸。",
+      "迈坦村在西南大块土地上展开，林地、田块和村路把边界拉得很长。",
+      "湖仔村位于镇域西侧，水面、农田和聚落相互靠近，空间显得更湿润。",
+      "塘塞村贴着西北一带，塘、水和村庄的名字，让人一听就能想到水岸生活。",
+      "赵宅村在镇域西部，村域沿道路和田畴展开，生活节奏靠近土地。",
+      "顶尾村位于西南边缘，像镇域的一段收尾，把田野一直带到边界处。",
+      "宅仔村在南部东侧，村庄分布贴着田块，和周边管理区边界相互咬合。",
+      "上塘村是典型村培育点，文化墙、外立面和村庄环境都在慢慢变新。",
+      "林排村靠近南部东侧，林地气息和农田纹理一起铺在村界里。",
+      "东坑村在镇域南部偏西，地势和道路让村庄与周边田块连成一片。",
+      "深坑村位于最南端附近，村域向下收束，像客路镇南边的一枚扣子。",
+      "高坡村面积不大，却处在多村相邻的位置，是镇域中部一个清晰节点。",
+      "三塘村在西北角一带，村界小而分散，像散落在大片镇域里的细节。",
+      "从镇标、主街、市场到运河碧道，再到30个村庄，客路镇的故事一直贴着道路、水岸和田野生长。"
+    ],
+    "pronunciations": [
+      {
+        "term": "客路",
+        "pinyin": "kè lù"
+      },
+      {
+        "term": "镇圩",
+        "pinyin": "zhèn xū"
+      },
+      {
+        "term": "白切狗",
+        "pinyin": "bái qiē gǒu"
+      },
+      {
+        "term": "叶搭饼",
+        "pinyin": "yè dā bǐng"
+      },
+      {
+        "term": "猪肠粉",
+        "pinyin": "zhū cháng fěn"
+      },
+      {
+        "term": "雷剧",
+        "pinyin": "léi jù"
+      },
+      {
+        "term": "年例",
+        "pinyin": "nián lì"
+      },
+      {
+        "term": "穿令箭",
+        "pinyin": "chuān lìng jiàn"
+      },
+      {
+        "term": "翻刺床",
+        "pinyin": "fān cì chuáng"
+      },
+      {
+        "term": "青年运河",
+        "pinyin": "qīng nián yùn hé"
+      },
+      {
+        "term": "甘蔗",
+        "pinyin": "gān zhè"
+      },
+      {
+        "term": "桉树",
+        "pinyin": "ān shù"
+      },
+      {
+        "term": "牛车",
+        "pinyin": "niú chē"
+      },
+      {
+        "term": "手扶拖拉机",
+        "pinyin": "shǒu fú tuō lā jī"
+      },
+      {
+        "term": "迈哉",
+        "pinyin": "mài zāi"
+      },
+      {
+        "term": "饶里",
+        "pinyin": "ráo lǐ"
+      },
+      {
+        "term": "迈坦",
+        "pinyin": "mài tǎn"
+      },
+      {
+        "term": "塘塞",
+        "pinyin": "táng sāi"
+      },
+      {
+        "term": "顶尾",
+        "pinyin": "dǐng wěi"
+      },
+      {
+        "term": "宅仔",
+        "pinyin": "zhái zǎi"
+      }
+    ],
+    "imagePromptTheme": "雷州半岛北大门、客路墟日、白切狗与叶搭饼、雷剧和年例、甘蔗海与红土田洋的乡土纪录片风格，真实实景照片，克制而温暖。",
+    "sources": [
+      {
+        "claimId": "440882102-boundary-001",
+        "claim": "本地广东省村级行政边界SHP中，客路镇代码440882102提取到52个可靠边界单元，其中30个村级面纳入视频巡游，22个林场或华侨管理区单元仅作边界上下文保留。",
+        "sourceTitle": "广东省全省村级行政边界数据",
+        "sourceUrl": "data/regions/01【25096】全国村级行政边界数据/广东村界/广东全省/广东省CJ.shp",
+        "publisher": "项目本地数据",
+        "publishedAt": "2026-08-14",
+        "confidence": "high",
+        "usage": [
+          "timeline",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440882102-population-001",
+        "claim": "公开报道称客路镇为广东省中心镇、湛江市乡镇街道简政放权试点镇，户籍人口15.3万人。",
+        "sourceTitle": "【百千万工程】客路镇典型镇建设成效显著",
+        "sourceUrl": "http://www.leizhou.gov.cn/pdml/klz/zwdt/content/post_2123430.html",
+        "publisher": "雷州市融媒体中心",
+        "publishedAt": "2025-11-30",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882102-administration-001",
+        "claim": "《雷州市客路镇人民政府2024年工作报告》记载客路镇辖32个村（社区），全镇288条自然村已实现植树全覆盖。",
+        "sourceTitle": "雷州市客路镇人民政府2024年工作报告",
+        "sourceUrl": "http://www.leizhou.gov.cn/pdml/klz/zfgzbg/content/post_1989529.html",
+        "publisher": "雷州市客路镇人民政府",
+        "publishedAt": "2024-12-16",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "research",
+          "coverage-note"
+        ]
+      },
+      {
+        "claimId": "440882102-economy-001",
+        "claim": "2024年前三季度，客路镇完成地区生产总值15.21亿元；报告同时记载生态红糖加工厂、芝麻种植、黄牛养殖、古窑烧制等产业线索。",
+        "sourceTitle": "雷州市客路镇人民政府2024年工作报告",
+        "sourceUrl": "http://www.leizhou.gov.cn/pdml/klz/zfgzbg/content/post_1989529.html",
+        "publisher": "雷州市客路镇人民政府",
+        "publishedAt": "2024-12-16",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882102-town-upgrade-001",
+        "claim": "客路镇美丽圩镇建设包括入镇通道、示范主街、农贸市场、美丽河道、生态小公园等项目；报道记载金河路、客路市场和1300米碧道等具体改造。",
+        "sourceTitle": "【百千万工程】客路镇典型镇建设成效显著",
+        "sourceUrl": "http://www.leizhou.gov.cn/pdml/klz/zwdt/content/post_2123430.html",
+        "publisher": "雷州市融媒体中心",
+        "publishedAt": "2025-11-30",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      },
+      {
+        "claimId": "440882102-school-001",
+        "claim": "客路镇中心小学符章图书馆由乡贤捐资320万元建设，占地255平方米，计划3层，建筑总面积近600平方米。",
+        "sourceTitle": "乡土情怀|客路镇中心小学符章图书馆奠基",
+        "sourceUrl": "http://www.leizhou.gov.cn/pdml/klz/zwdt/content/post_1952118.html",
+        "publisher": "雷州发布",
+        "publishedAt": "2024-09-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard",
+          "visual"
+        ]
+      }
+    ]
+  },
+  "440882106": {
+    "name": "纪家镇",
+    "title": "地理乡土情·雷州市纪家镇",
+    "voiceRate": "+5%",
+    "voiceId": "zh-CN-YunyangNeural",
+    "subtitleLeadSeconds": -0.12,
+    "tourIntroSentences": 6,
+    "tourFlightSeconds": 3.6,
+    "tourReturnSeconds": 4.4,
+    "tourOrder": [
+      "440882106204",
+      "440882106205",
+      "440882106203",
+      "440882106206",
+      "440882106200",
+      "440882106201",
+      "440882106202",
+      "440882106207",
+      "440882106210",
+      "440882106211",
+      "440882106213",
+      "440882106212",
+      "440882106220",
+      "440882106208",
+      "440882106219",
+      "440882106221",
+      "440882106214",
+      "440882106215",
+      "440882106217",
+      "440882106224",
+      "440882106227",
+      "440882106414",
+      "440882106413",
+      "440882106412",
+      "440882106411",
+      "440882106410",
+      "440882106409",
+      "440882106408",
+      "440882106407",
+      "440882106406",
+      "440882106405",
+      "440882106404",
+      "440882106403",
+      "440882106401",
+      "440882106402",
+      "440882106222",
+      "440882106216",
+      "440882106218",
+      "440882106209",
+      "440882106223",
+      "440882106225",
+      "440882106226"
+    ],
+    "subtitleProtectedPhrases": [
+      "雷州市纪家镇",
+      "北部湾",
+      "雷州青年运河西灌渠",
+      "省道白流线",
+      "常住人口",
+      "纪家村",
+      "双水村",
+      "周家村",
+      "周家大院",
+      "奉政第",
+      "包金村",
+      "武术醒狮团",
+      "恬神村",
+      "北仔村",
+      "盘龙滩",
+      "公益村",
+      "潭杰村",
+      "曲港村",
+      "盐灶仔村",
+      "功夫盆景",
+      "莫宅村",
+      "林西村",
+      "南塘村",
+      "坡门村",
+      "双石村",
+      "曲溪村",
+      "上郎村",
+      "文园村",
+      "后坑村",
+      "锦盘村",
+      "先锋村",
+      "吴宅村",
+      "罗灵村",
+      "纪家林场草律林队(纪家镇)",
+      "纪家林场赤坭尾林队(纪家镇)",
+      "纪家林场高家林队(纪家镇)",
+      "纪家林场公益林队(纪家镇)",
+      "纪家林场后罗林队(纪家镇)",
+      "纪家林场纪家林队(纪家镇)",
+      "纪家林场坡门林队(纪家镇)",
+      "纪家林场田寮林队(纪家镇)",
+      "纪家林场新园林队(纪家镇)",
+      "唐家林场调乃家林队(纪家镇)",
+      "唐家林场田西林队(纪家镇)",
+      "纪家镇北仔盐场",
+      "纪家镇林场",
+      "曲溪水库",
+      "迈特村",
+      "官长村",
+      "豪郎村",
+      "海联村",
+      "沙口村",
+      "42个边界单元",
+      "28个行政村",
+      "14个管理单元"
+    ],
+    "facts": {
+      "area": "行政区域面积339.13平方千米",
+      "population": "2020年11月常住人口75167人",
+      "economy": "海水养殖、晒盐、海洋捕捞与沙地农业并存",
+      "physical": "西临北部湾，海岸线32公里，亚热带季风气候",
+      "history": "周家古村、恬神千年聚落、曲港红色老区",
+      "culture": "包金醒狮、盐灶仔功夫盆景与雷州半岛乡土生活",
+      "modern": "高标准农田、特色南瓜、村庄基础设施与绿美建设"
+    },
+    "narration": [
+      "纪家镇在雷州市西北部，东邻客路、杨家，西临北部湾，南连唐家、企水，北接遂溪的河头、江洪。",
+      "镇域面积339.13平方公里，海岸线32公里，白流线和青年运河西灌渠穿境而过。",
+      "截至2020年11月，纪家镇常住人口75167人。",
+      "虾塘、盐田、防风林与番薯、花生、香芋田块交错相连。",
+      "海水养殖、晒盐、海洋捕捞和沙地农业构成沿海生产底色。",
+      "GIS边界共有42个单元，包括28个行政村和14个管理单元。",
+      "双水村有400多年历史，3500多亩高标准水田铺开成片良田。",
+      "莫宅村位于镇域北部腹地，村域沿农田和乡路展开。",
+      "林西村位于镇域北部腹地，村域沿农田和乡路展开。",
+      "南塘村位于镇域北部腹地，村域沿农田和乡路展开。",
+      "坡门村位于镇域北部东侧，村域沿农田和乡路展开。",
+      "公益村发展特色南瓜种植，北宋古瓦窟与今天的田地相邻。",
+      "双石村位于镇域中部腹地，村域沿农田和乡路展开。",
+      "曲溪村位于镇域中部腹地，村域沿农田和乡路展开。",
+      "上郎村位于镇域中部腹地，村域沿农田和乡路展开。",
+      "纪家村是纪家圩所在地，镇政府、学校、卫生院和市场集中在这里。",
+      "文园村位于镇域中部腹地，村域沿农田和乡路展开。",
+      "潭杰村是百千万工程典型村，硬化巷道、供水管网和绿化景观连成日常。",
+      "曲港村是革命红色老区，曲港圩和渔港码头记着往昔故事。",
+      "盐灶仔村以功夫盆景闻名，一盆一景，方寸之间见天地。",
+      "周家村是中国传统村落，周家大院奉政第留住青砖古宅的时光。",
+      "后坑村位于镇域中部西侧，村域沿海岸和田块展开。",
+      "锦盘村位于镇域中部腹地，村域沿农田和乡路展开。",
+      "先锋村位于镇域北部西侧，村域沿海岸和田块展开。",
+      "包金村清代起有醒狮传统，2015年武术醒狮团登上央视元宵晚会。",
+      "吴宅村位于镇域南部西侧，村域沿海岸和田块展开。",
+      "罗灵村位于镇域南部西侧，村域沿海岸和田块展开。",
+      "纪家林场草律林队分布在镇域中部西侧，林地与周边村域相接。",
+      "纪家林场赤坭尾林队分布在镇域中部东侧，林地与周边村域相接。",
+      "纪家林场高家林队分布在镇域中部腹地，林地与周边村域相接。",
+      "纪家林场公益林队分布在镇域中部东侧，林地与周边村域相接。",
+      "纪家林场后罗林队分布在镇域中部西侧，林地与周边村域相接。",
+      "纪家林场纪家林队分布在镇域中部腹地，林地与周边村域相接。",
+      "纪家林场坡门林队分布在镇域北部东侧，林地与周边村域相接。",
+      "纪家林场田寮林队分布在镇域中部西侧，林地与周边村域相接。",
+      "纪家林场新园林队分布在镇域中部腹地，林地与周边村域相接。",
+      "唐家林场调乃家林队分布在镇域中部东侧，林地与周边村域相接。",
+      "唐家林场田西林队分布在镇域南部西侧，林地与周边村域相接。",
+      "纪家镇北仔盐场靠近镇域中部西侧海岸，盐业空间与沿海村域相接。",
+      "纪家镇林场分布在镇域北部东侧，林地与周边村域相接。",
+      "曲溪水库位于镇域中部西侧，水面与周边土地相连。",
+      "迈特村位于镇域南部西侧，村域沿海岸和田块展开。",
+      "北仔村临海而立，盘龙滩连接沙滩、海天和滨海产业。",
+      "官长村位于镇域中部西侧，村域沿海岸和田块展开。",
+      "豪郎村位于镇域中部西侧，村域沿海岸和田块展开。",
+      "海联村位于镇域南部西侧，村域沿海岸和田块展开。",
+      "恬神村有1100多年历史，1500亩对虾养殖和29公顷盐场连着北部湾。",
+      "沙口村位于镇域南部西侧，村域沿海岸和田块展开。",
+      "从北部湾海岸到镇域腹地，42个GIS边界单元完整展开，村庄、田野、林地和水面彼此相连。"
+    ],
+    "pronunciations": [
+      {
+        "term": "纪家",
+        "pinyin": "jì jiā"
+      },
+      {
+        "term": "圩",
+        "pinyin": "xū"
+      },
+      {
+        "term": "恬神",
+        "pinyin": "tián shén"
+      },
+      {
+        "term": "潭杰",
+        "pinyin": "tán jié"
+      },
+      {
+        "term": "盐灶仔",
+        "pinyin": "yán zào zǎi"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440882106-boundary-001",
+        "claim": "广东省村界SHP中纪家镇代码前缀440882106包含28个行政村和14个管理单元面；父级外轮廓由全部42个可靠面融合生成。",
+        "sourceTitle": "广东省全省村级行政边界数据",
+        "sourceUrl": "data/regions/01【25096】全国村级行政边界数据/广东村界/广东全省/广东省CJ.shp",
+        "publisher": "项目本地数据",
+        "publishedAt": "2026-08-14",
+        "confidence": "high",
+        "usage": [
+          "timeline",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440882106-profile-001",
+        "claim": "纪家镇位于雷州市西北部，面积339.13平方千米，海岸线32公里，2020年11月常住人口75167人。",
+        "sourceTitle": "纪家镇公开概况与第七次人口普查资料",
+        "sourceUrl": "http://www.leizhou.gov.cn/zjlzjj/gkmlpt/mindex",
+        "publisher": "雷州市人民政府",
+        "publishedAt": "2020-11",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882106-zhoujia-001",
+        "claim": "周家村古村落保留周家大院、奉政第等古民居建筑群。",
+        "sourceTitle": "藏在乡间的周家大院！探访雷州纪家镇周家村古村落建筑群",
+        "sourceUrl": "https://static.nfnews.com/content/202601/28/c12119089.html",
+        "publisher": "南方+",
+        "publishedAt": "2026-01-28",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882106-baojin-001",
+        "claim": "2015年央视元宵晚会上的4头醒狮来自雷州市纪家镇包金村。",
+        "sourceTitle": "威武之狮登上央视元宵晚会舞台",
+        "sourceUrl": "https://www.gdzjdaily.com.cn/p/2693771.html",
+        "publisher": "湛江日报/湛江云媒",
+        "publishedAt": "2015-03-18",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882106-user-001",
+        "claim": "10个重点村的农田、古村、养殖、海湾、红色记忆和手艺细节按用户提供文本整理。",
+        "sourceTitle": "用户提供的纪家镇视频资料",
+        "sourceUrl": "user://prompt",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-14",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440882110": {
+    "name": "东里镇",
+    "title": "地理乡土情·雷州市东里镇",
+    "voiceRate": "+24%",
+    "voiceId": "zh-CN-YunxiNeural",
+    "subtitleLeadSeconds": -0.08,
+    "tourIntroSentences": 6,
+    "tourFlightSeconds": 3.8,
+    "tourReturnSeconds": 4.4,
+    "tourOrder": [
+      "440882110208",
+      "440882110206",
+      "440882110209",
+      "440882110200",
+      "440882110201",
+      "440882110016",
+      "440882110203",
+      "440882110204",
+      "440882110205",
+      "440882110217",
+      "440882110219",
+      "440882110212",
+      "440882110210",
+      "440882110211",
+      "440882110213",
+      "440882110214",
+      "440882110215",
+      "440882110216",
+      "440882110218",
+      "440882110207"
+    ],
+    "subtitleProtectedPhrases": [
+      "雷州市东里镇",
+      "东里镇",
+      "东里圩",
+      "东里社区",
+      "雷州湾",
+      "海滨路",
+      "南美白对虾",
+      "金鲳鱼",
+      "石斑鱼",
+      "番薯",
+      "花生",
+      "海水稻",
+      "红树林",
+      "中华白海豚",
+      "东里村",
+      "东塘村",
+      "东寮村",
+      "白岭村",
+      "三吉村",
+      "北堀村",
+      "甲六村",
+      "西坡村",
+      "英佳塘村",
+      "洪流村",
+      "沙节村",
+      "六格村",
+      "后葛村",
+      "北坑村",
+      "土头村",
+      "淡水村",
+      "南头村",
+      "七联村",
+      "下湖村",
+      "西挖村"
+    ],
+    "facts": {
+      "area": "行政区域面积142.25平方千米",
+      "population": "2020年常住人口68246人",
+      "economy": "2024年生产总值15.34亿元",
+      "physical": "雷州半岛东部滨海乡镇，三面环海",
+      "history": "滨海聚落、红色记忆与渔耕传统交织",
+      "culture": "虾塘、渔船、红树林、番薯田与海风生活",
+      "modern": "对虾养殖、生态治理与乡村振兴并行"
+    },
+    "narration": [
+      "东里镇位于雷州市东部滨海，三面环海，东临雷州湾。",
+      "镇域面积142.25平方千米，2020年常住人口68246人。",
+      "镇中心在东里圩，学校、卫生院和市场都围着海滨路展开。",
+      "沿海虾塘和鱼塘连成片，对虾、金鲳鱼、石斑鱼是这里的主角。",
+      "沙地上，番薯和花生扎根，海水稻也在沿海田块里生长。",
+      "2024年全镇生产总值15.34亿元，海风、渔业和生态治理一起推着小镇往前走。",
+      "东里村紧邻镇区，城乡融合最明显，农田、村舍和海岸线彼此衔接。",
+      "东塘村以连片虾塘见长，对虾养殖是村里的主要收入。",
+      "东寮村沙质偏瘦，番薯、花生和耐旱作物在这里占了上风。",
+      "白岭村靠海生长，番薯和花生是沙地上的代表作物。",
+      "三吉村位于西南海岸，近海渔业和养殖业撑起村庄日常。",
+      "北堀村是对虾产业重点区，现代化虾塘示范基地正在这里推进。",
+      "甲六村从经济薄弱村转身，合作社、鱼干加工和电商让村子慢慢活起来。",
+      "西坡村海岸线漫长，滩涂和虾池把海天拉得很开。",
+      "英佳塘村枕山濒海，红色革命记忆是村里的底色。",
+      "洪流村红树林一片连着一片，候鸟和中华白海豚常来这片海湾。",
+      "沙节村海岸安静，滩涂资源适合养殖，也适合慢慢看海。",
+      "六格村是乡村振兴示范带的起点，村容和道路都在升级。",
+      "后葛村临海而居，虾塘、村道和风景一起铺开。",
+      "北坑村沿海滩涂资源丰富，现代养殖正在替换低产虾塘。",
+      "土头村沙地与村路相连，番薯和花生仍是熟悉的底色。",
+      "淡水村田地、村舍和海湾彼此靠近，日常节奏很慢。",
+      "南头村面向内湾，海风、滩涂和养殖水面都在附近。",
+      "七联村海水养殖和沙地农业并行，村庄朴实安静。",
+      "下湖村村名带着海湾味道，海边生活和田地相互靠拢。",
+      "西挖村在镇域西侧，海岸、村路和农田一路延展。",
+      "走完东里镇这二十个村，虾塘的鲜、红树林的静、海风的柔，都留在雷州湾边。"
+    ],
+    "pronunciations": [
+      {
+        "term": "雷州湾",
+        "pinyin": "léi zhōu wān"
+      },
+      {
+        "term": "东里圩",
+        "pinyin": "dōng lǐ xū"
+      },
+      {
+        "term": "北堀村",
+        "pinyin": "běi kū cūn"
+      },
+      {
+        "term": "英佳塘村",
+        "pinyin": "yīng jiā táng cūn"
+      },
+      {
+        "term": "中华白海豚",
+        "pinyin": "zhōng huá bái hǎi tún"
+      }
+    ],
+    "imagePromptTheme": "",
+    "sources": [
+      {
+        "claimId": "440882110-boundary-001",
+        "claim": "本地村级边界数据中，东里镇代码 440882110 下提取到20个村级面要素，父级外轮廓来自本地乡镇级 GeoJSON。",
+        "sourceTitle": "广东省乡镇级与村级行政边界数据（本地缓存）",
+        "sourceUrl": "data/regions/01【25096】全国村级行政边界数据/广东村界/广东全省/广东省CJ.shp",
+        "publisher": "项目本地数据",
+        "publishedAt": "2026-08-14",
+        "confidence": "high",
+        "usage": [
+          "timeline",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440882110-user-brief-001",
+        "claim": "用户提供稿件给出东里镇区位、三面环海、面积142.25平方千米、2020年常住人口68246人、2024年生产总值15.34亿元及各村叙事重点。",
+        "sourceTitle": "用户提供的东里镇视频稿件",
+        "sourceUrl": "user://prompt",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-14",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882110-industry-001",
+        "claim": "东里镇发展对虾等海水养殖，围绕北堀等片区推进虾塘改造和现代化养殖基地建设。",
+        "sourceTitle": "东里镇人民政府工作报告及特色产业实施方案公开资料",
+        "sourceUrl": "https://www.leizhou.gov.cn/zjlzdl/gkmlpt/index",
+        "publisher": "雷州市东里镇人民政府",
+        "publishedAt": "2024-2025",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882110-ecology-001",
+        "claim": "东里镇沿海红树林、洪流村生态景观、候鸟和中华白海豚等内容来自公开报道与用户稿件综合整理。",
+        "sourceTitle": "东里镇洪流村红树林与滨海生态公开报道",
+        "sourceUrl": "https://www.gdzjdaily.com.cn/",
+        "publisher": "湛江日报/湛江云媒等公开报道",
+        "publishedAt": "2024-2026",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440882111": {
+    "name": "调风镇",
+    "title": "地理乡土情·雷州市调风镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "雷州市",
+    "town": "调风镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "调风镇位于广东省、湛江市、雷州市，本方案依据全国村级行政边界数据自动建立，下辖18个村级区域。另按源边界数据保留3个农场等补充管理单元，只显示边界、不单独出镜。",
+      "镜头将从高空穿过云层抵达调风镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "调铭村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "里仁村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "水尾村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "林宅村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "禄切村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "后降村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "坑尾村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "调风村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "企树村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "官昌村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "井仔村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "卜昌村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "课堂村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "坎园村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "横山村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "东平村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "赤尾村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "草朗村是调风镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回调风镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440882111213",
+      "440882111203",
+      "440882111205",
+      "440882111212",
+      "440882111202",
+      "440882111209",
+      "440882111210",
+      "440882111200",
+      "440882111201",
+      "440882111216",
+      "440882111217",
+      "440882111207",
+      "440882111206",
+      "440882111208",
+      "440882111215",
+      "440882111211",
+      "440882111214",
+      "440882111204"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440882112": {
+    "name": "龙门镇",
+    "title": "地理乡土情·雷州市龙门镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "雷州市",
+    "town": "龙门镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "龙门镇位于广东省、湛江市、雷州市，本方案依据全国村级行政边界数据自动建立，下辖57个村级区域。",
+      "镜头将从高空穿过云层抵达龙门镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "金星农场二十三队(南兴镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场二十四队(南兴镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场二十五队(南兴镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场十六队(南兴镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场畜牧队(南兴镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "羊觅村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "排楼村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "谢家村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "德地村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "九斗村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那利村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那宛村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那双村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "王家村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "竹桥村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "后排村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "横山村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "公树村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "平湖村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "淘汶村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "潭边村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "足荣村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "田墩村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那尾村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "禄马村是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "大新社区是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "向阳社区是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "新华社区是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "火炬农场六队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "火炬农场十一队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "火炬农场一队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场场部(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场二十七队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场二十四队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场二十五队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场三队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场十八队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场十二队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场十六队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场十七队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场十三队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场十四队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场十五队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场畜牧队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场研究所(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "金星农场一队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "龙门水库管理处是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "龙门林场大坑林队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "龙门林场东坎林队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "龙门林场排楼林队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "幸福农场二十六队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "幸福农场二十七队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "幸福农场二十四队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "幸福农场七队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "幸福农场十五队(龙门镇)是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "龙门镇农场是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "马定桥水库是龙门镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回龙门镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440882108410",
+      "440882108409",
+      "440882108408",
+      "440882108407",
+      "440882108406",
+      "440882112200",
+      "440882112203",
+      "440882112201",
+      "440882112202",
+      "440882112204",
+      "440882112207",
+      "440882112205",
+      "440882112206",
+      "440882112209",
+      "440882112210",
+      "440882112211",
+      "440882112212",
+      "440882112208",
+      "440882112213",
+      "440882112214",
+      "440882112217",
+      "440882112216",
+      "440882112219",
+      "440882112218",
+      "440882112215",
+      "440882112003",
+      "440882112002",
+      "440882112001",
+      "440882112417",
+      "440882112413",
+      "440882112410",
+      "440882112409",
+      "440882112406",
+      "440882112405",
+      "440882112404",
+      "440882112403",
+      "440882112402",
+      "440882112401",
+      "440882112222",
+      "440882112223",
+      "440882112224",
+      "440882112225",
+      "440882112226",
+      "440882112229",
+      "440882112230",
+      "440882112231",
+      "440882112233",
+      "440882112234",
+      "440882112235",
+      "440882112236",
+      "440882112239",
+      "440882112240",
+      "440882112241",
+      "440882112243",
+      "440882112249",
+      "440882112254",
+      "440882112255"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440882115": {
+    "name": "乌石镇",
+    "title": "地理乡土情·雷州市乌石镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "雷州市",
+    "town": "乌石镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "乌石镇位于广东省、湛江市、雷州市，本方案依据全国村级行政边界数据自动建立，下辖25个村级区域。",
+      "镜头将从高空穿过云层抵达乌石镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "岭峰村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "乌石镇国营盐场是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "乌石镇政府是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "房参村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "潭元村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "铺仔村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "陈宅村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "泗寮村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "湖仔村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "丰南村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "平步村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "向党村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那澳村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "雷州市盐场那沃工区(乌石镇)是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "三教村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那毛村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "港彩村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "潭朗村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "塘东村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "乌石村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "伴侣村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那灵村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "新沟村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "岭下村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "文堂村是乌石镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回乌石镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440882115210",
+      "440882115202",
+      "440882115000",
+      "440882115209",
+      "440882115208",
+      "440882115201",
+      "440882115200",
+      "440882115204",
+      "440882115203",
+      "440882115205",
+      "440882115211",
+      "440882115220",
+      "440882115019",
+      "440882115400",
+      "440882115223",
+      "440882115224",
+      "440882115225",
+      "440882115222",
+      "440882115219",
+      "440882115212",
+      "440882115217",
+      "440882115216",
+      "440882115215",
+      "440882115214",
+      "440882115213"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440882116": {
+    "name": "覃斗镇",
+    "title": "地理乡土情·雷州市覃斗镇",
+    "voiceRate": "+24%",
+    "voiceId": "zh-CN-YunxiNeural",
+    "subtitleLeadSeconds": -0.08,
+    "tourIntroSentences": 6,
+    "tourFlightSeconds": 3.8,
+    "tourReturnSeconds": 4.4,
+    "tourOrder": [
+      "440882116001",
+      "440882116207",
+      "440882116202",
+      "440882116201",
+      "440882116209",
+      "440882116210",
+      "440882116200",
+      "440882116206",
+      "440882116211",
+      "440882116208",
+      "440882116218",
+      "440882116203",
+      "440882116204",
+      "440882116217",
+      "440882116205",
+      "440882116216",
+      "440882116215",
+      "440882116214",
+      "440882116212",
+      "440882116213"
+    ],
+    "subtitleProtectedPhrases": [
+      "雷州市覃斗镇",
+      "覃斗镇",
+      "北部湾",
+      "覃斗路",
+      "覃斗芒果",
+      "流沙南珠",
+      "流沙港",
+      "黄金贝",
+      "覃斗社区",
+      "讨泗村",
+      "六高村",
+      "凌新村",
+      "英岭村",
+      "东港村",
+      "西岸村",
+      "后洪村",
+      "卜立村",
+      "塘边村",
+      "铺前村",
+      "迈克村",
+      "那金村",
+      "山尾村",
+      "流沙村",
+      "下海村",
+      "海边村",
+      "头和村",
+      "提交村",
+      "英楠村"
+    ],
+    "facts": {
+      "area": "行政区域面积104平方千米",
+      "population": "2020年常住人口39735人",
+      "physical": "雷州半岛西海岸、北部湾东岸，海岸线长46公里",
+      "economy": "芒果种植与南珠养殖加工构成两张产业名片",
+      "culture": "圩市、果园、渔港与珍珠池共同塑造沿海生活",
+      "modern": "覃斗路、乌石港高速与流沙港串联产地和市场"
+    },
+    "narration": [
+      "覃斗镇位于雷州市西南部、北部湾东岸，距雷州市区约六十九千米。",
+      "全镇行政区域面积一百零四平方千米，二零二零年常住人口三万九千七百三十五人。",
+      "这里冬暖春旱、光照充足，四十六公里海岸线外，是广阔的浅海和滩涂。",
+      "覃斗芒果与流沙南珠，是这片土地最鲜明的两张名片。",
+      "覃斗路连接果园、养殖基地和流沙港，乌流线、平覃线、英覃线在镇域交织。",
+      "接下来，镜头沿着道路与海岸，走进覃斗镇的一个社区和十九个行政村。",
+      "覃斗社区是覃斗圩和镇政府所在地，商铺、市场与公共服务聚在一起，赶集日最有烟火气。",
+      "塘边村临近乌石港高速，便利交通让芒果和蔬菜更快运往外地。",
+      "凌新村人口较多，八个自然村之间，青枣与芒果铺开连片田园。",
+      "六高村紧邻讨泗，芒果产业园从传统种植向交易、加工和农旅融合延伸。",
+      "迈克村的多个自然村广泛种植芒果，是覃斗芒果产业的重要组成部分。",
+      "那金村里陈、吴等姓氏世代相处，在共同耕作中延续典型农业村落的生活。",
+      "讨泗村是覃斗芒果核心产区，台农、蛋芒等品种连成果园，乡贤力量也参与乡村建设。",
+      "卜立村由多个自然村组成，农田、养殖与老屋保留着传统村落的质朴。",
+      "山尾村以优质芒果闻名，当地人常说，覃斗芒果上国会，最是有名山尾村。",
+      "铺前村因古驿道商铺得名，如今从救济村成长为蔬果产业与覃斗芒果示范村。",
+      "西岸村守着北部湾海岸，海风穿过果园与村舍，留下鲜明的西海岸气息。",
+      "英岭村靠海发展，产业由盐场和近海捕捞，转向贝类、对虾与石斑鱼立体养殖。",
+      "海边村从浅海捕捞转向黄金贝养殖，小小贝类托起越来越稳的沿海生活。",
+      "东港村依港而生，渔船、海水养殖和潮汐，共同安排着村民的日常。",
+      "后洪村的珍珠养殖池连片分布，珠农劳作与粼粼水面构成寻常风景。",
+      "提交村的四个自然村普遍种植芒果，果园也是村庄最熟悉的产业景观。",
+      "英楠村由英楠与乔木两个自然村组成，芒果和乔木共生，田园绿意绵延。",
+      "头和村由头罗、和合、外村组成，田园、老树与村道维持着宁静节奏。",
+      "流沙村被誉为中国南珠第一村，珍珠养殖、加工与流沙深水港，让产品走向五十多个国家和地区。",
+      "下海村面向海湾，渔业捕捞与海水养殖，是多个自然村的重要收入来源。",
+      "从覃斗圩到流沙港，从芒果园到珍珠池，二十个村和社区串起雷州半岛西海岸最真实的生活。"
+    ],
+    "pronunciations": [
+      {
+        "term": "覃斗",
+        "pinyin": "tán dǒu"
+      },
+      {
+        "term": "覃斗圩",
+        "pinyin": "tán dǒu xū"
+      },
+      {
+        "term": "讨泗",
+        "pinyin": "tǎo sì"
+      },
+      {
+        "term": "卜立",
+        "pinyin": "bǔ lì"
+      },
+      {
+        "term": "流沙南珠",
+        "pinyin": "liú shā nán zhū"
+      }
+    ],
+    "imagePromptTheme": "雷州半岛西海岸的芒果园、珍珠养殖池、渔港、浅海滩涂与乡村道路，纪实摄影风格",
+    "sources": [
+      {
+        "claimId": "440882116-boundary-001",
+        "claim": "本地缓存村界覆盖覃斗镇18个旧版单元；现行东港村、西岸村使用从相邻旧版沿海村面拆分的不重叠展示边界，并明确标注非测绘用途。",
+        "sourceTitle": "广东省乡镇级与村级行政边界数据（本地缓存）",
+        "sourceUrl": "data/regions/01【25096】全国村级行政边界数据/广东村界/广东全省/广东省CJ.shp",
+        "publisher": "项目本地数据",
+        "publishedAt": "2026-08-16",
+        "confidence": "medium",
+        "usage": [
+          "timeline",
+          "storyboard",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440882116-user-brief-001",
+        "claim": "用户稿件提供覃斗镇区位、面积、人口、交通、产业与20个村（社区）的逐段叙事重点。",
+        "sourceTitle": "用户提供的覃斗镇视频稿件",
+        "sourceUrl": "user://prompt",
+        "publisher": "用户提供",
+        "publishedAt": "2026-08-16",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882116-division-001",
+        "claim": "覃斗镇现行统计区划代码为440882116，下辖覃斗社区及19个村委会。",
+        "sourceTitle": "雷州市行政区划（2025年）",
+        "sourceUrl": "https://www.xzqh.org/show/china/2025/44/440882.html",
+        "publisher": "区划地名网（据统计区划资料整理）",
+        "publishedAt": "2025",
+        "confidence": "medium",
+        "usage": [
+          "script",
+          "coverage"
+        ]
+      },
+      {
+        "claimId": "440882116-leizhou-001",
+        "claim": "雷州是南珠之乡、芒果之乡，流沙南珠和覃斗芒果获国家地理标志保护。",
+        "sourceTitle": "雷州概况",
+        "sourceUrl": "https://www.leizhou.gov.cn/lzsq/lzjj/content/post_1865125.html",
+        "publisher": "雷州市人民政府",
+        "publishedAt": "2026",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      },
+      {
+        "claimId": "440882116-pearl-001",
+        "claim": "流沙村被誉为中国南珠第一村，南珠产业持续获得科研团队支持。",
+        "sourceTitle": "良种良法让流沙南珠更璀璨",
+        "sourceUrl": "https://www.zhanjiang.gov.cn/zjsfw/bmdh/kjj/zwgk/gzdt/content/mpost_2180697.html",
+        "publisher": "湛江市人民政府门户网站",
+        "publishedAt": "2026",
+        "confidence": "high",
+        "usage": [
+          "script",
+          "storyboard"
+        ]
+      }
+    ]
+  },
+  "440883106": {
+    "name": "吴阳镇",
+    "title": "地理乡土情·吴川市吴阳镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "吴川市",
+    "town": "吴阳镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "吴阳镇位于广东省湛江市吴川市，是中国历史文化名镇、粤西唯一状元林召棠的故里，下辖18个村级区域。",
+      "镜头将从高空穿过云层抵达吴阳镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "街道社区是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "白沙村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "上郭社区是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那蒙村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那郭垌村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "闸口村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "新勇村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "桥头村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "那良村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "水洒村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "三端村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "芷寮村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "大坉村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "秧义村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "海山村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "文塔村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "限口村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "沙角旋村是吴阳镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回吴阳镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "440883106001",
+      "440883106003",
+      "440883106004",
+      "440883106201",
+      "440883106203",
+      "440883106204",
+      "440883106010",
+      "440883106209",
+      "440883106202",
+      "440883106206",
+      "440883106207",
+      "440883106210",
+      "440883106016",
+      "440883106215",
+      "440883106214",
+      "440883106211",
+      "440883106212",
+      "440883106213"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  },
+  "440883107": {
+    "name": "塘缀镇",
+    "title": "地理乡土情·吴川市塘缀镇",
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "吴川市",
+    "town": "塘缀镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "广东有个镇，名字里有个字，你大概打不出来——塘㙍。\n输入法只有「塘缀」，身份证上是「塘㙍」。\n这个字字典里没有。塘㙍人造的：土字旁加四个「又」——这片土地，又宽、又广、又肥、又美。\n它原来叫塘溪。明万历年间的书里，就有「塘㙍圩」。四百年前，这儿已经是圩市。\n本地人一直读「缀」，字典偏给它注了个「多」。",
+      "先看这片地。一百七十平方公里，不高，是丘陵，一个土坡连着一个土坡。\n塘㙍河从化州流过来，四十七公里，穿过全镇，到黄坡大岸汇进鉴江。两岸耕地十八万亩，是吴川最大的产粮区。\n吴川有句老话：左江出文官，右江出武官。塘㙍在鉴江右岸。",
+      "2022年3月24日，整个湛江机场搬到了这个镇——塘㙍镇合山村。\n4E级，跑道3200米，能落波音777、787，航站楼六万一千八百平方米。\n以前塘㙍人坐飞机，要往湛江跑四十公里。现在机场在自家地里。",
+      "机场一落，路就往这挤：沈海、汕湛、广湛高铁，还有个塘㙍站。\n去年旅客三百二十二万，货邮九千三百吨，三十二条航线——已经是国际机场。\n空港经济区就在边上。邮政、京东、圆通都进来了；原子高科做医药。",
+      "再往里走，是塘㙍的老本行：糖酒机械。\n七十年代从公社农机厂起家。最红火时全镇一百多家厂，宏泰甘化把设备卖到亚非拉。\n可去年，全镇规模以上工业只剩八家，产值一亿六千万。\n老产业在缩，人也在走——户籍十五万八，常住十万出头。",
+      "往北，杨赤里村。四十五栋别墅，统一图纸、统一层高，村民拎包入住。\n出钱的是本村人杨松，1980年揣着几十块去深圳。有人说这是炫富，村里人说：房本写的是自己名。",
+      "樟山村，张炎故居。一·二八淞沪抗战，他带十九路军，在吴淞庙行跟日军硬拼。\n1945年1月，他在樟山宣布起义，一千多人打下伪县政府，活捉县长。3月被捕，遇害。\n1958年追认革命烈士。1989年列为省文物保护单位。",
+      "丰六洞村西边有座丽山，五十六米高。古吴川八景之一，叫丽山樵唱。\n山顶那口井，水一半冷一半热。山脚的三仙古庙，1958年毁了。景还在，唱山歌的樵夫没有了。",
+      "塘㙍人说话，跟吴川市区不一样。塘缀口音属高阳片粤语，跟化州、茂名更近，九个声调。\n本地人自嘲：塘㙍人吵架，好听过唱歌。拿塘㙍话配短视频，很容易就火。\n圩日一条街上四种口音：塘㙍话、吴川话、廉江话、化州话。",
+      "塘㙍人的早上，从一块松糕开始。\n市场里有条街，整排铺子只卖糕。松糕、芋头糕、马蹄糕，还有田艾籺、田薯籺。\n赤砂糖加碱水，发足了蒸四十分钟。切一条拎起来抖一抖，不断。",
+      "几年前，市场里一个松糕摊。摊主的女儿拍了几段短视频，蒸糕、切糕，发到网上。\n热气往上冒，手指按下去，糕慢慢回弹。就这么火了。\n一度冲到湛江美食榜第一。有人开两三个小时车来，排队半小时，买两盒就走。",
+      "塘㙍人最舍得花钱的那天，不是过年，是年例。\n日子各村不同：六寿村二月初二宰牲，十月初一分众肉。外出的开车回来，摆几十桌，请亲戚、请朋友。\n还有粤剧。杨屋的文化广场，年年请省粤剧院。",
+      "接下来，一村一句，走完塘㙍下辖的二十四个村。走得快，也许有遗漏，也可能说得不准，欢迎在评论区补充。",
+      "龙安。状元地人出去做皮带，珠三角开了近百家厂。六寿村二月二宰牲。",
+      "岭脚。1943年南路特委机关进村，抗日前线指挥部就设在书房。2022年评上市文明村。",
+      "翟屋。1943年王国强在这儿教书，白天上课，晚上做地下党。",
+      "樟山。一条村两位将军，十八人参加八一南昌起义。",
+      "石埠，一千五百多户。耕地四千六百亩，十三条自然村。",
+      "西埇。「埇」是两山之间的田。塘㙍带这个字的村，不止它一个。",
+      "三丫，十五条自然村，五千二百人，离镇区四公里。",
+      "社山，1531年建村。文辉小学替张炎藏过枪，篮球队在吴川有名。",
+      "大洋。赵明六十二岁去哈佛读书，回来建了大洋学堂，读书不要钱。",
+      "塘㙍，镇政府在这儿。糖酒设备七十年代起家。农历一、四、七趁圩。",
+      "杨屋，七千二百人，全镇最多。机场占的合山村在这儿。",
+      "上圩，紧贴镇区。三十多亩释迦果，村里最拿得出手的产业。",
+      "中堂。七十多亩多年生水稻，种一次收几年，稻里还养小龙虾。",
+      "南埇。将军茶全手工炒。杨赤里四十五栋别墅在这儿。",
+      "东村，一千二百多户。年例一到，外出的都往家赶。",
+      "新桥和塘下，镇域最东头。趁圩去板桥。",
+      "屋地山，十八条自然村，全镇最多。屋地山、大洋、凌田、冷水。",
+      "板桥，原来是板桥镇，2003年并进来。板桥圩还在，二、五、八趁圩。",
+      "上杭，九条自然村。易氏大宗祠，一年分红三万五。",
+      "东岸，九条自然村。东岸、岭尾、大低垌三条大村，大低垌圩市最热闹。",
+      "企石，二十五平方公里，全镇最大。曲田、企石、米各、占村。",
+      "塘莲。山薯是招牌，2014年成立合作社，把生薯做成品牌。",
+      "山瑶，2017年的全国文明村镇。乡贤捐一千二百万修路建校。",
+      "一个镇，名字打不出来，机场落下来，别墅盖起来，糖机卖到国外，人走了五万。\n塘㙍人不用解释。你打「塘缀」，我们也认。"
+    ],
+    "tourOrder": [
+      "440883107214",
+      "440883107213",
+      "440883107204",
+      "440883107212",
+      "440883107211",
+      "440883107013",
+      "440883107209",
+      "440883107208",
+      "440883107207",
+      "440883107009",
+      "440883107202",
+      "440883107205",
+      "440883107203",
+      "440883107007",
+      "440883107224",
+      "440883107028",
+      "440883107221",
+      "440883107220",
+      "440883107218",
+      "440883107222",
+      "440883107225",
+      "440883107026",
+      "440883107217"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05,
+    "tourIntroSentences": 66,
+    "outroParagraphIndex": 36,
+    "tourReturnSeconds": 4.4
+  },
+  "441881103": {
+    "name": "横石水镇",
+    "title": "地理乡土情·英德市横石水镇",
+    "province": "广东省",
+    "city": "清远市",
+    "county": "英德市",
+    "town": "横石水镇",
+    "generated": true,
+    "generationSource": "广东村界/广东全省/广东省CJ.dbf",
+    "generationNotice": "由全国村级行政边界数据自动生成初始方案；地方事实、图片与旁白需在发布前复核。",
+    "narration": [
+      "横石水镇位于广东省、清远市、英德市，本方案依据全国村级行政边界数据自动建立，下辖8个村级区域。",
+      "镜头将从高空穿过云层抵达横石水镇，持续显示行政边界与村级名称，并依照真实边界顺序展开游览。",
+      "横石水社区是横石水镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "农科站是横石水镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "江古山村是横石水镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "横岭村是横石水镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "溪北村是横石水镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "联雄村是横石水镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "新星村是横石水镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "塔岗村是横石水镇下辖的村级区域，镜头将沿真实边界停留，等待补充当地产业、风貌与生活素材。",
+      "从最后一个村级区域拉回横石水镇全域，这份自动方案可继续补充真实图片、地方资料、字幕和旁白后再导出成片。"
+    ],
+    "tourOrder": [
+      "441881103001",
+      "441881103003",
+      "441881103201",
+      "441881103202",
+      "441881103203",
+      "441881103204",
+      "441881103207",
+      "441881103206"
+    ],
+    "voiceId": "zh-CN-YunyangNeural",
+    "voiceRate": "-4%",
+    "subtitleLeadSeconds": 0.05
+  }
+}

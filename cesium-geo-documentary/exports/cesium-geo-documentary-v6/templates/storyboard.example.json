@@ -1,0 +1,45 @@
+{
+  "regionId": "000000",
+  "duration": 50,
+  "scenes": [
+    {
+      "sceneId": "location",
+      "title": "空间定位",
+      "start": 0,
+      "duration": 7,
+      "narrationRef": "script:paragraph-01",
+      "cesium": {
+        "cameraAction": "holdParentOverview",
+        "regionId": "000000",
+        "layers": ["imagery", "parent-boundary", "child-boundaries"],
+        "boundarySequence": ["reveal-parent", "fade-in-children"]
+      },
+      "visualEvidence": {
+        "featureIds": ["river-example"],
+        "photoAssetIds": []
+      },
+      "transitionOut": "hold",
+      "sources": ["000000-location-001"]
+    },
+    {
+      "sceneId": "culture",
+      "title": "地方文化",
+      "start": 32,
+      "duration": 6,
+      "narrationRef": "script:paragraph-05",
+      "narrationCueIds": ["cue-culture-01"],
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "000000",
+        "layers": ["imagery", "boundaries", "selected-fill"]
+      },
+      "visualEvidence": {
+        "featureIds": [],
+        "photoAssetIds": ["culture-photo-example"],
+        "photoPlacement": "collision-aware-negative-space"
+      },
+      "transitionOut": "photo-fade",
+      "sources": ["000000-culture-001", "asset:culture-photo-example"]
+    }
+  ]
+}

@@ -1,0 +1,282 @@
+{
+  "regionId": "440823104",
+  "title": "地理乡土情·遂溪县乐民镇",
+  "duration": 223,
+  "presentationMode": "parent-child-tour",
+  "coverageMode": "verified-source-boundaries",
+  "boundaryUnitCount": 12,
+  "tourChildCount": 12,
+  "scenes": [
+    {
+      "start": 0.1,
+      "end": 9,
+      "visual": "封面淡出后，高空地球镜头沿乐民镇中心连续下坠，穿过密集云层完成约三秒的穿云，直接落在父级总览相机；边界总览在镜头锁定时开始。",
+      "claimIds": [
+        "440823104-boundary-001",
+        "440823104-profile-001"
+      ],
+      "duration": 8.9
+    },
+    {
+      "start": 9,
+      "end": 17,
+      "visual": "父级总览相机锁定，卫星影像上以贴地笔触完整绘制乐民镇父级边界；开场不显示任何下级名称。",
+      "claimIds": [
+        "440823104-boundary-001",
+        "440823104-profile-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 17,
+      "end": 25,
+      "visual": "稳定淡入全部12个边界单元，两处林场以上下文线完整显示并保留标签；乐民、盐灶两座渔港位置以轻量标注。",
+      "claimIds": [
+        "440823104-boundary-001",
+        "440823104-profile-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 25,
+      "end": 33,
+      "visual": "保持父级低斜视总览，人口与行政事实以简洁事实卡短暂出现；地图边界保持稳定无闪烁。",
+      "claimIds": [
+        "440823104-profile-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 33,
+      "end": 41,
+      "visual": "展示2025年乐民花蟹实景图，标签注明年份；随后回到卫星图中的沿海渔港与捕捞水域。",
+      "visualAssetId": "lemin-huaxie",
+      "claimIds": [
+        "440823104-crab-001",
+        "440823104-crab-festival-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 41,
+      "end": 49,
+      "visual": "回到卫星图承接东风螺养殖与对虾种业、渔光互补光伏；不做通用水产图片替代。",
+      "claimIds": [
+        "440823104-economy-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 49,
+      "end": 57,
+      "visual": "展示乐民所城（珍珠城）遗址实景，标签保留来源；随后回到乐民城所在位置。",
+      "visualAssetId": "lemin-cheng",
+      "claimIds": [
+        "440823104-history-001",
+        "440823104-civil-academy-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 57,
+      "end": 65,
+      "visual": "回到卫星图，以墩文、乐民城、海山、松树等老区村庄位置承接红色历史；图片进入退出均柔和淡化。",
+      "claimIds": [
+        "440823104-red-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 65,
+      "end": 73,
+      "visual": "展示2026年二月二游鱼鱼灯夜景实景，标签注明官方活动与年份；字幕与配音中圩读xū。",
+      "visualAssetId": "yudeng-lantern",
+      "claimIds": [
+        "440823104-culture-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 73,
+      "end": 81,
+      "visual": "回到乐民圩街景与卫星总览，承接圩日、雷州话与镇区日常节奏；不出现读音教学式旁白。",
+      "claimIds": [
+        "440823104-dialect-001",
+        "440823104-culture-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 81,
+      "end": 89,
+      "visual": "展示乐民中学越秀游泳馆实景，标签保留2025年；随后回到镇区教育设施位置。",
+      "visualAssetId": "lemin-middle-school-pool",
+      "claimIds": [
+        "440823104-school-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 89,
+      "end": 97,
+      "visual": "回到全镇卫星总览，以风电、光伏与典型村建设承载蓝色经济与乡村建设；全部下级标签继续隐藏。",
+      "claimIds": [
+        "440823104-modern-001",
+        "440823104-economy-001"
+      ],
+      "duration": 8
+    },
+    {
+      "start": 110.26,
+      "end": 118.02,
+      "childId": "440823104207",
+      "childName": "盐灶村",
+      "visual": "从父级总览连续缓动抵达盐灶村，当前边界由上下文白平滑过渡为金色并淡入低透明填充，只显示盐灶村标签，到达后锁定。",
+      "narrationCueIds": [
+        "440823104-child-01"
+      ],
+      "duration": 7.759999999999991
+    },
+    {
+      "start": 118.02,
+      "end": 126.64,
+      "childId": "440823104208",
+      "childName": "调神村",
+      "visual": "由盐灶村自然飞向调神村，前一标签先淡出、当前标签再淡入，完整上下文边界持续可见且不闪烁。",
+      "narrationCueIds": [
+        "440823104-child-02"
+      ],
+      "duration": 8.620000000000005
+    },
+    {
+      "start": 126.64,
+      "end": 132.317,
+      "childId": "440823104206",
+      "childName": "埠头村",
+      "visual": "连续飞抵埠头村，村域沿河涌展开，镜头到达后固定。",
+      "narrationCueIds": [
+        "440823104-child-03"
+      ],
+      "duration": 5.677000000000007
+    },
+    {
+      "start": 132.317,
+      "end": 141.94,
+      "childId": "440823104205",
+      "childName": "墩文村",
+      "visual": "连续飞抵墩文村，纪念设施位置以轻量标注；边界和填充平滑交接。",
+      "narrationCueIds": [
+        "440823104-child-04"
+      ],
+      "duration": 9.62299999999999
+    },
+    {
+      "start": 141.94,
+      "end": 148.763,
+      "childId": "440823104204",
+      "childName": "余村",
+      "visual": "连续飞抵余村，多部件同步高亮，旁白提到典型村建设时以文字标签轻量提示。",
+      "narrationCueIds": [
+        "440823104-child-05"
+      ],
+      "duration": 6.8230000000000075
+    },
+    {
+      "start": 148.763,
+      "end": 155.52,
+      "childId": "440823104203",
+      "childName": "海山村",
+      "visual": "连续飞抵海山村，保持统一缓动和低斜视，抵达后锁定。",
+      "narrationCueIds": [
+        "440823104-child-06"
+      ],
+      "duration": 6.757000000000005
+    },
+    {
+      "start": 155.52,
+      "end": 163.528,
+      "childId": "440823104201",
+      "childName": "乐民村",
+      "visual": "连续飞抵乐民村，乐民所城与文明书院位置以轻量标注；展示醒狮实景图承接村域旁白。",
+      "visualAssetId": "xingshi",
+      "narrationCueIds": [
+        "440823104-child-07"
+      ],
+      "duration": 8.007999999999981
+    },
+    {
+      "start": 163.528,
+      "end": 170.768,
+      "childId": "440823104202",
+      "childName": "松树村",
+      "visual": "连续飞抵松树村，两个分片和内洞结构完整保留，边界与填充同步。",
+      "narrationCueIds": [
+        "440823104-child-08"
+      ],
+      "duration": 7.240000000000009
+    },
+    {
+      "start": 170.768,
+      "end": 177.317,
+      "childId": "440823104214",
+      "childName": "乐民镇河头林场",
+      "visual": "连续飞抵乐民镇河头林场，林场管理单元作为完整边界面高亮，标签保留“林场”字样，不因管理属性被排除。",
+      "narrationCueIds": [
+        "440823104-child-09"
+      ],
+      "duration": 6.549000000000007
+    },
+    {
+      "start": 177.317,
+      "end": 184.244,
+      "childId": "440823104200",
+      "childName": "陈铁村",
+      "visual": "连续飞抵陈铁村，镜头变化保持匀缓，不突然加速放大。",
+      "narrationCueIds": [
+        "440823104-child-10"
+      ],
+      "duration": 6.9269999999999925
+    },
+    {
+      "start": 184.244,
+      "end": 191.314,
+      "childId": "440823104213",
+      "childName": "乐民镇北坡林场",
+      "visual": "连续飞抵乐民镇北坡林场，林场面完整高亮并保留标签，与相邻村域边界保持一致。",
+      "narrationCueIds": [
+        "440823104-child-11"
+      ],
+      "duration": 7.069999999999993
+    },
+    {
+      "start": 191.314,
+      "end": 197.291,
+      "childId": "440823104209",
+      "childName": "安埠村",
+      "visual": "连续飞抵安埠村，当前标签和金色边界平滑出现，到达后固定完成最后一段村级旁白。",
+      "narrationCueIds": [
+        "440823104-child-12"
+      ],
+      "duration": 5.977000000000004
+    },
+    {
+      "start": 197.291,
+      "end": 201.691,
+      "visual": "最后一段村级旁白结束后，选中填充和标签淡出，相机沿连续测地线缓动返回父级开场视角；12个上下文边界保持稳定。",
+      "cameraAction": "return-to-parent-overview",
+      "duration": 4.4,
+      "silent": true
+    },
+    {
+      "start": 201.691,
+      "end": 225,
+      "visual": "父级总览完全锁定，以完整边界和卫星影像承接片尾总结，标题保持“地理乡土情·遂溪县乐民镇”。",
+      "claimIds": [
+        "440823104-profile-001",
+        "440823104-history-001",
+        "440823104-culture-001"
+      ],
+      "duration": 21.308999999999997
+    }
+  ]
+}

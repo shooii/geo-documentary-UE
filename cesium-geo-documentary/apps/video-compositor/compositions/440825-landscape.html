@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>徐闻县地理图说</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1920px;height:1080px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Microsoft YaHei")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}
+    .topbar{left:72px;top:72px;display:flex;align-items:center;gap:18px;font-size:24px;letter-spacing:.16em;color:#d1dbe1;text-shadow:0 2px 16px #000}.topbar:before{content:"";width:64px;height:3px;background:#ffd166;box-shadow:0 0 16px rgba(255,209,102,.75)}
+    .subtitle{left:50%;bottom:72px;transform:translateX(-50%);max-width:1180px;font-size:38px;line-height:1.42;text-align:center;font-weight:650;text-shadow:0 2px 8px #000;white-space:nowrap}.subtitle-inner{display:block;padding:12px 24px;border-radius:14px;background:rgba(4,10,15,.72)}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440825-landscape" data-start="0" data-width="1920" data-height="1080" data-duration="50" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440825-map-landscape.mp4" muted playsinline preload="auto" data-start="0" data-duration="50" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="0" data-duration="50" data-track-index="1"></div>
+  <div id="topbar" class="clip topbar" data-start="0" data-duration="50" data-track-index="10">湛江地理图说 · 全域与区县</div>
+  <div id="caption-0" class="clip subtitle" data-start="0.100" data-duration="4.888" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">地图向雷州半岛最南端推进，徐闻面向琼州海峡，</span></div>
+<div id="caption-1" class="clip subtitle" data-start="4.988" data-duration="1.999" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">与海南岛隔海相望。</span></div>
+<div id="caption-2" class="clip subtitle" data-start="6.987" data-duration="5.430" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">2024年徐闻户籍人口79.52万，县城、农场、</span></div>
+<div id="caption-3" class="clip subtitle" data-start="12.417" data-duration="3.620" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">沿海乡镇与港口共同组织人口分布。</span></div>
+<div id="caption-4" class="clip subtitle" data-start="16.037" data-duration="4.880" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">2024年徐闻地区生产总值263.14亿元，</span></div>
+<div id="caption-5" class="clip subtitle" data-start="20.917" data-duration="4.658" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">特色农业、港航物流和对琼联系构成经济主线。</span></div>
+<div id="caption-6" class="clip subtitle" data-start="25.575" data-duration="5.278" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">地方史资料把徐闻古港视作汉代海上丝绸之路的重要始发</span></div>
+<div id="caption-7" class="clip subtitle" data-start="30.853" data-duration="0.422" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">港。</span></div>
+<div id="caption-8" class="clip subtitle" data-start="31.275" data-duration="4.254" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">热带季风气候和红色土壤铺开连片菠萝田，</span></div>
+<div id="caption-9" class="clip subtitle" data-start="35.529" data-duration="3.358" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">形成鲜明的大地景观与农耕文化。</span></div>
+<div id="caption-10" class="clip subtitle" data-start="38.887" data-duration="4.903" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">今天的徐闻既是大陆道路的南端，也是面向海峡、</span></div>
+<div id="caption-11" class="clip subtitle" data-start="43.790" data-duration="2.897" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">海南和更远海域的交通起点。</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440825-narration.wav" data-start="0" data-duration="46.750" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed" class="clip" src="media/music/ambient-map-bed.wav" data-start="0" data-duration="50" data-track-index="7" data-volume="0.5"></audio>
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner"],{opacity:0});
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.12},0.100).to("#caption-inner-0",{opacity:0,duration:.12},4.848).set("#caption-inner-0",{opacity:0},4.988);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.12},4.988).to("#caption-inner-1",{opacity:0,duration:.12},6.847).set("#caption-inner-1",{opacity:0},6.987);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.12},6.987).to("#caption-inner-2",{opacity:0,duration:.12},12.277).set("#caption-inner-2",{opacity:0},12.417);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.12},12.417).to("#caption-inner-3",{opacity:0,duration:.12},15.897).set("#caption-inner-3",{opacity:0},16.037);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.12},16.037).to("#caption-inner-4",{opacity:0,duration:.12},20.777).set("#caption-inner-4",{opacity:0},20.917);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.12},20.917).to("#caption-inner-5",{opacity:0,duration:.12},25.435).set("#caption-inner-5",{opacity:0},25.575);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.12},25.575).to("#caption-inner-6",{opacity:0,duration:.12},30.713).set("#caption-inner-6",{opacity:0},30.853);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.12},30.853).to("#caption-inner-7",{opacity:0,duration:.12},31.135).set("#caption-inner-7",{opacity:0},31.275);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.12},31.275).to("#caption-inner-8",{opacity:0,duration:.12},35.389).set("#caption-inner-8",{opacity:0},35.529);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.12},35.529).to("#caption-inner-9",{opacity:0,duration:.12},38.747).set("#caption-inner-9",{opacity:0},38.887);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.12},38.887).to("#caption-inner-10",{opacity:0,duration:.12},43.650).set("#caption-inner-10",{opacity:0},43.790);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.12},43.790).to("#caption-inner-11",{opacity:0,duration:.12},46.547).set("#caption-inner-11",{opacity:0},46.687);
+  window.__timelines=window.__timelines||{};window.__timelines["440825-landscape"]=tl;
+</script>
+</body></html>

@@ -1,0 +1,74 @@
+{
+  "parentId": "440900",
+  "presentationMode": "clean-broadcast-map-led",
+  "features": [],
+  "photos": [],
+  "requirements": [
+    {
+      "regionId": "440900",
+      "subjects": ["茂名荔枝", "年例", "冼夫人相关历史记忆"],
+      "verificationSources": [
+        "http://www.maoming.gov.cn/zlmm/tsmm/content/post_1594538.html",
+        "http://www.maoming.gov.cn/zlmm/lyzx/content/post_1584699.html"
+      ],
+      "status": "map-led-fallback",
+      "reason": "官方页面可核验主题，但未提供明确可复用图片许可；正式成片不转载页面图片。"
+    },
+    {
+      "regionId": "440902",
+      "subjects": ["茂南年例", "白话、雷话与客家话分布"],
+      "verificationSources": [
+        "http://www.maonan.gov.cn/zwgk/gkxx/rw/content/post_1630169.html",
+        "http://www.maoming.gov.cn/zlmm/lyzx/content/post_1584699.html"
+      ],
+      "status": "map-led-fallback",
+      "reason": "使用行政区高亮与字幕说明，不使用许可不明的节庆照片。"
+    },
+    {
+      "regionId": "440904",
+      "subjects": ["冼夫人故里", "电白沉香", "沿海物产"],
+      "verificationSources": [
+        "http://www.dianbai.gov.cn/zldb/dbgk/content/post_1627413.html"
+      ],
+      "status": "map-led-fallback",
+      "reason": "官方概况核验了地点和主题，但页面图片未声明可复用许可。"
+    },
+    {
+      "regionId": "440981",
+      "subjects": ["高州木偶戏", "古荔园", "冼太文化"],
+      "verificationSources": [
+        "http://www.gaozhou.gov.cn/gzgk/rwls/content/post_1435280.html",
+        "http://www.gaozhou.gov.cn/gzgk/rwls/content/post_1167039.html",
+        "http://www.gaozhou.gov.cn/gzgk/rwls/content/post_1573623.html"
+      ],
+      "status": "map-led-fallback",
+      "reason": "主题已精确核验；因未取得可复用原图许可，正式成片保持地图主导。"
+    },
+    {
+      "regionId": "440982",
+      "subjects": ["化橘红", "化州赛龙舟", "化州裹蒸粽"],
+      "verificationSources": [
+        "http://www.huazhou.gov.cn/hzgk/index.html",
+        "http://www.huazhou.gov.cn/hzgk/lswh/content/post_1351810.html",
+        "http://www.huazhou.gov.cn/hzgk/lswh/content/post_1191609.html"
+      ],
+      "status": "map-led-fallback",
+      "reason": "化州政府网明确限制未经授权转载，故不将页面图片放入视频。"
+    },
+    {
+      "regionId": "440983",
+      "subjects": ["南玉", "三华李", "竹编"],
+      "verificationSources": [
+        "http://www.xinyi.gov.cn/zlxy/xygk/content/post_172645.html",
+        "http://www.xinyi.gov.cn/zlxy/xygk/content/post_172641.html"
+      ],
+      "status": "map-led-fallback",
+      "reason": "官方页面注明图片未经授权不得转载，成片仅使用地图与文字。"
+    }
+  ],
+  "generatedImagery": {
+    "enabled": false,
+    "reason": "clean-broadcast 模式禁止隐藏 AI 标识后继续使用生成图。"
+  },
+  "reviewedAt": "2026-08-03"
+}

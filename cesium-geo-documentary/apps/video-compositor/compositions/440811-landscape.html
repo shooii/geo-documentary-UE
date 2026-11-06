@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>麻章区地理图说</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1920px;height:1080px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Microsoft YaHei")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}
+    .topbar{left:72px;top:72px;display:flex;align-items:center;gap:18px;font-size:24px;letter-spacing:.16em;color:#d1dbe1;text-shadow:0 2px 16px #000}.topbar:before{content:"";width:64px;height:3px;background:#ffd166;box-shadow:0 0 16px rgba(255,209,102,.75)}
+    .subtitle{left:50%;bottom:72px;transform:translateX(-50%);max-width:1180px;font-size:38px;line-height:1.42;text-align:center;font-weight:650;text-shadow:0 2px 8px #000;white-space:nowrap}.subtitle-inner{display:block;padding:12px 24px;border-radius:14px;background:rgba(4,10,15,.72)}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440811-landscape" data-start="0" data-width="1920" data-height="1080" data-duration="50" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440811-map-landscape.mp4" muted playsinline preload="auto" data-start="0" data-duration="50" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="0" data-duration="50" data-track-index="1"></div>
+  <div id="topbar" class="clip topbar" data-start="0" data-duration="50" data-track-index="10">湛江地理图说 · 全域与区县</div>
+  <div id="caption-0" class="clip subtitle" data-start="0.100" data-duration="2.810" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">麻章位于湛江中心城区西南部，</span></div>
+<div id="caption-1" class="clip subtitle" data-start="2.910" data-duration="4.015" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">是城市空间与雷州半岛腹地之间的过渡地带。</span></div>
+<div id="caption-2" class="clip subtitle" data-start="6.925" data-duration="4.415" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">2024年末麻章常住人口33.96万，</span></div>
+<div id="caption-3" class="clip subtitle" data-start="11.340" data-duration="4.647" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">人口分布连接城区、乡镇、农场与交通走廊。</span></div>
+<div id="caption-4" class="clip subtitle" data-start="15.987" data-duration="4.829" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">2025年麻章地区生产总值205.82亿元，</span></div>
+<div id="caption-5" class="clip subtitle" data-start="20.816" data-duration="4.609" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">现代农业、制造业、物流和城市配套共同推进。</span></div>
+<div id="caption-6" class="clip subtitle" data-start="25.425" data-duration="3.791" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">湖光岩玛珥湖由远古蒸气岩浆爆发形成，</span></div>
+<div id="caption-7" class="clip subtitle" data-start="29.216" data-duration="3.159" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">湖底沉积记录着漫长的环境变化。</span></div>
+<div id="caption-8" class="clip subtitle" data-start="32.375" data-duration="3.694" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">围绕湖光岩形成的地质认知与地方记忆，</span></div>
+<div id="caption-9" class="clip subtitle" data-start="36.069" data-duration="2.668" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">成为麻章最鲜明的文化坐标。</span></div>
+<div id="caption-10" class="clip subtitle" data-start="38.737" data-duration="5.028" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">从火山口湖到不断延伸的城市道路，麻章把深时间、</span></div>
+<div id="caption-11" class="clip subtitle" data-start="43.765" data-duration="3.935" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">农业空间与当代发展放在同一幅地图上。</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440811-narration.wav" data-start="0" data-duration="47.760" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed" class="clip" src="media/music/ambient-map-bed.wav" data-start="0" data-duration="50" data-track-index="7" data-volume="0.5"></audio>
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner"],{opacity:0});
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.12},0.100).to("#caption-inner-0",{opacity:0,duration:.12},2.770).set("#caption-inner-0",{opacity:0},2.910);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.12},2.910).to("#caption-inner-1",{opacity:0,duration:.12},6.785).set("#caption-inner-1",{opacity:0},6.925);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.12},6.925).to("#caption-inner-2",{opacity:0,duration:.12},11.200).set("#caption-inner-2",{opacity:0},11.340);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.12},11.340).to("#caption-inner-3",{opacity:0,duration:.12},15.847).set("#caption-inner-3",{opacity:0},15.987);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.12},15.987).to("#caption-inner-4",{opacity:0,duration:.12},20.676).set("#caption-inner-4",{opacity:0},20.816);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.12},20.816).to("#caption-inner-5",{opacity:0,duration:.12},25.285).set("#caption-inner-5",{opacity:0},25.425);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.12},25.425).to("#caption-inner-6",{opacity:0,duration:.12},29.076).set("#caption-inner-6",{opacity:0},29.216);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.12},29.216).to("#caption-inner-7",{opacity:0,duration:.12},32.235).set("#caption-inner-7",{opacity:0},32.375);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.12},32.375).to("#caption-inner-8",{opacity:0,duration:.12},35.929).set("#caption-inner-8",{opacity:0},36.069);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.12},36.069).to("#caption-inner-9",{opacity:0,duration:.12},38.597).set("#caption-inner-9",{opacity:0},38.737);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.12},38.737).to("#caption-inner-10",{opacity:0,duration:.12},43.625).set("#caption-inner-10",{opacity:0},43.765);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.12},43.765).to("#caption-inner-11",{opacity:0,duration:.12},47.560).set("#caption-inner-11",{opacity:0},47.700);
+  window.__timelines=window.__timelines||{};window.__timelines["440811-landscape"]=tl;
+</script>
+</body></html>

@@ -1,0 +1,55 @@
+project:
+  id: example-series
+  title: 地理图说·示例地区
+  topic_name: 示例地区
+  language: zh-CN
+scope:
+  level_role: admin2
+  official_level_name: 县级行政区
+  parent_region_id: "000000"
+  region_ids: ["000000"]
+  child_coverage: all-immediate
+  coverage_manifest: content/coverage-manifest.json
+map:
+  projection: EPSG:4326
+  boundary_source: data/raw/example.geojson
+  boundary_source_format: GeoJSON # or ESRI Shapefile
+  shapefile_required_sidecars: [.shp, .shx, .dbf, .prj]
+  shapefile_name_map: ""
+  imagery_provider: licensed-satellite-provider
+  imagery_attribution: Provider attribution
+  formal_satellite_required: true
+  terrain_provider: ellipsoid
+  parent_boundary_reveal: true
+  parent_boundary_reveal_seconds: 2.2
+  child_boundary_fade_seconds: 1.1
+  named_feature_manifest: assets/source/feature-manifest.json
+  cesium_token_env: CESIUM_ION_TOKEN
+story:
+  target_duration_seconds: 50
+  tone: professional-engaging-documentary
+  reading_speed_cpm: 240
+  title_format: "地理图说·{topicName}"
+  required_visual_evidence: [history, culture, named-physical-features]
+photo_assets:
+  enabled: true
+  require_exact_locality_and_subject: true
+  require_explicit_reuse_license: true
+  manifest_path: assets/source/photo-manifest.json
+  placement: collision-aware-negative-space
+render:
+  fps: 30
+  frame_mode: deterministic
+  outputs: [landscape, portrait, square]
+  delivery_mode: batch
+  master_profile: landscape
+  master_region_order: ["000000"]
+  master_output: renders/final/master.mp4
+qa:
+  require_source_citations: true
+  require_visual_inspection: true
+  require_tile_ready_check: true
+  require_satellite_sharpness_review: true
+  require_master_join_review: true
+  require_complete_child_coverage: true
+  require_visual_evidence_mapping: true

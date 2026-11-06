@@ -1,0 +1,490 @@
+{
+  "parentId": "440825110",
+  "parentName": "锦和镇",
+  "levelRole": "township/subdistrict",
+  "officialLevelName": "镇",
+  "childRole": "administrative-village",
+  "source": "用户提供的广东省村级行政边界SHP",
+  "effectiveDate": null,
+  "completeImmediateChildCoverage": false,
+  "coverageScope": "21 reliable boundary units shown and toured: 17 administrative villages, 1 community polygon, and 3 farm management units",
+  "knownCoverageGaps": [
+    "锦和社区：公开名录存在，但当前来源没有独立可靠polygon",
+    "外罗社区：公开名录存在，但当前来源没有独立可靠polygon",
+    "渔业社区：公开名录存在，但当前来源没有独立可靠polygon"
+  ],
+  "tourChildIds": [
+    "440825110201",
+    "440825110202",
+    "440825110203",
+    "440825110204",
+    "440825110205",
+    "440825110208",
+    "440825110207",
+    "440825110213",
+    "440825110214",
+    "440825110217",
+    "440825110303",
+    "440825110304",
+    "440825110305",
+    "440825110211",
+    "440825110209",
+    "440825110212",
+    "440825110215",
+    "440825110216",
+    "440825110002",
+    "440825110210",
+    "440825110206"
+  ],
+  "boundaryUnitIds": [
+    "440825110201",
+    "440825110202",
+    "440825110203",
+    "440825110204",
+    "440825110205",
+    "440825110208",
+    "440825110207",
+    "440825110213",
+    "440825110214",
+    "440825110217",
+    "440825110303",
+    "440825110304",
+    "440825110305",
+    "440825110211",
+    "440825110209",
+    "440825110212",
+    "440825110215",
+    "440825110216",
+    "440825110002",
+    "440825110210",
+    "440825110206"
+  ],
+  "children": [
+    {
+      "id": "440825110201",
+      "name": "东山村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 1
+    },
+    {
+      "id": "440825110202",
+      "name": "胜利村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 18
+    },
+    {
+      "id": "440825110203",
+      "name": "那楚村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 17
+    },
+    {
+      "id": "440825110204",
+      "name": "坑口村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 5
+    },
+    {
+      "id": "440825110205",
+      "name": "沟西村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 12
+    },
+    {
+      "id": "440825110208",
+      "name": "锦市村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 20
+    },
+    {
+      "id": "440825110207",
+      "name": "锦丰村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 6
+    },
+    {
+      "id": "440825110213",
+      "name": "龙群村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 21
+    },
+    {
+      "id": "440825110214",
+      "name": "红星村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 19
+    },
+    {
+      "id": "440825110217",
+      "name": "后湾村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 13
+    },
+    {
+      "id": "440825110303",
+      "name": "海角农场",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 4
+    },
+    {
+      "id": "440825110304",
+      "name": "海欧农场",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 2
+    },
+    {
+      "id": "440825110305",
+      "name": "锦和镇二堂农场",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 3
+    },
+    {
+      "id": "440825110211",
+      "name": "城内村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 8
+    },
+    {
+      "id": "440825110209",
+      "name": "金门村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 7
+    },
+    {
+      "id": "440825110212",
+      "name": "那板村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 9
+    },
+    {
+      "id": "440825110215",
+      "name": "白茅村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 15
+    },
+    {
+      "id": "440825110216",
+      "name": "北塘村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 14
+    },
+    {
+      "id": "440825110002",
+      "name": "建设社区",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 16
+    },
+    {
+      "id": "440825110210",
+      "name": "六极村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 10
+    },
+    {
+      "id": "440825110206",
+      "name": "洋尾村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 11
+    }
+  ],
+  "boundaryUnits": [
+    {
+      "id": "440825110201",
+      "name": "东山村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110202",
+      "name": "胜利村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110203",
+      "name": "那楚村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110204",
+      "name": "坑口村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110205",
+      "name": "沟西村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110208",
+      "name": "锦市村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110207",
+      "name": "锦丰村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110213",
+      "name": "龙群村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110214",
+      "name": "红星村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110217",
+      "name": "后湾村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110303",
+      "name": "海角农场",
+      "unitRole": "supplemental-management-unit",
+      "classification": "farm-management-unit"
+    },
+    {
+      "id": "440825110304",
+      "name": "海欧农场",
+      "unitRole": "supplemental-management-unit",
+      "classification": "farm-management-unit"
+    },
+    {
+      "id": "440825110305",
+      "name": "锦和镇二堂农场",
+      "unitRole": "supplemental-management-unit",
+      "classification": "farm-management-unit"
+    },
+    {
+      "id": "440825110211",
+      "name": "城内村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110209",
+      "name": "金门村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110212",
+      "name": "那板村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110215",
+      "name": "白茅村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110216",
+      "name": "北塘村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110002",
+      "name": "建设社区",
+      "unitRole": "community"
+    },
+    {
+      "id": "440825110210",
+      "name": "六极村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440825110206",
+      "name": "洋尾村",
+      "unitRole": "administrative-village"
+    }
+  ],
+  "supplementalUnits": [
+    {
+      "id": "440825110303",
+      "name": "海角农场",
+      "classification": "farm-management-unit",
+      "includedInTour": true
+    },
+    {
+      "id": "440825110304",
+      "name": "海欧农场",
+      "classification": "farm-management-unit",
+      "includedInTour": true
+    },
+    {
+      "id": "440825110305",
+      "name": "锦和镇二堂农场",
+      "classification": "farm-management-unit",
+      "includedInTour": true
+    }
+  ],
+  "narrationCoverage": [
+    {
+      "id": "440825110201",
+      "start": 107.252,
+      "end": 115.794,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110304",
+      "start": 115.794,
+      "end": 124.231,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110305",
+      "start": 124.231,
+      "end": 131.861,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110303",
+      "start": 131.861,
+      "end": 141.536,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110204",
+      "start": 141.536,
+      "end": 148.476,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110207",
+      "start": 148.476,
+      "end": 155.559,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110209",
+      "start": 155.559,
+      "end": 162.656,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110211",
+      "start": 162.656,
+      "end": 169.231,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110212",
+      "start": 169.231,
+      "end": 176.692,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110210",
+      "start": 176.692,
+      "end": 185.807,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110206",
+      "start": 185.807,
+      "end": 191.992,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110205",
+      "start": 191.992,
+      "end": 200,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110217",
+      "start": 200,
+      "end": 206.94,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110216",
+      "start": 206.94,
+      "end": 212.916,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110215",
+      "start": 212.916,
+      "end": 220.39,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110002",
+      "start": 220.39,
+      "end": 228.854,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110203",
+      "start": 228.854,
+      "end": 235,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110202",
+      "start": 235,
+      "end": 242.786,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110214",
+      "start": 242.786,
+      "end": 249.778,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110208",
+      "start": 249.778,
+      "end": 257.304,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825110213",
+      "start": 257.304,
+      "end": 265.325,
+      "camera": true,
+      "highlight": true
+    }
+  ]
+}

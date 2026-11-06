@@ -1,0 +1,11 @@
+voices:
+  narrator-male-calm:
+    provider: edge-tts
+    voice_id: zh-CN-YunxiNeural
+    rate: "+0%"
+    pitch: "+0Hz"
+  narrator-female-calm:
+    provider: edge-tts
+    voice_id: zh-CN-XiaoxiaoNeural
+    rate: "+0%"
+    pitch: "+0Hz"

@@ -1,0 +1,10 @@
+#!/bin/sh
+# Prevent accidental commits of large generated assets or datasets.
+limit=10485760
+git diff --cached --name-only --diff-filter=ACMR -z | while IFS= read -r -d '' path; do
+  size=$(git cat-file -s ":$path" 2>/dev/null) || continue
+  if [ "$size" -gt "$limit" ]; then
+    echo "Commit blocked: $path is $size bytes (limit: $limit bytes)." >&2
+    exit 1
+  fi
+done

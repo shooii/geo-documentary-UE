@@ -1,0 +1,115 @@
+project:
+  id: zhanjiang-county-series
+  title: 湛江各区县地理图说
+  language: zh-CN
+  output_dir: renders/final
+
+scope:
+  level: prefecture
+  region_ids:
+    - "440800"
+    - "440802"
+    - "440803"
+    - "440804"
+    - "440811"
+    - "440823"
+    - "440825"
+    - "440881"
+    - "440882"
+    - "440883"
+  include_children: false
+
+map:
+  imagery_provider: esri-world-imagery
+  imagery_ion_asset_id: 2
+  imagery_attribution: Esri World Imagery
+  mapbox_map_id: mapbox/satellite-v9
+  # 密钥不再写入文件，请通过环境变量提供（server.ts 优先读 env）：
+  #   MAPBOX_ACCESS_TOKEN   → mapbox satellite 影像
+  #   CESIUM_ION_TOKEN      → Cesium Ion 资产
+  #   TIANDITU_TOKEN        → 天地图影像与影像注记（也可直接配置下方 tianditu_token）
+  mapbox_access_token: ""
+  esri_world_imagery_url: https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer
+  bing_maps_key: ""
+  tianditu_token: ""
+  formal_satellite_required: true
+  terrain_provider: ellipsoid
+  cesium_ion_token: ""
+  cesium_token_env: CESIUM_ION_TOKEN
+  projection: EPSG:4326
+  boundary_source: data/raw/440800_full.geojson
+  offline_mode: false
+
+story:
+  target_duration_seconds: 50
+  sections:
+    - location
+    - population
+    - economy
+    - history
+    - culture
+    - modern_development
+  tone: cinematic-documentary
+  audience: general
+  reading_speed_cpm: 240
+
+visual:
+  design_source: tokens
+  figma_file_url: ""
+  theme: dark-cinematic-cartography
+  presentation_mode: clean-broadcast
+  show_scale_bar: true
+  show_north_arrow: false
+  label_language: zh-CN
+
+imagegen:
+  enabled: false
+  max_assets_per_region: 0
+  require_manifest: true
+  default_aspect_ratio: "16:9"
+
+photo_assets:
+  enabled: false
+  map_first: true
+  require_explicit_reuse_license: true
+  manifest_path: assets/source/photo-manifest.json
+
+voice:
+  provider: edge-tts
+  voice_id: zh-CN-YunxiNeural
+  speed: 1.0
+  sample_rate: 48000
+  subtitle_mode: sentence-and-word
+
+render:
+  fps: 30
+  width: 1920
+  height: 1080
+  device_scale_factor: 1
+  frame_mode: deterministic
+  quality: high
+  outputs:
+    - landscape
+  delivery_mode: master
+  master_profile: landscape
+  master_region_order:
+    - "440800"
+    - "440802"
+    - "440803"
+    - "440804"
+    - "440811"
+    - "440823"
+    - "440825"
+    - "440881"
+    - "440882"
+    - "440883"
+  master_output: renders/final/zhanjiang-prefecture-and-9-counties-direct-flight-v5.mp4
+
+qa:
+  require_source_citations: true
+  require_visual_inspection: true
+  require_tile_ready_check: true
+  require_satellite_sharpness_review: true
+  require_master_join_review: true
+  max_subtitle_lines: 1
+  max_subtitle_chars_per_line: 26

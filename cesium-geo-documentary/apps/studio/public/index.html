@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>地理图说 · 视频输出工作台</title>
+  <link rel="stylesheet" href="/studio.css?v=20261012-subtitle-25-1" />
+  <link rel="stylesheet" href="/assets.css?v=20260909-4" />
+  <link rel="stylesheet" href="/studio-refine.css?v=20261102-explicit-save-1" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">◉</span><div><strong>地理图说</strong><small>视频工作台</small></div></div>
+    <div class="project-title"><input id="projectName" value="未命名项目" readonly title="点击保存方案（可直接修改名称）" /><button id="saveState" type="button" class="save-state" title="所有场景修改已保存；保存失败时点击重试" aria-live="polite">已保存</button></div>
+    <div class="top-actions"><button id="openProjectList">方案列表</button><button id="saveProjectButton" class="save-project-action">保存方案</button><button id="openWorkbookPanel">方案表格</button><button class="primary export-entry" id="openExportPanel"><span id="exportButtonLabel">导出视频</span><span id="exportButtonStatus" class="export-entry-status" hidden></span></button></div>
+  </header>
+
+  <main class="workspace">
+    <aside class="library panel">
+      <div class="panel-head"><div><small>PROJECT</small><h2>项目与场景</h2></div></div>
+      <section class="current-region-card" aria-label="当前方案所属行政区">
+        <small>所属行政区 · 随方案固定</small><strong id="currentRegionName">未打开方案</strong>
+        <p id="currentRegionPath">新建时选择地区；改名不会改变行政区。</p>
+        <button id="openNewProject" type="button">＋ 新建方案</button>
+      </section>
+      <details class="region-picker compact-disclosure" aria-labelledby="regionPickerTitle">
+        <summary class="region-picker-title"><span><b id="regionPickerTitle">制作地区</b><small id="regionSummary">当前项目地区</small></span><span>更改</span></summary>
+        <div class="disclosure-body">
+        <label class="region-search-label">搜索行政区
+          <div class="region-search-box"><span>⌕</span><input id="regionSearch" type="search" autocomplete="off" placeholder="输入新寮镇、徐闻县或区划代码" /></div>
+        </label>
+        <div id="regionSearchResults" class="region-search-results" hidden></div>
+        <details class="region-cascade-disclosure">
+          <summary>高级选择</summary>
+          <div class="region-cascade">
+            <label>省<select id="provinceSelect"><option>加载中…</option></select></label>
+            <label>市<select id="citySelect" disabled><option>请选择</option></select></label>
+            <label>区县<select id="countySelect" disabled><option>请选择</option></select></label>
+            <label>乡镇/街道<select id="townSelect" disabled><option>请选择</option></select></label>
+          </div>
+        </details>
+        <div id="regionSelectionMeta" class="region-selection-meta">正在读取全国行政区目录…</div>
+        <details class="poi-import-settings">
+          <summary><span><b>自动采集实景素材</b><small id="poiImportSummary">按村界匹配高德 POI 图片</small></span><label class="switch-label" onclick="event.stopPropagation()"><input id="poiAutoImport" type="checkbox" />启用</label></summary>
+          <div class="poi-settings-body">
+            <label>高德 Web 服务 Key<input id="amapKey" type="password" autocomplete="off" placeholder="仅首次填写，保存在本机 workspace" /></label>
+            <label>关键词（可选）<input id="poiKeyword" placeholder="如：景点、渔港、盐场" /></label>
+            <div class="poi-type-head"><b>POI 类型 <small>高德官方 20 个一级分类</small></b><span><button type="button" id="poiSelectAll">全选</button><button type="button" id="poiClearTypes">清空</button></span></div>
+            <div id="poiTypeGrid" class="poi-type-grid"><span>正在读取类型…</span></div>
+            <p>每个下级边界独立检索并做点在面内校验；返回的全部图片会去重后绑定到对应场景。</p>
+          </div>
+        </details>
+        <label class="automation-option">
+          <span><b>自动生成文案与字幕</b><small id="aiCopySummary">使用 DeepSeek 按场景生成，字幕与旁白同步</small></span>
+          <span class="switch-label"><input id="aiCopyGeneration" type="checkbox" checked />启用</span>
+        </label>
+        <div class="ai-copy-actions">
+          <small id="aiCopyStatus"></small>
+          <div class="ai-copy-reference">
+            <textarea id="copyReference" rows="3" maxlength="3000" aria-label="参考文案（可选）" placeholder="参考文案（可选）：粘贴一段你满意的范文，将按它的语气与叙事风格重新生成全部场景旁白；留空则按默认纪录片风格生成。"></textarea>
+          </div>
+          <button id="regenerateProjectCopy" type="button">重新生成当前项目文案</button>
+        </div>
+        <button id="applyRegion" class="region-apply" disabled>使用所选乡镇新建项目</button>
+        </div>
+      </details>
+      <section class="quick-settings">
+        <div class="compact-section-title"><span>成片设置</span><small>保存后生效</small></div>
+        <label class="preset-group-label">画幅</label>
+        <div class="profile-presets" role="radiogroup" aria-label="成片画幅">
+          <button type="button" class="profile-preset" data-profile="portrait" title="竖屏 9:16 · 1080×1920"><b>竖屏</b><small>9:16</small></button>
+          <button type="button" class="profile-preset" data-profile="landscape" title="横屏 16:9 · 1920×1080"><b>横屏</b><small>16:9</small></button>
+          <button type="button" class="profile-preset" data-profile="square" title="方形 1:1 · 1080×1080"><b>方形</b><small>1:1</small></button>
+        </div>
+        <label class="preset-group-label">画质</label>
+        <div class="quality-presets" role="radiogroup" aria-label="成片画质档位">
+          <button type="button" class="quality-preset" data-quality="draft"><b>快速预览</b><small>确认脚本与镜头 · 渲染更快</small></button>
+          <button type="button" class="quality-preset" data-quality="high"><b>正式成片</b><small>交付画质 · 渲染更久</small></button>
+        </div>
+        <select id="profileSelect" class="preset-fallback" hidden><option value="portrait">9:16</option><option value="landscape">16:9</option><option value="square">1:1</option></select>
+        <select id="qualitySelect" class="preset-fallback" hidden><option value="draft">快速预览</option><option value="high">正式成片</option></select>
+        <label>卫星影像<select id="imageryProviderSelect"><option value="esri-world-imagery">Esri World Imagery（推荐）</option><option value="tianditu-imagery">天地图影像（可逐场景叠加注记）</option><option value="mapbox-satellite">Mapbox 高清卫星</option><option value="bing-aerial">必应卫星（需配置 Key）</option><option value="cesium-ion-world-imagery">Cesium 默认卫星</option></select><small id="imageryProviderHint" class="field-note"></small></label>
+        <div class="grid-2"><label>配音<select id="voiceId"><option value="zh-CN-YunyangNeural">云扬·纪录片</option><option value="zh-CN-YunxiNeural">云希·青年</option><option value="zh-CN-XiaoxiaoNeural">晓晓·女声</option></select></label><label>语速<input id="voiceSpeed" type="number" min="0.7" max="1.3" step="0.01" /></label></div>
+      </section>
+      <details class="cover-settings compact-disclosure"><summary><span>封面设置</span><small>封面文字、时长与遮罩</small></summary>
+        <label>行政层级标题<input id="coverAdministrativeLabel" /></label>
+        <label>封面副标题<input id="coverSubtitle" /></label>
+        <label>封面底部文字<input id="coverContentMeta" maxlength="80" placeholder="如：飘色 · 黄坡话 · 29村点名 · 牛腩粉" /><small class="field-note">对应封面底部的一行文字；留空可隐藏，保存方案后生效。</small></label>
+        <div class="grid-2"><label>封面时长<input id="coverIntro" type="number" min="0.25" max="10" step="0.1" /></label><label>淡出时长<input id="coverFadeOut" type="number" min="0" max="3" step="0.05" /></label></div>
+        <label>背景遮罩<input id="coverOverlay" type="range" min="0" max="1" step="0.01" /></label>
+      </details>
+      <div class="section-title"><span>场景</span><span class="section-title-actions"><button id="planTourRoute" class="plan-route-button" title="按下级行政区接壤关系重排巡游顺序：下一个行政区尽量与上一个接壤">按接壤重排</button></span></div>
+      <div id="sceneList" class="scene-list"></div>
+      <input id="assetInput" type="file" accept="image/*,video/mp4,video/quicktime,video/webm,.mp4,.mov,.m4v,.webm,.gif" hidden multiple />
+    </aside>
+
+    <section class="stage-wrap">
+      <div class="stage-toolbar"><div class="view-tabs"><button id="actualViewTab" class="active" aria-pressed="true">实际画面</button><button id="safeAreaTab" aria-pressed="false">字幕安全区</button></div><div class="spec-badge pending" id="specBadge">保存后刷新</div></div>
+      <div class="stage-canvas">
+        <div id="previewFrame" class="preview-frame portrait">
+          <!-- No src here on purpose: boot() picks a project and render() assigns
+               the one URL that is actually wanted. A hardcoded default would start
+               a full Cesium boot (and, without studioPreview, the heavy export-grade
+               one) that gets torn down two seconds later, aborting its in-flight
+               skybox and boundary requests. -->
+          <iframe id="cesiumPreview" title="UE 地图视频流" allow="autoplay; fullscreen"></iframe>
+          <img id="coverPreview" class="cover-preview" hidden alt="统一封面预览" />
+          <div id="previewAssetFrame" class="preview-asset-frame" hidden><img id="previewAsset" class="preview-asset" hidden alt="场景素材预览" /><video id="previewAssetVideo" class="preview-asset" hidden loop playsinline preload="auto" aria-hidden="true"></video></div>
+          <div id="previewAssetCaption" class="preview-asset-caption" hidden aria-hidden="true"></div>
+          <div id="previewShade" class="preview-shade"></div>
+          <div id="previewCopy" class="preview-copy subtitle-only"><p id="previewSubtitle" hidden aria-hidden="true"></p></div>
+          <div id="safeArea" class="safe-area" hidden>
+            <div class="platform-exclusion top"><span>顶部平台信息区</span></div>
+            <div class="platform-exclusion right"><span>右侧互动按钮区</span></div>
+            <div class="platform-exclusion bottom"><span>底部标题与操作区</span></div>
+            <div class="subtitle-safe-box"><small>字幕安全区 · 画面底部向上 25% 处</small><b id="safeAreaSubtitle" hidden aria-hidden="true"></b></div>
+          </div>
+        </div>
+      </div>
+      <div class="transport">
+        <button id="playFromStart" class="restart" title="从第一个场景开始连续播放整片">↺ 从头</button>
+        <button id="previousScene" title="上一个场景">«</button>
+        <button id="playButton" class="play" title="播放当前场景（画面 + 旁白 + 字幕），播完停在这一场" aria-label="播放当前场景">▶</button>
+        <button id="nextScene" title="下一个场景">»</button>
+        <span id="playScope" class="play-scope">只播当前场景</span>
+        <span id="timecode">00:00 / 00:00</span>
+      </div>
+      <div id="previewTrustStatus" class="preview-trust-status" role="status" aria-live="polite">正在确认旁白与时间轴…</div>
+      <div id="narrationNotice" class="narration-notice" hidden></div>
+    </section>
+
+    <aside class="inspector panel">
+      <div class="panel-head"><div><small>INSPECTOR</small><h2>场景编辑</h2></div></div>
+      <div id="emptyInspector" class="empty">选择一个场景进行编辑</div>
+      <div id="sceneInspector" hidden>
+        <div class="inspector-primary">
+          <label>标题<input id="sceneTitle" /></label>
+          <div id="coverTextEditor" hidden>
+            <label>封面底部文字<input id="sceneCoverContentMeta" maxlength="80" placeholder="如：飘色 · 黄坡话 · 29村点名 · 牛腩粉" /><small class="field-note">显示在封面副标题下方；留空可隐藏，保存方案后生效。</small></label>
+          </div>
+        </div>
+        <label id="sceneAnnotationControl" class="scene-annotation-toggle" hidden>
+          <input id="sceneImageryAnnotation" type="checkbox" />
+          <span><b>天地图影像注记</b><small>仅当前场景叠加地名注记，其他场景可保持关闭</small></span>
+        </label>
+        <section id="sceneAssetsEditor" class="scene-assets-editor">
+          <div class="scene-assets-head">
+            <div><b>当前场景素材</b><small id="sceneAssetCount">0 个素材</small></div>
+            <span class="scene-assets-tools">
+              <button id="undoAssetButton" type="button" disabled title="没有可撤销的素材操作">撤销</button>
+              <button id="openAssetLibrary" type="button" title="查看与管理整个方案的素材库">素材库</button>
+              <button id="toggleSceneAssetPicker" type="button">选择素材</button>
+            </span>
+          </div>
+          <div class="scene-asset-display-control">
+            <span><b>选择成片图片</b><small>勾选“用于成片”；“设为首图”会自动加入并排在第一张；拖动卡片可调整播放顺序（也可 Alt+↑↓）</small></span>
+            <span class="scene-asset-selection-actions"><strong id="sceneAssetSelectionSummary">已选 0 / 0</strong><button id="selectAllSceneAssets" type="button">全选</button><button id="clearSceneAssetsSelection" type="button">清空</button></span>
+          </div>
+          <div id="sceneAssetEmpty" class="scene-asset-empty">尚未选择素材。点击“选择素材”从素材库绑定到当前场景。</div>
+          <div class="asset-upload-feedback"><div id="assetUploadStatus" role="status" aria-live="polite" hidden></div><button id="retryAssetUploads" type="button" hidden>重试失败项</button></div>
+          <div id="sceneBoundAssets" class="scene-bound-assets"></div>
+          <div id="sceneAssetPicker" class="scene-asset-picker" hidden>
+            <div class="scene-asset-picker-head">
+              <b id="sceneAssetPickerTitle">选择素材</b>
+              <span class="scene-asset-picker-actions" id="sceneAssetPickerActions">
+                <button id="closeSceneAssetPicker" type="button">完成</button>
+              </span>
+            </div>
+            <div class="scene-asset-picker-toolbar">
+              <input id="sceneAssetSearch" type="search" placeholder="搜索名称、说明或 POI…" autocomplete="off" aria-label="搜索素材" />
+              <div class="scene-asset-filter-row">
+                <label>范围<select id="sceneAssetScope" aria-label="素材地区范围"><option value="current">仅当前村</option><option value="all">全镇素材</option></select></label>
+                <label>排序<select id="sceneAssetSort" aria-label="素材排序"><option value="relevance">智能排序</option><option value="recent">最近使用</option><option value="name">按名称</option><option value="usage">使用次数</option></select></label>
+              </div>
+              <span class="scene-asset-filter-chips" role="group" aria-label="素材来源筛选">
+                <button type="button" class="chip active" data-asset-group="all">全部</button>
+                <button type="button" class="chip" data-asset-group="upload">我的上传</button>
+                <button type="button" class="chip" data-asset-group="poi">实景 POI</button>
+              </span>
+              <label class="scene-asset-unbound-only"><input id="sceneAssetUnboundOnly" type="checkbox" />只看未绑定</label>
+            </div>
+            <div id="sceneAssetPickerList" class="scene-asset-picker-list"></div>
+            <div id="sceneAssetPickerFooter" class="scene-asset-picker-footer" hidden></div>
+          </div>
+          <div id="childCollectPanel" class="child-collect" hidden>
+            <div class="child-collect-head">
+              <span><b>本村实景素材</b><small id="childCollectCoverage">—</small></span>
+              <button id="toggleChildCollect" type="button" title="按本村边界重新检索高德 POI 图片，可换类型或关键词">重采本村素材</button>
+            </div>
+            <div id="childCollectForm" class="child-collect-form" hidden>
+              <label>关键词（可选）<input id="childCollectKeyword" placeholder="如：渔港、盐场、祠堂" /></label>
+              <div class="poi-type-head"><b>POI 类型 <small>只影响本村</small></b><span><button type="button" id="childCollectAll">全选</button><button type="button" id="childCollectClear">清空</button></span></div>
+              <div id="childCollectTypes" class="poi-type-grid"></div>
+              <label class="child-collect-option"><input id="childCollectUnbind" type="checkbox" checked /><span>先解绑本村同类型的旧素材<br /><small>素材不删除，仍留在素材库与“选择素材”里</small></span></label>
+              <div class="child-collect-actions"><small id="childCollectStatus"></small><button id="runChildCollect" type="button">开始采集</button></div>
+            </div>
+            <details id="childCollectCoverageDetails" class="child-collect-coverage">
+              <summary>全部村庄的采集覆盖<small id="childCollectCoverageSummary"></small></summary>
+              <div id="childCollectCoverageList" class="child-collect-coverage-list"></div>
+            </details>
+          </div>
+        </section>
+        <div id="coverAssetNote" class="scene-asset-empty" hidden>更多封面文字、时长与背景遮罩可在左侧“封面设置”中调整。</div>
+        <div id="sceneCopyTools" class="scene-copy-tools" hidden>
+          <button id="regenerateSceneCopy" type="button" title="调用 AI 只重写当前场景旁白与字幕，不影响其他场景">AI 重写本场景旁白</button>
+          <button id="splitOverviewCopy" type="button" title="把本总体介绍场景的文案按句子拆成多个场景，并自动从项目素材中匹配真实图片填充">按文案拆分并自动配图</button>
+        </div>
+        <details id="narrationEditor" class="editor-group narration-editor compact-disclosure" open><summary><span>文案与字幕</span><small>主要内容</small></summary>
+          <label>旁白与字幕<textarea id="narration" rows="7"></textarea><small class="field-note">只需编辑旁白；导出视频时会按语义和画幅自动断句生成字幕。</small><small class="counter" id="narrationCount">0 字</small></label>
+        </details>
+        <details class="editor-group compact-disclosure"><summary><span>时长与停留</span><small>高级</small></summary>
+          <label>地图停留<input id="mapHold" type="number" min="0" max="120" step="0.1" /></label>
+          <div class="grid-2"><label>前置停留<input id="preHold" type="number" min="0" max="20" step="0.1" /></label><label>后置停留<input id="postHold" type="number" min="0" max="20" step="0.1" /></label></div>
+        </details>
+        <details class="editor-group compact-disclosure"><summary><span>地图镜头</span><small>高级</small></summary>
+          <div id="lockedCameraNote" class="locked-note">模板场景自动锁定；村级镜头使用真实中心与边界</div>
+          <div class="grid-2"><label>经度<input id="longitude" type="number" step="0.0001" /></label><label>纬度<input id="latitude" type="number" step="0.0001" /></label></div>
+          <label>镜头高度<input id="height" type="number" step="100" /></label>
+        </details>
+
+        <details id="placementPanel" class="editor-group compact-disclosure" hidden open>
+          <summary><span>素材画面</span><small>裁切与动画</small></summary>
+          <div class="grid-2"><label>适配<select id="assetFit"><option value="cover">Cover 裁满</option><option value="contain">Contain 完整</option><option value="fill">Fill 拉伸</option><option value="fullscreen">Fullscreen 全屏</option></select></label><label>动画<select id="assetAnimation"><option value="still">静止</option><option value="push-in">缓慢推近</option><option value="pull-out">缓慢拉远</option><option value="pan-left">向左平移</option><option value="pan-right">向右平移</option></select></label></div>
+          <div class="grid-2"><label>焦点 X<input id="focalX" type="number" min="0" max="1" step="0.01" /></label><label>焦点 Y<input id="focalY" type="number" min="0" max="1" step="0.01" /></label></div>
+          <div class="grid-2"><label>缩放<input id="assetScale" type="number" min="0.5" max="3" step="0.01" /></label><label>最短展示<input id="assetMinimum" type="number" min="0.1" max="120" step="0.1" /></label></div>
+          <div class="grid-2"><label>提前入场<input id="assetLead" type="number" min="0" max="0.75" step="0.05" /></label><label>延后退场<input id="assetTail" type="number" min="0" max="0.75" step="0.05" /></label></div>
+          <label>替代文本<input id="assetAlt" /></label>
+        </details>
+        <button class="danger-text" id="deleteScene">删除当前场景</button>
+      </div>
+
+    </aside>
+  </main>
+
+  <section class="timeline">
+    <div class="timeline-head"><strong>时间轴</strong><span id="totalDuration">0.0 秒</span><span id="cueSummary">0 个场景</span></div>
+    <div class="timeline-body"><div class="track-label"><span>◈</span><b>场景</b></div><div id="timelineScenes" class="timeline-scenes"></div></div>
+    <details class="timeline-detail-tracks"><summary>展开旁白与素材轨道</summary>
+      <div class="timeline-body slim"><div class="track-label"><span>♫</span><b>旁白</b></div><div id="cueTrack" class="cue-track"></div></div>
+      <div class="timeline-body slim visual-track-row"><div class="track-label"><span>▧</span><b>素材</b></div><div id="visualTrack" class="visual-track"></div></div>
+    </details>
+  </section>
+
+  <div id="projectListModal" class="project-list-modal" hidden role="dialog" aria-modal="true" aria-labelledby="projectListTitle">
+    <div id="projectListBackdrop" class="export-backdrop"></div>
+    <section class="project-list-dialog">
+      <header><div><small>PROJECTS</small><h2 id="projectListTitle">方案列表</h2></div><div class="project-list-header-actions"><button id="newProjectFromList" class="secondary">＋ 新建方案</button><button id="closeProjectList" class="icon-button" aria-label="关闭方案列表">×</button></div></header>
+      <div class="project-list-toolbar"><input id="projectListSearch" type="search" placeholder="按名称或地区筛选…（/ 聚焦）" autocomplete="off" aria-label="筛选方案" /><small id="projectListCount"></small></div>
+      <div class="project-list-views" role="tablist" aria-label="列表视图">
+        <button type="button" data-list-view="recent" class="active">最近更新</button>
+        <button type="button" data-list-view="region">按地区分组</button>
+        <button type="button" data-list-view="dup">只看同名</button>
+      </div>
+      <div id="projectListItems" class="project-list-items"></div>
+    </section>
+  </div>
+
+  <div id="saveProjectModal" class="project-list-modal" hidden role="dialog" aria-modal="true" aria-labelledby="saveProjectTitle">
+    <div id="saveProjectBackdrop" class="export-backdrop"></div>
+    <section class="save-project-dialog">
+      <header><div><small>SAVE PROJECT</small><h2 id="saveProjectTitle">保存方案</h2><p>场景修改只有保存后才会生效。为当前方案命名，名称不可与已有方案重复。</p></div><button id="closeSaveProject" class="icon-button" aria-label="关闭保存窗口">×</button></header>
+      <div class="save-project-body">
+        <label>方案名称<input id="saveProjectName" type="text" maxlength="60" placeholder="请输入方案名称" autocomplete="off" /></label>
+        <p id="saveProjectError" class="save-project-error" hidden></p>
+      </div>
+      <footer class="save-project-footer">
+        <button id="cancelSaveProject">取消</button>
+        <button id="confirmSaveProject" class="primary">保存</button>
+      </footer>
+    </section>
+  </div>
+
+  <div id="renameProjectModal" class="project-list-modal" hidden role="dialog" aria-modal="true" aria-labelledby="renameProjectTitle">
+    <div id="renameProjectBackdrop" class="export-backdrop"></div>
+    <section class="save-project-dialog">
+      <header><div><small>RENAME PROJECT</small><h2 id="renameProjectTitle">重命名方案</h2><p>修改方案名称，名称不可与已有方案重复。</p></div><button id="closeRenameProject" class="icon-button" aria-label="关闭重命名窗口">×</button></header>
+      <div class="save-project-body">
+        <label>方案名称<input id="renameProjectName" type="text" maxlength="60" placeholder="请输入方案名称" autocomplete="off" /></label>
+        <p id="renameProjectError" class="save-project-error" hidden></p>
+      </div>
+      <footer class="save-project-footer">
+        <button id="cancelRenameProject">取消</button>
+        <button id="confirmRenameProject" class="primary">保存</button>
+      </footer>
+    </section>
+  </div>
+
+  <div id="deleteProjectModal" class="project-list-modal" hidden role="dialog" aria-modal="true" aria-labelledby="deleteProjectTitle">
+    <div id="deleteProjectBackdrop" class="export-backdrop"></div>
+    <section class="save-project-dialog">
+      <header><div><small>DELETE PROJECT</small><h2 id="deleteProjectTitle">删除方案</h2><p>删除后无法恢复，请谨慎操作。</p></div><button id="closeDeleteProject" class="icon-button" aria-label="关闭删除窗口">×</button></header>
+      <div class="save-project-body">
+        <p id="deleteProjectMessage" class="delete-project-message"></p>
+      </div>
+      <footer class="save-project-footer">
+        <button id="cancelDeleteProject">取消</button>
+        <button id="confirmDeleteProject" class="danger">删除</button>
+      </footer>
+    </section>
+  </div>
+
+  <div id="exportModal" class="export-modal" hidden role="dialog" aria-modal="true" aria-labelledby="exportPanelTitle">
+    <div id="exportBackdrop" class="export-backdrop"></div>
+    <section class="export-dialog">
+      <header class="export-dialog-head">
+        <div><small>DELIVERY</small><h2 id="exportPanelTitle">导出视频</h2><p>可连续添加任务，关闭窗口后仍在后台执行。</p></div>
+        <button id="closeExportPanel" class="icon-button" aria-label="关闭导出面板">×</button>
+      </header>
+      <div class="export-modal-grid">
+        <section class="export-check-pane">
+          <div class="export-pane-title"><span class="status-dot"></span><div><b>导出前检查</b><small>Cesium · HyperFrames · FFmpeg · Golden QA</small></div></div>
+          <div id="readinessList" class="readiness-list"></div>
+        </section>
+        <section class="export-result-pane">
+          <div id="exportEstimate" class="export-estimate" hidden></div>
+          <section class="export-queue-summary" aria-label="导出队列概况">
+            <div><small>处理中</small><b id="exportRunningCount">0</b></div>
+            <div><small>排队</small><b id="exportQueuedCount">0</b></div>
+            <div><small>已完成</small><b id="exportCompletedCount">0</b></div>
+          </section>
+          <section class="export-history-section">
+            <div class="export-history-head"><b>导出任务</b><small>按提交顺序执行 · 成片独立保存</small></div>
+            <p id="exportConnectionStatus" class="export-connection-status" role="status" aria-live="polite" hidden></p>
+            <div id="exportHistory" class="export-history"></div>
+          </section>
+        </section>
+      </div>
+      <details id="exportTimeline" class="export-timeline" hidden>
+        <summary><b>时间轴对账</b><span id="exportTimelineSummary"></span></summary>
+        <p class="export-timeline-hint">灰条：旁白 · 色块：成片素材 · 红框：越界或不足 0.5 秒。无图场景仍显示地图；时长以最新旁白为准。</p>
+        <div id="exportTimelineBody" class="export-timeline-body"></div>
+      </details>
+      <footer class="export-modal-footer"><span id="exportFooterHint">任务会在后台继续运行</span><button id="closeExportPanelFooter" class="ghost">返回编辑</button><button class="primary" id="renderButton">＋ 添加导出任务</button></footer>
+    </section>
+  </div>
+
+  <div id="workbookModal" class="export-modal" hidden role="dialog" aria-modal="true" aria-labelledby="workbookPanelTitle">
+    <div id="workbookBackdrop" class="export-backdrop"></div>
+    <section class="export-dialog workbook-dialog">
+      <header class="export-dialog-head">
+        <div><small>WORKBOOK</small><h2 id="workbookPanelTitle">方案表格往返</h2><p>导出表格改文案与素材，再导入；预校验通过才写入。</p></div>
+        <button id="closeWorkbookPanel" class="icon-button" aria-label="关闭表格面板"><svg class="wb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
+      </header>
+      <div class="workbook-body">
+        <section class="workbook-step">
+          <div class="workbook-step-text">
+            <b><span class="wb-step-no">1</span><span class="wb-step-title">导出表格</span></b>
+            <small>当前方案共 <span id="workbookSceneCount">0</span> 个场景、<span id="workbookAssetCount">0</span> 个素材。含「场景」「素材库」「说明」三张工作表，可改文案与素材。</small>
+          </div>
+          <button id="workbookExport" class="primary"><svg class="wb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M12 4l4 4M12 4l-4 4M5 19h14" /></svg><span class="wb-label">导出</span></button>
+        </section>
+        <section class="workbook-step">
+          <div class="workbook-step-text">
+            <b><span class="wb-step-no">2</span><span class="wb-step-title">导入编辑后的表格</span></b>
+            <small>导入后立即预校验，通过后才能保存为新版本。</small>
+          </div>
+          <label class="primary workbook-file-button"><svg class="wb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M12 15l4-4M12 15l-4-4M5 19h14" /></svg><span class="wb-label">导入</span><input id="workbookFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden /></label>
+        </section>
+        <div id="workbookFileName" class="workbook-file-name" hidden></div>
+        <div id="workbookResult" class="workbook-result" hidden></div>
+      </div>
+      <footer class="export-modal-footer">
+        <span id="workbookFooterHint">机器字段不会被表格改动，时长按旁白音频计算；新增素材需先有图片文件。</span>
+        <button id="closeWorkbookPanelFooter" class="ghost"><svg class="wb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" /></svg><span class="wb-label">返回编辑</span></button>
+        <button class="primary" id="workbookCommit" disabled><svg class="wb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" /></svg><span class="wb-label">保存为新版本</span></button>
+      </footer>
+    </section>
+  </div>
+  <div id="newProjectModal" class="project-list-modal" hidden role="dialog" aria-modal="true" aria-labelledby="newProjectTitle">
+    <div id="newProjectBackdrop" class="export-backdrop"></div>
+    <section class="save-project-dialog new-project-dialog">
+      <header><div><small>NEW PROJECT</small><h2 id="newProjectTitle">新建方案</h2><p id="newProjectIntro">先确认行政区，再创建独立方案。不会修改当前方案。</p></div><button id="closeNewProject" class="icon-button" aria-label="关闭新建窗口">×</button></header>
+      <div class="save-project-body">
+        <section class="creation-region-card" aria-live="polite">
+          <small>所属行政区</small><strong id="newProjectRegionName">请选择乡镇/街道</strong>
+          <span id="newProjectRegionPath"></span>
+          <button id="changeNewProjectRegion" type="button">更换地区</button>
+        </section>
+        <label>方案名称<input id="newProjectName" type="text" maxlength="60" placeholder="按所选行政区自动命名" autocomplete="off" /></label>
+        <p id="newProjectImpact" class="creation-impact">选择行政区后会显示创建范围。</p>
+        <p id="newProjectError" class="save-project-error" role="alert" hidden></p>
+      </div>
+      <footer class="save-project-footer"><button id="cancelNewProject">取消</button><button id="confirmNewProject" class="primary" disabled>创建方案</button></footer>
+    </section>
+  </div>
+
+  <div id="confirmModal" class="project-list-modal" hidden role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <div id="confirmBackdrop" class="export-backdrop"></div>
+    <section class="save-project-dialog">
+      <header><div><small>CONFIRM</small><h2 id="confirmModalTitle">确认操作</h2></div><button id="closeConfirmModal" class="icon-button" aria-label="关闭确认窗口">×</button></header>
+      <div class="save-project-body"><p id="confirmModalMessage" class="delete-project-message"></p></div>
+      <footer class="save-project-footer">
+        <button id="cancelConfirmModal">取消</button>
+        <button id="confirmModalOk" class="danger">确认</button>
+      </footer>
+    </section>
+  </div>
+
+  <div id="assetLibraryModal" class="asset-library-modal project-list-modal" hidden role="dialog" aria-modal="true" aria-labelledby="assetLibraryTitle">
+    <div id="assetLibraryBackdrop" class="export-backdrop"></div>
+    <section class="asset-library-dialog">
+      <header>
+        <div><small>ASSET LIBRARY</small><h2 id="assetLibraryTitle">素材库</h2><p>仅显示当前行政区的图片/视频；同一行政区的所有方案共享素材，其他行政区不可见。</p></div>
+        <div class="asset-library-header-actions"><button id="assetLibraryUpload" type="button">上传素材</button><button id="closeAssetLibrary" class="icon-button" aria-label="关闭素材库">×</button></div>
+      </header>
+      <div class="asset-library-toolbar">
+        <div class="asset-library-search-row"><input id="assetLibrarySearch" type="search" placeholder="按名称、说明、村名或 POI 搜索…" autocomplete="off" aria-label="搜索素材" /><small id="assetLibraryCount"></small></div>
+        <div class="asset-library-filter-row">
+          <label>来源<select id="assetLibrarySource"><option value="all">全部来源</option><option value="upload">我的上传</option><option value="poi">实景 POI</option></select></label>
+          <label>本方案使用状态<select id="assetLibraryUsage"><option value="all">全部状态</option><option value="unused">未使用</option><option value="used">已使用</option><option value="multi">多场景使用</option></select></label>
+          <label>排序<select id="assetLibrarySort"><option value="recent">最近使用</option><option value="name">按名称</option><option value="usage">使用次数</option><option value="source">按地区/来源</option></select></label>
+          <span class="asset-library-batch-actions"><button id="selectUnusedAssets" type="button">选择未使用</button><button id="clearAssetSelection" type="button" hidden>取消选择</button><button id="deleteSelectedAssets" class="danger" type="button" disabled>永久删除</button></span>
+        </div>
+      </div>
+      <div id="assetLibraryList" class="asset-library-list"></div>
+      <footer class="asset-library-footer"><span id="assetLibraryHint">同一 POI 的多张照片会自动归组。永久删除会影响所有引用该文件的方案，请谨慎操作。</span></footer>
+    </section>
+  </div>
+
+  <div id="assetPreviewModal" class="project-list-modal" hidden role="dialog" aria-modal="true" aria-labelledby="assetPreviewTitle">
+    <div id="assetPreviewBackdrop" class="export-backdrop"></div>
+    <section class="asset-preview-dialog">
+      <header>
+        <div><small>ASSET PREVIEW</small><h2 id="assetPreviewTitle">素材预览</h2></div>
+        <button id="closeAssetPreview" class="icon-button" aria-label="关闭预览">×</button>
+      </header>
+      <div class="asset-preview-body">
+        <div id="assetPreviewMediaWrap" class="asset-preview-media"><img id="assetPreviewMedia" alt="素材预览" /><video id="assetPreviewVideo" controls muted playsinline hidden></video><div id="assetPreviewMissing" class="asset-preview-missing" hidden>素材文件缺失，无法预览</div></div>
+        <div class="asset-preview-meta"><b id="assetPreviewMetaName"></b><small id="assetPreviewMetaDetail"></small><p id="assetPreviewMetaNote"></p></div>
+      </div>
+      <footer class="asset-preview-footer">
+        <span id="assetPreviewNote"></span>
+        <span class="asset-preview-actions" id="assetPreviewActions"><button id="assetPreviewUse" class="primary" type="button">绑定到当前场景</button><button id="assetPreviewCancel" type="button">取消</button></span>
+      </footer>
+    </section>
+  </div>
+
+  <div id="assetRenameModal" class="project-list-modal" hidden role="dialog" aria-modal="true" aria-labelledby="assetRenameTitle">
+    <div id="assetRenameBackdrop" class="export-backdrop"></div>
+    <section class="save-project-dialog">
+      <header><div><small>RENAME ASSET</small><h2 id="assetRenameTitle">重命名素材</h2><p>新的名称会同步到素材库与该素材所在的全部方案。</p></div><button id="closeAssetRename" class="icon-button" aria-label="关闭重命名窗口">×</button></header>
+      <div class="save-project-body">
+        <label>素材名称<input id="assetRenameName" type="text" maxlength="120" placeholder="请输入素材名称" autocomplete="off" /></label>
+        <p id="assetRenameError" class="save-project-error" hidden></p>
+      </div>
+      <footer class="save-project-footer">
+        <button id="cancelAssetRename">取消</button>
+        <button id="confirmAssetRename" class="primary">保存</button>
+      </footer>
+    </section>
+  </div>
+
+  <div id="projectBusy" class="project-busy" hidden role="status" aria-live="polite">
+    <div class="project-busy-card">
+      <div class="project-busy-spinner" aria-hidden="true"></div>
+      <div class="project-busy-text">
+        <h3 id="projectBusyTitle">正在打开方案…</h3>
+        <p id="projectBusyStage">正在获取方案内容</p>
+      </div>
+      <div class="project-busy-bar"><i id="projectBusyFill"></i></div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script type="module" src="/studio.js?v=20261102-explicit-save-1"></script>
+</body>
+</html>

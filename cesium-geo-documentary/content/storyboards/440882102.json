@@ -1,0 +1,1247 @@
+{
+  "regionId": "440882102",
+  "title": "地理乡土情·雷州市客路镇",
+  "duration": 287,
+  "profile": "portrait",
+  "presentationMode": "parent-child-tour-with-evidence-cutaways",
+  "tourChildCount": 30,
+  "photoAssetIds": [
+    "town-entrance",
+    "jinhe-street",
+    "town-market",
+    "canal-greenway",
+    "school-library-groundbreaking",
+    "school-library-ceremony"
+  ],
+  "visualEvidence": {
+    "timingMode": "narration-cue-required",
+    "manifest": "content/visuals/440882102.json",
+    "photoManifest": "assets/source/photo-manifest-440882102.json",
+    "clips": [
+      {
+        "id": "town-entrance",
+        "narrationCueIndex": 3
+      },
+      {
+        "id": "jinhe-street",
+        "narrationCueIndex": 4
+      },
+      {
+        "id": "town-market",
+        "narrationCueIndex": 5
+      },
+      {
+        "id": "canal-greenway",
+        "narrationCueIndex": 6
+      },
+      {
+        "id": "school-library-groundbreaking",
+        "narrationCueIndex": 7
+      },
+      {
+        "id": "school-library-ceremony",
+        "narrationCueIndex": 8
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "sceneId": "440882102-intro-01",
+      "title": "????",
+      "start": 0.1,
+      "duration": 6.772,
+      "end": 6.872,
+      "narrationRef": "script:paragraph-01",
+      "narration": "??????????????????????207????????????????????????",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440882102",
+        "layers": [
+          "cesium-world-imagery",
+          "parent-boundary",
+          "context-child-boundaries"
+        ]
+      },
+      "photoAssetIds": [],
+      "subtitle": {
+        "text": "??????????????????????207????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-population-001",
+        "440882102-administration-001",
+        "440882102-economy-001"
+      ],
+      "accessibility": "卫星地图保持客路镇父级总览，照片卡仅在对应事实出现时进入。"
+    },
+    {
+      "sceneId": "440882102-intro-02",
+      "title": "????",
+      "start": 6.822,
+      "duration": 12.670000000000002,
+      "end": 19.492,
+      "narrationRef": "script:paragraph-02",
+      "narration": "????????????????????????????????",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440882102",
+        "layers": [
+          "cesium-world-imagery",
+          "parent-boundary",
+          "context-child-boundaries"
+        ]
+      },
+      "photoAssetIds": [],
+      "subtitle": {
+        "text": "????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-population-001",
+        "440882102-administration-001",
+        "440882102-economy-001"
+      ],
+      "accessibility": "卫星地图保持客路镇父级总览，照片卡仅在对应事实出现时进入。"
+    },
+    {
+      "sceneId": "440882102-intro-03",
+      "title": "????",
+      "start": 19.492,
+      "duration": 10.832999999999998,
+      "end": 30.325,
+      "narrationRef": "script:paragraph-03",
+      "narration": "???????????????????????????",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440882102",
+        "layers": [
+          "cesium-world-imagery",
+          "parent-boundary",
+          "context-child-boundaries"
+        ]
+      },
+      "photoAssetIds": [],
+      "subtitle": {
+        "text": "???????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-population-001",
+        "440882102-administration-001",
+        "440882102-economy-001"
+      ],
+      "accessibility": "卫星地图保持客路镇父级总览，照片卡仅在对应事实出现时进入。"
+    },
+    {
+      "sceneId": "440882102-intro-04",
+      "title": "????",
+      "start": 30.325,
+      "duration": 9.701000000000004,
+      "end": 40.026,
+      "narrationRef": "script:paragraph-04",
+      "narration": "?????????????????????????????????????",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440882102",
+        "layers": [
+          "cesium-world-imagery",
+          "parent-boundary",
+          "context-child-boundaries"
+        ]
+      },
+      "photoAssetIds": [
+        "town-entrance"
+      ],
+      "subtitle": {
+        "text": "?????????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-town-upgrade-001"
+      ],
+      "accessibility": "卫星地图保持客路镇父级总览，照片卡仅在对应事实出现时进入。"
+    },
+    {
+      "sceneId": "440882102-intro-05",
+      "title": "?????",
+      "start": 40.026,
+      "duration": 7.876999999999995,
+      "end": 47.903,
+      "narrationRef": "script:paragraph-05",
+      "narration": "?????????????????????????????????????????",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440882102",
+        "layers": [
+          "cesium-world-imagery",
+          "parent-boundary",
+          "context-child-boundaries"
+        ]
+      },
+      "photoAssetIds": [
+        "jinhe-street"
+      ],
+      "subtitle": {
+        "text": "?????????????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-town-upgrade-001"
+      ],
+      "accessibility": "卫星地图保持客路镇父级总览，照片卡仅在对应事实出现时进入。"
+    },
+    {
+      "sceneId": "440882102-intro-06",
+      "title": "??????",
+      "start": 47.903,
+      "duration": 8.607,
+      "end": 56.51,
+      "narrationRef": "script:paragraph-06",
+      "narration": "?????????????????????????????????",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440882102",
+        "layers": [
+          "cesium-world-imagery",
+          "parent-boundary",
+          "context-child-boundaries"
+        ]
+      },
+      "photoAssetIds": [
+        "town-market"
+      ],
+      "subtitle": {
+        "text": "?????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-town-upgrade-001"
+      ],
+      "accessibility": "卫星地图保持客路镇父级总览，照片卡仅在对应事实出现时进入。"
+    },
+    {
+      "sceneId": "440882102-intro-07",
+      "title": "????",
+      "start": 56.51,
+      "duration": 8.384999999999998,
+      "end": 64.895,
+      "narrationRef": "script:paragraph-07",
+      "narration": "2025???????????????15.3???2024???????????32???????288?????",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440882102",
+        "layers": [
+          "cesium-world-imagery",
+          "parent-boundary",
+          "context-child-boundaries"
+        ]
+      },
+      "photoAssetIds": [
+        "canal-greenway"
+      ],
+      "subtitle": {
+        "text": "2025???????????????15.3???2024???????????32???????288?????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-town-upgrade-001"
+      ],
+      "accessibility": "卫星地图保持客路镇父级总览，照片卡仅在对应事实出现时进入。"
+    },
+    {
+      "sceneId": "440882102-intro-08",
+      "title": "?????",
+      "start": 64.895,
+      "duration": 9.870000000000005,
+      "end": 74.765,
+      "narrationRef": "script:paragraph-08",
+      "narration": "2024?????????????????15.21????????????????????????",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440882102",
+        "layers": [
+          "cesium-world-imagery",
+          "parent-boundary",
+          "context-child-boundaries"
+        ]
+      },
+      "photoAssetIds": [
+        "school-library-groundbreaking"
+      ],
+      "subtitle": {
+        "text": "2024?????????????????15.21????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-school-001"
+      ],
+      "accessibility": "卫星地图保持客路镇父级总览，照片卡仅在对应事实出现时进入。"
+    },
+    {
+      "sceneId": "440882102-intro-09",
+      "title": "?????",
+      "start": 74.765,
+      "duration": 7.343999999999994,
+      "end": 82.109,
+      "narrationRef": "script:paragraph-09",
+      "narration": "???????????????????????????????????????????????????",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440882102",
+        "layers": [
+          "cesium-world-imagery",
+          "parent-boundary",
+          "context-child-boundaries"
+        ]
+      },
+      "photoAssetIds": [
+        "school-library-ceremony"
+      ],
+      "subtitle": {
+        "text": "???????????????????????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-school-001"
+      ],
+      "accessibility": "卫星地图保持客路镇父级总览，照片卡仅在对应事实出现时进入。"
+    },
+    {
+      "sceneId": "440882102-child-01",
+      "childId": "440882102200",
+      "childName": "客路村",
+      "start": 82.109,
+      "duration": 6.2109999999999985,
+      "end": 88.32,
+      "narrationRef": "script:paragraph-10",
+      "narration": "??????????????????????????????????",
+      "visual": "首次点亮客路村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102200",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "客路村边界和名称同步出现，地图不显示未到达村名。",
+      "title": "????"
+    },
+    {
+      "sceneId": "440882102-child-02",
+      "childId": "440882102201",
+      "childName": "曲溪村",
+      "start": 88.32,
+      "duration": 6.666000000000011,
+      "end": 94.986,
+      "narrationRef": "script:paragraph-11",
+      "narration": "?????????????????????????????",
+      "visual": "首次点亮曲溪村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102201",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "曲溪村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-03",
+      "childId": "440882102202",
+      "childName": "大家村",
+      "start": 94.986,
+      "duration": 6.8359999999999985,
+      "end": 101.822,
+      "narrationRef": "script:paragraph-12",
+      "narration": "???????????????????????????????",
+      "visual": "首次点亮大家村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102202",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "???????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "大家村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-04",
+      "childId": "440882102203",
+      "childName": "水标村",
+      "start": 101.822,
+      "duration": 6.9140000000000015,
+      "end": 108.736,
+      "narrationRef": "script:paragraph-13",
+      "narration": "?????????????????????????????????",
+      "visual": "首次点亮水标村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102203",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "水标村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-05",
+      "childId": "440882102204",
+      "childName": "迈港村",
+      "start": 108.736,
+      "duration": 6.771000000000001,
+      "end": 115.507,
+      "narrationRef": "script:paragraph-14",
+      "narration": "?????207????????????????????????",
+      "visual": "首次点亮迈港村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102204",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????207????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "迈港村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-06",
+      "childId": "440882102205",
+      "childName": "高桥村",
+      "start": 115.507,
+      "duration": 6.887999999999991,
+      "end": 122.395,
+      "narrationRef": "script:paragraph-15",
+      "narration": "??????????????????????????????",
+      "visual": "首次点亮高桥村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102205",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "高桥村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-07",
+      "childId": "440882102206",
+      "childName": "泰坡村",
+      "start": 122.395,
+      "duration": 7.422000000000011,
+      "end": 129.817,
+      "narrationRef": "script:paragraph-16",
+      "narration": "??????????????????????????????????",
+      "visual": "首次点亮泰坡村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102206",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "泰坡村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-08",
+      "childId": "440882102207",
+      "childName": "高上村",
+      "start": 129.817,
+      "duration": 6.418999999999983,
+      "end": 136.236,
+      "narrationRef": "script:paragraph-17",
+      "narration": "????????????????????????????????",
+      "visual": "首次点亮高上村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102207",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "高上村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-09",
+      "childId": "440882102208",
+      "childName": "车路村",
+      "start": 136.236,
+      "duration": 7.201000000000022,
+      "end": 143.437,
+      "narrationRef": "script:paragraph-18",
+      "narration": "?????????????????????????????",
+      "visual": "首次点亮车路村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102208",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "车路村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-10",
+      "childId": "440882102209",
+      "childName": "上梁村",
+      "start": 143.437,
+      "duration": 6.601999999999975,
+      "end": 150.039,
+      "narrationRef": "script:paragraph-19",
+      "narration": "??????????????????????????????????",
+      "visual": "首次点亮上梁村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102209",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "上梁村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-11",
+      "childId": "440882102210",
+      "childName": "东山村",
+      "start": 150.039,
+      "duration": 7.135000000000019,
+      "end": 157.174,
+      "narrationRef": "script:paragraph-20",
+      "narration": "?????????????????????????????",
+      "visual": "首次点亮东山村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102210",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "东山村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-12",
+      "childId": "440882102211",
+      "childName": "恒山村",
+      "start": 157.174,
+      "duration": 6.522999999999996,
+      "end": 163.697,
+      "narrationRef": "script:paragraph-21",
+      "narration": "??????????????????????????????",
+      "visual": "首次点亮恒山村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102211",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "恒山村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-13",
+      "childId": "440882102212",
+      "childName": "本立村",
+      "start": 163.697,
+      "duration": 6.927999999999997,
+      "end": 170.625,
+      "narrationRef": "script:paragraph-22",
+      "narration": "?????????????????????????????",
+      "visual": "首次点亮本立村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102212",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "本立村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-14",
+      "childId": "440882102213",
+      "childName": "六梅村",
+      "start": 170.625,
+      "duration": 6.665999999999997,
+      "end": 177.291,
+      "narrationRef": "script:paragraph-23",
+      "narration": "??????????????????????????????",
+      "visual": "首次点亮六梅村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102213",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "六梅村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-15",
+      "childId": "440882102214",
+      "childName": "湖南村",
+      "start": 177.291,
+      "duration": 6.055000000000007,
+      "end": 183.346,
+      "narrationRef": "script:paragraph-24",
+      "narration": "?????????????????????????????",
+      "visual": "首次点亮湖南村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102214",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "湖南村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-16",
+      "childId": "440882102215",
+      "childName": "迈哉村",
+      "start": 183.346,
+      "duration": 6.36699999999999,
+      "end": 189.713,
+      "narrationRef": "script:paragraph-25",
+      "narration": "???????????????????????????",
+      "visual": "首次点亮迈哉村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102215",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "???????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "迈哉村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-17",
+      "childId": "440882102216",
+      "childName": "坡仔村",
+      "start": 189.713,
+      "duration": 6.653999999999996,
+      "end": 196.367,
+      "narrationRef": "script:paragraph-26",
+      "narration": "?????????????????????????????",
+      "visual": "首次点亮坡仔村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102216",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "坡仔村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-18",
+      "childId": "440882102227",
+      "childName": "饶里村",
+      "start": 196.367,
+      "duration": 6.78400000000002,
+      "end": 203.151,
+      "narrationRef": "script:paragraph-27",
+      "narration": "????????????????????????????????",
+      "visual": "首次点亮饶里村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102227",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "饶里村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-19",
+      "childId": "440882102217",
+      "childName": "迈坦村",
+      "start": 203.151,
+      "duration": 6.704999999999984,
+      "end": 209.856,
+      "narrationRef": "script:paragraph-28",
+      "narration": "??????????207????????????????????",
+      "visual": "首次点亮迈坦村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102217",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????207????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "迈坦村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-20",
+      "childId": "440882102218",
+      "childName": "湖仔村",
+      "start": 209.856,
+      "duration": 7.0049999999999955,
+      "end": 216.861,
+      "narrationRef": "script:paragraph-29",
+      "narration": "??????????????????????????????",
+      "visual": "首次点亮湖仔村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102218",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "湖仔村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-21",
+      "childId": "440882102219",
+      "childName": "塘塞村",
+      "start": 216.861,
+      "duration": 7.40900000000002,
+      "end": 224.27,
+      "narrationRef": "script:paragraph-30",
+      "narration": "???????????????????????????????",
+      "visual": "首次点亮塘塞村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102219",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "???????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "塘塞村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-22",
+      "childId": "440882102220",
+      "childName": "赵宅村",
+      "start": 224.27,
+      "duration": 6.614999999999981,
+      "end": 230.885,
+      "narrationRef": "script:paragraph-31",
+      "narration": "?????????????????????????????????",
+      "visual": "首次点亮赵宅村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102220",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "赵宅村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-23",
+      "childId": "440882102221",
+      "childName": "顶尾村",
+      "start": 230.885,
+      "duration": 6.237000000000023,
+      "end": 237.122,
+      "narrationRef": "script:paragraph-32",
+      "narration": "?????????????????????????????",
+      "visual": "首次点亮顶尾村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102221",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "顶尾村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-24",
+      "childId": "440882102222",
+      "childName": "宅仔村",
+      "start": 237.122,
+      "duration": 6.875,
+      "end": 243.997,
+      "narrationRef": "script:paragraph-33",
+      "narration": "??????????????????????????????",
+      "visual": "首次点亮宅仔村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102222",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "宅仔村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-25",
+      "childId": "440882102223",
+      "childName": "上塘村",
+      "start": 243.997,
+      "duration": 7.343999999999994,
+      "end": 251.341,
+      "narrationRef": "script:paragraph-34",
+      "narration": "???????????????????????????????",
+      "visual": "首次点亮上塘村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102223",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "???????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "上塘村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-26",
+      "childId": "440882102224",
+      "childName": "林排村",
+      "start": 251.341,
+      "duration": 6.158999999999992,
+      "end": 257.5,
+      "narrationRef": "script:paragraph-35",
+      "narration": "??????????????????????????????",
+      "visual": "首次点亮林排村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102224",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "林排村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-27",
+      "childId": "440882102225",
+      "childName": "东坑村",
+      "start": 257.5,
+      "duration": 6.65300000000002,
+      "end": 264.153,
+      "narrationRef": "script:paragraph-36",
+      "narration": "???????????????????????????",
+      "visual": "首次点亮东坑村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102225",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "???????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "东坑村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-28",
+      "childId": "440882102226",
+      "childName": "深坑村",
+      "start": 264.153,
+      "duration": 6.614999999999952,
+      "end": 270.768,
+      "narrationRef": "script:paragraph-37",
+      "narration": "?????????????????????????????",
+      "visual": "首次点亮深坑村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102226",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "?????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "深坑村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-29",
+      "childId": "440882102228",
+      "childName": "高坡村",
+      "start": 270.768,
+      "duration": 6.523000000000025,
+      "end": 277.291,
+      "narrationRef": "script:paragraph-38",
+      "narration": "??????????????????????????????",
+      "visual": "首次点亮高坡村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102228",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "??????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "高坡村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-child-30",
+      "childId": "440882102229",
+      "childName": "三塘村",
+      "start": 277.291,
+      "duration": 6.680000000000007,
+      "end": 283.971,
+      "narrationRef": "script:paragraph-39",
+      "narration": "???????????????????????????????",
+      "visual": "首次点亮三塘村边界和名称，当前村金色高亮，已访问村界保留。",
+      "cesium": {
+        "cameraAction": "flyToRegion",
+        "regionId": "440882102229",
+        "parentRegionId": "440882102",
+        "layers": [
+          "parent-boundary",
+          "visited-child-boundaries",
+          "current-child-highlight"
+        ]
+      },
+      "subtitle": {
+        "text": "???????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-boundary-001"
+      ],
+      "accessibility": "三塘村边界和名称同步出现，地图不显示未到达村名。"
+    },
+    {
+      "sceneId": "440882102-return-parent",
+      "cameraAction": "return-to-parent-overview",
+      "start": 283.971,
+      "duration": 4.399999999999977,
+      "end": 288.371,
+      "silent": true,
+      "visual": "静音返回客路镇父级总览，保留全部已访问村界和名称。"
+    },
+    {
+      "sceneId": "440882102-finale",
+      "start": 288.371,
+      "duration": 0.5,
+      "end": 302,
+      "narrationRef": "script:paragraph-40",
+      "narration": "??????????????????????????????",
+      "visual": "父级总览锁定，完成收尾旁白。",
+      "subtitle": {
+        "text": "??????????????????????????????",
+        "maxLines": 1,
+        "maxCharsPerLine": 14
+      },
+      "sources": [
+        "440882102-town-upgrade-001",
+        "440882102-boundary-001"
+      ]
+    }
+  ]
+}

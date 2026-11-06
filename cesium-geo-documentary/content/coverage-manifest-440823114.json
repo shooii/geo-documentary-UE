@@ -1,0 +1,281 @@
+{
+  "parentId": "440823114",
+  "parentName": "河头镇",
+  "levelRole": "township",
+  "officialLevelName": "镇",
+  "childRole": "administrative-village",
+  "source": "用户提供的广东省村级行政边界 SHP 数据（河头镇旧代码前缀 440823114）",
+  "effectiveDate": "source dataset date not declared; official town profile compared at 2025-07-29",
+  "sourceAdministrativeCode": "440823114",
+  "currentReferenceAdministrativeCode": "440823115",
+  "completeReliableBoundaryUnitCoverage": true,
+  "completeImmediateChildCoverage": false,
+  "coverageScope": "11 reliable boundary units: 11 tour children and 0 supplemental management units",
+  "parentGeometryBasis": "union-of-all-11-reliable-source-features",
+  "tourChildIds": [
+    "440823114200",
+    "440823114202",
+    "440823114203",
+    "440823114204",
+    "440823114205",
+    "440823114206",
+    "440823114207",
+    "440823114208",
+    "440823114209",
+    "440823114210",
+    "440823114201"
+  ],
+  "boundaryUnitIds": [
+    "440823114201",
+    "440823114202",
+    "440823114204",
+    "440823114206",
+    "440823114207",
+    "440823114210",
+    "440823114200",
+    "440823114203",
+    "440823114205",
+    "440823114208",
+    "440823114209"
+  ],
+  "children": [
+    {
+      "id": "440823114200",
+      "name": "河头村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 1,
+      "hasInteriorRings": true
+    },
+    {
+      "id": "440823114202",
+      "name": "吴排村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 2
+    },
+    {
+      "id": "440823114203",
+      "name": "割山村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 3,
+      "multipartParts": 2
+    },
+    {
+      "id": "440823114204",
+      "name": "田西村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 4
+    },
+    {
+      "id": "440823114205",
+      "name": "双村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 5,
+      "multipartParts": 2
+    },
+    {
+      "id": "440823114206",
+      "name": "山域村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 6
+    },
+    {
+      "id": "440823114207",
+      "name": "新市村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 7
+    },
+    {
+      "id": "440823114208",
+      "name": "干塘村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 8,
+      "multipartParts": 2
+    },
+    {
+      "id": "440823114209",
+      "name": "吾良村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 9,
+      "multipartParts": 2,
+      "hasInteriorRings": true
+    },
+    {
+      "id": "440823114210",
+      "name": "上坡村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 10
+    },
+    {
+      "id": "440823114201",
+      "name": "虎溪村",
+      "included": true,
+      "reason": "reliable SHP feature",
+      "editorialOrder": 11
+    }
+  ],
+  "supplementalUnits": [],
+  "internalUnmappedOfficialUnits": [
+    {
+      "name": "油河塘村",
+      "included": false,
+      "audienceDisclosure": false,
+      "reason": "official 2024 child list includes the village, but neither supplied Suixi village-boundary SHP contains an independent reliable polygon; no inferred geometry is permitted"
+    }
+  ],
+  "presentationPolicy": {
+    "openingChildLabels": "hidden",
+    "tourLabels": "current-child-only",
+    "supplementalLabels": "hidden-by-default",
+    "parentBoundaryColor": "#8B1E1E",
+    "selectedBoundaryColor": "#FFD166",
+    "contextBoundaryColor": "#E8F0F5",
+    "publicNarrationMentionsDataGaps": false,
+    "outroReturnsToParentOverview": true
+  },
+  "narrationCoverage": [
+    {
+      "id": "440823114200",
+      "start": 87.096,
+      "end": 92.617,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114202",
+      "start": 92.617,
+      "end": 99.01,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114203",
+      "start": 99.01,
+      "end": 104.505,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114204",
+      "start": 104.505,
+      "end": 110.429,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114205",
+      "start": 110.429,
+      "end": 116.627,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114206",
+      "start": 116.627,
+      "end": 122.356,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114207",
+      "start": 122.356,
+      "end": 129.023,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114208",
+      "start": 129.023,
+      "end": 133.958,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114209",
+      "start": 133.958,
+      "end": 138.828,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114210",
+      "start": 138.828,
+      "end": 144.127,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823114201",
+      "start": 144.127,
+      "end": 149.908,
+      "camera": true,
+      "highlight": true
+    }
+  ],
+  "boundaryUnits": [
+    {
+      "id": "440823114201",
+      "name": "虎溪村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114202",
+      "name": "吴排村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114204",
+      "name": "田西村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114206",
+      "name": "山域村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114207",
+      "name": "新市村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114210",
+      "name": "上坡村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114200",
+      "name": "河头村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114203",
+      "name": "割山村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114205",
+      "name": "双村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114208",
+      "name": "干塘村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823114209",
+      "name": "吾良村",
+      "unitRole": "administrative-village"
+    }
+  ]
+}

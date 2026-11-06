@@ -1,0 +1,5 @@
+{
+  "name": "@geo-video/cesium-player",
+  "private": true,
+  "type": "module"
+}

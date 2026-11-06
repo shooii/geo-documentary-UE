@@ -1,0 +1,251 @@
+{
+  "regionId": "440802",
+  "name": "赤坎区",
+  "duration": 52,
+  "scenes": [
+    {
+      "sceneId": "440802-scene-01",
+      "title": "湛江全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "从湛江全域看，赤坎位于主城区北部、湛江湾西岸，是全市行政与公共服务中心。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440802",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "从湛江全域看，赤坎位于主城区北部、湛江湾西岸，是全市行政与公共服务中心。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440802-location-001"
+      ],
+      "accessibility": "旁白说明湛江全域定位，地图高亮赤坎区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440802-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2020年第七次全国人口普查显示，赤坎常住人口约39.03万，人口高度集中于连续建成区。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440802",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2020年常住人口约39.03万",
+        "body": "港湾与密集街区交织"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2020年第七次全国人口普查显示，赤坎常住人口约39.03万，人口高度集中于连续建成区。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440802-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮赤坎区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440802-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2025年赤坎地区生产总值380.98亿元，总部经济、现代服务业和商贸文旅构成主要经济脉络。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440802",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2025年GDP 380.98亿元",
+        "body": "老城保护与现代服务业并行"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年赤坎地区生产总值380.98亿元，总部经济、现代服务业和商贸文旅构成主要经济脉络。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440802-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮赤坎区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440802-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "赤坎古商埠在宋代渐成形，清代海运贸易兴盛后，多地商旅沿港湾在这里汇聚。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440802",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "古商埠连接海上商路",
+        "body": "赤坎古商埠在宋代渐成形，清代海运贸易兴盛后，多地商旅沿港湾在这里汇聚。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "赤坎古商埠在宋代渐成形，清代海运贸易兴盛后，多地商旅沿港湾在这里汇聚。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440802-history-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮赤坎区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440802-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "古码头、岭南骑楼、会馆和老街，共同保存着湛江城市成长的早期记忆。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440802",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "骑楼、会馆与老街记忆",
+        "body": "古码头、岭南骑楼、会馆和老街，共同保存着湛江城市成长的早期记忆。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "古码头、岭南骑楼、会馆和老街，共同保存着湛江城市成长的早期记忆。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440802-location-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮赤坎区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440802-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 8,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的赤坎在保护历史街区的同时更新城市服务，让港湾、商路与现代生活继续相连。",
+      "cesium": {
+        "cameraAction": "pullBackToParent",
+        "regionId": "440802",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的赤坎在保护历史街区的同时更新城市服务，让港湾、商路与现代生活继续相连。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440802-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮赤坎区，所有重要文字保持在安全区。"
+    }
+  ]
+}

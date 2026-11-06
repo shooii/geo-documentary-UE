@@ -1,0 +1,251 @@
+{
+  "regionId": "440881",
+  "name": "廉江市",
+  "duration": 50,
+  "scenes": [
+    {
+      "sceneId": "440881-scene-01",
+      "title": "湛江全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "廉江位于雷州半岛北部，向西北连接广西，向南通往湛江主城区与半岛腹地。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440881",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "廉江位于雷州半岛北部，向西北连接广西，向南通往湛江主城区与半岛腹地。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440881-location-001"
+      ],
+      "accessibility": "旁白说明湛江全域定位，地图高亮廉江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440881-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2025年末廉江常住人口138.08万，是湛江人口规模较大的县级市。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440881",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2025年常住人口138.08万",
+        "body": "雷州半岛北部连接粤桂"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年末廉江常住人口138.08万，是湛江人口规模较大的县级市。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440881-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮廉江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440881-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2025年廉江地区生产总值588.08亿元，现代服务、特色农业与小家电制造共同支撑县域经济。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440881",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2025年GDP 588.08亿元",
+        "body": "小家电产业形成制造集群"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年廉江地区生产总值588.08亿元，现代服务、特色农业与小家电制造共同支撑县域经济。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440881-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮廉江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440881-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "九洲江流域长期孕育城镇、农业与区域商贸，形成廉江发展的基本空间骨架。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440881",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "九洲江流域孕育城镇与农业",
+        "body": "九洲江流域长期孕育城镇、农业与区域商贸，形成廉江发展的基本空间骨架。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "九洲江流域长期孕育城镇、农业与区域商贸，形成廉江发展的基本空间骨架。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440881-location-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮廉江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440881-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "红橙品牌和小家电产业，分别连接田野、工厂与地方生活，成为鲜明的城市文化名片。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440881",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "红橙构成鲜明地方物产名片",
+        "body": "红橙品牌和小家电产业，分别连接田野、工厂与地方生活，成为鲜明的城市文化名片。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "红橙品牌和小家电产业，分别连接田野、工厂与地方生活，成为鲜明的城市文化名片。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440881-location-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮廉江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440881-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 6,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的廉江从九洲江延伸到产业园，在粤桂联系中展示县域经济的多重层次。",
+      "cesium": {
+        "cameraAction": "pullBackToParent",
+        "regionId": "440881",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的廉江从九洲江延伸到产业园，在粤桂联系中展示县域经济的多重层次。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440881-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮廉江市，所有重要文字保持在安全区。"
+    }
+  ]
+}

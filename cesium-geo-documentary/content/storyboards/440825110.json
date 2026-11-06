@@ -1,0 +1,47 @@
+{
+  "regionId": "440825110",
+  "title": "地理乡土情·徐闻县锦和镇",
+  "profile": "portrait",
+  "presentationMode": "parent-child-tour-map-led",
+  "opening": {
+    "coverSeconds": 1.3,
+    "descentSeconds": 3,
+    "totalSeconds": 4.3,
+    "visual": "深蓝金色封面后，同一条地图轨从高空地球穿过厚实云层，连续抵达锦和镇父级边界。"
+  },
+  "scenes": [
+    {
+      "narrationCueRange": [
+        0,
+        10
+      ],
+      "visual": "父级卫星总览与贴地边界；在对应句级 cue 中依次展示菠萝培训和锦和中学官方实景图。",
+      "photoAssetIds": [
+        "pineapple-training",
+        "jinhe-middle-school"
+      ]
+    },
+    {
+      "narrationCueRange": [
+        11,
+        31
+      ],
+      "visual": "连续飞抵21个可靠边界单元，农场管理单元不排除；在对应村级 cue 展示那板、六极、沟西、白茅官方实景图。",
+      "photoAssetIds": [
+        "naban-awards",
+        "liuji-wharf",
+        "gouxi-harbor",
+        "baimao-governance"
+      ]
+    },
+    {
+      "narrationCueRange": [
+        32,
+        33
+      ],
+      "visual": "回到锦和镇全景，以古城、农业、海洋、学校与村庄的共同脉络收束。",
+      "duration": null
+    }
+  ],
+  "duration": 292
+}

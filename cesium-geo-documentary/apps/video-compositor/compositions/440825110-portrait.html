@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>锦和镇地理乡土情</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1080px;height:1920px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Noto Sans SC"),local("Source Han Sans SC"),local("Microsoft YaHei")}@font-face{font-family:"GeoNumber";src:local("Roboto Flex"),local("Roboto"),local("Arial")}@font-face{font-family:"STZhongsong";src:local("STZhongsong"),local("华文中宋"),local("Source Han Serif SC"),local("SimSun")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}.cover{inset:0;width:100%;height:100%;object-fit:cover;background:#06101a}
+    .topbar{left:64px;top:64px;display:flex;align-items:center;gap:13px;padding:9px 20px 9px 9px;border:1px solid rgba(226,177,96,.42);border-radius:999px;background:rgba(3,14,25,.72);font-family:"STZhongsong","GeoSans",serif;font-size:32px;font-weight:600;letter-spacing:.08em;color:#f5e4c6;text-shadow:0 2px 10px rgba(0,0,0,.9);box-shadow:0 8px 28px rgba(0,0,0,.24);backdrop-filter:blur(14px)}.brand-mark{display:block;width:46px;height:46px;flex:0 0 auto;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px rgba(236,190,111,.54)}
+    .visual{left:64px;top:278px;width:952px;height:780px;margin:0;overflow:hidden;border:1px solid rgba(215,235,237,.32);border-radius:28px;background:#07151d;box-shadow:0 24px 80px rgba(0,0,0,.46);isolation:isolate}.visual-bg,.visual-main{position:absolute;inset:0;width:100%;height:100%}.visual-bg{z-index:0;background-size:cover;background-position:center;filter:blur(34px) saturate(.82) brightness(.56);transform:scale(1.13)}.visual-main{z-index:1}.visual-main.fit-cover{object-fit:cover}.visual-main.fit-contain{object-fit:contain;padding:18px}.visual:after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(2,9,14,.76) 100%);pointer-events:none}.visual figcaption{position:absolute;z-index:3;left:28px;right:28px;bottom:24px;font-size:30px;font-weight:650;line-height:1.25;letter-spacing:.03em;color:#f4f7f9;text-shadow:0 2px 10px rgba(0,0,0,.9)}
+    .subtitle{left:50%;bottom:118px;transform:translateX(-50%);max-width:900px;font-size:44px;line-height:1.38;text-align:center;font-weight:650;letter-spacing:0;text-shadow:0 2px 8px rgba(0,0,0,.96);white-space:nowrap}.subtitle-inner{display:block;padding:10px 22px;border-radius:10px;background:rgba(4,10,15,.72)}
+    .provider-credit{right:21px;bottom:18px;padding:5px 9px;border-radius:6px;background:rgba(4,10,15,.58);font-size:15px;letter-spacing:.02em;color:rgba(244,247,249,.78);text-shadow:0 1px 4px #000;white-space:nowrap}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440825110-portrait" data-start="0" data-width="1080" data-height="1920" data-duration="293.300" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440825110-map-portrait.mp4" muted playsinline preload="auto" data-start="1.300" data-duration="292.000" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="1.300" data-duration="292.000" data-track-index="1"></div>
+  <div id="topbar" class="clip topbar" data-start="1.300" data-duration="292.000" data-track-index="10"><img class="brand-mark" src="media/images/geo-documentary-mark.png" alt="">地理乡土情·徐闻县锦和镇</div>
+  <div id="provider-credit" class="clip provider-credit" data-start="1.300" data-duration="292.000" data-track-index="11">Esri World Imagery · Esri, Maxar, Earthstar Geographics and contributors</div>
+  <figure id="visual-pineapple-training" class="clip visual visual-real" data-start="44.768" data-duration="9.433" data-track-index="20"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440825110-pineapple-training.jpg')"></div><img class="visual-main fit-contain" src="media/images/440825110-pineapple-training.jpg" alt="锦和镇菠萝网络销售培训（官方实景）"><figcaption>锦和镇菠萝网络销售培训（官方实景）</figcaption></figure>
+<figure id="visual-jinhe-middle-school" class="clip visual visual-real" data-start="81.603" data-duration="8.249" data-track-index="21"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440825110-jinhe-middle-school.jpg')"></div><img class="visual-main fit-contain" src="media/images/440825110-jinhe-middle-school.jpg" alt="锦和中学校园安全检查（官方实景）"><figcaption>锦和中学校园安全检查（官方实景）</figcaption></figure>
+<figure id="visual-naban-awards" class="clip visual visual-real" data-start="173.231" data-duration="7.761" data-track-index="22"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440825110-naban-awards.jpg')"></div><img class="visual-main fit-contain" src="media/images/440825110-naban-awards.jpg" alt="那板村2024年奖学颁奖活动（官方实景）"><figcaption>那板村2024年奖学颁奖活动（官方实景）</figcaption></figure>
+<figure id="visual-liuji-wharf" class="clip visual visual-real" data-start="180.992" data-duration="9.355" data-track-index="23"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440825110-liuji-wharf.jpg')"></div><img class="visual-main fit-contain" src="media/images/440825110-liuji-wharf.jpg" alt="六极码头防台检查（官方实景）"><figcaption>六极码头防台检查（官方实景）</figcaption></figure>
+<figure id="visual-gouxi-harbor" class="clip visual visual-real" data-start="195.992" data-duration="8.548" data-track-index="24"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440825110-gouxi-harbor.jpg')"></div><img class="visual-main fit-contain" src="media/images/440825110-gouxi-harbor.jpg" alt="沟西避风港安全检查（官方实景）"><figcaption>沟西避风港安全检查（官方实景）</figcaption></figure>
+<figure id="visual-baimao-governance" class="clip visual visual-real" data-start="216.916" data-duration="8.014" data-track-index="25"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440825110-baimao-governance.png')"></div><img class="visual-main fit-contain" src="media/images/440825110-baimao-governance.png" alt="白茅村积分制乡村治理活动（官方实景）"><figcaption>白茅村积分制乡村治理活动（官方实景）</figcaption></figure>
+  <div id="caption-0" class="clip subtitle" data-start="4.400" data-duration="2.478" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">广东省湛江市徐闻县东部</span></div>
+<div id="caption-1" class="clip subtitle" data-start="6.878" data-duration="2.253" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">锦和镇连接内陆农田与</span></div>
+<div id="caption-2" class="clip subtitle" data-start="9.131" data-duration="1.126" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">外罗湾沿海</span></div>
+<div id="caption-3" class="clip subtitle" data-start="10.257" data-duration="2.028" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">可靠边界融合面积约</span></div>
+<div id="caption-4" class="clip subtitle" data-start="12.285" data-duration="2.703" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">一百一十二点六八平方千米</span></div>
+<div id="caption-5" class="clip subtitle" data-start="14.988" data-duration="2.747" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">第七次全国人口普查公开资</span></div>
+<div id="caption-6" class="clip subtitle" data-start="17.735" data-duration="2.976" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">料显示，锦和镇约有三点五万人</span></div>
+<div id="caption-7" class="clip subtitle" data-start="20.711" data-duration="2.518" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">公开名录记载全镇设四个</span></div>
+<div id="caption-8" class="clip subtitle" data-start="23.229" data-duration="2.060" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">社区和十七个行政村</span></div>
+<div id="caption-9" class="clip subtitle" data-start="25.289" data-duration="1.654" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">锦和旧称新安村</span></div>
+<div id="caption-10" class="clip subtitle" data-start="26.943" data-duration="3.309" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">明洪武二十七年设置锦囊卫所后</span></div>
+<div id="caption-11" class="clip subtitle" data-start="30.252" data-duration="2.363" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">锦囊之名沿着城墙遗迹</span></div>
+<div id="caption-12" class="clip subtitle" data-start="32.615" data-duration="2.127" data-track-index="5"><span id="caption-inner-12" class="subtitle-inner">和聚落记忆留到今天</span></div>
+<div id="caption-13" class="clip subtitle" data-start="34.742" data-duration="1.796" data-track-index="5"><span id="caption-inner-13" class="subtitle-inner">二零二五年上半年</span></div>
+<div id="caption-14" class="clip subtitle" data-start="36.538" data-duration="0.449" data-track-index="5"><span id="caption-inner-14" class="subtitle-inner">全镇</span></div>
+<div id="caption-15" class="clip subtitle" data-start="36.987" data-duration="3.142" data-track-index="5"><span id="caption-inner-15" class="subtitle-inner">农林牧渔业总产值十点三六亿元</span></div>
+<div id="caption-16" class="clip subtitle" data-start="40.129" data-duration="2.245" data-track-index="5"><span id="caption-inner-16" class="subtitle-inner">水稻种植二点零五万亩</span></div>
+<div id="caption-17" class="clip subtitle" data-start="42.374" data-duration="0.898" data-track-index="5"><span id="caption-inner-17" class="subtitle-inner">农业种植</span></div>
+<div id="caption-18" class="clip subtitle" data-start="43.272" data-duration="1.796" data-track-index="5"><span id="caption-inner-18" class="subtitle-inner">面积十一点六万亩</span></div>
+<div id="caption-19" class="clip subtitle" data-start="45.068" data-duration="2.808" data-track-index="5"><span id="caption-inner-19" class="subtitle-inner">菠萝是锦和重要的特色产业</span></div>
+<div id="caption-20" class="clip subtitle" data-start="47.876" data-duration="2.107" data-track-index="5"><span id="caption-inner-20" class="subtitle-inner">官方培训把种植经验</span></div>
+<div id="caption-21" class="clip subtitle" data-start="49.983" data-duration="2.574" data-track-index="5"><span id="caption-inner-21" class="subtitle-inner">网络销售和锦囊金钻菠萝</span></div>
+<div id="caption-22" class="clip subtitle" data-start="52.557" data-duration="1.404" data-track-index="5"><span id="caption-inner-22" class="subtitle-inner">品牌连接起来</span></div>
+<div id="caption-23" class="clip subtitle" data-start="53.961" data-duration="1.755" data-track-index="5"><span id="caption-inner-23" class="subtitle-inner">沿海一侧同样繁忙</span></div>
+<div id="caption-24" class="clip subtitle" data-start="55.716" data-duration="2.632" data-track-index="5"><span id="caption-inner-24" class="subtitle-inner">二零二五年上半年海洋捕捞</span></div>
+<div id="caption-25" class="clip subtitle" data-start="58.348" data-duration="1.536" data-track-index="5"><span id="caption-inner-25" class="subtitle-inner">二千六百零六吨</span></div>
+<div id="caption-26" class="clip subtitle" data-start="59.884" data-duration="0.877" data-track-index="5"><span id="caption-inner-26" class="subtitle-inner">海水养殖</span></div>
+<div id="caption-27" class="clip subtitle" data-start="60.761" data-duration="1.755" data-track-index="5"><span id="caption-inner-27" class="subtitle-inner">六千七百五十四吨</span></div>
+<div id="caption-28" class="clip subtitle" data-start="62.516" data-duration="1.714" data-track-index="5"><span id="caption-inner-28" class="subtitle-inner">外罗渔港综合体</span></div>
+<div id="caption-29" class="clip subtitle" data-start="64.230" data-duration="2.449" data-track-index="5"><span id="caption-inner-29" class="subtitle-inner">锦和产业园和海上风电</span></div>
+<div id="caption-30" class="clip subtitle" data-start="66.679" data-duration="1.469" data-track-index="5"><span id="caption-inner-30" class="subtitle-inner">项目持续推进</span></div>
+<div id="caption-31" class="clip subtitle" data-start="68.148" data-duration="2.203" data-track-index="5"><span id="caption-inner-31" class="subtitle-inner">海岸生产、能源建设与</span></div>
+<div id="caption-32" class="clip subtitle" data-start="70.351" data-duration="2.204" data-track-index="5"><span id="caption-inner-32" class="subtitle-inner">镇域交通在这里交汇</span></div>
+<div id="caption-33" class="clip subtitle" data-start="72.555" data-duration="2.571" data-track-index="5"><span id="caption-inner-33" class="subtitle-inner">以古韵锦囊城为文化基底</span></div>
+<div id="caption-34" class="clip subtitle" data-start="75.126" data-duration="2.337" data-track-index="5"><span id="caption-inner-34" class="subtitle-inner">锦囊公园和城内古城项</span></div>
+<div id="caption-35" class="clip subtitle" data-start="77.463" data-duration="2.337" data-track-index="5"><span id="caption-inner-35" class="subtitle-inner">目把卫所历史转化为今</span></div>
+<div id="caption-36" class="clip subtitle" data-start="79.800" data-duration="2.103" data-track-index="5"><span id="caption-inner-36" class="subtitle-inner">天可阅读的公共空间</span></div>
+<div id="caption-37" class="clip subtitle" data-start="81.903" data-duration="2.570" data-track-index="5"><span id="caption-inner-37" class="subtitle-inner">锦和中学承担镇域中学教育</span></div>
+<div id="caption-38" class="clip subtitle" data-start="84.473" data-duration="1.927" data-track-index="5"><span id="caption-inner-38" class="subtitle-inner">官方检查记录里的校</span></div>
+<div id="caption-39" class="clip subtitle" data-start="86.400" data-duration="1.713" data-track-index="5"><span id="caption-inner-39" class="subtitle-inner">园日常，也是圩镇公</span></div>
+<div id="caption-40" class="clip subtitle" data-start="88.113" data-duration="1.499" data-track-index="5"><span id="caption-inner-40" class="subtitle-inner">共服务的一部分</span></div>
+<div id="caption-41" class="clip subtitle" data-start="89.612" data-duration="1.950" data-track-index="5"><span id="caption-inner-41" class="subtitle-inner">这里常听见徐闻话</span></div>
+<div id="caption-42" class="clip subtitle" data-start="91.562" data-duration="2.682" data-track-index="5"><span id="caption-inner-42" class="subtitle-inner">也就是雷州话的地方语音</span></div>
+<div id="caption-43" class="clip subtitle" data-start="94.244" data-duration="1.950" data-track-index="5"><span id="caption-inner-43" class="subtitle-inner">圩日交谈、海产劳作</span></div>
+<div id="caption-44" class="clip subtitle" data-start="96.194" data-duration="1.219" data-track-index="5"><span id="caption-inner-44" class="subtitle-inner">和菠萝季节</span></div>
+<div id="caption-45" class="clip subtitle" data-start="97.413" data-duration="2.681" data-track-index="5"><span id="caption-inner-45" class="subtitle-inner">共同构成锦和的生活节奏</span></div>
+<div id="caption-46" class="clip subtitle" data-start="100.094" data-duration="2.338" data-track-index="5"><span id="caption-inner-46" class="subtitle-inner">接下来，镜头沿可靠边界</span></div>
+<div id="caption-47" class="clip subtitle" data-start="102.432" data-duration="2.339" data-track-index="5"><span id="caption-inner-47" class="subtitle-inner">逐一走过十七个行政村</span></div>
+<div id="caption-48" class="clip subtitle" data-start="104.771" data-duration="2.338" data-track-index="5"><span id="caption-inner-48" class="subtitle-inner">建设社区面和三个农场</span></div>
+<div id="caption-49" class="clip subtitle" data-start="107.109" data-duration="2.338" data-track-index="5"><span id="caption-inner-49" class="subtitle-inner">管理单元，不因农场类别</span></div>
+<div id="caption-50" class="clip subtitle" data-start="109.447" data-duration="2.105" data-track-index="5"><span id="caption-inner-50" class="subtitle-inner">省略任何已核验范围</span></div>
+<div id="caption-51" class="clip subtitle" data-start="111.552" data-duration="2.078" data-track-index="5"><span id="caption-inner-51" class="subtitle-inner">东山村位于镇域南端</span></div>
+<div id="caption-52" class="clip subtitle" data-start="113.630" data-duration="2.308" data-track-index="5"><span id="caption-inner-52" class="subtitle-inner">也是官方推进建设的典</span></div>
+<div id="caption-53" class="clip subtitle" data-start="115.938" data-duration="2.078" data-track-index="5"><span id="caption-inner-53" class="subtitle-inner">型村之一，村域从南部</span></div>
+<div id="caption-54" class="clip subtitle" data-start="118.016" data-duration="2.078" data-track-index="5"><span id="caption-inner-54" class="subtitle-inner">农地向相邻聚落展开</span></div>
+<div id="caption-55" class="clip subtitle" data-start="120.094" data-duration="2.411" data-track-index="5"><span id="caption-inner-55" class="subtitle-inner">海欧农场靠近镇域南部</span></div>
+<div id="caption-56" class="clip subtitle" data-start="122.505" data-duration="1.687" data-track-index="5"><span id="caption-inner-56" class="subtitle-inner">管理范围与东山</span></div>
+<div id="caption-57" class="clip subtitle" data-start="124.192" data-duration="1.687" data-track-index="5"><span id="caption-inner-57" class="subtitle-inner">胜利等村域相接</span></div>
+<div id="caption-58" class="clip subtitle" data-start="125.879" data-duration="2.652" data-track-index="5"><span id="caption-inner-58" class="subtitle-inner">构成连续的农业生产空间</span></div>
+<div id="caption-59" class="clip subtitle" data-start="128.531" data-duration="2.861" data-track-index="5"><span id="caption-inner-59" class="subtitle-inner">锦和镇二堂农场面积较紧凑</span></div>
+<div id="caption-60" class="clip subtitle" data-start="131.392" data-duration="2.623" data-track-index="5"><span id="caption-inner-60" class="subtitle-inner">嵌在南部农场与村庄之间</span></div>
+<div id="caption-61" class="clip subtitle" data-start="134.015" data-duration="2.146" data-track-index="5"><span id="caption-inner-61" class="subtitle-inner">边界虽小仍完整保留</span></div>
+<div id="caption-62" class="clip subtitle" data-start="136.161" data-duration="2.700" data-track-index="5"><span id="caption-inner-62" class="subtitle-inner">海角农场位于镇域南部偏中</span></div>
+<div id="caption-63" class="clip subtitle" data-start="138.861" data-duration="2.475" data-track-index="5"><span id="caption-inner-63" class="subtitle-inner">官方工作报告也将其列入</span></div>
+<div id="caption-64" class="clip subtitle" data-start="141.336" data-duration="2.250" data-track-index="5"><span id="caption-inner-64" class="subtitle-inner">辖区工作范围，农业管理</span></div>
+<div id="caption-65" class="clip subtitle" data-start="143.586" data-duration="2.250" data-track-index="5"><span id="caption-inner-65" class="subtitle-inner">单元在地图上清晰可见</span></div>
+<div id="caption-66" class="clip subtitle" data-start="145.836" data-duration="2.726" data-track-index="5"><span id="caption-inner-66" class="subtitle-inner">坑口村向镇域中南部过渡</span></div>
+<div id="caption-67" class="clip subtitle" data-start="148.562" data-duration="1.983" data-track-index="5"><span id="caption-inner-67" class="subtitle-inner">村界连接海角农场</span></div>
+<div id="caption-68" class="clip subtitle" data-start="150.545" data-duration="2.231" data-track-index="5"><span id="caption-inner-68" class="subtitle-inner">锦丰村和那楚村一带</span></div>
+<div id="caption-69" class="clip subtitle" data-start="152.776" data-duration="2.125" data-track-index="5"><span id="caption-inner-69" class="subtitle-inner">锦丰村位于镇域中部</span></div>
+<div id="caption-70" class="clip subtitle" data-start="154.901" data-duration="2.361" data-track-index="5"><span id="caption-inner-70" class="subtitle-inner">紧凑村域承接南北村落</span></div>
+<div id="caption-71" class="clip subtitle" data-start="157.262" data-duration="2.597" data-track-index="5"><span id="caption-inner-71" class="subtitle-inner">是锦和腹地的重要连接点</span></div>
+<div id="caption-72" class="clip subtitle" data-start="159.859" data-duration="2.203" data-track-index="5"><span id="caption-inner-72" class="subtitle-inner">金门村位于锦丰以北</span></div>
+<div id="caption-73" class="clip subtitle" data-start="162.062" data-duration="2.447" data-track-index="5"><span id="caption-inner-73" class="subtitle-inner">村界在城内、那板与洋尾</span></div>
+<div id="caption-74" class="clip subtitle" data-start="164.509" data-duration="2.447" data-track-index="5"><span id="caption-inner-74" class="subtitle-inner">之间形成一处清晰节点</span></div>
+<div id="caption-75" class="clip subtitle" data-start="166.956" data-duration="2.411" data-track-index="5"><span id="caption-inner-75" class="subtitle-inner">城内村保存着锦囊所城的</span></div>
+<div id="caption-76" class="clip subtitle" data-start="169.367" data-duration="2.411" data-track-index="5"><span id="caption-inner-76" class="subtitle-inner">历史线索，也是古韵锦囊城</span></div>
+<div id="caption-77" class="clip subtitle" data-start="171.778" data-duration="1.753" data-track-index="5"><span id="caption-inner-77" class="subtitle-inner">叙事最集中的地方</span></div>
+<div id="caption-78" class="clip subtitle" data-start="173.531" data-duration="1.975" data-track-index="5"><span id="caption-inner-78" class="subtitle-inner">那板村位于镇域北部</span></div>
+<div id="caption-79" class="clip subtitle" data-start="175.506" data-duration="1.975" data-track-index="5"><span id="caption-inner-79" class="subtitle-inner">二零二四年奖学颁奖</span></div>
+<div id="caption-80" class="clip subtitle" data-start="177.481" data-duration="1.975" data-track-index="5"><span id="caption-inner-80" class="subtitle-inner">活动留下了村庄重视</span></div>
+<div id="caption-81" class="clip subtitle" data-start="179.456" data-duration="1.536" data-track-index="5"><span id="caption-inner-81" class="subtitle-inner">教育的真实记录</span></div>
+<div id="caption-82" class="clip subtitle" data-start="180.992" data-duration="2.399" data-track-index="5"><span id="caption-inner-82" class="subtitle-inner">六极村伸向镇域最北端</span></div>
+<div id="caption-83" class="clip subtitle" data-start="183.391" data-duration="2.398" data-track-index="5"><span id="caption-inner-83" class="subtitle-inner">六极码头连接沿海生产</span></div>
+<div id="caption-84" class="clip subtitle" data-start="185.789" data-duration="1.679" data-track-index="5"><span id="caption-inner-84" class="subtitle-inner">与防台安全检查</span></div>
+<div id="caption-85" class="clip subtitle" data-start="187.468" data-duration="2.639" data-track-index="5"><span id="caption-inner-85" class="subtitle-inner">海岸线是村域的重要一侧</span></div>
+<div id="caption-86" class="clip subtitle" data-start="190.107" data-duration="2.474" data-track-index="5"><span id="caption-inner-86" class="subtitle-inner">洋尾村位于镇域中东部</span></div>
+<div id="caption-87" class="clip subtitle" data-start="192.581" data-duration="1.979" data-track-index="5"><span id="caption-inner-87" class="subtitle-inner">狭长村界连接六极</span></div>
+<div id="caption-88" class="clip subtitle" data-start="194.560" data-duration="1.732" data-track-index="5"><span id="caption-inner-88" class="subtitle-inner">金门与沟西一带</span></div>
+<div id="caption-89" class="clip subtitle" data-start="196.292" data-duration="2.059" data-track-index="5"><span id="caption-inner-89" class="subtitle-inner">沟西村靠近东部沿海</span></div>
+<div id="caption-90" class="clip subtitle" data-start="198.351" data-duration="2.059" data-track-index="5"><span id="caption-inner-90" class="subtitle-inner">沟西避风港的消防和</span></div>
+<div id="caption-91" class="clip subtitle" data-start="200.410" data-duration="2.060" data-track-index="5"><span id="caption-inner-91" class="subtitle-inner">防台检查，呈现渔业生</span></div>
+<div id="caption-92" class="clip subtitle" data-start="202.470" data-duration="1.830" data-track-index="5"><span id="caption-inner-92" class="subtitle-inner">产背后的安全秩序</span></div>
+<div id="caption-93" class="clip subtitle" data-start="204.300" data-duration="1.675" data-track-index="5"><span id="caption-inner-93" class="subtitle-inner">后湾村村域紧凑</span></div>
+<div id="caption-94" class="clip subtitle" data-start="205.975" data-duration="2.154" data-track-index="5"><span id="caption-inner-94" class="subtitle-inner">位于沟西与北塘之间</span></div>
+<div id="caption-95" class="clip subtitle" data-start="208.129" data-duration="1.675" data-track-index="5"><span id="caption-inner-95" class="subtitle-inner">村路和沿海生产</span></div>
+<div id="caption-96" class="clip subtitle" data-start="209.804" data-duration="1.436" data-track-index="5"><span id="caption-inner-96" class="subtitle-inner">空间彼此衔接</span></div>
+<div id="caption-97" class="clip subtitle" data-start="211.240" data-duration="2.241" data-track-index="5"><span id="caption-inner-97" class="subtitle-inner">北塘村处在镇域东部</span></div>
+<div id="caption-98" class="clip subtitle" data-start="213.481" data-duration="1.494" data-track-index="5"><span id="caption-inner-98" class="subtitle-inner">边界连接后湾</span></div>
+<div id="caption-99" class="clip subtitle" data-start="214.975" data-duration="2.241" data-track-index="5"><span id="caption-inner-99" class="subtitle-inner">白茅和建设社区一带</span></div>
+<div id="caption-100" class="clip subtitle" data-start="217.216" data-duration="2.102" data-track-index="5"><span id="caption-inner-100" class="subtitle-inner">白茅村位于镇域东缘</span></div>
+<div id="caption-101" class="clip subtitle" data-start="219.318" data-duration="1.869" data-track-index="5"><span id="caption-inner-101" class="subtitle-inner">积分兑换等乡村治</span></div>
+<div id="caption-102" class="clip subtitle" data-start="221.187" data-duration="1.868" data-track-index="5"><span id="caption-inner-102" class="subtitle-inner">理实践，把公共事务</span></div>
+<div id="caption-103" class="clip subtitle" data-start="223.055" data-duration="1.635" data-track-index="5"><span id="caption-inner-103" class="subtitle-inner">落实到村民日常</span></div>
+<div id="caption-104" class="clip subtitle" data-start="224.690" data-duration="2.902" data-track-index="5"><span id="caption-inner-104" class="subtitle-inner">建设社区面紧邻北塘和那楚</span></div>
+<div id="caption-105" class="clip subtitle" data-start="227.592" data-duration="1.935" data-track-index="5"><span id="caption-inner-105" class="subtitle-inner">作为可靠的社区边</span></div>
+<div id="caption-106" class="clip subtitle" data-start="229.527" data-duration="1.934" data-track-index="5"><span id="caption-inner-106" class="subtitle-inner">界单元，在整条巡游</span></div>
+<div id="caption-107" class="clip subtitle" data-start="231.461" data-duration="1.693" data-track-index="5"><span id="caption-inner-107" class="subtitle-inner">路线中完整呈现</span></div>
+<div id="caption-108" class="clip subtitle" data-start="233.154" data-duration="2.458" data-track-index="5"><span id="caption-inner-108" class="subtitle-inner">那楚村位于镇域中东部</span></div>
+<div id="caption-109" class="clip subtitle" data-start="235.612" data-duration="1.967" data-track-index="5"><span id="caption-inner-109" class="subtitle-inner">村界连接建设社区</span></div>
+<div id="caption-110" class="clip subtitle" data-start="237.579" data-duration="1.721" data-track-index="5"><span id="caption-inner-110" class="subtitle-inner">胜利和坑口一带</span></div>
+<div id="caption-111" class="clip subtitle" data-start="239.300" data-duration="2.595" data-track-index="5"><span id="caption-inner-111" class="subtitle-inner">胜利村向镇域南部展开</span></div>
+<div id="caption-112" class="clip subtitle" data-start="241.895" data-duration="2.596" data-track-index="5"><span id="caption-inner-112" class="subtitle-inner">与东山、那楚及农场管理</span></div>
+<div id="caption-113" class="clip subtitle" data-start="244.491" data-duration="2.595" data-track-index="5"><span id="caption-inner-113" class="subtitle-inner">单元共同构成南部片区</span></div>
+<div id="caption-114" class="clip subtitle" data-start="247.086" data-duration="2.331" data-track-index="5"><span id="caption-inner-114" class="subtitle-inner">红星村位于镇域西南部</span></div>
+<div id="caption-115" class="clip subtitle" data-start="249.417" data-duration="1.864" data-track-index="5"><span id="caption-inner-115" class="subtitle-inner">较宽村域连接胜利</span></div>
+<div id="caption-116" class="clip subtitle" data-start="251.281" data-duration="1.632" data-track-index="5"><span id="caption-inner-116" class="subtitle-inner">锦市与东山一带</span></div>
+<div id="caption-117" class="clip subtitle" data-start="252.913" data-duration="1.165" data-track-index="5"><span id="caption-inner-117" class="subtitle-inner">的耕作空间</span></div>
+<div id="caption-118" class="clip subtitle" data-start="254.078" data-duration="2.117" data-track-index="5"><span id="caption-inner-118" class="subtitle-inner">锦市村位于镇域西部</span></div>
+<div id="caption-119" class="clip subtitle" data-start="256.195" data-duration="1.881" data-track-index="5"><span id="caption-inner-119" class="subtitle-inner">也是官方推进建设</span></div>
+<div id="caption-120" class="clip subtitle" data-start="258.076" data-duration="1.411" data-track-index="5"><span id="caption-inner-120" class="subtitle-inner">的典型村之一</span></div>
+<div id="caption-121" class="clip subtitle" data-start="259.487" data-duration="2.117" data-track-index="5"><span id="caption-inner-121" class="subtitle-inner">村域向西侧连续展开</span></div>
+<div id="caption-122" class="clip subtitle" data-start="261.604" data-duration="2.005" data-track-index="5"><span id="caption-inner-122" class="subtitle-inner">龙群村处在镇域西端</span></div>
+<div id="caption-123" class="clip subtitle" data-start="263.609" data-duration="2.451" data-track-index="5"><span id="caption-inner-123" class="subtitle-inner">边界覆盖西部较开阔区域</span></div>
+<div id="caption-124" class="clip subtitle" data-start="266.060" data-duration="2.005" data-track-index="5"><span id="caption-inner-124" class="subtitle-inner">为这次二十一个可靠</span></div>
+<div id="caption-125" class="clip subtitle" data-start="268.065" data-duration="1.560" data-track-index="5"><span id="caption-inner-125" class="subtitle-inner">单元的巡游收尾</span></div>
+<div id="caption-126" class="clip subtitle" data-start="274.025" data-duration="2.119" data-track-index="5"><span id="caption-inner-126" class="subtitle-inner">从锦囊古城到菠萝田</span></div>
+<div id="caption-127" class="clip subtitle" data-start="276.144" data-duration="2.354" data-track-index="5"><span id="caption-inner-127" class="subtitle-inner">从学校与村庄治理到码</span></div>
+<div id="caption-128" class="clip subtitle" data-start="278.498" data-duration="2.353" data-track-index="5"><span id="caption-inner-128" class="subtitle-inner">头和避风港，锦和的地理</span></div>
+<div id="caption-129" class="clip subtitle" data-start="280.851" data-duration="2.119" data-track-index="5"><span id="caption-inner-129" class="subtitle-inner">并不只是一条边界线</span></div>
+<div id="caption-130" class="clip subtitle" data-start="282.970" data-duration="1.509" data-track-index="5"><span id="caption-inner-130" class="subtitle-inner">它把农业、海洋</span></div>
+<div id="caption-131" class="clip subtitle" data-start="284.479" data-duration="3.018" data-track-index="5"><span id="caption-inner-131" class="subtitle-inner">历史和一座座村庄连接起来</span></div>
+<div id="caption-132" class="clip subtitle" data-start="287.497" data-duration="2.767" data-track-index="5"><span id="caption-inner-132" class="subtitle-inner">组成今天徐闻县锦和镇真</span></div>
+<div id="caption-133" class="clip subtitle" data-start="290.264" data-duration="2.264" data-track-index="5"><span id="caption-inner-133" class="subtitle-inner">实而完整的乡土脉络</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440825110-narration.wav" data-start="4.300" data-duration="288.320" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed-0" class="clip" src="media/music/ambient-map-bed.wav" data-start="1.3" data-duration="50" data-track-index="70" data-volume="0.2"></audio>
+<audio id="music-bed-1" class="clip" src="media/music/ambient-map-bed.wav" data-start="47.3" data-duration="50" data-track-index="71" data-volume="0.2"></audio>
+<audio id="music-bed-2" class="clip" src="media/music/ambient-map-bed.wav" data-start="93.3" data-duration="50" data-track-index="72" data-volume="0.2"></audio>
+<audio id="music-bed-3" class="clip" src="media/music/ambient-map-bed.wav" data-start="139.3" data-duration="50" data-track-index="73" data-volume="0.2"></audio>
+<audio id="music-bed-4" class="clip" src="media/music/ambient-map-bed.wav" data-start="185.3" data-duration="50" data-track-index="74" data-volume="0.2"></audio>
+<audio id="music-bed-5" class="clip" src="media/music/ambient-map-bed.wav" data-start="231.3" data-duration="50" data-track-index="75" data-volume="0.2"></audio>
+<audio id="music-bed-6" class="clip" src="media/music/ambient-map-bed.wav" data-start="277.3" data-duration="16" data-track-index="76" data-volume="0.2"></audio>
+  <img id="cover" class="clip cover" src="media/images/440825110-cover.png" alt="地理乡土情·徐闻县锦和镇视频封面" data-start="0" data-duration="1.300" data-track-index="100">
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner",".visual"],{opacity:0});
+  tl.fromTo("#cover",{opacity:1},{opacity:0,duration:0.286,ease:"power2.inOut"},1.014).set("#cover",{opacity:0},1.300);
+  
+  tl.fromTo("#visual-pineapple-training",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},44.768).to("#visual-pineapple-training",{opacity:0,y:-18,duration:.32,ease:"power2.in"},53.851).set("#visual-pineapple-training",{opacity:0},54.201);
+tl.fromTo("#visual-jinhe-middle-school",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},81.603).to("#visual-jinhe-middle-school",{opacity:0,y:-18,duration:.32,ease:"power2.in"},89.502).set("#visual-jinhe-middle-school",{opacity:0},89.852);
+tl.fromTo("#visual-naban-awards",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},173.231).to("#visual-naban-awards",{opacity:0,y:-18,duration:.32,ease:"power2.in"},180.642).set("#visual-naban-awards",{opacity:0},180.992);
+tl.fromTo("#visual-liuji-wharf",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},180.992).to("#visual-liuji-wharf",{opacity:0,y:-18,duration:.32,ease:"power2.in"},189.997).set("#visual-liuji-wharf",{opacity:0},190.347);
+tl.fromTo("#visual-gouxi-harbor",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},195.992).to("#visual-gouxi-harbor",{opacity:0,y:-18,duration:.32,ease:"power2.in"},204.190).set("#visual-gouxi-harbor",{opacity:0},204.540);
+tl.fromTo("#visual-baimao-governance",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},216.916).to("#visual-baimao-governance",{opacity:0,y:-18,duration:.32,ease:"power2.in"},224.580).set("#visual-baimao-governance",{opacity:0},224.930);
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.12},4.400).to("#caption-inner-0",{opacity:0,duration:.12},6.738).set("#caption-inner-0",{opacity:0},6.878);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.12},6.878).to("#caption-inner-1",{opacity:0,duration:.12},8.991).set("#caption-inner-1",{opacity:0},9.131);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.12},9.131).to("#caption-inner-2",{opacity:0,duration:.12},10.117).set("#caption-inner-2",{opacity:0},10.257);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.12},10.257).to("#caption-inner-3",{opacity:0,duration:.12},12.145).set("#caption-inner-3",{opacity:0},12.285);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.12},12.285).to("#caption-inner-4",{opacity:0,duration:.12},14.848).set("#caption-inner-4",{opacity:0},14.988);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.12},14.988).to("#caption-inner-5",{opacity:0,duration:.12},17.595).set("#caption-inner-5",{opacity:0},17.735);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.12},17.735).to("#caption-inner-6",{opacity:0,duration:.12},20.571).set("#caption-inner-6",{opacity:0},20.711);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.12},20.711).to("#caption-inner-7",{opacity:0,duration:.12},23.089).set("#caption-inner-7",{opacity:0},23.229);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.12},23.229).to("#caption-inner-8",{opacity:0,duration:.12},25.149).set("#caption-inner-8",{opacity:0},25.289);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.12},25.289).to("#caption-inner-9",{opacity:0,duration:.12},26.803).set("#caption-inner-9",{opacity:0},26.943);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.12},26.943).to("#caption-inner-10",{opacity:0,duration:.12},30.112).set("#caption-inner-10",{opacity:0},30.252);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.12},30.252).to("#caption-inner-11",{opacity:0,duration:.12},32.475).set("#caption-inner-11",{opacity:0},32.615);
+tl.fromTo("#caption-inner-12",{opacity:0,y:8},{opacity:1,y:0,duration:.12},32.615).to("#caption-inner-12",{opacity:0,duration:.12},34.602).set("#caption-inner-12",{opacity:0},34.742);
+tl.fromTo("#caption-inner-13",{opacity:0,y:8},{opacity:1,y:0,duration:.12},34.742).to("#caption-inner-13",{opacity:0,duration:.12},36.398).set("#caption-inner-13",{opacity:0},36.538);
+tl.fromTo("#caption-inner-14",{opacity:0,y:8},{opacity:1,y:0,duration:.12},36.538).to("#caption-inner-14",{opacity:0,duration:.12},36.847).set("#caption-inner-14",{opacity:0},36.987);
+tl.fromTo("#caption-inner-15",{opacity:0,y:8},{opacity:1,y:0,duration:.12},36.987).to("#caption-inner-15",{opacity:0,duration:.12},39.989).set("#caption-inner-15",{opacity:0},40.129);
+tl.fromTo("#caption-inner-16",{opacity:0,y:8},{opacity:1,y:0,duration:.12},40.129).to("#caption-inner-16",{opacity:0,duration:.12},42.234).set("#caption-inner-16",{opacity:0},42.374);
+tl.fromTo("#caption-inner-17",{opacity:0,y:8},{opacity:1,y:0,duration:.12},42.374).to("#caption-inner-17",{opacity:0,duration:.12},43.132).set("#caption-inner-17",{opacity:0},43.272);
+tl.fromTo("#caption-inner-18",{opacity:0,y:8},{opacity:1,y:0,duration:.12},43.272).to("#caption-inner-18",{opacity:0,duration:.12},44.928).set("#caption-inner-18",{opacity:0},45.068);
+tl.fromTo("#caption-inner-19",{opacity:0,y:8},{opacity:1,y:0,duration:.12},45.068).to("#caption-inner-19",{opacity:0,duration:.12},47.736).set("#caption-inner-19",{opacity:0},47.876);
+tl.fromTo("#caption-inner-20",{opacity:0,y:8},{opacity:1,y:0,duration:.12},47.876).to("#caption-inner-20",{opacity:0,duration:.12},49.843).set("#caption-inner-20",{opacity:0},49.983);
+tl.fromTo("#caption-inner-21",{opacity:0,y:8},{opacity:1,y:0,duration:.12},49.983).to("#caption-inner-21",{opacity:0,duration:.12},52.417).set("#caption-inner-21",{opacity:0},52.557);
+tl.fromTo("#caption-inner-22",{opacity:0,y:8},{opacity:1,y:0,duration:.12},52.557).to("#caption-inner-22",{opacity:0,duration:.12},53.821).set("#caption-inner-22",{opacity:0},53.961);
+tl.fromTo("#caption-inner-23",{opacity:0,y:8},{opacity:1,y:0,duration:.12},53.961).to("#caption-inner-23",{opacity:0,duration:.12},55.576).set("#caption-inner-23",{opacity:0},55.716);
+tl.fromTo("#caption-inner-24",{opacity:0,y:8},{opacity:1,y:0,duration:.12},55.716).to("#caption-inner-24",{opacity:0,duration:.12},58.208).set("#caption-inner-24",{opacity:0},58.348);
+tl.fromTo("#caption-inner-25",{opacity:0,y:8},{opacity:1,y:0,duration:.12},58.348).to("#caption-inner-25",{opacity:0,duration:.12},59.744).set("#caption-inner-25",{opacity:0},59.884);
+tl.fromTo("#caption-inner-26",{opacity:0,y:8},{opacity:1,y:0,duration:.12},59.884).to("#caption-inner-26",{opacity:0,duration:.12},60.621).set("#caption-inner-26",{opacity:0},60.761);
+tl.fromTo("#caption-inner-27",{opacity:0,y:8},{opacity:1,y:0,duration:.12},60.761).to("#caption-inner-27",{opacity:0,duration:.12},62.376).set("#caption-inner-27",{opacity:0},62.516);
+tl.fromTo("#caption-inner-28",{opacity:0,y:8},{opacity:1,y:0,duration:.12},62.516).to("#caption-inner-28",{opacity:0,duration:.12},64.090).set("#caption-inner-28",{opacity:0},64.230);
+tl.fromTo("#caption-inner-29",{opacity:0,y:8},{opacity:1,y:0,duration:.12},64.230).to("#caption-inner-29",{opacity:0,duration:.12},66.539).set("#caption-inner-29",{opacity:0},66.679);
+tl.fromTo("#caption-inner-30",{opacity:0,y:8},{opacity:1,y:0,duration:.12},66.679).to("#caption-inner-30",{opacity:0,duration:.12},68.008).set("#caption-inner-30",{opacity:0},68.148);
+tl.fromTo("#caption-inner-31",{opacity:0,y:8},{opacity:1,y:0,duration:.12},68.148).to("#caption-inner-31",{opacity:0,duration:.12},70.211).set("#caption-inner-31",{opacity:0},70.351);
+tl.fromTo("#caption-inner-32",{opacity:0,y:8},{opacity:1,y:0,duration:.12},70.351).to("#caption-inner-32",{opacity:0,duration:.12},72.415).set("#caption-inner-32",{opacity:0},72.555);
+tl.fromTo("#caption-inner-33",{opacity:0,y:8},{opacity:1,y:0,duration:.12},72.555).to("#caption-inner-33",{opacity:0,duration:.12},74.986).set("#caption-inner-33",{opacity:0},75.126);
+tl.fromTo("#caption-inner-34",{opacity:0,y:8},{opacity:1,y:0,duration:.12},75.126).to("#caption-inner-34",{opacity:0,duration:.12},77.323).set("#caption-inner-34",{opacity:0},77.463);
+tl.fromTo("#caption-inner-35",{opacity:0,y:8},{opacity:1,y:0,duration:.12},77.463).to("#caption-inner-35",{opacity:0,duration:.12},79.660).set("#caption-inner-35",{opacity:0},79.800);
+tl.fromTo("#caption-inner-36",{opacity:0,y:8},{opacity:1,y:0,duration:.12},79.800).to("#caption-inner-36",{opacity:0,duration:.12},81.763).set("#caption-inner-36",{opacity:0},81.903);
+tl.fromTo("#caption-inner-37",{opacity:0,y:8},{opacity:1,y:0,duration:.12},81.903).to("#caption-inner-37",{opacity:0,duration:.12},84.333).set("#caption-inner-37",{opacity:0},84.473);
+tl.fromTo("#caption-inner-38",{opacity:0,y:8},{opacity:1,y:0,duration:.12},84.473).to("#caption-inner-38",{opacity:0,duration:.12},86.260).set("#caption-inner-38",{opacity:0},86.400);
+tl.fromTo("#caption-inner-39",{opacity:0,y:8},{opacity:1,y:0,duration:.12},86.400).to("#caption-inner-39",{opacity:0,duration:.12},87.973).set("#caption-inner-39",{opacity:0},88.113);
+tl.fromTo("#caption-inner-40",{opacity:0,y:8},{opacity:1,y:0,duration:.12},88.113).to("#caption-inner-40",{opacity:0,duration:.12},89.472).set("#caption-inner-40",{opacity:0},89.612);
+tl.fromTo("#caption-inner-41",{opacity:0,y:8},{opacity:1,y:0,duration:.12},89.612).to("#caption-inner-41",{opacity:0,duration:.12},91.422).set("#caption-inner-41",{opacity:0},91.562);
+tl.fromTo("#caption-inner-42",{opacity:0,y:8},{opacity:1,y:0,duration:.12},91.562).to("#caption-inner-42",{opacity:0,duration:.12},94.104).set("#caption-inner-42",{opacity:0},94.244);
+tl.fromTo("#caption-inner-43",{opacity:0,y:8},{opacity:1,y:0,duration:.12},94.244).to("#caption-inner-43",{opacity:0,duration:.12},96.054).set("#caption-inner-43",{opacity:0},96.194);
+tl.fromTo("#caption-inner-44",{opacity:0,y:8},{opacity:1,y:0,duration:.12},96.194).to("#caption-inner-44",{opacity:0,duration:.12},97.273).set("#caption-inner-44",{opacity:0},97.413);
+tl.fromTo("#caption-inner-45",{opacity:0,y:8},{opacity:1,y:0,duration:.12},97.413).to("#caption-inner-45",{opacity:0,duration:.12},99.954).set("#caption-inner-45",{opacity:0},100.094);
+tl.fromTo("#caption-inner-46",{opacity:0,y:8},{opacity:1,y:0,duration:.12},100.094).to("#caption-inner-46",{opacity:0,duration:.12},102.292).set("#caption-inner-46",{opacity:0},102.432);
+tl.fromTo("#caption-inner-47",{opacity:0,y:8},{opacity:1,y:0,duration:.12},102.432).to("#caption-inner-47",{opacity:0,duration:.12},104.631).set("#caption-inner-47",{opacity:0},104.771);
+tl.fromTo("#caption-inner-48",{opacity:0,y:8},{opacity:1,y:0,duration:.12},104.771).to("#caption-inner-48",{opacity:0,duration:.12},106.969).set("#caption-inner-48",{opacity:0},107.109);
+tl.fromTo("#caption-inner-49",{opacity:0,y:8},{opacity:1,y:0,duration:.12},107.109).to("#caption-inner-49",{opacity:0,duration:.12},109.307).set("#caption-inner-49",{opacity:0},109.447);
+tl.fromTo("#caption-inner-50",{opacity:0,y:8},{opacity:1,y:0,duration:.12},109.447).to("#caption-inner-50",{opacity:0,duration:.12},111.412).set("#caption-inner-50",{opacity:0},111.552);
+tl.fromTo("#caption-inner-51",{opacity:0,y:8},{opacity:1,y:0,duration:.12},111.552).to("#caption-inner-51",{opacity:0,duration:.12},113.490).set("#caption-inner-51",{opacity:0},113.630);
+tl.fromTo("#caption-inner-52",{opacity:0,y:8},{opacity:1,y:0,duration:.12},113.630).to("#caption-inner-52",{opacity:0,duration:.12},115.798).set("#caption-inner-52",{opacity:0},115.938);
+tl.fromTo("#caption-inner-53",{opacity:0,y:8},{opacity:1,y:0,duration:.12},115.938).to("#caption-inner-53",{opacity:0,duration:.12},117.876).set("#caption-inner-53",{opacity:0},118.016);
+tl.fromTo("#caption-inner-54",{opacity:0,y:8},{opacity:1,y:0,duration:.12},118.016).to("#caption-inner-54",{opacity:0,duration:.12},119.954).set("#caption-inner-54",{opacity:0},120.094);
+tl.fromTo("#caption-inner-55",{opacity:0,y:8},{opacity:1,y:0,duration:.12},120.094).to("#caption-inner-55",{opacity:0,duration:.12},122.365).set("#caption-inner-55",{opacity:0},122.505);
+tl.fromTo("#caption-inner-56",{opacity:0,y:8},{opacity:1,y:0,duration:.12},122.505).to("#caption-inner-56",{opacity:0,duration:.12},124.052).set("#caption-inner-56",{opacity:0},124.192);
+tl.fromTo("#caption-inner-57",{opacity:0,y:8},{opacity:1,y:0,duration:.12},124.192).to("#caption-inner-57",{opacity:0,duration:.12},125.739).set("#caption-inner-57",{opacity:0},125.879);
+tl.fromTo("#caption-inner-58",{opacity:0,y:8},{opacity:1,y:0,duration:.12},125.879).to("#caption-inner-58",{opacity:0,duration:.12},128.391).set("#caption-inner-58",{opacity:0},128.531);
+tl.fromTo("#caption-inner-59",{opacity:0,y:8},{opacity:1,y:0,duration:.12},128.531).to("#caption-inner-59",{opacity:0,duration:.12},131.252).set("#caption-inner-59",{opacity:0},131.392);
+tl.fromTo("#caption-inner-60",{opacity:0,y:8},{opacity:1,y:0,duration:.12},131.392).to("#caption-inner-60",{opacity:0,duration:.12},133.875).set("#caption-inner-60",{opacity:0},134.015);
+tl.fromTo("#caption-inner-61",{opacity:0,y:8},{opacity:1,y:0,duration:.12},134.015).to("#caption-inner-61",{opacity:0,duration:.12},136.021).set("#caption-inner-61",{opacity:0},136.161);
+tl.fromTo("#caption-inner-62",{opacity:0,y:8},{opacity:1,y:0,duration:.12},136.161).to("#caption-inner-62",{opacity:0,duration:.12},138.721).set("#caption-inner-62",{opacity:0},138.861);
+tl.fromTo("#caption-inner-63",{opacity:0,y:8},{opacity:1,y:0,duration:.12},138.861).to("#caption-inner-63",{opacity:0,duration:.12},141.196).set("#caption-inner-63",{opacity:0},141.336);
+tl.fromTo("#caption-inner-64",{opacity:0,y:8},{opacity:1,y:0,duration:.12},141.336).to("#caption-inner-64",{opacity:0,duration:.12},143.446).set("#caption-inner-64",{opacity:0},143.586);
+tl.fromTo("#caption-inner-65",{opacity:0,y:8},{opacity:1,y:0,duration:.12},143.586).to("#caption-inner-65",{opacity:0,duration:.12},145.696).set("#caption-inner-65",{opacity:0},145.836);
+tl.fromTo("#caption-inner-66",{opacity:0,y:8},{opacity:1,y:0,duration:.12},145.836).to("#caption-inner-66",{opacity:0,duration:.12},148.422).set("#caption-inner-66",{opacity:0},148.562);
+tl.fromTo("#caption-inner-67",{opacity:0,y:8},{opacity:1,y:0,duration:.12},148.562).to("#caption-inner-67",{opacity:0,duration:.12},150.405).set("#caption-inner-67",{opacity:0},150.545);
+tl.fromTo("#caption-inner-68",{opacity:0,y:8},{opacity:1,y:0,duration:.12},150.545).to("#caption-inner-68",{opacity:0,duration:.12},152.636).set("#caption-inner-68",{opacity:0},152.776);
+tl.fromTo("#caption-inner-69",{opacity:0,y:8},{opacity:1,y:0,duration:.12},152.776).to("#caption-inner-69",{opacity:0,duration:.12},154.761).set("#caption-inner-69",{opacity:0},154.901);
+tl.fromTo("#caption-inner-70",{opacity:0,y:8},{opacity:1,y:0,duration:.12},154.901).to("#caption-inner-70",{opacity:0,duration:.12},157.122).set("#caption-inner-70",{opacity:0},157.262);
+tl.fromTo("#caption-inner-71",{opacity:0,y:8},{opacity:1,y:0,duration:.12},157.262).to("#caption-inner-71",{opacity:0,duration:.12},159.719).set("#caption-inner-71",{opacity:0},159.859);
+tl.fromTo("#caption-inner-72",{opacity:0,y:8},{opacity:1,y:0,duration:.12},159.859).to("#caption-inner-72",{opacity:0,duration:.12},161.922).set("#caption-inner-72",{opacity:0},162.062);
+tl.fromTo("#caption-inner-73",{opacity:0,y:8},{opacity:1,y:0,duration:.12},162.062).to("#caption-inner-73",{opacity:0,duration:.12},164.369).set("#caption-inner-73",{opacity:0},164.509);
+tl.fromTo("#caption-inner-74",{opacity:0,y:8},{opacity:1,y:0,duration:.12},164.509).to("#caption-inner-74",{opacity:0,duration:.12},166.816).set("#caption-inner-74",{opacity:0},166.956);
+tl.fromTo("#caption-inner-75",{opacity:0,y:8},{opacity:1,y:0,duration:.12},166.956).to("#caption-inner-75",{opacity:0,duration:.12},169.227).set("#caption-inner-75",{opacity:0},169.367);
+tl.fromTo("#caption-inner-76",{opacity:0,y:8},{opacity:1,y:0,duration:.12},169.367).to("#caption-inner-76",{opacity:0,duration:.12},171.638).set("#caption-inner-76",{opacity:0},171.778);
+tl.fromTo("#caption-inner-77",{opacity:0,y:8},{opacity:1,y:0,duration:.12},171.778).to("#caption-inner-77",{opacity:0,duration:.12},173.391).set("#caption-inner-77",{opacity:0},173.531);
+tl.fromTo("#caption-inner-78",{opacity:0,y:8},{opacity:1,y:0,duration:.12},173.531).to("#caption-inner-78",{opacity:0,duration:.12},175.366).set("#caption-inner-78",{opacity:0},175.506);
+tl.fromTo("#caption-inner-79",{opacity:0,y:8},{opacity:1,y:0,duration:.12},175.506).to("#caption-inner-79",{opacity:0,duration:.12},177.341).set("#caption-inner-79",{opacity:0},177.481);
+tl.fromTo("#caption-inner-80",{opacity:0,y:8},{opacity:1,y:0,duration:.12},177.481).to("#caption-inner-80",{opacity:0,duration:.12},179.316).set("#caption-inner-80",{opacity:0},179.456);
+tl.fromTo("#caption-inner-81",{opacity:0,y:8},{opacity:1,y:0,duration:.12},179.456).to("#caption-inner-81",{opacity:0,duration:.12},180.852).set("#caption-inner-81",{opacity:0},180.992);
+tl.fromTo("#caption-inner-82",{opacity:0,y:8},{opacity:1,y:0,duration:.12},180.992).to("#caption-inner-82",{opacity:0,duration:.12},183.251).set("#caption-inner-82",{opacity:0},183.391);
+tl.fromTo("#caption-inner-83",{opacity:0,y:8},{opacity:1,y:0,duration:.12},183.391).to("#caption-inner-83",{opacity:0,duration:.12},185.649).set("#caption-inner-83",{opacity:0},185.789);
+tl.fromTo("#caption-inner-84",{opacity:0,y:8},{opacity:1,y:0,duration:.12},185.789).to("#caption-inner-84",{opacity:0,duration:.12},187.328).set("#caption-inner-84",{opacity:0},187.468);
+tl.fromTo("#caption-inner-85",{opacity:0,y:8},{opacity:1,y:0,duration:.12},187.468).to("#caption-inner-85",{opacity:0,duration:.12},189.967).set("#caption-inner-85",{opacity:0},190.107);
+tl.fromTo("#caption-inner-86",{opacity:0,y:8},{opacity:1,y:0,duration:.12},190.107).to("#caption-inner-86",{opacity:0,duration:.12},192.441).set("#caption-inner-86",{opacity:0},192.581);
+tl.fromTo("#caption-inner-87",{opacity:0,y:8},{opacity:1,y:0,duration:.12},192.581).to("#caption-inner-87",{opacity:0,duration:.12},194.420).set("#caption-inner-87",{opacity:0},194.560);
+tl.fromTo("#caption-inner-88",{opacity:0,y:8},{opacity:1,y:0,duration:.12},194.560).to("#caption-inner-88",{opacity:0,duration:.12},196.152).set("#caption-inner-88",{opacity:0},196.292);
+tl.fromTo("#caption-inner-89",{opacity:0,y:8},{opacity:1,y:0,duration:.12},196.292).to("#caption-inner-89",{opacity:0,duration:.12},198.211).set("#caption-inner-89",{opacity:0},198.351);
+tl.fromTo("#caption-inner-90",{opacity:0,y:8},{opacity:1,y:0,duration:.12},198.351).to("#caption-inner-90",{opacity:0,duration:.12},200.270).set("#caption-inner-90",{opacity:0},200.410);
+tl.fromTo("#caption-inner-91",{opacity:0,y:8},{opacity:1,y:0,duration:.12},200.410).to("#caption-inner-91",{opacity:0,duration:.12},202.330).set("#caption-inner-91",{opacity:0},202.470);
+tl.fromTo("#caption-inner-92",{opacity:0,y:8},{opacity:1,y:0,duration:.12},202.470).to("#caption-inner-92",{opacity:0,duration:.12},204.160).set("#caption-inner-92",{opacity:0},204.300);
+tl.fromTo("#caption-inner-93",{opacity:0,y:8},{opacity:1,y:0,duration:.12},204.300).to("#caption-inner-93",{opacity:0,duration:.12},205.835).set("#caption-inner-93",{opacity:0},205.975);
+tl.fromTo("#caption-inner-94",{opacity:0,y:8},{opacity:1,y:0,duration:.12},205.975).to("#caption-inner-94",{opacity:0,duration:.12},207.989).set("#caption-inner-94",{opacity:0},208.129);
+tl.fromTo("#caption-inner-95",{opacity:0,y:8},{opacity:1,y:0,duration:.12},208.129).to("#caption-inner-95",{opacity:0,duration:.12},209.664).set("#caption-inner-95",{opacity:0},209.804);
+tl.fromTo("#caption-inner-96",{opacity:0,y:8},{opacity:1,y:0,duration:.12},209.804).to("#caption-inner-96",{opacity:0,duration:.12},211.100).set("#caption-inner-96",{opacity:0},211.240);
+tl.fromTo("#caption-inner-97",{opacity:0,y:8},{opacity:1,y:0,duration:.12},211.240).to("#caption-inner-97",{opacity:0,duration:.12},213.341).set("#caption-inner-97",{opacity:0},213.481);
+tl.fromTo("#caption-inner-98",{opacity:0,y:8},{opacity:1,y:0,duration:.12},213.481).to("#caption-inner-98",{opacity:0,duration:.12},214.835).set("#caption-inner-98",{opacity:0},214.975);
+tl.fromTo("#caption-inner-99",{opacity:0,y:8},{opacity:1,y:0,duration:.12},214.975).to("#caption-inner-99",{opacity:0,duration:.12},217.076).set("#caption-inner-99",{opacity:0},217.216);
+tl.fromTo("#caption-inner-100",{opacity:0,y:8},{opacity:1,y:0,duration:.12},217.216).to("#caption-inner-100",{opacity:0,duration:.12},219.178).set("#caption-inner-100",{opacity:0},219.318);
+tl.fromTo("#caption-inner-101",{opacity:0,y:8},{opacity:1,y:0,duration:.12},219.318).to("#caption-inner-101",{opacity:0,duration:.12},221.047).set("#caption-inner-101",{opacity:0},221.187);
+tl.fromTo("#caption-inner-102",{opacity:0,y:8},{opacity:1,y:0,duration:.12},221.187).to("#caption-inner-102",{opacity:0,duration:.12},222.915).set("#caption-inner-102",{opacity:0},223.055);
+tl.fromTo("#caption-inner-103",{opacity:0,y:8},{opacity:1,y:0,duration:.12},223.055).to("#caption-inner-103",{opacity:0,duration:.12},224.550).set("#caption-inner-103",{opacity:0},224.690);
+tl.fromTo("#caption-inner-104",{opacity:0,y:8},{opacity:1,y:0,duration:.12},224.690).to("#caption-inner-104",{opacity:0,duration:.12},227.452).set("#caption-inner-104",{opacity:0},227.592);
+tl.fromTo("#caption-inner-105",{opacity:0,y:8},{opacity:1,y:0,duration:.12},227.592).to("#caption-inner-105",{opacity:0,duration:.12},229.387).set("#caption-inner-105",{opacity:0},229.527);
+tl.fromTo("#caption-inner-106",{opacity:0,y:8},{opacity:1,y:0,duration:.12},229.527).to("#caption-inner-106",{opacity:0,duration:.12},231.321).set("#caption-inner-106",{opacity:0},231.461);
+tl.fromTo("#caption-inner-107",{opacity:0,y:8},{opacity:1,y:0,duration:.12},231.461).to("#caption-inner-107",{opacity:0,duration:.12},233.014).set("#caption-inner-107",{opacity:0},233.154);
+tl.fromTo("#caption-inner-108",{opacity:0,y:8},{opacity:1,y:0,duration:.12},233.154).to("#caption-inner-108",{opacity:0,duration:.12},235.472).set("#caption-inner-108",{opacity:0},235.612);
+tl.fromTo("#caption-inner-109",{opacity:0,y:8},{opacity:1,y:0,duration:.12},235.612).to("#caption-inner-109",{opacity:0,duration:.12},237.439).set("#caption-inner-109",{opacity:0},237.579);
+tl.fromTo("#caption-inner-110",{opacity:0,y:8},{opacity:1,y:0,duration:.12},237.579).to("#caption-inner-110",{opacity:0,duration:.12},239.160).set("#caption-inner-110",{opacity:0},239.300);
+tl.fromTo("#caption-inner-111",{opacity:0,y:8},{opacity:1,y:0,duration:.12},239.300).to("#caption-inner-111",{opacity:0,duration:.12},241.755).set("#caption-inner-111",{opacity:0},241.895);
+tl.fromTo("#caption-inner-112",{opacity:0,y:8},{opacity:1,y:0,duration:.12},241.895).to("#caption-inner-112",{opacity:0,duration:.12},244.351).set("#caption-inner-112",{opacity:0},244.491);
+tl.fromTo("#caption-inner-113",{opacity:0,y:8},{opacity:1,y:0,duration:.12},244.491).to("#caption-inner-113",{opacity:0,duration:.12},246.946).set("#caption-inner-113",{opacity:0},247.086);
+tl.fromTo("#caption-inner-114",{opacity:0,y:8},{opacity:1,y:0,duration:.12},247.086).to("#caption-inner-114",{opacity:0,duration:.12},249.277).set("#caption-inner-114",{opacity:0},249.417);
+tl.fromTo("#caption-inner-115",{opacity:0,y:8},{opacity:1,y:0,duration:.12},249.417).to("#caption-inner-115",{opacity:0,duration:.12},251.141).set("#caption-inner-115",{opacity:0},251.281);
+tl.fromTo("#caption-inner-116",{opacity:0,y:8},{opacity:1,y:0,duration:.12},251.281).to("#caption-inner-116",{opacity:0,duration:.12},252.773).set("#caption-inner-116",{opacity:0},252.913);
+tl.fromTo("#caption-inner-117",{opacity:0,y:8},{opacity:1,y:0,duration:.12},252.913).to("#caption-inner-117",{opacity:0,duration:.12},253.938).set("#caption-inner-117",{opacity:0},254.078);
+tl.fromTo("#caption-inner-118",{opacity:0,y:8},{opacity:1,y:0,duration:.12},254.078).to("#caption-inner-118",{opacity:0,duration:.12},256.055).set("#caption-inner-118",{opacity:0},256.195);
+tl.fromTo("#caption-inner-119",{opacity:0,y:8},{opacity:1,y:0,duration:.12},256.195).to("#caption-inner-119",{opacity:0,duration:.12},257.936).set("#caption-inner-119",{opacity:0},258.076);
+tl.fromTo("#caption-inner-120",{opacity:0,y:8},{opacity:1,y:0,duration:.12},258.076).to("#caption-inner-120",{opacity:0,duration:.12},259.347).set("#caption-inner-120",{opacity:0},259.487);
+tl.fromTo("#caption-inner-121",{opacity:0,y:8},{opacity:1,y:0,duration:.12},259.487).to("#caption-inner-121",{opacity:0,duration:.12},261.464).set("#caption-inner-121",{opacity:0},261.604);
+tl.fromTo("#caption-inner-122",{opacity:0,y:8},{opacity:1,y:0,duration:.12},261.604).to("#caption-inner-122",{opacity:0,duration:.12},263.469).set("#caption-inner-122",{opacity:0},263.609);
+tl.fromTo("#caption-inner-123",{opacity:0,y:8},{opacity:1,y:0,duration:.12},263.609).to("#caption-inner-123",{opacity:0,duration:.12},265.920).set("#caption-inner-123",{opacity:0},266.060);
+tl.fromTo("#caption-inner-124",{opacity:0,y:8},{opacity:1,y:0,duration:.12},266.060).to("#caption-inner-124",{opacity:0,duration:.12},267.925).set("#caption-inner-124",{opacity:0},268.065);
+tl.fromTo("#caption-inner-125",{opacity:0,y:8},{opacity:1,y:0,duration:.12},268.065).to("#caption-inner-125",{opacity:0,duration:.12},269.485).set("#caption-inner-125",{opacity:0},269.625);
+tl.fromTo("#caption-inner-126",{opacity:0,y:8},{opacity:1,y:0,duration:.12},274.025).to("#caption-inner-126",{opacity:0,duration:.12},276.004).set("#caption-inner-126",{opacity:0},276.144);
+tl.fromTo("#caption-inner-127",{opacity:0,y:8},{opacity:1,y:0,duration:.12},276.144).to("#caption-inner-127",{opacity:0,duration:.12},278.358).set("#caption-inner-127",{opacity:0},278.498);
+tl.fromTo("#caption-inner-128",{opacity:0,y:8},{opacity:1,y:0,duration:.12},278.498).to("#caption-inner-128",{opacity:0,duration:.12},280.711).set("#caption-inner-128",{opacity:0},280.851);
+tl.fromTo("#caption-inner-129",{opacity:0,y:8},{opacity:1,y:0,duration:.12},280.851).to("#caption-inner-129",{opacity:0,duration:.12},282.830).set("#caption-inner-129",{opacity:0},282.970);
+tl.fromTo("#caption-inner-130",{opacity:0,y:8},{opacity:1,y:0,duration:.12},282.970).to("#caption-inner-130",{opacity:0,duration:.12},284.339).set("#caption-inner-130",{opacity:0},284.479);
+tl.fromTo("#caption-inner-131",{opacity:0,y:8},{opacity:1,y:0,duration:.12},284.479).to("#caption-inner-131",{opacity:0,duration:.12},287.357).set("#caption-inner-131",{opacity:0},287.497);
+tl.fromTo("#caption-inner-132",{opacity:0,y:8},{opacity:1,y:0,duration:.12},287.497).to("#caption-inner-132",{opacity:0,duration:.12},290.124).set("#caption-inner-132",{opacity:0},290.264);
+tl.fromTo("#caption-inner-133",{opacity:0,y:8},{opacity:1,y:0,duration:.12},290.264).to("#caption-inner-133",{opacity:0,duration:.12},292.388).set("#caption-inner-133",{opacity:0},292.528);
+  window.__timelines=window.__timelines||{};window.__timelines["440825110-portrait"]=tl;
+</script>
+</body></html>

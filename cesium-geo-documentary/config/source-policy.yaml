@@ -1,0 +1,12 @@
+priority:
+  - government
+  - official-statistics
+  - cultural-heritage-institution
+  - academic
+  - authoritative-encyclopedia
+  - mainstream-media
+rules:
+  require_year_for_statistics: true
+  generated_images_must_be_labeled: true
+  boundary_visualization_disclaimer: true
+  accessed_at: "2026-07-26"

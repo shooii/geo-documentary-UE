@@ -1,0 +1,18 @@
+profiles:
+  landscape:
+    width: 1920
+    height: 1080
+    subtitle_chars_per_line: 26
+    safe_margin: 72
+  portrait:
+    width: 1080
+    height: 1920
+    # 44px × 18 = 792px + 22px 内边距仍在 900px 最大宽度内；
+    # 14 字会把「这个镇」「下辖」这类 2 字词切到两行，18 字才容得下整句。
+    subtitle_chars_per_line: 18
+    safe_margin: 64
+  square:
+    width: 1080
+    height: 1080
+    subtitle_chars_per_line: 16
+    safe_margin: 64

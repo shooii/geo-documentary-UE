@@ -1,0 +1,38 @@
+{
+  "duration": 50,
+  "actions": [
+    {
+      "id": "parent-boundary-reveal",
+      "time": 0,
+      "duration": 2.2,
+      "type": "revealParentBoundary",
+      "target": "000000",
+      "easing": "sineInOut"
+    },
+    {
+      "id": "child-boundaries-in",
+      "time": 2.2,
+      "duration": 1.1,
+      "type": "fadeInChildBoundaries",
+      "target": "children-of:000000",
+      "easing": "sineInOut"
+    },
+    {
+      "id": "named-river-reveal",
+      "time": 10,
+      "duration": 5,
+      "type": "revealNamedFeature",
+      "target": "river-example",
+      "easing": "sineInOut"
+    },
+    {
+      "id": "culture-photo",
+      "time": 32,
+      "duration": 6,
+      "type": "showVerifiedPhoto",
+      "target": "culture-photo-example",
+      "placement": "collision-aware-negative-space",
+      "easing": "power2Out"
+    }
+  ]
+}

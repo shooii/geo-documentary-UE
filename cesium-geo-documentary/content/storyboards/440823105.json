@@ -1,0 +1,142 @@
+{
+  "regionId": "440823105",
+  "title": "地理乡土情·遂溪县江洪镇",
+  "profile": "portrait",
+  "presentationMode": "parent-child-tour-map-led",
+  "opening": {
+    "coverSeconds": 1.6,
+    "descentSeconds": 3,
+    "totalSeconds": 4.6,
+    "visual": "深蓝金色封面后，同一条地图轨从高空地球穿过厚实云层，连续抵达江洪镇父级边界。"
+  },
+  "scenes": [
+    {
+      "narrationCueRange": [
+        0,
+        3
+      ],
+      "visual": "父级卫星总览、海岸与贴地边界；历史信息保持地图主导。"
+    },
+    {
+      "narrationCueRange": [
+        4,
+        8
+      ],
+      "visual": "按句级cue依次展示江洪渔港船队、天光鱼市、海上龙舟赛、仙裙岛和江洪初级中学校园入口。",
+      "photoAssetIds": [
+        "jianghong-harbor-fleet",
+        "tianguang-fish-market",
+        "jianghong-dragon-boat",
+        "xianqun-island",
+        "jianghong-middle-school"
+      ]
+    },
+    {
+      "childId": "440823105001",
+      "narrationCueRange": [
+        10,
+        10
+      ],
+      "visual": "飞抵江洪社区，父级和全部上下文边界保持常显。",
+      "start": 90.755,
+      "end": 99.205,
+      "duration": 8.450000000000003
+    },
+    {
+      "childId": "440823105201",
+      "narrationCueRange": [
+        11,
+        11
+      ],
+      "visual": "平滑飞抵北草村。",
+      "start": 99.205,
+      "end": 105.312,
+      "duration": 6.106999999999999
+    },
+    {
+      "childId": "440823105202",
+      "narrationCueRange": [
+        12,
+        12
+      ],
+      "visual": "平滑飞抵四联村。",
+      "start": 105.312,
+      "end": 110.625,
+      "duration": 5.313000000000002
+    },
+    {
+      "childId": "440823105203",
+      "narrationCueRange": [
+        13,
+        13
+      ],
+      "visual": "平滑飞抵坛头村。",
+      "start": 110.625,
+      "end": 115.664,
+      "duration": 5.0390000000000015
+    },
+    {
+      "childId": "440823105401",
+      "narrationCueRange": [
+        14,
+        14
+      ],
+      "visual": "平滑飞抵江洪镇河头林场，保留完整上下文线。",
+      "start": 115.664,
+      "end": 123.32,
+      "duration": 7.655999999999992
+    },
+    {
+      "childId": "440823105204",
+      "narrationCueRange": [
+        15,
+        15
+      ],
+      "visual": "平滑飞抵昌洋村。",
+      "start": 123.32,
+      "end": 130.807,
+      "duration": 7.486999999999995
+    },
+    {
+      "childId": "440823105205",
+      "narrationCueRange": [
+        16,
+        16
+      ],
+      "visual": "平滑飞抵姑寮村。",
+      "start": 130.807,
+      "end": 136.445,
+      "duration": 5.638000000000005
+    },
+    {
+      "childId": "440823105200",
+      "narrationCueRange": [
+        17,
+        17
+      ],
+      "visual": "平滑飞抵大路村。",
+      "start": 136.445,
+      "end": 141.914,
+      "duration": 5.468999999999994
+    },
+    {
+      "cameraAction": "return-to-parent-overview",
+      "visual": "静默回到江洪镇父级全景，边界和已访问标签保持稳定。",
+      "start": 141.914,
+      "end": 146.314,
+      "duration": 4.4,
+      "silent": true
+    },
+    {
+      "narrationCueRange": [
+        18,
+        18
+      ],
+      "visual": "父级相机锁定后播出收束句。",
+      "duration": 12.686000000000007,
+      "start": 146.314,
+      "end": 159
+    }
+  ],
+  "duration": 159
+}

@@ -1,0 +1,35 @@
+{
+  "imageryProvider": "esri-world-imagery",
+  "mapboxMapId": "mapbox/satellite-v9",
+  "esriWorldImageryUrl": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+  "bingMapsKey": "",
+  "visual": {
+    "imageryBrightness": 0.9,
+    "imageryContrast": 1.05,
+    "imagerySaturation": 0.78,
+    "imageryGamma": 1,
+    "imageryHue": 0
+  },
+  "labelDistance": {
+    "distanceScale": true,
+    "translucency": true,
+    "declutter": true
+  },
+  "focusMask": {
+    "enabled": true,
+    "alpha": 0.24,
+    "bboxExpand": 3.2,
+    "fadeSeconds": 3.6
+  },
+  "features": {
+    "enabled": true
+  },
+  "terrain": {
+    "provider": "ellipsoid",
+    "ionAssetId": 1,
+    "arcgisUrl": "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer",
+    "requestVertexNormals": false,
+    "requestWaterMask": false
+  },
+  "tiandituToken": "a52ed938b46f7551ea599e371c6dd8c0"
+}

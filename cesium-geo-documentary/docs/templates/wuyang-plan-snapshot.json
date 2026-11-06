@@ -1,0 +1,1461 @@
+{
+  "_说明": "吴阳镇抖音优化版（project-mvknwzfk）完整结构存档，用作新地点的结构母版",
+  "regionId": "440883106",
+  "projectId": "project-mvknwzfk",
+  "name": "吴川市吴阳镇 · 抖音优化版",
+  "revision": 17,
+  "cover": {
+    "province": "广东省",
+    "city": "湛江市",
+    "county": "吴川市",
+    "town": "吴阳镇",
+    "topic": "千年古邑",
+    "subtitle": "一千三百年县城，现在只是个镇",
+    "administrativeLabel": "吴川市吴阳镇",
+    "titlePosition": "lower-third",
+    "fontFamily": "STZhongsong",
+    "fontSize": 108,
+    "fontWeight": 700,
+    "color": "#FFF8EA",
+    "strokeColor": "#E9B96E",
+    "shadowColor": "#000000",
+    "backgroundMode": "unified-globe",
+    "overlayOpacity": 0.82,
+    "introSeconds": 1.6,
+    "fadeInSeconds": 0,
+    "fadeOutSeconds": 0.35,
+    "safeMargin": 66,
+    "contentMeta": "古港 · 状元 · 六景 · 脆虾"
+  },
+  "voice": {},
+  "scenes": [
+    {
+      "id": "cover",
+      "section": "cover",
+      "type": "cover",
+      "title": "吴川市吴阳镇",
+      "narration": "",
+      "segments": 0,
+      "duration": 1.6,
+      "placements": []
+    },
+    {
+      "id": "overview-1",
+      "section": "overview",
+      "type": "map-overview",
+      "title": "开场｜一千三百年县城",
+      "narration": "广东有个镇，当过一千三百年县城。现在它只是个镇。\n它出过粤西唯一的状元，还留着一条能通海的老港——它叫吴阳，在湛江吴川。",
+      "segments": 2,
+      "duration": 11.57,
+      "placements": [
+        {
+          "assetName": "吴阳航拍",
+          "assetId": "015cffd8-6ece-4082-8ed4-e3920d64747c",
+          "fit": "cover",
+          "keywords": [
+            "县城"
+          ],
+          "alt": "吴阳航拍（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "吴阳朝天门",
+          "assetId": "fa3757fd-94f1-4e76-b17d-7090914e245c",
+          "fit": "contain",
+          "keywords": [
+            "吴阳"
+          ],
+          "alt": "吴阳朝天门（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "overview-spot-zhuangyuan",
+      "section": "overview",
+      "type": "map-overview",
+      "title": "霞街｜一条巷，走出一个状元",
+      "narration": "霞街，清代状元林召棠的老家。\n一条几百米的巷子。广东九位状元，粤西只出这一位。\n科举那些年，这条巷出了二十六位举人、三位进士。\n状元坊上「状元」两个字，是他自己写的。\n再往里，是他住过的老屋。\n还有一口井，八百多年，全村人喝到现在。霞街人，开学前会来井边洗把手吗？",
+      "segments": 6,
+      "duration": 24.9,
+      "camera": {
+        "longitude": 110.675894501694,
+        "latitude": 21.34530515953554,
+        "height": 2600,
+        "heading": 0,
+        "pitch": -58,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "林绍棠",
+          "assetId": "4a9c8195-f9a4-4079-aa8a-8e54717504a4",
+          "fit": "contain",
+          "keywords": [
+            "林召棠的老家"
+          ],
+          "alt": "林召棠像（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "状元坊前奔跑的孩子",
+          "assetId": "b4d98463-d160-4e8d-a4d1-1ae0b879e5f4",
+          "fit": "cover",
+          "keywords": [
+            "巷子"
+          ],
+          "alt": "状元坊前奔跑的孩子｜广州日报新花城",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://huacheng.gz-cmc.com/pages/2024/02/17/SF1154718700edd696a1ee44bbb49c4a.html",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "林氏大宗",
+          "assetId": "f838cd88-e0a8-4a8c-a60f-9551bc22ce0e",
+          "fit": "cover",
+          "keywords": [
+            "举人"
+          ],
+          "alt": "霞街林氏大宗与进士匾额｜吴川市人民政府",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://www.gdwc.gov.cn/zjwcwy/gkmlpt/content/2/2234/post_2234176.html",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "状元坊",
+          "assetId": "2c773881-6283-4e2f-ad8d-7a31be264c5b",
+          "fit": "contain",
+          "keywords": [
+            "状元坊"
+          ],
+          "alt": "霞街状元坊｜吴川市人民政府",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://www.gdwc.gov.cn/zjwcwy/gkmlpt/content/2/2234/post_2234176.html",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "林召棠故居",
+          "assetId": "eee4ac66-309a-439e-aa4d-b4418e2e85a0",
+          "fit": "cover",
+          "keywords": [
+            "老屋"
+          ],
+          "alt": "林召棠故居｜吴川市人民政府",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://www.gdwc.gov.cn/zjwcwy/gkmlpt/content/2/2234/post_2234176.html",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "状元井",
+          "assetId": "18acbd99-92d5-40a4-8997-8277105c1e00",
+          "fit": "cover",
+          "keywords": [
+            "井"
+          ],
+          "alt": "状元井（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "overview-spot-shuangfeng",
+      "section": "overview",
+      "type": "map-overview",
+      "title": "双峰塔｜四百年，它一直在",
+      "narration": "镇子西南，一座塔站在鉴江入海口，高二十三点一五米。\n明万历二十七年，县令周应鳌建它镇水口。二〇〇〇年，广东省文物保护单位。\n它正对着特思山和丽山，所以叫双峰塔。四百年风吹海雨，它一直在。",
+      "segments": 3,
+      "duration": 17.84,
+      "camera": {
+        "longitude": 110.6524701559833,
+        "latitude": 21.305361897706195,
+        "height": 2200,
+        "heading": 0,
+        "pitch": -60,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "双峰塔 · ",
+          "assetId": "9ac66122-9ce8-4670-be42-da608b6f574f",
+          "fit": "contain",
+          "keywords": [
+            "二十三点一五米"
+          ],
+          "alt": "双峰塔塔身｜高德 POI 实景",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/a41179c8e1234aeaead9f90bdcbcda21",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "双峰塔 · ",
+          "assetId": "5d5ceb5a-f1bd-419f-90de-556be7bd6a61",
+          "fit": "contain",
+          "keywords": [
+            "周应鳌"
+          ],
+          "alt": "双峰塔文保碑｜高德 POI 实景",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://aos-comment.amap.com/B0FFL7ZV6J/comment/content_media_external_images_media_9867_1731705737264_86141927.jpg",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "双峰塔星空",
+          "assetId": "cf1dcfad-5716-4a2d-815d-dbb0da1f4d28",
+          "fit": "cover",
+          "keywords": [
+            "双峰塔"
+          ],
+          "alt": "双峰塔星空｜吴川市人民政府",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://www.gdwc.gov.cn/zjwcwy/gkmlpt/content/2/2234/post_2234176.html",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "overview-spot-xuegong",
+      "section": "overview",
+      "type": "map-overview",
+      "title": "吴川学宫｜元代的大成殿",
+      "narration": "吴阳中学里，藏着一座元代学宫，现在只剩大成殿，面阔二十点三米。\n二〇二四年开始，四百四十八万修缮，修旧如旧。\n林召棠在这里读过书，清朝首任驻美公使陈兰彬也在这里读过。文脉就压在梁架上。",
+      "segments": 3,
+      "duration": 17.65,
+      "camera": {
+        "longitude": 110.68806609562455,
+        "latitude": 21.35504473845731,
+        "height": 2400,
+        "heading": 0,
+        "pitch": -62,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "大成殿实拍",
+          "assetId": "4c7ed7ef-df35-40e6-bf80-3ee97dbf0cfc",
+          "fit": "cover",
+          "keywords": [
+            "大成殿"
+          ],
+          "alt": "大成殿实拍（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "修复后大成殿",
+          "assetId": "41ea7550-07e5-4b9c-8a95-022a328bfb73",
+          "fit": "cover",
+          "keywords": [
+            "修缮"
+          ],
+          "alt": "修复后大成殿（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "殿内梁架旧照",
+          "assetId": "3c9c1e33-81a2-40c3-8b82-51bc41e1fb8f",
+          "fit": "cover",
+          "keywords": [
+            "梁架"
+          ],
+          "alt": "殿内梁架旧照（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "overview-spot-zhiliao",
+      "section": "overview",
+      "type": "map-overview",
+      "title": "芷寮古港｜金芷寮，银赤坎",
+      "narration": "再往南，芷寮。唐宋到民国，南方的船都往这儿泊。\n县志写此地富庶曾为六邑之最，所以叫金芷寮、银赤坎。后来泥沙淤了，只剩老街和码头石。",
+      "segments": 2,
+      "duration": 12.55,
+      "camera": {
+        "longitude": 110.65754888809579,
+        "latitude": 21.323681521957543,
+        "height": 2600,
+        "heading": 0,
+        "pitch": -60,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "芷寮古港 · ",
+          "assetId": "7ddf840f-279c-4641-8bd8-c85f551de311",
+          "fit": "contain",
+          "keywords": [
+            "泊"
+          ],
+          "alt": "芷寮村·中国历史文化名村门牌｜高德 POI 实景",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/792599f3cf85c084d963fa4d47ffab1b",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "芷寮古港旧址 · ",
+          "assetId": "4ff4a99c-12a7-4272-a99e-1a51f96092c7",
+          "fit": "cover",
+          "keywords": [
+            "金芷寮"
+          ],
+          "alt": "芷寮古港旧址｜高德 POI 实景",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/c1874e9d049d947746b82b6473f737da",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "overview-spot-jinhai",
+      "section": "overview",
+      "type": "map-overview",
+      "title": "金海岸｜十八公里海岸线",
+      "narration": "再看海。吴阳十八公里海岸线。\n八平方公里防风林，联合国「人与生物圈」考察点。\n早上五点，渔民出海——这就是旧八景里的「东海朝阳」。\n吴阳人，你上一次来金海岸，是哪一年？",
+      "segments": 4,
+      "duration": 15.88,
+      "camera": {
+        "longitude": 110.70375834434716,
+        "latitude": 21.34156556119596,
+        "height": 3000,
+        "heading": 0,
+        "pitch": -58,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "吴阳金海岸沙滩 · ",
+          "assetId": "92f413fc-a123-42a1-bf09-47322406072b",
+          "fit": "contain",
+          "keywords": [
+            "海岸线"
+          ],
+          "alt": "吴阳金海岸沙滩｜高德 POI 实景",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/5b590fce882776180ba776c3125b5c2a",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "防风林",
+          "assetId": "18953d6b-1fb6-4439-80e7-7c5a9d5b1a3c",
+          "fit": "cover",
+          "keywords": [
+            "防风林"
+          ],
+          "alt": "金海岸防风林（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "东海朝阳",
+          "assetId": "6b025a32-c2c6-4b15-92be-9b63a820ddb2",
+          "fit": "cover",
+          "keywords": [
+            "东海朝阳"
+          ],
+          "alt": "东海朝阳（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "曾经的中国芭提雅",
+          "assetId": "a14d07c5-ae8e-4c94-8cd4-4ea3d4ba8e45",
+          "fit": "contain",
+          "keywords": [
+            "金海岸"
+          ],
+          "alt": "曾经的中国芭提雅（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "overview-food-wuyang",
+      "section": "overview",
+      "type": "map-overview",
+      "title": "吴阳四味｜一只虾，一只蟹，一碗螺粥",
+      "narration": "脆虾。鉴江咸淡水交界，一只虾又甜又脆，全镇一点二万亩，年产值六点五个亿。\n米蟹。农历二月最肥，膏结如子。林召棠写过：执杯持蟹，足了一生事。\n沙螺。清朝贡品，一碗粥，鲜得不用放味精。\n鸡油饭。本地细骨鸡，白切，鸡油拌饭，粒粒分明。你心里的第一名是哪家？",
+      "segments": 4,
+      "duration": 23.92,
+      "camera": {
+        "longitude": 110.68802349167403,
+        "latitude": 21.34981436916689,
+        "height": 2400,
+        "heading": 0,
+        "pitch": -60,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "白灼脆虾",
+          "assetId": "b482d83a-c59d-4c54-9290-e3fd6aa4cc03",
+          "fit": "cover",
+          "keywords": [
+            "脆虾"
+          ],
+          "alt": "白灼吴阳脆虾｜湛江晚报",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://paper.gdzjdaily.com.cn/zjwb/html/2026-03/25/content_146380_3265519.htm",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "手绘芷寮蟹",
+          "assetId": "fed6dea6-923f-4175-93ad-78012f45e1ca",
+          "fit": "contain",
+          "keywords": [
+            "米蟹"
+          ],
+          "alt": "手绘芷寮蟹（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "沙螺粥",
+          "assetId": "4c7d355d-ca5e-4f47-b2df-12019c0eb5db",
+          "fit": "contain",
+          "keywords": [
+            "沙螺"
+          ],
+          "alt": "沙螺粥（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "吴阳鸡油饭",
+          "assetId": "697e2d86-01b3-4016-ae5b-2dbc8ec717f4",
+          "fit": "cover",
+          "keywords": [
+            "鸡油饭"
+          ],
+          "alt": "吴阳鸡油饭（用户提供）",
+          "sourceType": "user-provided",
+          "sourceUrl": "",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "overview-2",
+      "section": "overview",
+      "type": "image-card",
+      "title": "转入｜十八个村",
+      "narration": "门面看完，说底子。十八个村和社区，一村一句话，找找有没有你的村。",
+      "segments": 1,
+      "duration": 6.27,
+      "placements": [
+        {
+          "assetName": "吴阳客厅(吴阳历史文化展馆) · ",
+          "assetId": "a158467d-b375-4553-a78f-0ad2a5beb574",
+          "fit": "cover",
+          "keywords": [
+            "十八个村"
+          ],
+          "alt": "吴阳客厅外景｜高德 POI 实景",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/bc6770ae3680013b0000003435202855?type=pic",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106001",
+      "section": "child",
+      "type": "region-focus",
+      "title": "街道社区｜三个朝代挤在一条街",
+      "narration": "街道社区，老镇区。南城门，明洪武二十七年建，一九三八年拆城，它没拆。\n中山纪念堂，一九三一年，广东除广州外最完整的一座。\n极浦亭，南宋，旧八景之首「极浦渔归」。",
+      "segments": 3,
+      "duration": 15.29,
+      "camera": {
+        "longitude": 110.68002995,
+        "latitude": 21.3479368,
+        "height": 5634,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "南城门",
+          "assetId": "2d2b2000-4d85-402b-a070-067c3a5871c2",
+          "fit": "cover",
+          "keywords": [
+            "南城门"
+          ],
+          "alt": "吴阳古城南城门（永和门）｜广州日报新花城",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://huacheng.gz-cmc.com/pages/2024/02/17/SF1154718700edd696a1ee44bbb49c4a.html",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "吴阳中山纪念堂",
+          "assetId": "84487620-5960-4d7e-9021-9709b62bef44",
+          "fit": "contain",
+          "keywords": [
+            "中山纪念堂"
+          ],
+          "alt": "吴阳中山纪念堂｜广州日报新花城",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://huacheng.gz-cmc.com/pages/2024/02/17/SF1154718700edd696a1ee44bbb49c4a.html",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "极浦亭",
+          "assetId": "7f9852fa-f7e2-4527-ae43-0a6b1f521606",
+          "fit": "cover",
+          "keywords": [
+            "极浦亭"
+          ],
+          "alt": "极浦亭与九曲桥｜广州日报新花城",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://huacheng.gz-cmc.com/pages/2024/02/17/SF1154718700edd696a1ee44bbb49c4a.html",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106003",
+      "section": "child",
+      "type": "region-focus",
+      "title": "白沙社区｜三个姓，一条湾",
+      "narration": "白沙，刘、邱、朱三个姓。村口这口六德井，八百年了。",
+      "segments": 1,
+      "duration": 4.9,
+      "camera": {
+        "longitude": 110.67185845,
+        "latitude": 21.343280999999998,
+        "height": 5462,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "白沙村 · 六德井 · ",
+          "assetId": "d3725a43-48af-4de9-8674-16d5b92c9191",
+          "fit": "cover",
+          "keywords": [
+            "白沙"
+          ],
+          "alt": "白沙村 · 六德井 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/59c29ac124ade19486b73c79240599e9",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106004",
+      "section": "child",
+      "type": "region-focus",
+      "title": "上郭社区｜科甲名宗",
+      "narration": "上郭，吴氏祖地。祠堂碑上写着：廿四举人、三进士、卅六仕宦。",
+      "segments": 1,
+      "duration": 5.69,
+      "camera": {
+        "longitude": 110.68702859999999,
+        "latitude": 21.358808449999998,
+        "height": 4485,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "上郭社区 · 上郭吴氏大宗 · ",
+          "assetId": "3ffd55cc-04ee-494a-a06a-5c8f0224dc97",
+          "fit": "cover",
+          "keywords": [
+            "上郭"
+          ],
+          "alt": "上郭社区 · 上郭吴氏大宗 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/81712998cacf58bc0000000592692663",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106201",
+      "section": "child",
+      "type": "region-focus",
+      "title": "那蒙村｜冬天来摘草莓",
+      "narration": "那蒙，吴阳的采摘村。草莓、青枣种成片，冬天来正好。",
+      "segments": 1,
+      "duration": 4.9,
+      "camera": {
+        "longitude": 110.69477135,
+        "latitude": 21.36949885,
+        "height": 5202,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "那蒙村 · 海庐门楼 · ",
+          "assetId": "0ef80c3a-dd4e-4d2e-be28-3ba17277e918",
+          "fit": "cover",
+          "keywords": [
+            "那蒙"
+          ],
+          "alt": "那蒙村 · 海庐门楼 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/f0b527821ebadfc015a197eedb0c7461",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106203",
+      "section": "child",
+      "type": "region-focus",
+      "title": "那郭垌村｜一村一个姓",
+      "narration": "那郭垌，十一条自然村，姓高、姓吴、姓凌，一村一个样。",
+      "segments": 1,
+      "duration": 5.1,
+      "camera": {
+        "longitude": 110.67633885000001,
+        "latitude": 21.366324050000003,
+        "height": 5853,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "那郭垌村 · 里屋沙简公庙 · ",
+          "assetId": "4062f520-4af1-47fc-a543-d8f1c1997b85",
+          "fit": "contain",
+          "keywords": [
+            "那郭垌"
+          ],
+          "alt": "那郭垌村 · 里屋沙简公庙 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/e970aa636afd1e1c46f69dbd764e0024",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106204",
+      "section": "child",
+      "type": "region-focus",
+      "title": "闸口村｜靠一个水口吃饭",
+      "narration": "闸口，十六条自然村，吴阳最多。靠鉴江的水口吃饭，所以叫闸口。",
+      "segments": 1,
+      "duration": 5.88,
+      "camera": {
+        "longitude": 110.6773801,
+        "latitude": 21.3846705,
+        "height": 4816,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "闸口村 · 上插仁德堂 · ",
+          "assetId": "8406711e-22c6-4fc7-b5b1-649b50a10cb2",
+          "fit": "cover",
+          "keywords": [
+            "闸口"
+          ],
+          "alt": "闸口村 · 上插仁德堂 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "http://store.is.autonavi.com/showpic/9c61bb6c8e5b1a0afa1c3373add26b34",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106010",
+      "section": "child",
+      "type": "region-focus",
+      "title": "新勇村｜十个村，姓字当头",
+      "narration": "新勇，十条自然村，杨屋坡、余新、曾屋、宁根，大多以姓立村。",
+      "segments": 1,
+      "duration": 5.69,
+      "camera": {
+        "longitude": 110.661573,
+        "latitude": 21.3748487,
+        "height": 4689,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "新勇村 · 宁根太祖庙 · ",
+          "assetId": "b3825391-cf9c-494c-b529-1c5826c28526",
+          "fit": "contain",
+          "keywords": [
+            "新勇"
+          ],
+          "alt": "新勇村 · 宁根太祖庙 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/52d5d2f5a4bb49c1181740ef4e7df78e",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106209",
+      "section": "child",
+      "type": "region-focus",
+      "title": "桥头村｜码头压在村界上",
+      "narration": "桥头，古港码头就压在村界上。门口那条石板路，可能就是老码头的路。",
+      "segments": 1,
+      "duration": 6.27,
+      "camera": {
+        "longitude": 110.65874,
+        "latitude": 21.3289094,
+        "height": 6989,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "桥头村 · 桥头管区桥北村天后宫 · ",
+          "assetId": "61838416-bf99-457f-bcbf-efa96756a6a1",
+          "fit": "contain",
+          "keywords": [
+            "桥头"
+          ],
+          "alt": "桥头村 · 桥头管区桥北村天后宫 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/807b3a1cf7abbabf0000007249644731",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106202",
+      "section": "child",
+      "type": "region-focus",
+      "title": "那良村｜地里的螺壳会说话",
+      "narration": "那良，村外有一处宋代贝丘遗址。一层螺壳、一层陶片，说明一千年前这里就靠海吃饭。",
+      "segments": 1,
+      "duration": 7.65,
+      "camera": {
+        "longitude": 110.65018764999999,
+        "latitude": 21.35064235,
+        "height": 6818,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "那良村 · 烈天府 · ",
+          "assetId": "26850bdc-b273-451a-8edb-a46cdf9d9422",
+          "fit": "contain",
+          "keywords": [
+            "那良"
+          ],
+          "alt": "那良村 · 烈天府 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "http://store.is.autonavi.com/showpic/ada4b13349d54082330c6eec7b5e3282",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106206",
+      "section": "child",
+      "type": "region-focus",
+      "title": "水洒村｜名字里全是水",
+      "narration": "水洒，七条自然村，名字里全是水。挨着鉴江，过去靠船，现在靠塘。",
+      "segments": 1,
+      "duration": 6.08,
+      "camera": {
+        "longitude": 110.6415842,
+        "latitude": 21.3652934,
+        "height": 5662,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "水洒村 · 水洒广福堂 · ",
+          "assetId": "41c4bd57-cebc-421d-8eb7-af572ce11ed5",
+          "fit": "cover",
+          "keywords": [
+            "水洒"
+          ],
+          "alt": "水洒村 · 水洒广福堂 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/a7c86e16d9fc9e7851bcff3282bc584c",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106207",
+      "section": "child",
+      "type": "region-focus",
+      "title": "三端村｜一姓分两村",
+      "narration": "三端，达上达下，同一个姓，分成了上下两村。",
+      "segments": 1,
+      "duration": 4.12,
+      "camera": {
+        "longitude": 110.63180034999999,
+        "latitude": 21.35052925,
+        "height": 4232,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "三端村 · 亚十村四兴境土地公庙 · ",
+          "assetId": "1d330682-8bfe-45b3-8177-d5ad43ce72b3",
+          "fit": "cover",
+          "keywords": [
+            "三端"
+          ],
+          "alt": "三端村 · 亚十村四兴境土地公庙 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/83de14d3a4bb00f02e50e147f1a3a023",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106210",
+      "section": "child",
+      "type": "region-focus",
+      "title": "芷寮村｜天后宫还在",
+      "narration": "芷寮，古港所在的村。天后宫还在，码头石还在。",
+      "segments": 1,
+      "duration": 4.31,
+      "camera": {
+        "longitude": 110.6560675,
+        "latitude": 21.3206209,
+        "height": 6304,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "芷寮古港 · ",
+          "assetId": "7ddf840f-279c-4641-8bd8-c85f551de311",
+          "fit": "contain",
+          "keywords": [
+            "芷寮"
+          ],
+          "alt": "芷寮古港 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/792599f3cf85c084d963fa4d47ffab1b",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106016",
+      "section": "child",
+      "type": "region-focus",
+      "title": "大坉村｜七条村都带坉",
+      "narration": "大坉，七条自然村，名字里都带一个坉字。坉，就是田边围起来的一块高地。",
+      "segments": 1,
+      "duration": 6.67,
+      "camera": {
+        "longitude": 110.63819699999999,
+        "latitude": 21.324402900000003,
+        "height": 4978,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "大坉村 · 大坉广褔庙 · ",
+          "assetId": "8f18a3a6-935d-4708-bdae-1afce1f70802",
+          "fit": "contain",
+          "keywords": [
+            "大坉"
+          ],
+          "alt": "大坉村 · 大坉广褔庙 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "http://store.is.autonavi.com/showpic/b5d948a8dde0ed29c9dddbd68d93e593",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106215",
+      "section": "child",
+      "type": "region-focus",
+      "title": "秧义村｜两个全国文明村",
+      "narration": "秧义，蛤岭、芝蔼两个全国文明村都在这。村道比镇上还整齐。",
+      "segments": 1,
+      "duration": 5.49,
+      "camera": {
+        "longitude": 110.7058713,
+        "latitude": 21.3553645,
+        "height": 5195,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "秧义村 · 蛤岭真武殿 · ",
+          "assetId": "15aae8e6-d320-45b4-a212-1670f01a739b",
+          "fit": "cover",
+          "keywords": [
+            "秧义"
+          ],
+          "alt": "秧义村 · 蛤岭真武殿 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/1aaccf273baa84a6333fa94fc2cf6de8",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106214",
+      "section": "child",
+      "type": "region-focus",
+      "title": "海山村｜吴阳最大的村",
+      "narration": "海山，二十九条自然村，吴阳最大。村边就是金海岸。",
+      "segments": 1,
+      "duration": 4.71,
+      "camera": {
+        "longitude": 110.6891067,
+        "latitude": 21.3304445,
+        "height": 7799,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "海山村 · 古井 · ",
+          "assetId": "3855314a-1c97-465e-a73d-e0e49965da40",
+          "fit": "contain",
+          "keywords": [
+            "海山"
+          ],
+          "alt": "海山村 · 古井 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "http://store.is.autonavi.com/showpic/8a9e4d78fbf765984c78ad504b1d0daf",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106211",
+      "section": "child",
+      "type": "region-focus",
+      "title": "文塔村｜塔就在村里",
+      "narration": "文塔，塔就在这个村。村里人小时候，都爬过塔脚。",
+      "segments": 1,
+      "duration": 4.51,
+      "camera": {
+        "longitude": 110.6547873,
+        "latitude": 21.30858025,
+        "height": 10969,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "文塔村 · 双峰塔 · ",
+          "assetId": "f40c2272-5fed-43ee-94f6-3ceecd62b278",
+          "fit": "contain",
+          "keywords": [
+            "文塔"
+          ],
+          "alt": "文塔村 · 双峰塔 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://store.is.autonavi.com/showpic/166581073acaa5551d1bb09a4b4a8e24",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106212",
+      "section": "child",
+      "type": "region-focus",
+      "title": "限口村｜蟛蜞和沙螺的老家",
+      "narration": "限口，鉴江出海口。蟛蜞磨成汁是吴川人的鱼露，沙螺熬粥清朝是贡品。",
+      "segments": 1,
+      "duration": 6.27,
+      "camera": {
+        "longitude": 110.65293835,
+        "latitude": 21.2921652,
+        "height": 9356,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "限口村 · 伏波庙 · ",
+          "assetId": "978cd2d2-0707-4c33-9e2f-97eae1a06a0b",
+          "fit": "cover",
+          "keywords": [
+            "限口"
+          ],
+          "alt": "限口村 · 伏波庙 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "http://store.is.autonavi.com/showpic/cbd7ff8d7a57e38fa87d2f93967d8ae0",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "child-440883106213",
+      "section": "child",
+      "type": "region-focus",
+      "title": "沙角旋村｜限门飞雪",
+      "narration": "沙角旋，鉴江从这里入海。旧八景「限门飞雪」就在这儿——浪花打在船篷上，远看像雪。",
+      "segments": 1,
+      "duration": 7.84,
+      "camera": {
+        "longitude": 110.65262125000001,
+        "latitude": 21.24404685,
+        "height": 14372,
+        "heading": 0,
+        "pitch": -64,
+        "roll": 0,
+        "transition": "fly"
+      },
+      "placements": [
+        {
+          "assetName": "沙角旋村 · 三王宫 · ",
+          "assetId": "f8961e05-32ea-4851-8c01-71024cc60b74",
+          "fit": "cover",
+          "keywords": [
+            "沙角旋"
+          ],
+          "alt": "沙角旋村 · 三王宫 · ",
+          "sourceType": "amap-poi",
+          "sourceUrl": "https://aos-comment.amap.com/B0FFH7QIFG/comment/content_media_external_file_100004987_1773413087562_77739712.jpg",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    },
+    {
+      "id": "outro",
+      "section": "outro",
+      "type": "outro",
+      "title": "结尾｜留半天给吴阳",
+      "narration": "一千三百年县城，一位状元，一座古塔，一条废港。\n下次来湛江，留半天给吴阳：从状元坊走到南城门，再吃一碗沙螺粥。",
+      "segments": 2,
+      "duration": 17.84,
+      "placements": [
+        {
+          "assetName": "状元坊",
+          "assetId": "2c773881-6283-4e2f-ad8d-7a31be264c5b",
+          "fit": "contain",
+          "keywords": [
+            "古塔"
+          ],
+          "alt": "霞街状元坊｜吴川市人民政府",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://www.gdwc.gov.cn/zjwcwy/gkmlpt/content/2/2234/post_2234176.html",
+          "minimumDisplaySeconds": 2.5
+        },
+        {
+          "assetName": "南城门",
+          "assetId": "2d2b2000-4d85-402b-a070-067c3a5871c2",
+          "fit": "cover",
+          "keywords": [
+            "沙螺粥"
+          ],
+          "alt": "吴阳古城南城门（永和门）｜广州日报新花城",
+          "sourceType": "verified-real",
+          "sourceUrl": "https://huacheng.gz-cmc.com/pages/2024/02/17/SF1154718700edd696a1ee44bbb49c4a.html",
+          "minimumDisplaySeconds": 2.5
+        }
+      ]
+    }
+  ],
+  "referencedAssets": [
+    {
+      "id": "015cffd8-6ece-4082-8ed4-e3920d64747c",
+      "name": "吴阳航拍",
+      "sourceType": "user-provided",
+      "alt": "吴阳航拍",
+      "path": "/workspace-assets/015cffd8-6ece-4082-8ed4-e3920d64747c.png"
+    },
+    {
+      "id": "fa3757fd-94f1-4e76-b17d-7090914e245c",
+      "name": "吴阳朝天门",
+      "sourceType": "user-provided",
+      "alt": "吴阳朝天门",
+      "path": "/workspace-assets/fa3757fd-94f1-4e76-b17d-7090914e245c.png"
+    },
+    {
+      "id": "4a9c8195-f9a4-4079-aa8a-8e54717504a4",
+      "name": "林绍棠",
+      "sourceType": "user-provided",
+      "alt": "林绍棠",
+      "path": "/workspace-assets/4a9c8195-f9a4-4079-aa8a-8e54717504a4.webp"
+    },
+    {
+      "id": "b4d98463-d160-4e8d-a4d1-1ae0b879e5f4",
+      "name": "状元坊前奔跑的孩子",
+      "sourceType": "verified-real",
+      "sourceUrl": "https://huacheng.gz-cmc.com/pages/2024/02/17/SF1154718700edd696a1ee44bbb49c4a.html",
+      "alt": "霞街状元坊前奔跑的孩子｜广州日报新花城",
+      "path": "/workspace-assets/wuyang-b4d98463-d160-4e8d-a4d1-1ae0b879e5f4.jpg"
+    },
+    {
+      "id": "f838cd88-e0a8-4a8c-a60f-9551bc22ce0e",
+      "name": "林氏大宗",
+      "sourceType": "verified-real",
+      "sourceUrl": "https://www.gdwc.gov.cn/zjwcwy/gkmlpt/content/2/2234/post_2234176.html",
+      "alt": "霞街林氏大宗祠与进士匾额实拍｜吴川市人民政府",
+      "path": "/workspace-assets/wuyang-f838cd88-e0a8-4a8c-a60f-9551bc22ce0e.jpg"
+    },
+    {
+      "id": "2c773881-6283-4e2f-ad8d-7a31be264c5b",
+      "name": "状元坊",
+      "sourceType": "verified-real",
+      "sourceUrl": "https://www.gdwc.gov.cn/zjwcwy/gkmlpt/content/2/2234/post_2234176.html",
+      "alt": "霞街状元坊牌坊实拍｜吴川市人民政府",
+      "path": "/workspace-assets/wuyang-2c773881-6283-4e2f-ad8d-7a31be264c5b.jpg"
+    },
+    {
+      "id": "eee4ac66-309a-439e-aa4d-b4418e2e85a0",
+      "name": "林召棠故居",
+      "sourceType": "verified-real",
+      "sourceUrl": "https://www.gdwc.gov.cn/zjwcwy/gkmlpt/content/2/2234/post_2234176.html",
+      "alt": "霞街林召棠故居门楼实拍｜吴川市人民政府",
+      "path": "/workspace-assets/wuyang-eee4ac66-309a-439e-aa4d-b4418e2e85a0.jpg"
+    },
+    {
+      "id": "18acbd99-92d5-40a4-8997-8277105c1e00",
+      "name": "状元井",
+      "sourceType": "user-provided",
+      "alt": "状元井",
+      "path": "/workspace-assets/18acbd99-92d5-40a4-8997-8277105c1e00.jpg"
+    },
+    {
+      "id": "9ac66122-9ce8-4670-be42-da608b6f574f",
+      "name": "双峰塔 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/a41179c8e1234aeaead9f90bdcbcda21",
+      "alt": "双峰塔｜双峰塔（高德 POI 实景照片）",
+      "path": "/workspace-assets/amap-59471eec5c49a1cb1705c9674169afaa5b2f01d388594da919857884bdd06640.jpg"
+    },
+    {
+      "id": "5d5ceb5a-f1bd-419f-90de-556be7bd6a61",
+      "name": "双峰塔 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://aos-comment.amap.com/B0FFL7ZV6J/comment/content_media_external_images_media_9867_1731705737264_86141927.jpg",
+      "alt": "双峰塔｜双峰塔（高德 POI 实景照片）",
+      "path": "/workspace-assets/amap-fec2d741837dc8d317d8a887d06bce829fe99d06d2dd855ad82737e4e509e2e0.jpg"
+    },
+    {
+      "id": "cf1dcfad-5716-4a2d-815d-dbb0da1f4d28",
+      "name": "双峰塔星空",
+      "sourceType": "verified-real",
+      "sourceUrl": "https://www.gdwc.gov.cn/zjwcwy/gkmlpt/content/2/2234/post_2234176.html",
+      "alt": "双峰塔夜空星轨实拍｜吴川市人民政府《假期赴吴阳》",
+      "path": "/workspace-assets/wuyang-cf1dcfad-5716-4a2d-815d-dbb0da1f4d28.jpg"
+    },
+    {
+      "id": "4c7ed7ef-df35-40e6-bf80-3ee97dbf0cfc",
+      "name": "大成殿实拍",
+      "sourceType": "user-provided",
+      "alt": "大成殿实拍",
+      "path": "/workspace-assets/4c7ed7ef-df35-40e6-bf80-3ee97dbf0cfc.jpg"
+    },
+    {
+      "id": "41ea7550-07e5-4b9c-8a95-022a328bfb73",
+      "name": "修复后大成殿",
+      "sourceType": "user-provided",
+      "alt": "修复后大成殿",
+      "path": "/workspace-assets/41ea7550-07e5-4b9c-8a95-022a328bfb73.jpg"
+    },
+    {
+      "id": "3c9c1e33-81a2-40c3-8b82-51bc41e1fb8f",
+      "name": "殿内梁架旧照",
+      "sourceType": "user-provided",
+      "alt": "殿内梁架旧照",
+      "path": "/workspace-assets/3c9c1e33-81a2-40c3-8b82-51bc41e1fb8f.png"
+    },
+    {
+      "id": "7ddf840f-279c-4641-8bd8-c85f551de311",
+      "name": "芷寮古港 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/792599f3cf85c084d963fa4d47ffab1b",
+      "alt": "芷寮古港｜芷寮古港（高德 POI 实景照片）",
+      "path": "/workspace-assets/amap-32fa9eff110413f6e9868679e3effac49413c3483aadd14e6622fc9117dfc6bb.jpg"
+    },
+    {
+      "id": "4ff4a99c-12a7-4272-a99e-1a51f96092c7",
+      "name": "芷寮古港旧址 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/c1874e9d049d947746b82b6473f737da",
+      "alt": "芷寮古港｜芷寮古港旧址（高德 POI 实景照片）",
+      "path": "/workspace-assets/amap-d5f589f040b4387d3f161364c088ed088eb5630e302154b50c80e4d7a2af265c.jpg"
+    },
+    {
+      "id": "92f413fc-a123-42a1-bf09-47322406072b",
+      "name": "吴阳金海岸沙滩 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/5b590fce882776180ba776c3125b5c2a",
+      "alt": "金海岸｜吴阳金海岸沙滩（高德 POI 实景照片）",
+      "path": "/workspace-assets/amap-27f8c4f085b515dee1ae0aaeef17f802dea36ccd8c789b8d0d1c2f63587183c0.jpg"
+    },
+    {
+      "id": "18953d6b-1fb6-4439-80e7-7c5a9d5b1a3c",
+      "name": "防风林",
+      "sourceType": "user-provided",
+      "alt": "防风林",
+      "path": "/workspace-assets/18953d6b-1fb6-4439-80e7-7c5a9d5b1a3c.jpg"
+    },
+    {
+      "id": "6b025a32-c2c6-4b15-92be-9b63a820ddb2",
+      "name": "东海朝阳",
+      "sourceType": "user-provided",
+      "alt": "东海朝阳",
+      "path": "/workspace-assets/6b025a32-c2c6-4b15-92be-9b63a820ddb2.jpg"
+    },
+    {
+      "id": "a14d07c5-ae8e-4c94-8cd4-4ea3d4ba8e45",
+      "name": "曾经的中国芭提雅",
+      "sourceType": "user-provided",
+      "alt": "曾经的中国芭提雅",
+      "path": "/workspace-assets/a14d07c5-ae8e-4c94-8cd4-4ea3d4ba8e45.jpg"
+    },
+    {
+      "id": "b482d83a-c59d-4c54-9290-e3fd6aa4cc03",
+      "name": "白灼脆虾",
+      "sourceType": "verified-real",
+      "sourceUrl": "https://paper.gdzjdaily.com.cn/zjwb/html/2026-03/25/content_146380_3265519.htm",
+      "alt": "白灼吴阳脆虾｜湛江晚报",
+      "path": "/workspace-assets/wuyang-b482d83a-c59d-4c54-9290-e3fd6aa4cc03.jpg"
+    },
+    {
+      "id": "fed6dea6-923f-4175-93ad-78012f45e1ca",
+      "name": "手绘芷寮蟹",
+      "sourceType": "user-provided",
+      "alt": "手绘芷寮蟹",
+      "path": "/workspace-assets/fed6dea6-923f-4175-93ad-78012f45e1ca.png"
+    },
+    {
+      "id": "4c7d355d-ca5e-4f47-b2df-12019c0eb5db",
+      "name": "沙螺粥",
+      "sourceType": "user-provided",
+      "alt": "沙螺粥",
+      "path": "/workspace-assets/4c7d355d-ca5e-4f47-b2df-12019c0eb5db.png"
+    },
+    {
+      "id": "697e2d86-01b3-4016-ae5b-2dbc8ec717f4",
+      "name": "吴阳鸡油饭",
+      "sourceType": "user-provided",
+      "alt": "吴阳鸡油饭",
+      "path": "/workspace-assets/697e2d86-01b3-4016-ae5b-2dbc8ec717f4.png"
+    },
+    {
+      "id": "a158467d-b375-4553-a78f-0ad2a5beb574",
+      "name": "吴阳客厅(吴阳历史文化展馆) · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/bc6770ae3680013b0000003435202855?type=pic",
+      "alt": "吴阳镇区｜吴阳客厅(吴阳历史文化展馆)（高德 POI 实景照片）",
+      "path": "/workspace-assets/amap-42472f3961319e5f676909efb343e0cd310f64f648789c559a179175612abb4f.jpg"
+    },
+    {
+      "id": "2d2b2000-4d85-402b-a070-067c3a5871c2",
+      "name": "南城门",
+      "sourceType": "verified-real",
+      "sourceUrl": "https://huacheng.gz-cmc.com/pages/2024/02/17/SF1154718700edd696a1ee44bbb49c4a.html",
+      "alt": "吴阳古城南城门（永和门）实拍｜广州日报新花城",
+      "path": "/workspace-assets/wuyang-2d2b2000-4d85-402b-a070-067c3a5871c2.jpg"
+    },
+    {
+      "id": "84487620-5960-4d7e-9021-9709b62bef44",
+      "name": "吴阳中山纪念堂",
+      "sourceType": "verified-real",
+      "sourceUrl": "https://huacheng.gz-cmc.com/pages/2024/02/17/SF1154718700edd696a1ee44bbb49c4a.html",
+      "alt": "吴阳中山纪念堂民国洋楼实拍｜广州日报新花城",
+      "path": "/workspace-assets/wuyang-84487620-5960-4d7e-9021-9709b62bef44.jpg"
+    },
+    {
+      "id": "7f9852fa-f7e2-4527-ae43-0a6b1f521606",
+      "name": "极浦亭",
+      "sourceType": "verified-real",
+      "sourceUrl": "https://huacheng.gz-cmc.com/pages/2024/02/17/SF1154718700edd696a1ee44bbb49c4a.html",
+      "alt": "极浦亭与九曲桥实拍｜广州日报新花城",
+      "path": "/workspace-assets/wuyang-7f9852fa-f7e2-4527-ae43-0a6b1f521606.jpg"
+    },
+    {
+      "id": "d3725a43-48af-4de9-8674-16d5b92c9191",
+      "name": "白沙村 · 六德井 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/59c29ac124ade19486b73c79240599e9",
+      "alt": "白沙村的六德井",
+      "path": "/workspace-assets/amap-b189d6833f3d6c9e5e4d493619ebf53e6b3b282e60f5151a77e8300be49f4220.jpg"
+    },
+    {
+      "id": "3ffd55cc-04ee-494a-a06a-5c8f0224dc97",
+      "name": "上郭社区 · 上郭吴氏大宗 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/81712998cacf58bc0000000592692663",
+      "alt": "上郭社区的上郭吴氏大宗",
+      "path": "/workspace-assets/amap-1701e7968b92e8f8350289b0aa5f489c840c7ea02cc0011e3f96c64a878c49e0.jpg"
+    },
+    {
+      "id": "0ef80c3a-dd4e-4d2e-be28-3ba17277e918",
+      "name": "那蒙村 · 海庐门楼 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/f0b527821ebadfc015a197eedb0c7461",
+      "alt": "那蒙村的海庐门楼",
+      "path": "/workspace-assets/amap-f505912479f78e3076f4f56c6960f7e10483fd429fd8f93c8ad3d96411c6223e.jpg"
+    },
+    {
+      "id": "4062f520-4af1-47fc-a543-d8f1c1997b85",
+      "name": "那郭垌村 · 里屋沙简公庙 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/e970aa636afd1e1c46f69dbd764e0024",
+      "alt": "那郭垌村的里屋沙简公庙",
+      "path": "/workspace-assets/amap-d5c46ffbb4b681f2a8727218ffc7fefe02f238dda147ac6780e809e32a73d4e5.jpg"
+    },
+    {
+      "id": "8406711e-22c6-4fc7-b5b1-649b50a10cb2",
+      "name": "闸口村 · 上插仁德堂 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "http://store.is.autonavi.com/showpic/9c61bb6c8e5b1a0afa1c3373add26b34",
+      "alt": "闸口村的上插仁德堂",
+      "path": "/workspace-assets/amap-715198e816233b4eb354f25eff75aa7fa6477fd8f4d59d2612f63adfedc116c9.jpg"
+    },
+    {
+      "id": "b3825391-cf9c-494c-b529-1c5826c28526",
+      "name": "新勇村 · 宁根太祖庙 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/52d5d2f5a4bb49c1181740ef4e7df78e",
+      "alt": "新勇村的宁根太祖庙",
+      "path": "/workspace-assets/amap-f9dc543aff438f1367612eb2dffcf77b23144eb50bd85e68c9ada94d11027688.jpg"
+    },
+    {
+      "id": "61838416-bf99-457f-bcbf-efa96756a6a1",
+      "name": "桥头村 · 桥头管区桥北村天后宫 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/807b3a1cf7abbabf0000007249644731",
+      "alt": "桥头村的桥头管区桥北村天后宫",
+      "path": "/workspace-assets/amap-5c9dc933a48b38a667d0f32bfb1853dbbe5f1dc615361917002f35add7cc2fa3.jpg"
+    },
+    {
+      "id": "26850bdc-b273-451a-8edb-a46cdf9d9422",
+      "name": "那良村 · 烈天府 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "http://store.is.autonavi.com/showpic/ada4b13349d54082330c6eec7b5e3282",
+      "alt": "那良村的烈天府",
+      "path": "/workspace-assets/amap-6297415285ca45c3284ce119ca73d5ccf865fa98bdb7bf7416687078c4f0742b.jpg"
+    },
+    {
+      "id": "41c4bd57-cebc-421d-8eb7-af572ce11ed5",
+      "name": "水洒村 · 水洒广福堂 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/a7c86e16d9fc9e7851bcff3282bc584c",
+      "alt": "水洒村的水洒广福堂",
+      "path": "/workspace-assets/amap-493b755b1f0adccaeb3317d4144ac746ed4cdca800a0600da33d6316d1767a25.jpg"
+    },
+    {
+      "id": "1d330682-8bfe-45b3-8177-d5ad43ce72b3",
+      "name": "三端村 · 亚十村四兴境土地公庙 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/83de14d3a4bb00f02e50e147f1a3a023",
+      "alt": "三端村的亚十村四兴境土地公庙",
+      "path": "/workspace-assets/amap-77eafe848763645ccca6f5b592c50e7a5dd4e77b56001a189e9e098f8d274b45.jpg"
+    },
+    {
+      "id": "8f18a3a6-935d-4708-bdae-1afce1f70802",
+      "name": "大坉村 · 大坉广褔庙 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "http://store.is.autonavi.com/showpic/b5d948a8dde0ed29c9dddbd68d93e593",
+      "alt": "大坉村的大坉广褔庙",
+      "path": "/workspace-assets/amap-373c1b3e948d288df7a006bc7d6296971f6c1b2829661aeab07847a499fbbfe9.jpg"
+    },
+    {
+      "id": "15aae8e6-d320-45b4-a212-1670f01a739b",
+      "name": "秧义村 · 蛤岭真武殿 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/1aaccf273baa84a6333fa94fc2cf6de8",
+      "alt": "秧义村的蛤岭真武殿",
+      "path": "/workspace-assets/amap-0eb18604c9279a0f2944f2714b4446485bdbd9ab9212b98bca88246610c7b61a.jpg"
+    },
+    {
+      "id": "3855314a-1c97-465e-a73d-e0e49965da40",
+      "name": "海山村 · 古井 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "http://store.is.autonavi.com/showpic/8a9e4d78fbf765984c78ad504b1d0daf",
+      "alt": "海山村的古井",
+      "path": "/workspace-assets/amap-dd2ad4ed8c8da58ee2c4a35f46706b285a3ef25d063a5118f8f4d1b7bf345c94.jpg"
+    },
+    {
+      "id": "f40c2272-5fed-43ee-94f6-3ceecd62b278",
+      "name": "文塔村 · 双峰塔 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://store.is.autonavi.com/showpic/166581073acaa5551d1bb09a4b4a8e24",
+      "alt": "文塔村的双峰塔",
+      "path": "/workspace-assets/amap-aa361817f4334b926444811e33cba9c5fe0a45950fd8b3eaf37c0210d9b64421.jpg"
+    },
+    {
+      "id": "978cd2d2-0707-4c33-9e2f-97eae1a06a0b",
+      "name": "限口村 · 伏波庙 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "http://store.is.autonavi.com/showpic/cbd7ff8d7a57e38fa87d2f93967d8ae0",
+      "alt": "限口村的伏波庙",
+      "path": "/workspace-assets/amap-788dec3681da65ae34a8d4292c1394ceb1f44b064beaa1a4417e23d539e522f5.jpg"
+    },
+    {
+      "id": "f8961e05-32ea-4851-8c01-71024cc60b74",
+      "name": "沙角旋村 · 三王宫 · ",
+      "sourceType": "amap-poi",
+      "sourceUrl": "https://aos-comment.amap.com/B0FFH7QIFG/comment/content_media_external_file_100004987_1773413087562_77739712.jpg",
+      "alt": "沙角旋村的三王宫",
+      "path": "/workspace-assets/amap-f0bd48d1b891be6eaf4180b89e559b8de6b03b1cf849e3068b82e2d24396f5a3.jpg"
+    }
+  ]
+}

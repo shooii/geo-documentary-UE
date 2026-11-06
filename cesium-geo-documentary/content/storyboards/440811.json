@@ -1,0 +1,251 @@
+{
+  "regionId": "440811",
+  "name": "麻章区",
+  "duration": 50,
+  "scenes": [
+    {
+      "sceneId": "440811-scene-01",
+      "title": "湛江全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "麻章位于湛江中心城区西南部，是城市空间与雷州半岛腹地之间的过渡地带。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440811",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "麻章位于湛江中心城区西南部，是城市空间与雷州半岛腹地之间的过渡地带。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440811-location-001"
+      ],
+      "accessibility": "旁白说明湛江全域定位，地图高亮麻章区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440811-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2024年末麻章常住人口33.96万，人口分布连接城区、乡镇、农场与交通走廊。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440811",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2024年常住人口33.96万",
+        "body": "雷州半岛东北部的城郊过渡地带"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2024年末麻章常住人口33.96万，人口分布连接城区、乡镇、农场与交通走廊。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440811-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮麻章区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440811-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2025年麻章地区生产总值205.82亿元，现代农业、制造业、物流和城市配套共同推进。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440811",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2025年GDP 205.82亿元",
+        "body": "交通、农业与城市拓展交汇"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年麻章地区生产总值205.82亿元，现代农业、制造业、物流和城市配套共同推进。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440811-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮麻章区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440811-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "湖光岩玛珥湖由远古蒸气岩浆爆发形成，湖底沉积记录着漫长的环境变化。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440811",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "火山活动留下玛珥湖",
+        "body": "湖光岩玛珥湖由远古蒸气岩浆爆发形成，湖底沉积记录着漫长的环境变化。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "湖光岩玛珥湖由远古蒸气岩浆爆发形成，湖底沉积记录着漫长的环境变化。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440811-location-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮麻章区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440811-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "围绕湖光岩形成的地质认知与地方记忆，成为麻章最鲜明的文化坐标。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440811",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "湖光岩连接地质与地方记忆",
+        "body": "围绕湖光岩形成的地质认知与地方记忆，成为麻章最鲜明的文化坐标。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "围绕湖光岩形成的地质认知与地方记忆，成为麻章最鲜明的文化坐标。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440811-location-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮麻章区，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440811-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 6,
+      "narrationRef": "script:paragraph-06",
+      "narration": "从火山口湖到不断延伸的城市道路，麻章把深时间、农业空间与当代发展放在同一幅地图上。",
+      "cesium": {
+        "cameraAction": "pullBackToParent",
+        "regionId": "440811",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "从火山口湖到不断延伸的城市道路，麻章把深时间、农业空间与当代发展放在同一幅地图上。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440811-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮麻章区，所有重要文字保持在安全区。"
+    }
+  ]
+}

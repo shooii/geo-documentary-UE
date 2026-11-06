@@ -1,0 +1,251 @@
+{
+  "regionId": "440800",
+  "name": "湛江市",
+  "duration": 50,
+  "scenes": [
+    {
+      "sceneId": "440800-scene-01",
+      "title": "湛江全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "湛江位于广东西南部，覆盖雷州半岛，东濒南海、西临北部湾，下辖四区、两县、三市。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440800",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "湛江位于广东西南部，覆盖雷州半岛，东濒南海、西临北部湾，下辖四区、两县、三市。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440800-location-001"
+      ],
+      "accessibility": "旁白说明湛江全域定位，地图高亮湛江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440800-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2025年末，全市常住人口712.29万，城镇人口353.50万。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440800",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2025年常住人口712.29万",
+        "body": "雷州半岛连接南海、北部湾与琼州海峡"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年末，全市常住人口712.29万，城镇人口353.50万。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440800-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮湛江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440800-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2025年地区生产总值3952.94亿元，港口、临港工业、服务业与热带农业共同发展。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440800",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2025年GDP 3952.94亿元",
+        "body": "港口、临港产业与区域枢纽共同发展"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2025年地区生产总值3952.94亿元，港口、临港工业、服务业与热带农业共同发展。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440800-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮湛江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440800-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "古老聚落与近代港城叠加，海洋交通持续塑造湛江。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440800",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "雷州文化与近代港城记忆长期叠加",
+        "body": "古老聚落与近代港城叠加，海洋交通持续塑造湛江。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "古老聚落与近代港城叠加，海洋交通持续塑造湛江。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440800-history-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮湛江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440800-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "雷剧、醒狮、飘色、泥塑和海洋民俗，延续着半岛文化。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440800",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "雷剧、醒狮、飘色、泥塑与海洋民俗",
+        "body": "雷剧、醒狮、飘色、泥塑和海洋民俗，延续着半岛文化。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "雷剧、醒狮、飘色、泥塑和海洋民俗，延续着半岛文化。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440800-culture-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮湛江市，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440800-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 6,
+      "narrationRef": "script:paragraph-06",
+      "narration": "接下来，镜头依次走进赤坎、霞山、坡头、麻章、遂溪、徐闻、廉江、雷州和吴川。",
+      "cesium": {
+        "cameraAction": "pullBackToParent",
+        "regionId": "440800",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "接下来，镜头依次走进赤坎、霞山、坡头、麻章、遂溪、徐闻、廉江、雷州和吴川。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440800-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮湛江市，所有重要文字保持在安全区。"
+    }
+  ]
+}

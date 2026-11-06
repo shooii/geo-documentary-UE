@@ -1,0 +1,27 @@
+{
+  "id": "000000",
+  "name": "示例地区",
+  "levelRole": "admin2",
+  "levelName": "县级行政区",
+  "officialNativeLevelName": "县",
+  "parentId": "000000",
+  "childIds": ["000001", "000002"],
+  "sourceCrs": "EPSG:4326",
+  "boundaryInputFormat": "GeoJSON",
+  "sourceFiles": ["data/raw/example.geojson"],
+  "center": [110.0, 21.0],
+  "labelPoint": [110.0, 21.0],
+  "bbox": [109.8, 20.8, 110.2, 21.2],
+  "areaKm2": 1000,
+  "geometryPath": "data/normalized/000000.geojson",
+  "featureRefs": ["river-example", "mountain-example"],
+  "visualEvidenceRefs": ["culture-photo-example"],
+  "cameraPreset": {
+    "longitude": 110.0,
+    "latitude": 21.0,
+    "height": 250000,
+    "heading": 0,
+    "pitch": -65,
+    "roll": 0
+  }
+}

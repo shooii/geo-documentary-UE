@@ -1,0 +1,340 @@
+{
+  "regionId": "440825111",
+  "title": "地理图说·徐闻县和安镇",
+  "profile": "portrait",
+  "duration": 218,
+  "presentationMode": "parent-child-tour-map-led",
+  "scenes": [
+    {
+      "sceneId": "440825111-scene-01",
+      "title": "陆岛相依的和安",
+      "start": 0.1,
+      "end": 12.378,
+      "duration": 12.278,
+      "narration": "和安镇坐落在徐闻县东北部海岸，是一座陆岛相依的滨海镇；大陆岸线、近海岛屿、曲折港湾和广阔滩涂，共同组成五岛十湾的空间格局。",
+      "cameraAction": "hold-parent-overview",
+      "composition": "连续卫星地图总览，低对比悬浮镇域边界",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "和安镇坐落在徐闻县东北部海岸，是一座陆岛相依的滨海镇；大陆岸线、近海岛屿、曲折港湾和广阔滩涂，共同组成五岛十湾的空间格局。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-02",
+      "title": "十个村居与边界说明",
+      "start": 12.328,
+      "end": 26.09,
+      "duration": 13.762,
+      "narration": "全镇下辖和安社区与九个行政村，共十个村居；现有村界数据包含九个行政村面，和安社区没有独立可靠边界，因此与和安村合并讲述，不绘制近似边界。",
+      "cameraAction": "hold-parent-overview",
+      "composition": "连续卫星地图总览，低对比悬浮镇域边界",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "全镇下辖和安社区与九个行政村，共十个村居；现有村界数据包含九个行政村面，和安社区没有独立可靠边界，因此与和安村合并讲述，不绘制近似边界。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-boundary-001",
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-03",
+      "title": "海陆产业与生态",
+      "start": 26.09,
+      "end": 40.061,
+      "duration": 13.971,
+      "narration": "这里气候温暖，潮间带、红树林、虾塘和渔港交织；高位池对虾、近海捕捞和网箱养殖构成海洋支柱，斑斓叶、香兰鸡与沙地杂粮铺开陆上农业。",
+      "cameraAction": "hold-parent-overview",
+      "composition": "连续卫星地图总览，低对比悬浮镇域边界",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "这里气候温暖，潮间带、红树林、虾塘和渔港交织；高位池对虾、近海捕捞和网箱养殖构成海洋支柱，斑斓叶、香兰鸡与沙地杂粮铺开陆上农业。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-04",
+      "title": "冬松大桥与潮汐生活",
+      "start": 40.061,
+      "end": 53.259,
+      "duration": 13.198,
+      "narration": "过去海岛交通更多依靠渡船，冬松岛大桥通车后岛陆往来明显改善；潮起时渔船出港，潮落后人们赶海采贝，海陆两种生活在同一阵海风里相遇。",
+      "cameraAction": "hold-parent-overview",
+      "composition": "连续卫星地图总览，低对比悬浮镇域边界",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "过去海岛交通更多依靠渡船，冬松岛大桥通车后岛陆往来明显改善；潮起时渔船出港，潮落后人们赶海采贝，海陆两种生活在同一阵海风里相遇。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-05",
+      "title": "九村路线",
+      "start": 53.259,
+      "end": 67.083,
+      "duration": 13.823999999999998,
+      "narration": "接下来，镜头从镇墟出发，依次走进和安、云头、水头、公港、后湖、金鸡、佳平、北莉与冬松九个村域，并把和安社区纳入镇墟中心共同介绍。",
+      "cameraAction": "hold-parent-overview",
+      "composition": "连续卫星地图总览，低对比悬浮镇域边界",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "接下来，镜头从镇墟出发，依次走进和安、云头、水头、公港、后湖、金鸡、佳平、北莉与冬松九个村域，并把和安社区纳入镇墟中心共同介绍。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-06",
+      "title": "素材与证据说明",
+      "start": 67.083,
+      "end": 77.72,
+      "duration": 10.637,
+      "narration": "所有村级产业与风貌描述以用户提供资料为叙事依据；县域实景照片只作徐闻滨海环境语境，不宣称拍摄于具体村庄。",
+      "cameraAction": "hold-parent-overview",
+      "composition": "连续卫星地图总览，低对比悬浮镇域边界",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "所有村级产业与风貌描述以用户提供资料为叙事依据；县域实景照片只作徐闻滨海环境语境，不宣称拍摄于具体村庄。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-07",
+      "title": "和安社区 + 和安村",
+      "start": 77.72,
+      "end": 91.519,
+      "duration": 13.799000000000007,
+      "narration": "和安社区与和安村共同构成镇墟中心；镇政府、中学、卫生院、市场和码头汇聚在这里，赶圩、客运与海陆物资流转，组织着全镇最热闹的日常。",
+      "childId": "440825111201",
+      "cameraAction": "fly-to-child-and-hold",
+      "composition": "上方证据卡或标题，下方真实卫星地图与当前村界高亮",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "和安社区与和安村共同构成镇墟中心；镇政府、中学、卫生院、市场和码头汇聚在这里，赶圩、客运与海陆物资流转，组织着全镇最热闹的日常。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-08",
+      "title": "云头村",
+      "start": 91.519,
+      "end": 104.191,
+      "duration": 12.671999999999997,
+      "narration": "云头村是和安最有辨识度的香草农业节点；连片斑斓叶田带着清香延伸，采收、加工与香兰鸡等特色农产品，一起构成清新的田园景观。",
+      "childId": "440825111202",
+      "cameraAction": "fly-to-child-and-hold",
+      "composition": "上方证据卡或标题，下方真实卫星地图与当前村界高亮",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "云头村是和安最有辨识度的香草农业节点；连片斑斓叶田带着清香延伸，采收、加工与香兰鸡等特色农产品，一起构成清新的田园景观。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-09",
+      "title": "水头村",
+      "start": 104.191,
+      "end": 116.727,
+      "duration": 12.536000000000001,
+      "narration": "水头村紧邻内湾，虾塘、鱼塘与平缓滩涂交错；高位池增氧机昼夜运转，浅滩赶海仍在延续，村舍、防护林和养殖水面彼此相邻。",
+      "childId": "440825111203",
+      "cameraAction": "fly-to-child-and-hold",
+      "composition": "上方证据卡或标题，下方真实卫星地图与当前村界高亮",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "水头村紧邻内湾，虾塘、鱼塘与平缓滩涂交错；高位池增氧机昼夜运转，浅滩赶海仍在延续，村舍、防护林和养殖水面彼此相邻。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-10",
+      "title": "公港村",
+      "start": 116.727,
+      "end": 128.039,
+      "duration": 11.311999999999983,
+      "narration": "公港村是老牌滨海渔村，也保留革命老区记忆；港湾避风，渔船常年停靠，近海捕捞和小网箱养殖，让渔汛时节的码头格外忙碌。",
+      "childId": "440825111204",
+      "cameraAction": "fly-to-child-and-hold",
+      "composition": "上方证据卡或标题，下方真实卫星地图与当前村界高亮",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "公港村是老牌滨海渔村，也保留革命老区记忆；港湾避风，渔船常年停靠，近海捕捞和小网箱养殖，让渔汛时节的码头格外忙碌。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-11",
+      "title": "后湖村",
+      "start": 128.039,
+      "end": 140.049,
+      "duration": 12.01000000000002,
+      "narration": "后湖村以浅湖、塘堰和湿地水面为底色；咸淡水养殖、护岸林木与水鸟栖息地相互嵌合，呈现少见的内湖塘型滨海村落风貌。",
+      "childId": "440825111205",
+      "cameraAction": "fly-to-child-and-hold",
+      "composition": "上方证据卡或标题，下方真实卫星地图与当前村界高亮",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "后湖村以浅湖、塘堰和湿地水面为底色；咸淡水养殖、护岸林木与水鸟栖息地相互嵌合，呈现少见的内湖塘型滨海村落风貌。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-12",
+      "title": "金鸡村",
+      "start": 140.049,
+      "end": 152.904,
+      "duration": 12.85499999999999,
+      "narration": "金鸡村所在的金鸡岛拥有曲折岸线与宽阔潮间带；传统捕捞、贝类和鱼虾养殖历史悠久，退潮采贝、涨潮出海，是原生态港湾渔村的日常节奏。",
+      "childId": "440825111206",
+      "cameraAction": "fly-to-child-and-hold",
+      "composition": "上方证据卡或标题，下方真实卫星地图与当前村界高亮",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "金鸡村所在的金鸡岛拥有曲折岸线与宽阔潮间带；传统捕捞、贝类和鱼虾养殖历史悠久，退潮采贝、涨潮出海，是原生态港湾渔村的日常节奏。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-13",
+      "title": "佳平村",
+      "start": 152.904,
+      "end": 164.534,
+      "duration": 11.629999999999995,
+      "narration": "佳平村是滨海养殖与外销节点；对虾和海产养殖塘沿岸排布，水产装运连接岛外市场，也为滨海休闲与村庄更新留下新的空间。",
+      "childId": "440825111207",
+      "cameraAction": "fly-to-child-and-hold",
+      "composition": "上方证据卡或标题，下方真实卫星地图与当前村界高亮",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "佳平村是滨海养殖与外销节点；对虾和海产养殖塘沿岸排布，水产装运连接岛外市场，也为滨海休闲与村庄更新留下新的空间。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-14",
+      "title": "北莉村",
+      "start": 164.534,
+      "end": 176.642,
+      "duration": 12.108000000000004,
+      "narration": "北莉村位于北莉岛，四面环海，红树林与潮间滩涂保存着安静的原生气质；近海捕捞、滩涂养殖、赶海与观鸟，共同塑造海岛生活。",
+      "childId": "440825111208",
+      "cameraAction": "fly-to-child-and-hold",
+      "composition": "上方证据卡或标题，下方真实卫星地图与当前村界高亮",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "北莉村位于北莉岛，四面环海，红树林与潮间滩涂保存着安静的原生气质；近海捕捞、滩涂养殖、赶海与观鸟，共同塑造海岛生活。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-15",
+      "title": "冬松村",
+      "start": 176.642,
+      "end": 189.338,
+      "duration": 12.695999999999998,
+      "narration": "冬松村所在的冬松岛，是和安最知名的海岛；大桥连接陆岛，大片滩涂、红树林、渔船群与网箱养殖铺向海面，日出日落也展现出文旅潜力。",
+      "childId": "440825111209",
+      "cameraAction": "fly-to-child-and-hold",
+      "composition": "上方证据卡或标题，下方真实卫星地图与当前村界高亮",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "冬松村所在的冬松岛，是和安最知名的海岛；大桥连接陆岛，大片滩涂、红树林、渔船群与网箱养殖铺向海面，日出日落也展现出文旅潜力。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致"
+    },
+    {
+      "sceneId": "440825111-scene-16",
+      "title": "海陆共生的和安",
+      "start": 189.338,
+      "end": 194.338,
+      "duration": 5,
+      "narration": "从和安墟的码头烟火，到云头村漫野的斑斓清香，从大陆岸线的连片虾塘，到冬松、北莉与金鸡诸岛的潮间滩涂，和安把香草田园与耕海牧渔融在一起；潮起出海，潮落采海，香草伴海风，渔歌伴落日，这就是海陆共生的和安镇。",
+      "cameraAction": "return-to-parent-overview",
+      "composition": "连续卫星地图总览，低对比悬浮镇域边界",
+      "subtitle": {
+        "mode": "single-line-short-phrase",
+        "text": "从和安墟的码头烟火，到云头村漫野的斑斓清香，从大陆岸线的连片虾塘，到冬松、北莉与金鸡诸岛的潮间滩涂，和安把香草田园与耕海牧渔融在一起；潮起出海，潮落采海，香草伴海风，渔歌伴落日，这就是海陆共生的和安镇。",
+        "safeArea": "bottom"
+      },
+      "transition": "continuous-map-carrier",
+      "sources": [
+        "440825111-user-brief-002"
+      ],
+      "qa": "检查地名、字幕安全区、当前村界高亮与画面说明一致",
+      "silent": true
+    }
+  ]
+}

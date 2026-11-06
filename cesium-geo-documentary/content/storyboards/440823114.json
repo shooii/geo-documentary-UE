@@ -1,0 +1,251 @@
+{
+  "regionId": "440823114",
+  "title": "地理图说·遂溪县河头镇",
+  "duration": 275,
+  "presentationMode": "parent-child-tour",
+  "coverageMode": "verified-source-boundaries",
+  "boundaryUnitCount": 13,
+  "tourChildCount": 11,
+  "scenes": [
+    {
+      "start": 0.1,
+      "end": 9.346,
+      "visual": "父级总览相机锁定，卫星影像上以较慢的贴地笔触完整绘制河头镇父级边界；父级线使用#8B1E1E，开场不显示任何下级名称。",
+      "claimIds": [
+        "440823114-boundary-001",
+        "440823114-profile-001"
+      ],
+      "duration": 9.246
+    },
+    {
+      "start": 9.296,
+      "end": 17.825,
+      "visual": "稳定淡入全部11个可靠边界单元（11个行政村），水库、河流和运河标签按旁白出现。",
+      "claimIds": [
+        "440823114-boundary-001",
+        "440823114-profile-001"
+      ],
+      "duration": 8.529
+    },
+    {
+      "start": 17.825,
+      "end": 27.031,
+      "visual": "保持父级低斜视总览，标出S375线与S290线，人口数字以简洁事实卡短暂出现，地图边界保持稳定无闪烁。",
+      "claimIds": [
+        "440823114-census-001",
+        "440823114-profile-001"
+      ],
+      "duration": 9.206
+    },
+    {
+      "start": 27.031,
+      "end": 35.781,
+      "visual": "展示河头镇第一届红薯文化周实景，随后回到卫星图中的耕地与北翼农业片区，不用通用农产品图片替代。",
+      "visualAssetId": "red-sweetpotato-culture-week",
+      "claimIds": [
+        "440823114-economy-001"
+      ],
+      "duration": 8.75
+    },
+    {
+      "start": 35.781,
+      "end": 44.739,
+      "visual": "展示遂溪甘薯烤制成品，标签明确写为县域实景资料；只说明河头富硒番薯进入遂溪日常吃法，不冒充具体村庄餐桌。",
+      "visualAssetId": "suixi-roasted-sweetpotato",
+      "claimIds": [
+        "440823114-food-001"
+      ],
+      "duration": 8.957999999999998
+    },
+    {
+      "start": 44.739,
+      "end": 53.463,
+      "visual": "展示遂溪西南地区革命史馆官方外景图，再回到河头村位置；图片进入和退出均采用柔和淡化。",
+      "visualAssetId": "revolution-museum",
+      "claimIds": [
+        "440823114-history-001"
+      ],
+      "duration": 8.724000000000004
+    },
+    {
+      "start": 53.463,
+      "end": 61.445,
+      "visual": "展示河头镇美丽圩镇客厅外景，随后以镇区街道、农贸市场和公共空间承接市圩生活；字幕和配音中圩读xū。",
+      "visualAssetId": "township-lounge",
+      "claimIds": [
+        "440823114-township-001",
+        "440823114-dialect-001"
+      ],
+      "duration": 7.981999999999999
+    },
+    {
+      "start": 61.445,
+      "end": 70.442,
+      "visual": "展示河头群兴龙狮团2026年高桩比赛实景，画面标签保留年份；旁白讲述2024年省赛三冠事实，不混淆两个时间点。",
+      "visualAssetId": "qunxing-lion-team",
+      "claimIds": [
+        "440823114-culture-001",
+        "440823114-lion-visual-001"
+      ],
+      "duration": 8.996999999999993
+    },
+    {
+      "start": 70.442,
+      "end": 78.736,
+      "visual": "展示河头中学2023届九年级师生校园合影，保留校舍、横幅和学生群像；只称师生合影，不误写为正式毕业照。",
+      "visualAssetId": "hetou-middle-school",
+      "claimIds": [
+        "440823114-school-001"
+      ],
+      "duration": 8.294000000000011
+    },
+    {
+      "start": 78.736,
+      "end": 87.096,
+      "visual": "回到全镇卫星总览，以耕地、道路和林地承载现代农业、土地整治、风电建设与圩镇更新；全部下级标签继续隐藏。",
+      "claimIds": [
+        "440823114-modern-001"
+      ],
+      "duration": 8.36
+    },
+    {
+      "start": 87.096,
+      "end": 92.617,
+      "childId": "440823114200",
+      "childName": "河头村",
+      "visual": "从父级总览连续缓动抵达河头村，当前边界由上下文白平滑过渡为金色并淡入低透明填充，只显示河头村标签，到达后锁定。",
+      "narrationCueIds": [
+        "440823114-child-01"
+      ],
+      "duration": 5.521000000000001
+    },
+    {
+      "start": 92.617,
+      "end": 99.01,
+      "childId": "440823114202",
+      "childName": "吴排村",
+      "visual": "由河头村自然飞向吴排村，前一标签先淡出、当前标签再淡入，完整上下文边界持续可见且不闪烁。",
+      "narrationCueIds": [
+        "440823114-child-02"
+      ],
+      "duration": 6.393000000000001
+    },
+    {
+      "start": 99.01,
+      "end": 104.505,
+      "childId": "440823114203",
+      "childName": "割山村",
+      "visual": "连续飞抵割山村，两个多部件村面同步高亮，镜头到达后固定。",
+      "narrationCueIds": [
+        "440823114-child-03"
+      ],
+      "duration": 5.49499999999999
+    },
+    {
+      "start": 104.505,
+      "end": 110.429,
+      "childId": "440823114204",
+      "childName": "田西村",
+      "visual": "连续飞抵田西村，配合田西河标签，当前边界和填充平滑交接。",
+      "narrationCueIds": [
+        "440823114-child-04"
+      ],
+      "duration": 5.924000000000007
+    },
+    {
+      "start": 110.429,
+      "end": 116.627,
+      "childId": "440823114205",
+      "childName": "双村",
+      "visual": "连续飞抵双村，多部件同步高亮，旁白提到东坡楼和还砚亭时以文字标签轻量提示。",
+      "narrationCueIds": [
+        "440823114-child-05"
+      ],
+      "duration": 6.197999999999993
+    },
+    {
+      "start": 116.627,
+      "end": 122.356,
+      "childId": "440823114206",
+      "childName": "山域村",
+      "visual": "连续飞抵山域村，保持北向、低斜视和统一缓动，抵达后锁定。",
+      "narrationCueIds": [
+        "440823114-child-06"
+      ],
+      "duration": 5.728999999999999
+    },
+    {
+      "start": 122.356,
+      "end": 129.023,
+      "childId": "440823114207",
+      "childName": "新市村",
+      "visual": "连续飞抵新市村，并按需显示新市水库标签；非当前村名保持隐藏。",
+      "narrationCueIds": [
+        "440823114-child-07"
+      ],
+      "duration": 6.667000000000002
+    },
+    {
+      "start": 129.023,
+      "end": 133.958,
+      "childId": "440823114208",
+      "childName": "干塘村",
+      "visual": "连续飞抵干塘村，两个分片同时进入选中状态，不出现先黑后白的边界闪烁。",
+      "narrationCueIds": [
+        "440823114-child-08"
+      ],
+      "duration": 4.935000000000002
+    },
+    {
+      "start": 133.958,
+      "end": 138.828,
+      "childId": "440823114209",
+      "childName": "吾良村",
+      "visual": "连续飞抵吾良村，两个分片和内洞结构完整保留，边界与填充同步。",
+      "narrationCueIds": [
+        "440823114-child-09"
+      ],
+      "duration": 4.8700000000000045
+    },
+    {
+      "start": 138.828,
+      "end": 144.127,
+      "childId": "440823114210",
+      "childName": "上坡村",
+      "visual": "连续飞抵上坡村，镜头变化保持匀缓，不突然加速放大。",
+      "narrationCueIds": [
+        "440823114-child-10"
+      ],
+      "duration": 5.299000000000007
+    },
+    {
+      "start": 144.127,
+      "end": 149.908,
+      "childId": "440823114201",
+      "childName": "虎溪村",
+      "visual": "连续飞抵虎溪村，当前标签和金色边界平滑出现，到达后固定完成最后一段村级旁白。",
+      "narrationCueIds": [
+        "440823114-child-11"
+      ],
+      "duration": 5.7809999999999775
+    },
+    {
+      "start": 149.908,
+      "end": 154.308,
+      "visual": "最后一个村旁白结束后，选中填充和标签淡出，相机沿连续测地线缓动返回父级开场视角；11个上下文边界和酒红色父级边界保持稳定。",
+      "cameraAction": "return-to-parent-overview",
+      "duration": 4.4
+    },
+    {
+      "start": 154.308,
+      "end": 169,
+      "visual": "父级总览完全锁定，以完整边界和卫星影像承接片尾总结，标题保持“地理图说·遂溪县河头镇”。",
+      "claimIds": [
+        "440823114-profile-001",
+        "440823114-history-001",
+        "440823114-township-001"
+      ],
+      "duration": 120.69200000000001
+    }
+  ]
+}

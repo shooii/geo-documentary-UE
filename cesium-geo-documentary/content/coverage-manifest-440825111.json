@@ -1,0 +1,158 @@
+{
+  "parentId": "440825111",
+  "parentName": "和安镇",
+  "levelRole": "township",
+  "officialLevelName": "镇",
+  "childRole": "administrative-village",
+  "source": "用户提供的广东省村级行政边界SHP",
+  "effectiveDate": null,
+  "completeImmediateChildCoverage": false,
+  "coverageScope": "9 administrative-village polygons present in the supplied Guangdong village-boundary SHP",
+  "coverageLimitation": "Public town information also names 和安社区, but the supplied SHP does not contain a verified community polygon. Farm records 440825111301-303 are classified as supplemental management units and are not presented as ordinary villages.",
+  "excludedUnits": [
+    {
+      "id": "440825111001",
+      "name": "和安社区",
+      "reason": "No verified polygon in the supplied SHP"
+    },
+    {
+      "ids": [
+        "440825111301",
+        "440825111302",
+        "440825111303"
+      ],
+      "name": "农场管理单元",
+      "reason": "Supplemental non-village units"
+    }
+  ],
+  "children": [
+    {
+      "id": "440825111202",
+      "name": "云头村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 2
+    },
+    {
+      "id": "440825111207",
+      "name": "佳平村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 7
+    },
+    {
+      "id": "440825111209",
+      "name": "冬松村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 9
+    },
+    {
+      "id": "440825111205",
+      "name": "后湖村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 5
+    },
+    {
+      "id": "440825111203",
+      "name": "水头村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 3
+    },
+    {
+      "id": "440825111204",
+      "name": "公港村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 4
+    },
+    {
+      "id": "440825111208",
+      "name": "北莉村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 8
+    },
+    {
+      "id": "440825111201",
+      "name": "和安村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 1
+    },
+    {
+      "id": "440825111206",
+      "name": "金鸡村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 6
+    }
+  ],
+  "narrationCoverage": [
+    {
+      "id": "440825111201",
+      "start": 77.72,
+      "end": 91.519,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825111202",
+      "start": 91.519,
+      "end": 104.191,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825111203",
+      "start": 104.191,
+      "end": 116.727,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825111204",
+      "start": 116.727,
+      "end": 128.039,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825111205",
+      "start": 128.039,
+      "end": 140.049,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825111206",
+      "start": 140.049,
+      "end": 152.904,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825111207",
+      "start": 152.904,
+      "end": 164.534,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825111208",
+      "start": 164.534,
+      "end": 176.642,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440825111209",
+      "start": 176.642,
+      "end": 189.338,
+      "camera": true,
+      "highlight": true
+    }
+  ]
+}

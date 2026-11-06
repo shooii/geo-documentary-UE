@@ -1,0 +1,281 @@
+{
+  "regionId": "440882110",
+  "title": "地理乡土情·雷州市东里镇",
+  "duration": 136,
+  "profile": "portrait",
+  "presentationMode": "parent-child-tour",
+  "tourChildCount": 20,
+  "photoAssetIds": [
+    "town-sign",
+    "town-hall-sand-table",
+    "town-market",
+    "coastal-aquaculture-aerial",
+    "second-primary-groundbreaking",
+    "shrimp-park-sheds",
+    "shrimp-park-inspection",
+    "livestream-room",
+    "modern-shrimp-park-aerial",
+    "hongliu-village-road",
+    "training-session",
+    "village-lane"
+  ],
+  "visualEvidence": {
+    "timingMode": "narration-cue-required",
+    "manifest": "content/visuals/440882110.json",
+    "photoManifest": "assets/source/photo-manifest-440882110.json",
+    "boundaryStabilityNote": "Only photo-card overlays were added. The Cesium parent-child boundary timeline and dissolved Dongli town geometry are unchanged, preserving the stable no-flicker boundary treatment.",
+    "clips": [
+      { "id": "town-sign", "narrationCueIndex": 0 },
+      { "id": "town-hall-sand-table", "narrationCueIndex": 1 },
+      { "id": "town-market", "narrationCueIndex": 2 },
+      { "id": "coastal-aquaculture-aerial", "narrationCueIndex": 3 },
+      { "id": "second-primary-groundbreaking", "narrationCueIndex": 5 },
+      { "id": "shrimp-park-sheds", "narrationCueIndex": 7 },
+      { "id": "shrimp-park-inspection", "narrationCueIndex": 11 },
+      { "id": "livestream-room", "narrationCueIndex": 12 },
+      { "id": "modern-shrimp-park-aerial", "narrationCueIndex": 13 },
+      { "id": "hongliu-village-road", "narrationCueIndex": 15 },
+      { "id": "training-session", "narrationCueIndex": 17 },
+      { "id": "village-lane", "narrationCueIndex": 20 }
+    ]
+  },
+  "scenes": [
+    {
+      "start": 0.1,
+      "end": 4.656,
+      "visual": "东里镇父级卫星地图介绍，父级名称在描边完成后出现，村级边界暂不展开。",
+      "narration": "东里镇位于雷州市东部滨海，三面环海，东临雷州湾。",
+      "duration": 4.556
+    },
+    {
+      "start": 4.606,
+      "end": 10.413,
+      "visual": "东里镇父级卫星地图介绍，父级名称在描边完成后出现，村级边界暂不展开。",
+      "narration": "镇域面积142.25平方千米，2020年常住人口68246人。",
+      "duration": 5.807
+    },
+    {
+      "start": 10.413,
+      "end": 15.131,
+      "visual": "东里镇父级卫星地图介绍，父级名称在描边完成后出现，村级边界暂不展开。",
+      "narration": "镇中心在东里圩，学校、卫生院和市场都围着海滨路展开。",
+      "duration": 4.718
+    },
+    {
+      "start": 15.131,
+      "end": 20.816,
+      "visual": "东里镇父级卫星地图介绍，父级名称在描边完成后出现，村级边界暂不展开。",
+      "narration": "沿海虾塘和鱼塘连成片，对虾、金鲳鱼、石斑鱼是这里的主角。",
+      "duration": 5.684999999999999
+    },
+    {
+      "start": 20.816,
+      "end": 25.181,
+      "visual": "东里镇父级卫星地图介绍，父级名称在描边完成后出现，村级边界暂不展开。",
+      "narration": "沙地上，番薯和花生扎根，海水稻也在沿海田块里生长。",
+      "duration": 4.365000000000002
+    },
+    {
+      "start": 25.181,
+      "end": 32.056,
+      "visual": "东里镇父级卫星地图介绍，父级名称在描边完成后出现，村级边界暂不展开。",
+      "narration": "2024年全镇生产总值15.34亿元，海风、渔业和生态治理一起推着小镇往前走。",
+      "duration": 6.8749999999999964
+    },
+    {
+      "childId": "440882110208",
+      "childName": "东里村",
+      "visual": "首次点亮东里村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "东里村紧邻镇区，城乡融合最明显，农田、村舍和海岸线彼此衔接。",
+      "duration": 5.736000000000004,
+      "start": 32.056,
+      "end": 37.792
+    },
+    {
+      "childId": "440882110206",
+      "childName": "东塘村",
+      "visual": "首次点亮东塘村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "东塘村以连片虾塘见长，对虾养殖是村里的主要收入。",
+      "duration": 4.405000000000001,
+      "start": 37.792,
+      "end": 42.197
+    },
+    {
+      "childId": "440882110209",
+      "childName": "东寮村",
+      "visual": "首次点亮东寮村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "东寮村沙质偏瘦，番薯、花生和耐旱作物在这里占了上风。",
+      "duration": 4.969999999999999,
+      "start": 42.197,
+      "end": 47.167
+    },
+    {
+      "childId": "440882110200",
+      "childName": "白岭村",
+      "visual": "首次点亮白岭村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "白岭村靠海生长，番薯和花生是沙地上的代表作物。",
+      "duration": 4.1229999999999976,
+      "start": 47.167,
+      "end": 51.29
+    },
+    {
+      "childId": "440882110201",
+      "childName": "三吉村",
+      "visual": "首次点亮三吉村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "三吉村位于西南海岸，近海渔业和养殖业撑起村庄日常。",
+      "duration": 4.435000000000002,
+      "start": 51.29,
+      "end": 55.725
+    },
+    {
+      "childId": "440882110016",
+      "childName": "北堀村",
+      "visual": "首次点亮北堀村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "北堀村是对虾产业重点区，现代化虾塘示范基地正在这里推进。",
+      "duration": 4.687999999999995,
+      "start": 55.725,
+      "end": 60.413
+    },
+    {
+      "childId": "440882110203",
+      "childName": "甲六村",
+      "visual": "首次点亮甲六村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "甲六村从经济薄弱村转身，合作社、鱼干加工和电商让村子慢慢活起来。",
+      "duration": 5.665000000000006,
+      "start": 60.413,
+      "end": 66.078
+    },
+    {
+      "childId": "440882110204",
+      "childName": "西坡村",
+      "visual": "首次点亮西坡村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "西坡村海岸线漫长，滩涂和虾池把海天拉得很开。",
+      "duration": 3.9209999999999923,
+      "start": 66.078,
+      "end": 69.999
+    },
+    {
+      "childId": "440882110205",
+      "childName": "英佳塘村",
+      "visual": "首次点亮英佳塘村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "英佳塘村枕山濒海，红色革命记忆是村里的底色。",
+      "duration": 3.861000000000004,
+      "start": 69.999,
+      "end": 73.86
+    },
+    {
+      "childId": "440882110217",
+      "childName": "洪流村",
+      "visual": "首次点亮洪流村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "洪流村红树林一片连着一片，候鸟和中华白海豚常来这片海湾。",
+      "duration": 4.727999999999994,
+      "start": 73.86,
+      "end": 78.588
+    },
+    {
+      "childId": "440882110219",
+      "childName": "沙节村",
+      "visual": "首次点亮沙节村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "沙节村海岸安静，滩涂资源适合养殖，也适合慢慢看海。",
+      "duration": 4.416000000000011,
+      "start": 78.588,
+      "end": 83.004
+    },
+    {
+      "childId": "440882110212",
+      "childName": "六格村",
+      "visual": "首次点亮六格村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "六格村是乡村振兴示范带的起点，村容和道路都在升级。",
+      "duration": 4.536000000000001,
+      "start": 83.004,
+      "end": 87.54
+    },
+    {
+      "childId": "440882110210",
+      "childName": "后葛村",
+      "visual": "首次点亮后葛村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "后葛村临海而居，虾塘、村道和风景一起铺开。",
+      "duration": 3.961999999999989,
+      "start": 87.54,
+      "end": 91.502
+    },
+    {
+      "childId": "440882110211",
+      "childName": "北坑村",
+      "visual": "首次点亮北坑村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "北坑村沿海滩涂资源丰富，现代养殖正在替换低产虾塘。",
+      "duration": 4.667000000000002,
+      "start": 91.502,
+      "end": 96.169
+    },
+    {
+      "childId": "440882110213",
+      "childName": "土头村",
+      "visual": "首次点亮土头村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "土头村沙地与村路相连，番薯和花生仍是熟悉的底色。",
+      "duration": 4.323999999999998,
+      "start": 96.169,
+      "end": 100.493
+    },
+    {
+      "childId": "440882110214",
+      "childName": "淡水村",
+      "visual": "首次点亮淡水村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "淡水村田地、村舍和海湾彼此靠近，日常节奏很慢。",
+      "duration": 4.224000000000004,
+      "start": 100.493,
+      "end": 104.717
+    },
+    {
+      "childId": "440882110215",
+      "childName": "南头村",
+      "visual": "首次点亮南头村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "南头村面向内湾，海风、滩涂和养殖水面都在附近。",
+      "duration": 4.405000000000001,
+      "start": 104.717,
+      "end": 109.122
+    },
+    {
+      "childId": "440882110216",
+      "childName": "七联村",
+      "visual": "首次点亮七联村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "七联村海水养殖和沙地农业并行，村庄朴实安静。",
+      "duration": 4.1129999999999995,
+      "start": 109.122,
+      "end": 113.235
+    },
+    {
+      "childId": "440882110218",
+      "childName": "下湖村",
+      "visual": "首次点亮下湖村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "下湖村村名带着海湾味道，海边生活和田地相互靠拢。",
+      "duration": 4.406000000000006,
+      "start": 113.235,
+      "end": 117.641
+    },
+    {
+      "childId": "440882110207",
+      "childName": "西挖村",
+      "visual": "首次点亮西挖村边界和名称，当前单元金色高亮，已访问边界保留。",
+      "narration": "西挖村在镇域西侧，海岸、村路和农田一路延展。",
+      "duration": 4.1129999999999995,
+      "start": 117.641,
+      "end": 121.754
+    },
+    {
+      "cameraAction": "return-to-parent-overview",
+      "visual": "静音返回东里镇父级总览，保留全部20个已访问村界和名称。",
+      "duration": 4.3999999999999915,
+      "silent": true,
+      "start": 121.754,
+      "end": 126.154
+    },
+    {
+      "visual": "父级总览锁定，完成收尾旁白。",
+      "narration": "走完东里镇这二十个村，虾塘的鲜、红树林的静、海风的柔，都留在雷州湾边。",
+      "duration": 9.846000000000004,
+      "start": 126.154,
+      "end": 136
+    }
+  ]
+}

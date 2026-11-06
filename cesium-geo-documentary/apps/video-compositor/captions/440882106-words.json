@@ -1,0 +1,8427 @@
+{
+  "regionId": "440882106",
+  "mode": "tts-derived-interpolation",
+  "words": [
+    {
+      "text": "纪",
+      "start": 0.1,
+      "end": 0.351,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 0.351,
+      "end": 0.601,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 0.601,
+      "end": 0.852,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 0.852,
+      "end": 1.102,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "雷",
+      "start": 1.102,
+      "end": 1.353,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "州",
+      "start": 1.353,
+      "end": 1.604,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "市",
+      "start": 1.604,
+      "end": 1.854,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 1.854,
+      "end": 2.105,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 2.105,
+      "end": 2.355,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 2.355,
+      "end": 2.606,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "东",
+      "start": 2.606,
+      "end": 2.856,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "邻",
+      "start": 2.856,
+      "end": 3.107,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "客",
+      "start": 3.107,
+      "end": 3.358,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 3.358,
+      "end": 3.608,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "杨",
+      "start": 3.608,
+      "end": 3.859,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 3.859,
+      "end": 4.109,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 4.109,
+      "end": 4.36,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "临",
+      "start": 4.36,
+      "end": 4.61,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 4.61,
+      "end": 4.861,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 4.861,
+      "end": 5.112,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "湾",
+      "start": 5.112,
+      "end": 5.362,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "南",
+      "start": 5.362,
+      "end": 5.613,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "连",
+      "start": 5.613,
+      "end": 5.863,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "唐",
+      "start": 5.863,
+      "end": 6.114,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 6.114,
+      "end": 6.365,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "企",
+      "start": 6.365,
+      "end": 6.615,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "水",
+      "start": 6.615,
+      "end": 6.866,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 6.866,
+      "end": 7.116,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 7.116,
+      "end": 7.367,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "遂",
+      "start": 7.367,
+      "end": 7.617,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "溪",
+      "start": 7.617,
+      "end": 7.868,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "的",
+      "start": 7.868,
+      "end": 8.119,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "河",
+      "start": 8.119,
+      "end": 8.369,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "头",
+      "start": 8.369,
+      "end": 8.62,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "江",
+      "start": 8.62,
+      "end": 8.87,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "洪",
+      "start": 8.87,
+      "end": 9.121,
+      "cueIndex": 0,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 9.121,
+      "end": 9.363,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 9.363,
+      "end": 9.605,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "面",
+      "start": 9.605,
+      "end": 9.846,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "积",
+      "start": 9.846,
+      "end": 10.088,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "3",
+      "start": 10.088,
+      "end": 10.33,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "3",
+      "start": 10.33,
+      "end": 10.572,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "9",
+      "start": 10.572,
+      "end": 10.813,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "1",
+      "start": 10.813,
+      "end": 11.055,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "3",
+      "start": 11.055,
+      "end": 11.297,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "平",
+      "start": 11.297,
+      "end": 11.539,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "方",
+      "start": 11.539,
+      "end": 11.78,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "公",
+      "start": 11.78,
+      "end": 12.022,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "里",
+      "start": 12.022,
+      "end": 12.264,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 12.264,
+      "end": 12.506,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 12.506,
+      "end": 12.748,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "线",
+      "start": 12.748,
+      "end": 12.989,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "3",
+      "start": 12.989,
+      "end": 13.231,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "2",
+      "start": 13.231,
+      "end": 13.473,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "公",
+      "start": 13.473,
+      "end": 13.715,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "里",
+      "start": 13.715,
+      "end": 13.956,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "白",
+      "start": 13.956,
+      "end": 14.198,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "流",
+      "start": 14.198,
+      "end": 14.44,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "线",
+      "start": 14.44,
+      "end": 14.682,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 14.682,
+      "end": 14.924,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "青",
+      "start": 14.924,
+      "end": 15.165,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "年",
+      "start": 15.165,
+      "end": 15.407,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "运",
+      "start": 15.407,
+      "end": 15.649,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "河",
+      "start": 15.649,
+      "end": 15.891,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 15.891,
+      "end": 16.132,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "灌",
+      "start": 16.132,
+      "end": 16.374,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "渠",
+      "start": 16.374,
+      "end": 16.616,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "穿",
+      "start": 16.616,
+      "end": 16.858,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "境",
+      "start": 16.858,
+      "end": 17.099,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "而",
+      "start": 17.099,
+      "end": 17.341,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "过",
+      "start": 17.341,
+      "end": 17.583,
+      "cueIndex": 1,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "截",
+      "start": 17.583,
+      "end": 17.807,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "至",
+      "start": 17.807,
+      "end": 18.031,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "2",
+      "start": 18.031,
+      "end": 18.255,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 18.255,
+      "end": 18.48,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "2",
+      "start": 18.48,
+      "end": 18.704,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 18.704,
+      "end": 18.928,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "年",
+      "start": 18.928,
+      "end": 19.152,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "1",
+      "start": 19.152,
+      "end": 19.376,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "1",
+      "start": 19.376,
+      "end": 19.6,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "月",
+      "start": 19.6,
+      "end": 19.824,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 19.824,
+      "end": 20.048,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 20.048,
+      "end": 20.273,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 20.273,
+      "end": 20.497,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "常",
+      "start": 20.497,
+      "end": 20.721,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "住",
+      "start": 20.721,
+      "end": 20.945,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "人",
+      "start": 20.945,
+      "end": 21.169,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "口",
+      "start": 21.169,
+      "end": 21.393,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "7",
+      "start": 21.393,
+      "end": 21.617,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "5",
+      "start": 21.617,
+      "end": 21.841,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "1",
+      "start": 21.841,
+      "end": 22.066,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "6",
+      "start": 22.066,
+      "end": 22.29,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "7",
+      "start": 22.29,
+      "end": 22.514,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "人",
+      "start": 22.514,
+      "end": 22.738,
+      "cueIndex": 2,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "虾",
+      "start": 22.738,
+      "end": 23.038,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "塘",
+      "start": 23.038,
+      "end": 23.338,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盐",
+      "start": 23.338,
+      "end": 23.638,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 23.638,
+      "end": 23.938,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "防",
+      "start": 23.938,
+      "end": 24.238,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "风",
+      "start": 24.238,
+      "end": 24.538,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 24.538,
+      "end": 24.838,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 24.838,
+      "end": 25.138,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "番",
+      "start": 25.138,
+      "end": 25.438,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "薯",
+      "start": 25.438,
+      "end": 25.738,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "花",
+      "start": 25.738,
+      "end": 26.038,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "生",
+      "start": 26.038,
+      "end": 26.338,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "香",
+      "start": 26.338,
+      "end": 26.638,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "芋",
+      "start": 26.638,
+      "end": 26.938,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 26.938,
+      "end": 27.238,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 27.238,
+      "end": 27.538,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "交",
+      "start": 27.538,
+      "end": 27.838,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "错",
+      "start": 27.838,
+      "end": 28.138,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 28.138,
+      "end": 28.438,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "连",
+      "start": 28.438,
+      "end": 28.738,
+      "cueIndex": 3,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 28.738,
+      "end": 28.993,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "水",
+      "start": 28.993,
+      "end": 29.248,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "养",
+      "start": 29.248,
+      "end": 29.504,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "殖",
+      "start": 29.504,
+      "end": 29.759,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "晒",
+      "start": 29.759,
+      "end": 30.014,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盐",
+      "start": 30.014,
+      "end": 30.269,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 30.269,
+      "end": 30.524,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "洋",
+      "start": 30.524,
+      "end": 30.779,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "捕",
+      "start": 30.779,
+      "end": 31.035,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "捞",
+      "start": 31.035,
+      "end": 31.29,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 31.29,
+      "end": 31.545,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沙",
+      "start": 31.545,
+      "end": 31.8,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 31.8,
+      "end": 32.055,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 32.055,
+      "end": 32.31,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "业",
+      "start": 32.31,
+      "end": 32.566,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "构",
+      "start": 32.566,
+      "end": 32.821,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "成",
+      "start": 32.821,
+      "end": 33.076,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 33.076,
+      "end": 33.331,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 33.331,
+      "end": 33.586,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "生",
+      "start": 33.586,
+      "end": 33.841,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "产",
+      "start": 33.841,
+      "end": 34.097,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "底",
+      "start": 34.097,
+      "end": 34.352,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "色",
+      "start": 34.352,
+      "end": 34.607,
+      "cueIndex": 4,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "G",
+      "start": 34.607,
+      "end": 34.811,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "I",
+      "start": 34.811,
+      "end": 35.014,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "S",
+      "start": 35.014,
+      "end": 35.218,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 35.218,
+      "end": 35.422,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "界",
+      "start": 35.422,
+      "end": 35.625,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "共",
+      "start": 35.625,
+      "end": 35.829,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "有",
+      "start": 35.829,
+      "end": 36.033,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "4",
+      "start": 36.033,
+      "end": 36.236,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "2",
+      "start": 36.236,
+      "end": 36.44,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "个",
+      "start": 36.44,
+      "end": 36.643,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "单",
+      "start": 36.643,
+      "end": 36.847,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "元",
+      "start": 36.847,
+      "end": 37.051,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "包",
+      "start": 37.051,
+      "end": 37.254,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "括",
+      "start": 37.254,
+      "end": 37.458,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "2",
+      "start": 37.458,
+      "end": 37.662,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "8",
+      "start": 37.662,
+      "end": 37.865,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "个",
+      "start": 37.865,
+      "end": 38.069,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "行",
+      "start": 38.069,
+      "end": 38.273,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "政",
+      "start": 38.273,
+      "end": 38.476,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 38.476,
+      "end": 38.68,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 38.68,
+      "end": 38.884,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "1",
+      "start": 38.884,
+      "end": 39.087,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "4",
+      "start": 39.087,
+      "end": 39.291,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "个",
+      "start": 39.291,
+      "end": 39.494,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "管",
+      "start": 39.494,
+      "end": 39.698,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "理",
+      "start": 39.698,
+      "end": 39.902,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "单",
+      "start": 39.902,
+      "end": 40.105,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "元",
+      "start": 40.105,
+      "end": 40.309,
+      "cueIndex": 5,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "双",
+      "start": 40.309,
+      "end": 40.517,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "水",
+      "start": 40.517,
+      "end": 40.725,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 40.725,
+      "end": 40.933,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "有",
+      "start": 40.933,
+      "end": 41.141,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "4",
+      "start": 41.141,
+      "end": 41.348,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 41.348,
+      "end": 41.556,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 41.556,
+      "end": 41.764,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "多",
+      "start": 41.764,
+      "end": 41.972,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "年",
+      "start": 41.972,
+      "end": 42.18,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "历",
+      "start": 42.18,
+      "end": 42.388,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "史",
+      "start": 42.388,
+      "end": 42.596,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "3",
+      "start": 42.596,
+      "end": 42.804,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "5",
+      "start": 42.804,
+      "end": 43.012,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 43.012,
+      "end": 43.22,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 43.22,
+      "end": 43.427,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "多",
+      "start": 43.427,
+      "end": 43.635,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "亩",
+      "start": 43.635,
+      "end": 43.843,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "高",
+      "start": 43.843,
+      "end": 44.051,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "标",
+      "start": 44.051,
+      "end": 44.259,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "准",
+      "start": 44.259,
+      "end": 44.467,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "水",
+      "start": 44.467,
+      "end": 44.675,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 44.675,
+      "end": 44.883,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "铺",
+      "start": 44.883,
+      "end": 45.091,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 45.091,
+      "end": 45.298,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "成",
+      "start": 45.298,
+      "end": 45.506,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "片",
+      "start": 45.506,
+      "end": 45.714,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "良",
+      "start": 45.714,
+      "end": 45.922,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 45.922,
+      "end": 46.13,
+      "cueIndex": 6,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "莫",
+      "start": 46.13,
+      "end": 46.37,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "宅",
+      "start": 46.37,
+      "end": 46.611,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 46.611,
+      "end": 46.851,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 46.851,
+      "end": 47.092,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 47.092,
+      "end": 47.332,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 47.332,
+      "end": 47.572,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 47.572,
+      "end": 47.813,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 47.813,
+      "end": 48.053,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 48.053,
+      "end": 48.293,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 48.293,
+      "end": 48.534,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 48.534,
+      "end": 48.774,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 48.774,
+      "end": 49.015,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 49.015,
+      "end": 49.255,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 49.255,
+      "end": 49.495,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 49.495,
+      "end": 49.736,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 49.736,
+      "end": 49.976,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 49.976,
+      "end": 50.216,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乡",
+      "start": 50.216,
+      "end": 50.457,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 50.457,
+      "end": 50.697,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 50.697,
+      "end": 50.938,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 50.938,
+      "end": 51.178,
+      "cueIndex": 7,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 51.178,
+      "end": 51.416,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 51.416,
+      "end": 51.653,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 51.653,
+      "end": 51.891,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 51.891,
+      "end": 52.128,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 52.128,
+      "end": 52.366,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 52.366,
+      "end": 52.603,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 52.603,
+      "end": 52.841,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 52.841,
+      "end": 53.078,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 53.078,
+      "end": 53.316,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 53.316,
+      "end": 53.553,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 53.553,
+      "end": 53.791,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 53.791,
+      "end": 54.028,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 54.028,
+      "end": 54.266,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 54.266,
+      "end": 54.503,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 54.503,
+      "end": 54.741,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 54.741,
+      "end": 54.978,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 54.978,
+      "end": 55.216,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乡",
+      "start": 55.216,
+      "end": 55.453,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 55.453,
+      "end": 55.691,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 55.691,
+      "end": 55.928,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 55.928,
+      "end": 56.166,
+      "cueIndex": 8,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "南",
+      "start": 56.166,
+      "end": 56.404,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "塘",
+      "start": 56.404,
+      "end": 56.641,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 56.641,
+      "end": 56.879,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 56.879,
+      "end": 57.116,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 57.116,
+      "end": 57.354,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 57.354,
+      "end": 57.591,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 57.591,
+      "end": 57.829,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 57.829,
+      "end": 58.066,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 58.066,
+      "end": 58.304,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 58.304,
+      "end": 58.541,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 58.541,
+      "end": 58.779,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 58.779,
+      "end": 59.016,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 59.016,
+      "end": 59.254,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 59.254,
+      "end": 59.491,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 59.491,
+      "end": 59.729,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 59.729,
+      "end": 59.966,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 59.966,
+      "end": 60.204,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乡",
+      "start": 60.204,
+      "end": 60.441,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 60.441,
+      "end": 60.679,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 60.679,
+      "end": 60.916,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 60.916,
+      "end": 61.154,
+      "cueIndex": 9,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "坡",
+      "start": 61.154,
+      "end": 61.384,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "门",
+      "start": 61.384,
+      "end": 61.614,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 61.614,
+      "end": 61.845,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 61.845,
+      "end": 62.075,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 62.075,
+      "end": 62.305,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 62.305,
+      "end": 62.535,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 62.535,
+      "end": 62.765,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 62.765,
+      "end": 62.996,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 62.996,
+      "end": 63.226,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "东",
+      "start": 63.226,
+      "end": 63.456,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 63.456,
+      "end": 63.686,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 63.686,
+      "end": 63.916,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 63.916,
+      "end": 64.146,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 64.146,
+      "end": 64.377,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 64.377,
+      "end": 64.607,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 64.607,
+      "end": 64.837,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 64.837,
+      "end": 65.067,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乡",
+      "start": 65.067,
+      "end": 65.297,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 65.297,
+      "end": 65.528,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 65.528,
+      "end": 65.758,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 65.758,
+      "end": 65.988,
+      "cueIndex": 10,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "公",
+      "start": 65.988,
+      "end": 66.209,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "益",
+      "start": 66.209,
+      "end": 66.429,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 66.429,
+      "end": 66.65,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "发",
+      "start": 66.65,
+      "end": 66.871,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 66.871,
+      "end": 67.092,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "特",
+      "start": 67.092,
+      "end": 67.312,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "色",
+      "start": 67.312,
+      "end": 67.533,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "南",
+      "start": 67.533,
+      "end": 67.754,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "瓜",
+      "start": 67.754,
+      "end": 67.974,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "种",
+      "start": 67.974,
+      "end": 68.195,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "植",
+      "start": 68.195,
+      "end": 68.416,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 68.416,
+      "end": 68.637,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "宋",
+      "start": 68.637,
+      "end": 68.857,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "古",
+      "start": 68.857,
+      "end": 69.078,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "瓦",
+      "start": 69.078,
+      "end": 69.299,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "窟",
+      "start": 69.299,
+      "end": 69.519,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 69.519,
+      "end": 69.74,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "今",
+      "start": 69.74,
+      "end": 69.961,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "天",
+      "start": 69.961,
+      "end": 70.181,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "的",
+      "start": 70.181,
+      "end": 70.402,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 70.402,
+      "end": 70.623,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 70.623,
+      "end": 70.844,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 70.844,
+      "end": 71.064,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "邻",
+      "start": 71.064,
+      "end": 71.285,
+      "cueIndex": 11,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "双",
+      "start": 71.285,
+      "end": 71.525,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "石",
+      "start": 71.525,
+      "end": 71.765,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 71.765,
+      "end": 72.004,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 72.004,
+      "end": 72.244,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 72.244,
+      "end": 72.484,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 72.484,
+      "end": 72.724,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 72.724,
+      "end": 72.964,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 72.964,
+      "end": 73.203,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 73.203,
+      "end": 73.443,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 73.443,
+      "end": 73.683,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 73.683,
+      "end": 73.923,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 73.923,
+      "end": 74.163,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 74.163,
+      "end": 74.403,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 74.403,
+      "end": 74.642,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 74.642,
+      "end": 74.882,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 74.882,
+      "end": 75.122,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 75.122,
+      "end": 75.362,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乡",
+      "start": 75.362,
+      "end": 75.602,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 75.602,
+      "end": 75.841,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 75.841,
+      "end": 76.081,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 76.081,
+      "end": 76.321,
+      "cueIndex": 12,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "曲",
+      "start": 76.321,
+      "end": 76.557,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "溪",
+      "start": 76.557,
+      "end": 76.793,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 76.793,
+      "end": 77.028,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 77.028,
+      "end": 77.264,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 77.264,
+      "end": 77.5,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 77.5,
+      "end": 77.736,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 77.736,
+      "end": 77.972,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 77.972,
+      "end": 78.207,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 78.207,
+      "end": 78.443,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 78.443,
+      "end": 78.679,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 78.679,
+      "end": 78.915,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 78.915,
+      "end": 79.151,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 79.151,
+      "end": 79.387,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 79.387,
+      "end": 79.622,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 79.622,
+      "end": 79.858,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 79.858,
+      "end": 80.094,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 80.094,
+      "end": 80.33,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乡",
+      "start": 80.33,
+      "end": 80.566,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 80.566,
+      "end": 80.801,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 80.801,
+      "end": 81.037,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 81.037,
+      "end": 81.273,
+      "cueIndex": 13,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "上",
+      "start": 81.273,
+      "end": 81.512,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "郎",
+      "start": 81.512,
+      "end": 81.75,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 81.75,
+      "end": 81.989,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 81.989,
+      "end": 82.228,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 82.228,
+      "end": 82.466,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 82.466,
+      "end": 82.705,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 82.705,
+      "end": 82.944,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 82.944,
+      "end": 83.182,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 83.182,
+      "end": 83.421,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 83.421,
+      "end": 83.66,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 83.66,
+      "end": 83.898,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 83.898,
+      "end": 84.137,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 84.137,
+      "end": 84.376,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 84.376,
+      "end": 84.614,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 84.614,
+      "end": 84.853,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 84.853,
+      "end": 85.092,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 85.092,
+      "end": 85.33,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乡",
+      "start": 85.33,
+      "end": 85.569,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 85.569,
+      "end": 85.808,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 85.808,
+      "end": 86.046,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 86.046,
+      "end": 86.285,
+      "cueIndex": 14,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 86.285,
+      "end": 86.515,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 86.515,
+      "end": 86.745,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 86.745,
+      "end": 86.975,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "是",
+      "start": 86.975,
+      "end": 87.204,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 87.204,
+      "end": 87.434,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 87.434,
+      "end": 87.664,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "圩",
+      "start": 87.664,
+      "end": 87.894,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "所",
+      "start": 87.894,
+      "end": 88.124,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 88.124,
+      "end": 88.354,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 88.354,
+      "end": 88.583,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 88.583,
+      "end": 88.813,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "政",
+      "start": 88.813,
+      "end": 89.043,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "府",
+      "start": 89.043,
+      "end": 89.273,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "学",
+      "start": 89.273,
+      "end": 89.503,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "校",
+      "start": 89.503,
+      "end": 89.733,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "卫",
+      "start": 89.733,
+      "end": 89.963,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "生",
+      "start": 89.963,
+      "end": 90.192,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "院",
+      "start": 90.192,
+      "end": 90.422,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 90.422,
+      "end": 90.652,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "市",
+      "start": 90.652,
+      "end": 90.882,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 90.882,
+      "end": 91.112,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "集",
+      "start": 91.112,
+      "end": 91.342,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 91.342,
+      "end": 91.571,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 91.571,
+      "end": 91.801,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "这",
+      "start": 91.801,
+      "end": 92.031,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "里",
+      "start": 92.031,
+      "end": 92.261,
+      "cueIndex": 15,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "文",
+      "start": 92.261,
+      "end": 92.495,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "园",
+      "start": 92.495,
+      "end": 92.728,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 92.728,
+      "end": 92.962,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 92.962,
+      "end": 93.195,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 93.195,
+      "end": 93.429,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 93.429,
+      "end": 93.662,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 93.662,
+      "end": 93.896,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 93.896,
+      "end": 94.13,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 94.13,
+      "end": 94.363,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 94.363,
+      "end": 94.597,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 94.597,
+      "end": 94.83,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 94.83,
+      "end": 95.064,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 95.064,
+      "end": 95.297,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 95.297,
+      "end": 95.531,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 95.531,
+      "end": 95.765,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 95.765,
+      "end": 95.998,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 95.998,
+      "end": 96.232,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乡",
+      "start": 96.232,
+      "end": 96.465,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 96.465,
+      "end": 96.699,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 96.699,
+      "end": 96.932,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 96.932,
+      "end": 97.166,
+      "cueIndex": 16,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "潭",
+      "start": 97.166,
+      "end": 97.397,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "杰",
+      "start": 97.397,
+      "end": 97.628,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 97.628,
+      "end": 97.859,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "是",
+      "start": 97.859,
+      "end": 98.091,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "百",
+      "start": 98.091,
+      "end": 98.322,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "千",
+      "start": 98.322,
+      "end": 98.553,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "万",
+      "start": 98.553,
+      "end": 98.784,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "工",
+      "start": 98.784,
+      "end": 99.015,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "程",
+      "start": 99.015,
+      "end": 99.246,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "典",
+      "start": 99.246,
+      "end": 99.477,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "型",
+      "start": 99.477,
+      "end": 99.709,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 99.709,
+      "end": 99.94,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "硬",
+      "start": 99.94,
+      "end": 100.171,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "化",
+      "start": 100.171,
+      "end": 100.402,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "巷",
+      "start": 100.402,
+      "end": 100.633,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "道",
+      "start": 100.633,
+      "end": 100.864,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "供",
+      "start": 100.864,
+      "end": 101.095,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "水",
+      "start": 101.095,
+      "end": 101.326,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "管",
+      "start": 101.326,
+      "end": 101.558,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "网",
+      "start": 101.558,
+      "end": 101.789,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 101.789,
+      "end": 102.02,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "绿",
+      "start": 102.02,
+      "end": 102.251,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "化",
+      "start": 102.251,
+      "end": 102.482,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "景",
+      "start": 102.482,
+      "end": 102.713,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "观",
+      "start": 102.713,
+      "end": 102.944,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "连",
+      "start": 102.944,
+      "end": 103.176,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "成",
+      "start": 103.176,
+      "end": 103.407,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "日",
+      "start": 103.407,
+      "end": 103.638,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "常",
+      "start": 103.638,
+      "end": 103.869,
+      "cueIndex": 17,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "曲",
+      "start": 103.869,
+      "end": 104.091,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "港",
+      "start": 104.091,
+      "end": 104.312,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 104.312,
+      "end": 104.534,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "是",
+      "start": 104.534,
+      "end": 104.756,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "革",
+      "start": 104.756,
+      "end": 104.978,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "命",
+      "start": 104.978,
+      "end": 105.199,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "红",
+      "start": 105.199,
+      "end": 105.421,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "色",
+      "start": 105.421,
+      "end": 105.643,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "老",
+      "start": 105.643,
+      "end": 105.864,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "区",
+      "start": 105.864,
+      "end": 106.086,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "曲",
+      "start": 106.086,
+      "end": 106.308,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "港",
+      "start": 106.308,
+      "end": 106.53,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "圩",
+      "start": 106.53,
+      "end": 106.751,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 106.751,
+      "end": 106.973,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "渔",
+      "start": 106.973,
+      "end": 107.195,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "港",
+      "start": 107.195,
+      "end": 107.416,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "码",
+      "start": 107.416,
+      "end": 107.638,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "头",
+      "start": 107.638,
+      "end": 107.86,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "记",
+      "start": 107.86,
+      "end": 108.081,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "着",
+      "start": 108.081,
+      "end": 108.303,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "往",
+      "start": 108.303,
+      "end": 108.525,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "昔",
+      "start": 108.525,
+      "end": 108.747,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "故",
+      "start": 108.747,
+      "end": 108.968,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "事",
+      "start": 108.968,
+      "end": 109.19,
+      "cueIndex": 18,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盐",
+      "start": 109.19,
+      "end": 109.43,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "灶",
+      "start": 109.43,
+      "end": 109.669,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "仔",
+      "start": 109.669,
+      "end": 109.909,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 109.909,
+      "end": 110.149,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "以",
+      "start": 110.149,
+      "end": 110.389,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "功",
+      "start": 110.389,
+      "end": 110.628,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "夫",
+      "start": 110.628,
+      "end": 110.868,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盆",
+      "start": 110.868,
+      "end": 111.108,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "景",
+      "start": 111.108,
+      "end": 111.348,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "闻",
+      "start": 111.348,
+      "end": 111.587,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "名",
+      "start": 111.587,
+      "end": 111.827,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "一",
+      "start": 111.827,
+      "end": 112.067,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盆",
+      "start": 112.067,
+      "end": 112.306,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "一",
+      "start": 112.306,
+      "end": 112.546,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "景",
+      "start": 112.546,
+      "end": 112.786,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "方",
+      "start": 112.786,
+      "end": 113.026,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "寸",
+      "start": 113.026,
+      "end": 113.265,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "之",
+      "start": 113.265,
+      "end": 113.505,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "间",
+      "start": 113.505,
+      "end": 113.745,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "见",
+      "start": 113.745,
+      "end": 113.985,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "天",
+      "start": 113.985,
+      "end": 114.224,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 114.224,
+      "end": 114.464,
+      "cueIndex": 19,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 114.464,
+      "end": 114.678,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 114.678,
+      "end": 114.892,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 114.892,
+      "end": 115.105,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "是",
+      "start": 115.105,
+      "end": 115.319,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 115.319,
+      "end": 115.533,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "国",
+      "start": 115.533,
+      "end": 115.747,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "传",
+      "start": 115.747,
+      "end": 115.961,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "统",
+      "start": 115.961,
+      "end": 116.174,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 116.174,
+      "end": 116.388,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "落",
+      "start": 116.388,
+      "end": 116.602,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 116.602,
+      "end": 116.816,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 116.816,
+      "end": 117.03,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "大",
+      "start": 117.03,
+      "end": 117.244,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "院",
+      "start": 117.244,
+      "end": 117.457,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "奉",
+      "start": 117.457,
+      "end": 117.671,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "政",
+      "start": 117.671,
+      "end": 117.885,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "第",
+      "start": 117.885,
+      "end": 118.099,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "留",
+      "start": 118.099,
+      "end": 118.313,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "住",
+      "start": 118.313,
+      "end": 118.526,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "青",
+      "start": 118.526,
+      "end": 118.74,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "砖",
+      "start": 118.74,
+      "end": 118.954,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "古",
+      "start": 118.954,
+      "end": 119.168,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "宅",
+      "start": 119.168,
+      "end": 119.382,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "的",
+      "start": 119.382,
+      "end": 119.595,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "时",
+      "start": 119.595,
+      "end": 119.809,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "光",
+      "start": 119.809,
+      "end": 120.023,
+      "cueIndex": 20,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "后",
+      "start": 120.023,
+      "end": 120.253,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "坑",
+      "start": 120.253,
+      "end": 120.483,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 120.483,
+      "end": 120.714,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 120.714,
+      "end": 120.944,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 120.944,
+      "end": 121.174,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 121.174,
+      "end": 121.404,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 121.404,
+      "end": 121.634,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 121.634,
+      "end": 121.865,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 121.865,
+      "end": 122.095,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 122.095,
+      "end": 122.325,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 122.325,
+      "end": 122.555,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 122.555,
+      "end": 122.785,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 122.785,
+      "end": 123.015,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 123.015,
+      "end": 123.246,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 123.246,
+      "end": 123.476,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 123.476,
+      "end": 123.706,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 123.706,
+      "end": 123.936,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 123.936,
+      "end": 124.166,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 124.166,
+      "end": 124.397,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 124.397,
+      "end": 124.627,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 124.627,
+      "end": 124.857,
+      "cueIndex": 21,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "锦",
+      "start": 124.857,
+      "end": 125.095,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盘",
+      "start": 125.095,
+      "end": 125.332,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 125.332,
+      "end": 125.57,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 125.57,
+      "end": 125.807,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 125.807,
+      "end": 126.045,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 126.045,
+      "end": 126.282,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 126.282,
+      "end": 126.52,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 126.52,
+      "end": 126.757,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 126.757,
+      "end": 126.995,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 126.995,
+      "end": 127.232,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 127.232,
+      "end": 127.47,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 127.47,
+      "end": 127.707,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 127.707,
+      "end": 127.945,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 127.945,
+      "end": 128.182,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "农",
+      "start": 128.182,
+      "end": 128.42,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 128.42,
+      "end": 128.657,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 128.657,
+      "end": 128.895,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乡",
+      "start": 128.895,
+      "end": 129.132,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "路",
+      "start": 129.132,
+      "end": 129.37,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 129.37,
+      "end": 129.607,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 129.607,
+      "end": 129.845,
+      "cueIndex": 22,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "先",
+      "start": 129.845,
+      "end": 130.077,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "锋",
+      "start": 130.077,
+      "end": 130.309,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 130.309,
+      "end": 130.541,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 130.541,
+      "end": 130.772,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 130.772,
+      "end": 131.004,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 131.004,
+      "end": 131.236,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 131.236,
+      "end": 131.468,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 131.468,
+      "end": 131.7,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 131.7,
+      "end": 131.932,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 131.932,
+      "end": 132.164,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 132.164,
+      "end": 132.395,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 132.395,
+      "end": 132.627,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 132.627,
+      "end": 132.859,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 132.859,
+      "end": 133.091,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 133.091,
+      "end": 133.323,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 133.323,
+      "end": 133.555,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 133.555,
+      "end": 133.787,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 133.787,
+      "end": 134.018,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 134.018,
+      "end": 134.25,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 134.25,
+      "end": 134.482,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 134.482,
+      "end": 134.714,
+      "cueIndex": 23,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "包",
+      "start": 134.714,
+      "end": 134.925,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "金",
+      "start": 134.925,
+      "end": 135.135,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 135.135,
+      "end": 135.346,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "清",
+      "start": 135.346,
+      "end": 135.556,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "代",
+      "start": 135.556,
+      "end": 135.767,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "起",
+      "start": 135.767,
+      "end": 135.978,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "有",
+      "start": 135.978,
+      "end": 136.188,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "醒",
+      "start": 136.188,
+      "end": 136.399,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "狮",
+      "start": 136.399,
+      "end": 136.609,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "传",
+      "start": 136.609,
+      "end": 136.82,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "统",
+      "start": 136.82,
+      "end": 137.03,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "2",
+      "start": 137.03,
+      "end": 137.241,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 137.241,
+      "end": 137.452,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "1",
+      "start": 137.452,
+      "end": 137.662,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "5",
+      "start": 137.662,
+      "end": 137.873,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "年",
+      "start": 137.873,
+      "end": 138.083,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "武",
+      "start": 138.083,
+      "end": 138.294,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "术",
+      "start": 138.294,
+      "end": 138.505,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "醒",
+      "start": 138.505,
+      "end": 138.715,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "狮",
+      "start": 138.715,
+      "end": 138.926,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "团",
+      "start": 138.926,
+      "end": 139.136,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "登",
+      "start": 139.136,
+      "end": 139.347,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "上",
+      "start": 139.347,
+      "end": 139.557,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "央",
+      "start": 139.557,
+      "end": 139.768,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "视",
+      "start": 139.768,
+      "end": 139.979,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "元",
+      "start": 139.979,
+      "end": 140.189,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "宵",
+      "start": 140.189,
+      "end": 140.4,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "晚",
+      "start": 140.4,
+      "end": 140.61,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "会",
+      "start": 140.61,
+      "end": 140.821,
+      "cueIndex": 24,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "吴",
+      "start": 140.821,
+      "end": 141.051,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "宅",
+      "start": 141.051,
+      "end": 141.28,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 141.28,
+      "end": 141.51,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 141.51,
+      "end": 141.739,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 141.739,
+      "end": 141.969,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 141.969,
+      "end": 142.198,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 142.198,
+      "end": 142.428,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "南",
+      "start": 142.428,
+      "end": 142.658,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 142.658,
+      "end": 142.887,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 142.887,
+      "end": 143.117,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 143.117,
+      "end": 143.346,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 143.346,
+      "end": 143.576,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 143.576,
+      "end": 143.805,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 143.805,
+      "end": 144.035,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 144.035,
+      "end": 144.265,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 144.265,
+      "end": 144.494,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 144.494,
+      "end": 144.724,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 144.724,
+      "end": 144.953,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 144.953,
+      "end": 145.183,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 145.183,
+      "end": 145.412,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 145.412,
+      "end": 145.642,
+      "cueIndex": 25,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "罗",
+      "start": 145.642,
+      "end": 145.869,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "灵",
+      "start": 145.869,
+      "end": 146.096,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 146.096,
+      "end": 146.322,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 146.322,
+      "end": 146.549,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 146.549,
+      "end": 146.776,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 146.776,
+      "end": 147.003,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 147.003,
+      "end": 147.229,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "南",
+      "start": 147.229,
+      "end": 147.456,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 147.456,
+      "end": 147.683,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 147.683,
+      "end": 147.91,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 147.91,
+      "end": 148.136,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 148.136,
+      "end": 148.363,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 148.363,
+      "end": 148.59,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 148.59,
+      "end": 148.817,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 148.817,
+      "end": 149.043,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 149.043,
+      "end": 149.27,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 149.27,
+      "end": 149.497,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 149.497,
+      "end": 149.724,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 149.724,
+      "end": 149.95,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 149.95,
+      "end": 150.177,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 150.177,
+      "end": 150.404,
+      "cueIndex": 26,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 150.404,
+      "end": 150.623,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 150.623,
+      "end": 150.842,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 150.842,
+      "end": 151.061,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 151.061,
+      "end": 151.28,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "草",
+      "start": 151.28,
+      "end": 151.498,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "律",
+      "start": 151.498,
+      "end": 151.717,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 151.717,
+      "end": 151.936,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 151.936,
+      "end": 152.155,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 152.155,
+      "end": 152.374,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 152.374,
+      "end": 152.593,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 152.593,
+      "end": 152.812,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 152.812,
+      "end": 153.031,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 153.031,
+      "end": 153.249,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 153.249,
+      "end": 153.468,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 153.468,
+      "end": 153.687,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 153.687,
+      "end": 153.906,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 153.906,
+      "end": 154.125,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 154.125,
+      "end": 154.344,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 154.344,
+      "end": 154.563,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 154.563,
+      "end": 154.782,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 154.782,
+      "end": 155.001,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 155.001,
+      "end": 155.219,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 155.219,
+      "end": 155.438,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 155.438,
+      "end": 155.657,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 155.657,
+      "end": 155.876,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 155.876,
+      "end": 156.095,
+      "cueIndex": 27,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 156.095,
+      "end": 156.312,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 156.312,
+      "end": 156.53,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 156.53,
+      "end": 156.747,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 156.747,
+      "end": 156.964,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "赤",
+      "start": 156.964,
+      "end": 157.182,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "坭",
+      "start": 157.182,
+      "end": 157.399,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "尾",
+      "start": 157.399,
+      "end": 157.617,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 157.617,
+      "end": 157.834,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 157.834,
+      "end": 158.051,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 158.051,
+      "end": 158.269,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 158.269,
+      "end": 158.486,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 158.486,
+      "end": 158.703,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 158.703,
+      "end": 158.921,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 158.921,
+      "end": 159.138,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 159.138,
+      "end": 159.356,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 159.356,
+      "end": 159.573,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "东",
+      "start": 159.573,
+      "end": 159.79,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 159.79,
+      "end": 160.008,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 160.008,
+      "end": 160.225,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 160.225,
+      "end": 160.442,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 160.442,
+      "end": 160.66,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 160.66,
+      "end": 160.877,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 160.877,
+      "end": 161.095,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 161.095,
+      "end": 161.312,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 161.312,
+      "end": 161.529,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 161.529,
+      "end": 161.747,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 161.747,
+      "end": 161.964,
+      "cueIndex": 28,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 161.964,
+      "end": 162.183,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 162.183,
+      "end": 162.403,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 162.403,
+      "end": 162.622,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 162.622,
+      "end": 162.841,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "高",
+      "start": 162.841,
+      "end": 163.061,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 163.061,
+      "end": 163.28,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 163.28,
+      "end": 163.499,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 163.499,
+      "end": 163.718,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 163.718,
+      "end": 163.938,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 163.938,
+      "end": 164.157,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 164.157,
+      "end": 164.376,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 164.376,
+      "end": 164.596,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 164.596,
+      "end": 164.815,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 164.815,
+      "end": 165.034,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 165.034,
+      "end": 165.254,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 165.254,
+      "end": 165.473,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 165.473,
+      "end": 165.692,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 165.692,
+      "end": 165.912,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 165.912,
+      "end": 166.131,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 166.131,
+      "end": 166.35,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 166.35,
+      "end": 166.569,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 166.569,
+      "end": 166.789,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 166.789,
+      "end": 167.008,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 167.008,
+      "end": 167.227,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 167.227,
+      "end": 167.447,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 167.447,
+      "end": 167.666,
+      "cueIndex": 29,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 167.666,
+      "end": 167.882,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 167.882,
+      "end": 168.098,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 168.098,
+      "end": 168.314,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 168.314,
+      "end": 168.53,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "公",
+      "start": 168.53,
+      "end": 168.747,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "益",
+      "start": 168.747,
+      "end": 168.963,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 168.963,
+      "end": 169.179,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 169.179,
+      "end": 169.395,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 169.395,
+      "end": 169.611,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 169.611,
+      "end": 169.827,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 169.827,
+      "end": 170.043,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 170.043,
+      "end": 170.259,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 170.259,
+      "end": 170.476,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 170.476,
+      "end": 170.692,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 170.692,
+      "end": 170.908,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "东",
+      "start": 170.908,
+      "end": 171.124,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 171.124,
+      "end": 171.34,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 171.34,
+      "end": 171.556,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 171.556,
+      "end": 171.772,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 171.772,
+      "end": 171.988,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 171.988,
+      "end": 172.204,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 172.204,
+      "end": 172.421,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 172.421,
+      "end": 172.637,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 172.637,
+      "end": 172.853,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 172.853,
+      "end": 173.069,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 173.069,
+      "end": 173.285,
+      "cueIndex": 30,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 173.285,
+      "end": 173.499,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 173.499,
+      "end": 173.714,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 173.714,
+      "end": 173.928,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 173.928,
+      "end": 174.142,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "后",
+      "start": 174.142,
+      "end": 174.357,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "罗",
+      "start": 174.357,
+      "end": 174.571,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 174.571,
+      "end": 174.785,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 174.785,
+      "end": 174.999,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 174.999,
+      "end": 175.214,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 175.214,
+      "end": 175.428,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 175.428,
+      "end": 175.642,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 175.642,
+      "end": 175.857,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 175.857,
+      "end": 176.071,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 176.071,
+      "end": 176.285,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 176.285,
+      "end": 176.5,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 176.5,
+      "end": 176.714,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 176.714,
+      "end": 176.928,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 176.928,
+      "end": 177.143,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 177.143,
+      "end": 177.357,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 177.357,
+      "end": 177.571,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 177.571,
+      "end": 177.785,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 177.785,
+      "end": 178.0,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 178.0,
+      "end": 178.214,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 178.214,
+      "end": 178.428,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 178.428,
+      "end": 178.643,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 178.643,
+      "end": 178.857,
+      "cueIndex": 31,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 178.857,
+      "end": 179.075,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 179.075,
+      "end": 179.294,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 179.294,
+      "end": 179.512,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 179.512,
+      "end": 179.731,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 179.731,
+      "end": 179.949,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 179.949,
+      "end": 180.167,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 180.167,
+      "end": 180.386,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 180.386,
+      "end": 180.604,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 180.604,
+      "end": 180.822,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 180.822,
+      "end": 181.041,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 181.041,
+      "end": 181.259,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 181.259,
+      "end": 181.478,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 181.478,
+      "end": 181.696,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 181.696,
+      "end": 181.914,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 181.914,
+      "end": 182.133,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 182.133,
+      "end": 182.351,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 182.351,
+      "end": 182.57,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 182.57,
+      "end": 182.788,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 182.788,
+      "end": 183.006,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 183.006,
+      "end": 183.225,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 183.225,
+      "end": 183.443,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 183.443,
+      "end": 183.661,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 183.661,
+      "end": 183.88,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 183.88,
+      "end": 184.098,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 184.098,
+      "end": 184.317,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 184.317,
+      "end": 184.535,
+      "cueIndex": 32,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 184.535,
+      "end": 184.754,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 184.754,
+      "end": 184.973,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 184.973,
+      "end": 185.192,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 185.192,
+      "end": 185.411,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "坡",
+      "start": 185.411,
+      "end": 185.629,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "门",
+      "start": 185.629,
+      "end": 185.848,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 185.848,
+      "end": 186.067,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 186.067,
+      "end": 186.286,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 186.286,
+      "end": 186.505,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 186.505,
+      "end": 186.724,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 186.724,
+      "end": 186.943,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 186.943,
+      "end": 187.162,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 187.162,
+      "end": 187.38,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 187.38,
+      "end": 187.599,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 187.599,
+      "end": 187.818,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "东",
+      "start": 187.818,
+      "end": 188.037,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 188.037,
+      "end": 188.256,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 188.256,
+      "end": 188.475,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 188.475,
+      "end": 188.694,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 188.694,
+      "end": 188.913,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 188.913,
+      "end": 189.132,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 189.132,
+      "end": 189.35,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 189.35,
+      "end": 189.569,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 189.569,
+      "end": 189.788,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 189.788,
+      "end": 190.007,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 190.007,
+      "end": 190.226,
+      "cueIndex": 33,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 190.226,
+      "end": 190.444,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 190.444,
+      "end": 190.661,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 190.661,
+      "end": 190.879,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 190.879,
+      "end": 191.096,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 191.096,
+      "end": 191.314,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "寮",
+      "start": 191.314,
+      "end": 191.531,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 191.531,
+      "end": 191.749,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 191.749,
+      "end": 191.966,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 191.966,
+      "end": 192.184,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 192.184,
+      "end": 192.401,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 192.401,
+      "end": 192.619,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 192.619,
+      "end": 192.836,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 192.836,
+      "end": 193.054,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 193.054,
+      "end": 193.271,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 193.271,
+      "end": 193.489,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 193.489,
+      "end": 193.706,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 193.706,
+      "end": 193.924,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 193.924,
+      "end": 194.141,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 194.141,
+      "end": 194.359,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 194.359,
+      "end": 194.576,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 194.576,
+      "end": 194.794,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 194.794,
+      "end": 195.011,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 195.011,
+      "end": 195.229,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 195.229,
+      "end": 195.446,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 195.446,
+      "end": 195.664,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 195.664,
+      "end": 195.881,
+      "cueIndex": 34,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 195.881,
+      "end": 196.097,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 196.097,
+      "end": 196.312,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 196.312,
+      "end": 196.528,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 196.528,
+      "end": 196.744,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "新",
+      "start": 196.744,
+      "end": 196.959,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "园",
+      "start": 196.959,
+      "end": 197.175,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 197.175,
+      "end": 197.391,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 197.391,
+      "end": 197.606,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 197.606,
+      "end": 197.822,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 197.822,
+      "end": 198.038,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 198.038,
+      "end": 198.253,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 198.253,
+      "end": 198.469,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 198.469,
+      "end": 198.685,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 198.685,
+      "end": 198.9,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 198.9,
+      "end": 199.116,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 199.116,
+      "end": 199.331,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 199.331,
+      "end": 199.547,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 199.547,
+      "end": 199.763,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 199.763,
+      "end": 199.978,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 199.978,
+      "end": 200.194,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 200.194,
+      "end": 200.41,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 200.41,
+      "end": 200.625,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 200.625,
+      "end": 200.841,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 200.841,
+      "end": 201.057,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 201.057,
+      "end": 201.272,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 201.272,
+      "end": 201.488,
+      "cueIndex": 35,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "唐",
+      "start": 201.488,
+      "end": 201.706,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 201.706,
+      "end": 201.924,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 201.924,
+      "end": 202.141,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 202.141,
+      "end": 202.359,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "调",
+      "start": 202.359,
+      "end": 202.577,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "乃",
+      "start": 202.577,
+      "end": 202.795,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 202.795,
+      "end": 203.013,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 203.013,
+      "end": 203.231,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 203.231,
+      "end": 203.448,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 203.448,
+      "end": 203.666,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 203.666,
+      "end": 203.884,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 203.884,
+      "end": 204.102,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 204.102,
+      "end": 204.32,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 204.32,
+      "end": 204.537,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 204.537,
+      "end": 204.755,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 204.755,
+      "end": 204.973,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "东",
+      "start": 204.973,
+      "end": 205.191,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 205.191,
+      "end": 205.409,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 205.409,
+      "end": 205.626,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 205.626,
+      "end": 205.844,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 205.844,
+      "end": 206.062,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 206.062,
+      "end": 206.28,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 206.28,
+      "end": 206.498,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 206.498,
+      "end": 206.716,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 206.716,
+      "end": 206.933,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 206.933,
+      "end": 207.151,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 207.151,
+      "end": 207.369,
+      "cueIndex": 36,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "唐",
+      "start": 207.369,
+      "end": 207.591,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 207.591,
+      "end": 207.812,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 207.812,
+      "end": 208.034,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 208.034,
+      "end": 208.255,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 208.255,
+      "end": 208.477,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 208.477,
+      "end": 208.698,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 208.698,
+      "end": 208.92,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "队",
+      "start": 208.92,
+      "end": 209.142,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 209.142,
+      "end": 209.363,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 209.363,
+      "end": 209.585,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 209.585,
+      "end": 209.806,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 209.806,
+      "end": 210.028,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 210.028,
+      "end": 210.25,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "南",
+      "start": 210.25,
+      "end": 210.471,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 210.471,
+      "end": 210.693,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 210.693,
+      "end": 210.914,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 210.914,
+      "end": 211.136,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 211.136,
+      "end": 211.357,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 211.357,
+      "end": 211.579,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 211.579,
+      "end": 211.801,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 211.801,
+      "end": 212.022,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 212.022,
+      "end": 212.244,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 212.244,
+      "end": 212.465,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 212.465,
+      "end": 212.687,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 212.687,
+      "end": 212.908,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 212.908,
+      "end": 213.13,
+      "cueIndex": 37,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 213.13,
+      "end": 213.349,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 213.349,
+      "end": 213.567,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 213.567,
+      "end": 213.786,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 213.786,
+      "end": 214.004,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "仔",
+      "start": 214.004,
+      "end": 214.223,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盐",
+      "start": 214.223,
+      "end": 214.441,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 214.441,
+      "end": 214.66,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "靠",
+      "start": 214.66,
+      "end": 214.879,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "近",
+      "start": 214.879,
+      "end": 215.097,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 215.097,
+      "end": 215.316,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 215.316,
+      "end": 215.534,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 215.534,
+      "end": 215.753,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 215.753,
+      "end": 215.971,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 215.971,
+      "end": 216.19,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 216.19,
+      "end": 216.409,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 216.409,
+      "end": 216.627,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 216.627,
+      "end": 216.846,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盐",
+      "start": 216.846,
+      "end": 217.064,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "业",
+      "start": 217.064,
+      "end": 217.283,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "空",
+      "start": 217.283,
+      "end": 217.501,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "间",
+      "start": 217.501,
+      "end": 217.72,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 217.72,
+      "end": 217.939,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 217.939,
+      "end": 218.157,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 218.157,
+      "end": 218.376,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 218.376,
+      "end": 218.594,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 218.594,
+      "end": 218.813,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 218.813,
+      "end": 219.031,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 219.031,
+      "end": 219.25,
+      "cueIndex": 38,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "纪",
+      "start": 219.25,
+      "end": 219.471,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "家",
+      "start": 219.471,
+      "end": 219.692,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 219.692,
+      "end": 219.913,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 219.913,
+      "end": 220.134,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 220.134,
+      "end": 220.355,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "分",
+      "start": 220.355,
+      "end": 220.576,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "布",
+      "start": 220.576,
+      "end": 220.797,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "在",
+      "start": 220.797,
+      "end": 221.018,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 221.018,
+      "end": 221.239,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 221.239,
+      "end": 221.46,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 221.46,
+      "end": 221.681,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 221.681,
+      "end": 221.902,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "东",
+      "start": 221.902,
+      "end": 222.123,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 222.123,
+      "end": 222.344,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 222.344,
+      "end": 222.565,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 222.565,
+      "end": 222.786,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 222.786,
+      "end": 223.007,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 223.007,
+      "end": 223.228,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 223.228,
+      "end": 223.449,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 223.449,
+      "end": 223.67,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 223.67,
+      "end": 223.891,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 223.891,
+      "end": 224.112,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 224.112,
+      "end": 224.333,
+      "cueIndex": 39,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "曲",
+      "start": 224.333,
+      "end": 224.56,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "溪",
+      "start": 224.56,
+      "end": 224.788,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "水",
+      "start": 224.788,
+      "end": 225.015,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "库",
+      "start": 225.015,
+      "end": 225.242,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 225.242,
+      "end": 225.47,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 225.47,
+      "end": 225.697,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 225.697,
+      "end": 225.924,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 225.924,
+      "end": 226.152,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 226.152,
+      "end": 226.379,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 226.379,
+      "end": 226.606,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 226.606,
+      "end": 226.834,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 226.834,
+      "end": 227.061,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "水",
+      "start": 227.061,
+      "end": 227.288,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "面",
+      "start": 227.288,
+      "end": 227.516,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "与",
+      "start": 227.516,
+      "end": 227.743,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "周",
+      "start": 227.743,
+      "end": 227.97,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 227.97,
+      "end": 228.198,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "土",
+      "start": 228.198,
+      "end": 228.425,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 228.425,
+      "end": 228.652,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 228.652,
+      "end": 228.88,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "连",
+      "start": 228.88,
+      "end": 229.107,
+      "cueIndex": 40,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "迈",
+      "start": 229.107,
+      "end": 229.337,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "特",
+      "start": 229.337,
+      "end": 229.566,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 229.566,
+      "end": 229.796,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 229.796,
+      "end": 230.025,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 230.025,
+      "end": 230.255,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 230.255,
+      "end": 230.484,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 230.484,
+      "end": 230.714,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "南",
+      "start": 230.714,
+      "end": 230.944,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 230.944,
+      "end": 231.173,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 231.173,
+      "end": 231.403,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 231.403,
+      "end": 231.632,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 231.632,
+      "end": 231.862,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 231.862,
+      "end": 232.091,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 232.091,
+      "end": 232.321,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 232.321,
+      "end": 232.551,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 232.551,
+      "end": 232.78,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 232.78,
+      "end": 233.01,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 233.01,
+      "end": 233.239,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 233.239,
+      "end": 233.469,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 233.469,
+      "end": 233.698,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 233.698,
+      "end": 233.928,
+      "cueIndex": 41,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 233.928,
+      "end": 234.17,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "仔",
+      "start": 234.17,
+      "end": 234.412,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 234.412,
+      "end": 234.654,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "临",
+      "start": 234.654,
+      "end": 234.896,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 234.896,
+      "end": 235.138,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "而",
+      "start": 235.138,
+      "end": 235.38,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "立",
+      "start": 235.38,
+      "end": 235.622,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盘",
+      "start": 235.622,
+      "end": 235.864,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "龙",
+      "start": 235.864,
+      "end": 236.106,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "滩",
+      "start": 236.106,
+      "end": 236.348,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "连",
+      "start": 236.348,
+      "end": 236.591,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "接",
+      "start": 236.591,
+      "end": 236.833,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沙",
+      "start": 236.833,
+      "end": 237.075,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "滩",
+      "start": 237.075,
+      "end": 237.317,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 237.317,
+      "end": 237.559,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "天",
+      "start": 237.559,
+      "end": 237.801,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 237.801,
+      "end": 238.043,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "滨",
+      "start": 238.043,
+      "end": 238.285,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 238.285,
+      "end": 238.527,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "产",
+      "start": 238.527,
+      "end": 238.769,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "业",
+      "start": 238.769,
+      "end": 239.011,
+      "cueIndex": 42,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "官",
+      "start": 239.011,
+      "end": 239.243,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "长",
+      "start": 239.243,
+      "end": 239.475,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 239.475,
+      "end": 239.707,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 239.707,
+      "end": 239.938,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 239.938,
+      "end": 240.17,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 240.17,
+      "end": 240.402,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 240.402,
+      "end": 240.634,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 240.634,
+      "end": 240.866,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 240.866,
+      "end": 241.098,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 241.098,
+      "end": 241.33,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 241.33,
+      "end": 241.561,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 241.561,
+      "end": 241.793,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 241.793,
+      "end": 242.025,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 242.025,
+      "end": 242.257,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 242.257,
+      "end": 242.489,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 242.489,
+      "end": 242.721,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 242.721,
+      "end": 242.953,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 242.953,
+      "end": 243.184,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 243.184,
+      "end": 243.416,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 243.416,
+      "end": 243.648,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 243.648,
+      "end": 243.88,
+      "cueIndex": 43,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "豪",
+      "start": 243.88,
+      "end": 244.11,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "郎",
+      "start": 244.11,
+      "end": 244.339,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 244.339,
+      "end": 244.569,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 244.569,
+      "end": 244.798,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 244.798,
+      "end": 245.028,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 245.028,
+      "end": 245.258,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 245.258,
+      "end": 245.487,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "中",
+      "start": 245.487,
+      "end": 245.717,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 245.717,
+      "end": 245.947,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 245.947,
+      "end": 246.176,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 246.176,
+      "end": 246.406,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 246.406,
+      "end": 246.635,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 246.635,
+      "end": 246.865,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 246.865,
+      "end": 247.095,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 247.095,
+      "end": 247.324,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 247.324,
+      "end": 247.554,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 247.554,
+      "end": 247.784,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 247.784,
+      "end": 248.013,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 248.013,
+      "end": 248.243,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 248.243,
+      "end": 248.472,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 248.472,
+      "end": 248.702,
+      "cueIndex": 44,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 248.702,
+      "end": 248.928,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "联",
+      "start": 248.928,
+      "end": 249.153,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 249.153,
+      "end": 249.379,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 249.379,
+      "end": 249.604,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 249.604,
+      "end": 249.83,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 249.83,
+      "end": 250.056,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 250.056,
+      "end": 250.281,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "南",
+      "start": 250.281,
+      "end": 250.507,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 250.507,
+      "end": 250.733,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 250.733,
+      "end": 250.958,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 250.958,
+      "end": 251.184,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 251.184,
+      "end": 251.409,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 251.409,
+      "end": 251.635,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 251.635,
+      "end": 251.861,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 251.861,
+      "end": 252.086,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 252.086,
+      "end": 252.312,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 252.312,
+      "end": 252.538,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 252.538,
+      "end": 252.763,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 252.763,
+      "end": 252.989,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 252.989,
+      "end": 253.214,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 253.214,
+      "end": 253.44,
+      "cueIndex": 45,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "恬",
+      "start": 253.44,
+      "end": 253.643,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "神",
+      "start": 253.643,
+      "end": 253.845,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 253.845,
+      "end": 254.048,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "有",
+      "start": 254.048,
+      "end": 254.251,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "1",
+      "start": 254.251,
+      "end": 254.454,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "1",
+      "start": 254.454,
+      "end": 254.656,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 254.656,
+      "end": 254.859,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 254.859,
+      "end": 255.062,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "多",
+      "start": 255.062,
+      "end": 255.265,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "年",
+      "start": 255.265,
+      "end": 255.467,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "历",
+      "start": 255.467,
+      "end": 255.67,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "史",
+      "start": 255.67,
+      "end": 255.873,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "1",
+      "start": 255.873,
+      "end": 256.075,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "5",
+      "start": 256.075,
+      "end": 256.278,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 256.278,
+      "end": 256.481,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "0",
+      "start": 256.481,
+      "end": 256.684,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "亩",
+      "start": 256.684,
+      "end": 256.886,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "对",
+      "start": 256.886,
+      "end": 257.089,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "虾",
+      "start": 257.089,
+      "end": 257.292,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "养",
+      "start": 257.292,
+      "end": 257.495,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "殖",
+      "start": 257.495,
+      "end": 257.697,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 257.697,
+      "end": 257.9,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "2",
+      "start": 257.9,
+      "end": 258.103,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "9",
+      "start": 258.103,
+      "end": 258.305,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "公",
+      "start": 258.305,
+      "end": 258.508,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "顷",
+      "start": 258.508,
+      "end": 258.711,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "盐",
+      "start": 258.711,
+      "end": 258.914,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "场",
+      "start": 258.914,
+      "end": 259.116,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "连",
+      "start": 259.116,
+      "end": 259.319,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "着",
+      "start": 259.319,
+      "end": 259.522,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 259.522,
+      "end": 259.725,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 259.725,
+      "end": 259.927,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "湾",
+      "start": 259.927,
+      "end": 260.13,
+      "cueIndex": 46,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沙",
+      "start": 260.13,
+      "end": 260.362,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "口",
+      "start": 260.362,
+      "end": 260.595,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 260.595,
+      "end": 260.827,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "位",
+      "start": 260.827,
+      "end": 261.06,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "于",
+      "start": 261.06,
+      "end": 261.292,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 261.292,
+      "end": 261.525,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 261.525,
+      "end": 261.757,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "南",
+      "start": 261.757,
+      "end": 261.989,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 261.989,
+      "end": 262.222,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "西",
+      "start": 262.222,
+      "end": 262.454,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "侧",
+      "start": 262.454,
+      "end": 262.687,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 262.687,
+      "end": 262.919,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 262.919,
+      "end": 263.152,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "沿",
+      "start": 263.152,
+      "end": 263.384,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 263.384,
+      "end": 263.616,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 263.616,
+      "end": 263.849,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 263.849,
+      "end": 264.081,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 264.081,
+      "end": 264.314,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "块",
+      "start": 264.314,
+      "end": 264.546,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 264.546,
+      "end": 264.779,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 264.779,
+      "end": 265.011,
+      "cueIndex": 47,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "从",
+      "start": 269.411,
+      "end": 269.657,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "北",
+      "start": 269.657,
+      "end": 269.903,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "部",
+      "start": 269.903,
+      "end": 270.149,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "湾",
+      "start": 270.149,
+      "end": 270.395,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "海",
+      "start": 270.395,
+      "end": 270.641,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "岸",
+      "start": 270.641,
+      "end": 270.887,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "到",
+      "start": 270.887,
+      "end": 271.133,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "镇",
+      "start": 271.133,
+      "end": 271.379,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "域",
+      "start": 271.379,
+      "end": 271.625,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "腹",
+      "start": 271.625,
+      "end": 271.87,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 271.87,
+      "end": 272.116,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "4",
+      "start": 272.116,
+      "end": 272.362,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "2",
+      "start": 272.362,
+      "end": 272.608,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "个",
+      "start": 272.608,
+      "end": 272.854,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "G",
+      "start": 272.854,
+      "end": 273.1,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "I",
+      "start": 273.1,
+      "end": 273.346,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "S",
+      "start": 273.346,
+      "end": 273.592,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "边",
+      "start": 273.592,
+      "end": 273.838,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "界",
+      "start": 273.838,
+      "end": 274.084,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "单",
+      "start": 274.084,
+      "end": 274.33,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "元",
+      "start": 274.33,
+      "end": 274.576,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "完",
+      "start": 274.576,
+      "end": 274.822,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "整",
+      "start": 274.822,
+      "end": 275.068,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "展",
+      "start": 275.068,
+      "end": 275.314,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "开",
+      "start": 275.314,
+      "end": 275.56,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "村",
+      "start": 275.56,
+      "end": 275.806,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "庄",
+      "start": 275.806,
+      "end": 276.052,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "田",
+      "start": 276.052,
+      "end": 276.298,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "野",
+      "start": 276.298,
+      "end": 276.543,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "林",
+      "start": 276.543,
+      "end": 276.789,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "地",
+      "start": 276.789,
+      "end": 277.035,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "和",
+      "start": 277.035,
+      "end": 277.281,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "水",
+      "start": 277.281,
+      "end": 277.527,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "面",
+      "start": 277.527,
+      "end": 277.773,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "彼",
+      "start": 277.773,
+      "end": 278.019,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "此",
+      "start": 278.019,
+      "end": 278.265,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "相",
+      "start": 278.265,
+      "end": 278.511,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    },
+    {
+      "text": "连",
+      "start": 278.511,
+      "end": 278.757,
+      "cueIndex": 48,
+      "timingMode": "tts-derived-interpolation"
+    }
+  ]
+}

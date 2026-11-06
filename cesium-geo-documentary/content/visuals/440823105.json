@@ -1,0 +1,79 @@
+{
+  "regionId": "440823105",
+  "timingMode": "narration-cue-required",
+  "clips": [
+    {
+      "id": "jianghong-harbor-fleet",
+      "path": "assets/source/440823105/01-jianghong-harbor-fleet.png",
+      "label": "江洪渔港开渔船队航拍（2025年实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 6,
+      "requiredKeywords": [
+        "江洪渔港",
+        "1000多艘渔船"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "tianguang-fish-market",
+      "path": "assets/source/440823105/02-tianguang-fish-market.jpg",
+      "label": "江洪天光鱼市航拍（2023年实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 9,
+      "requiredKeywords": [
+        "花蟹",
+        "扇贝"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "jianghong-dragon-boat",
+      "path": "assets/source/440823105/03-jianghong-dragon-boat.jpg",
+      "label": "江洪海上龙舟赛航拍（2025年实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 10,
+      "narrationCueEndIndex": 11,
+      "requiredKeywords": [
+        "海上龙舟赛",
+        "江洪味"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "xianqun-island",
+      "path": "assets/source/440823105/04-xianqun-island.jpg",
+      "label": "江洪仙裙岛林地与海岸（实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 12,
+      "narrationCueEndIndex": 13,
+      "requiredKeywords": [
+        "仙裙岛",
+        "北部湾"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "jianghong-middle-school",
+      "path": "assets/source/440823105/05-jianghong-middle-school.jpg",
+      "label": "江洪初级中学校门与校园道路（2025年实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 14,
+      "narrationCueEndIndex": 15,
+      "requiredKeywords": [
+        "江洪初级中学",
+        "校园"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0.2
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@geo-video/video-compositor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "hyperframes lint .",
+    "check": "hyperframes check .",
+    "preview": "hyperframes preview .",
+    "render": "hyperframes render . --quality high"
+  }
+}

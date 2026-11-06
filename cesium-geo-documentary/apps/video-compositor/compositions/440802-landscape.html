@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>赤坎区地理图说</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1920px;height:1080px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Microsoft YaHei")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}
+    .topbar{left:72px;top:72px;display:flex;align-items:center;gap:18px;font-size:24px;letter-spacing:.16em;color:#d1dbe1;text-shadow:0 2px 16px #000}.topbar:before{content:"";width:64px;height:3px;background:#ffd166;box-shadow:0 0 16px rgba(255,209,102,.75)}
+    .subtitle{left:50%;bottom:72px;transform:translateX(-50%);max-width:1180px;font-size:38px;line-height:1.42;text-align:center;font-weight:650;text-shadow:0 2px 8px #000;white-space:nowrap}.subtitle-inner{display:block;padding:12px 24px;border-radius:14px;background:rgba(4,10,15,.72)}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440802-landscape" data-start="0" data-width="1920" data-height="1080" data-duration="50" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440802-map-landscape.mp4" muted playsinline preload="auto" data-start="0" data-duration="50" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="0" data-duration="50" data-track-index="1"></div>
+  <div id="topbar" class="clip topbar" data-start="0" data-duration="50" data-track-index="10">湛江地理图说 · 全域与区县</div>
+  <div id="caption-0" class="clip subtitle" data-start="0.100" data-duration="4.792" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">从湛江全域看，赤坎位于主城区北部、湛江湾西岸，</span></div>
+<div id="caption-1" class="clip subtitle" data-start="4.892" data-duration="2.708" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">是全市行政与公共服务中心。</span></div>
+<div id="caption-2" class="clip subtitle" data-start="7.600" data-duration="3.526" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">2020年第七次全国人口普查显示，</span></div>
+<div id="caption-3" class="clip subtitle" data-start="11.126" data-duration="2.903" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">赤坎常住人口约39.03万，</span></div>
+<div id="caption-4" class="clip subtitle" data-start="14.029" data-duration="2.696" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">人口高度集中于连续建成区。</span></div>
+<div id="caption-5" class="clip subtitle" data-start="16.725" data-duration="4.621" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">2025年赤坎地区生产总值380.98亿元，</span></div>
+<div id="caption-6" class="clip subtitle" data-start="21.346" data-duration="5.041" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">总部经济、现代服务业和商贸文旅构成主要经济脉络。</span></div>
+<div id="caption-7" class="clip subtitle" data-start="26.387" data-duration="4.660" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">赤坎古商埠在宋代渐成形，清代海运贸易兴盛后，</span></div>
+<div id="caption-8" class="clip subtitle" data-start="31.047" data-duration="2.753" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">多地商旅沿港湾在这里汇聚。</span></div>
+<div id="caption-9" class="clip subtitle" data-start="33.800" data-duration="3.357" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">古码头、岭南骑楼、会馆和老街，</span></div>
+<div id="caption-10" class="clip subtitle" data-start="37.157" data-duration="3.805" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">共同保存着湛江城市成长的早期记忆。</span></div>
+<div id="caption-11" class="clip subtitle" data-start="40.962" data-duration="5.884" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">今天的赤坎在保护历史街区的同时更新城市服务，让港湾、</span></div>
+<div id="caption-12" class="clip subtitle" data-start="46.846" data-duration="2.716" data-track-index="5"><span id="caption-inner-12" class="subtitle-inner">商路与现代生活继续相连。</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440802-narration.wav" data-start="0" data-duration="49.630" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed" class="clip" src="media/music/ambient-map-bed.wav" data-start="0" data-duration="50" data-track-index="7" data-volume="0.5"></audio>
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner"],{opacity:0});
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.12},0.100).to("#caption-inner-0",{opacity:0,duration:.12},4.752).set("#caption-inner-0",{opacity:0},4.892);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.12},4.892).to("#caption-inner-1",{opacity:0,duration:.12},7.460).set("#caption-inner-1",{opacity:0},7.600);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.12},7.600).to("#caption-inner-2",{opacity:0,duration:.12},10.986).set("#caption-inner-2",{opacity:0},11.126);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.12},11.126).to("#caption-inner-3",{opacity:0,duration:.12},13.889).set("#caption-inner-3",{opacity:0},14.029);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.12},14.029).to("#caption-inner-4",{opacity:0,duration:.12},16.585).set("#caption-inner-4",{opacity:0},16.725);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.12},16.725).to("#caption-inner-5",{opacity:0,duration:.12},21.206).set("#caption-inner-5",{opacity:0},21.346);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.12},21.346).to("#caption-inner-6",{opacity:0,duration:.12},26.247).set("#caption-inner-6",{opacity:0},26.387);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.12},26.387).to("#caption-inner-7",{opacity:0,duration:.12},30.907).set("#caption-inner-7",{opacity:0},31.047);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.12},31.047).to("#caption-inner-8",{opacity:0,duration:.12},33.660).set("#caption-inner-8",{opacity:0},33.800);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.12},33.800).to("#caption-inner-9",{opacity:0,duration:.12},37.017).set("#caption-inner-9",{opacity:0},37.157);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.12},37.157).to("#caption-inner-10",{opacity:0,duration:.12},40.822).set("#caption-inner-10",{opacity:0},40.962);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.12},40.962).to("#caption-inner-11",{opacity:0,duration:.12},46.706).set("#caption-inner-11",{opacity:0},46.846);
+tl.fromTo("#caption-inner-12",{opacity:0,y:8},{opacity:1,y:0,duration:.12},46.846).to("#caption-inner-12",{opacity:0,duration:.12},49.422).set("#caption-inner-12",{opacity:0},49.562);
+  window.__timelines=window.__timelines||{};window.__timelines["440802-landscape"]=tl;
+</script>
+</body></html>

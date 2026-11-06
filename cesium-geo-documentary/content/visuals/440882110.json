@@ -1,0 +1,137 @@
+{
+  "regionId": "440882110",
+  "profilePriority": "portrait",
+  "timingMode": "narration-cue-required",
+  "policy": "Use real public-report photographs from Dongli Town sources where the visible subject matches the narration cue. No generated locality imagery is used. Photos are kept as evidence cards above the continuous stable Cesium boundary map.",
+  "clips": [
+    {
+      "id": "town-sign",
+      "path": "assets/source/440882110/01-town-sign.jpg",
+      "label": "东里镇新建镇标与镇区街景（公开报道实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 0,
+      "requiredKeywords": ["东里镇"],
+      "leadSeconds": 0.15,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "town-hall-sand-table",
+      "path": "assets/source/440882110/05-town-hall-sand-table.jpg",
+      "label": "东里镇美丽圩镇客厅沙盘（公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 1,
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "town-market",
+      "path": "assets/source/440882110/07-town-market.jpg",
+      "label": "东里镇农贸市场改造后实景（公开报道实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 2,
+      "requiredKeywords": ["市场"],
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "coastal-aquaculture-aerial",
+      "path": "assets/source/440882110/02-coastal-aquaculture-aerial.jpg",
+      "label": "东里镇滨海虾塘与风车海岸（公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 3,
+      "requiredKeywords": ["虾塘"],
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "second-primary-groundbreaking",
+      "path": "assets/source/440882110/11-second-primary-groundbreaking.png",
+      "label": "雷州市东里镇第二小学建设项目开工仪式（公开报道实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 5,
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "shrimp-park-sheds",
+      "path": "assets/source/440882110/06-shrimp-park-sheds.jpg",
+      "label": "东里现代化对虾养殖棚区（公开报道实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 7,
+      "requiredKeywords": ["虾塘"],
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "shrimp-park-inspection",
+      "path": "assets/source/440882110/04-shrimp-park-inspection.jpg",
+      "label": "越秀海晟源对虾养殖基地调研现场（公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 11,
+      "requiredKeywords": ["北堀"],
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "livestream-room",
+      "path": "assets/source/440882110/09-livestream-room.jpg",
+      "label": "东里镇乡村振兴助农直播间（公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 12,
+      "requiredKeywords": ["电商"],
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "modern-shrimp-park-aerial",
+      "path": "assets/source/440882110/03-modern-shrimp-park-aerial.jpg",
+      "label": "东里镇海岸虾池与现代化养殖棚区（公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 13,
+      "requiredKeywords": ["虾池"],
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "hongliu-village-road",
+      "path": "assets/source/440882110/08-hongliu-village-road.jpg",
+      "label": "东里镇洪流村滨海乡村道路（公开报道实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 15,
+      "requiredKeywords": ["洪流"],
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "training-session",
+      "path": "assets/source/440882110/10-training-session.jpg",
+      "label": "东里镇乡村振兴培训课堂（公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 17,
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    },
+    {
+      "id": "village-lane",
+      "path": "assets/source/440882110/13-village-lane.png",
+      "label": "东里镇村巷与旧村风貌（公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 20,
+      "requiredKeywords": ["村路"],
+      "leadSeconds": 0.12,
+      "tailSeconds": 0.12
+    }
+  ]
+}

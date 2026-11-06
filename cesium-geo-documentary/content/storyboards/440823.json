@@ -1,0 +1,251 @@
+{
+  "regionId": "440823",
+  "name": "遂溪县",
+  "duration": 51,
+  "scenes": [
+    {
+      "sceneId": "440823-scene-01",
+      "title": "湛江全域定位",
+      "start": 0,
+      "duration": 8,
+      "narrationRef": "script:paragraph-01",
+      "narration": "从湛江九个区县的完整边界看，遂溪位于雷州半岛北部，西临北部湾并连接主城区。",
+      "cesium": {
+        "cameraAction": "showParentOverview",
+        "regionId": "440823",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "从湛江九个区县的完整边界看，遂溪位于雷州半岛北部，西临北部湾并连接主城区。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "stable-overview",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440823-location-001"
+      ],
+      "accessibility": "旁白说明湛江全域定位，地图高亮遂溪县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440823-scene-02",
+      "title": "人口与聚落",
+      "start": 8,
+      "duration": 9,
+      "narrationRef": "script:paragraph-02",
+      "narration": "2024年末遂溪常住人口89.31万，广阔平原与密集乡镇构成县域主要聚落格局。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440823",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Population",
+        "title": "2024年常住人口89.31万",
+        "body": "雷州半岛北部连接湾区与北部湾"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2024年末遂溪常住人口89.31万，广阔平原与密集乡镇构成县域主要聚落格局。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440823-population-001"
+      ],
+      "accessibility": "旁白说明人口与聚落，地图高亮遂溪县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440823-scene-03",
+      "title": "经济与产业",
+      "start": 17,
+      "duration": 9,
+      "narrationRef": "script:paragraph-03",
+      "narration": "2024年遂溪地区生产总值427.19亿元，农业、食品加工、商贸服务与交通区位共同支撑经济。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440823",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "StatisticCard/Economy",
+        "title": "2024年GDP 427.19亿元",
+        "body": "农业、交通与县城服务共同发展"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "2024年遂溪地区生产总值427.19亿元，农业、食品加工、商贸服务与交通区位共同支撑经济。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440823-economy-001"
+      ],
+      "accessibility": "旁白说明经济与产业，地图高亮遂溪县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440823-scene-04",
+      "title": "历史沿革",
+      "start": 26,
+      "duration": 9,
+      "narrationRef": "script:paragraph-04",
+      "narration": "遂溪古称铁杷，县城、集市与半岛南北交通长期在这里汇聚。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440823",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "GeoFactCard/History",
+        "title": "县城与交通廊道长期汇聚",
+        "body": "遂溪古称铁杷，县城、集市与半岛南北交通长期在这里汇聚。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "遂溪古称铁杷，县城、集市与半岛南北交通长期在这里汇聚。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440823-location-001"
+      ],
+      "accessibility": "旁白说明历史沿革，地图高亮遂溪县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440823-scene-05",
+      "title": "文化与民俗",
+      "start": 35,
+      "duration": 9,
+      "narrationRef": "script:paragraph-05",
+      "narration": "遂溪醒狮以新、高、难、险的高桩技艺著称，并列入国家级非物质文化遗产名录。",
+      "cesium": {
+        "cameraAction": "holdRegionCamera",
+        "regionId": "440823",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": {
+        "figmaComponent": "CultureCard/Text",
+        "title": "遂溪醒狮以高桩技艺传承",
+        "body": "遂溪醒狮以新、高、难、险的高桩技艺著称，并列入国家级非物质文化遗产名录。"
+      },
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "遂溪醒狮以新、高、难、险的高桩技艺著称，并列入国家级非物质文化遗产名录。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "soft-card-fade",
+      "sources": [
+        "440823-culture-001"
+      ],
+      "accessibility": "旁白说明文化与民俗，地图高亮遂溪县，所有重要文字保持在安全区。"
+    },
+    {
+      "sceneId": "440823-scene-06",
+      "title": "现代发展与总结",
+      "start": 44,
+      "duration": 7,
+      "narrationRef": "script:paragraph-06",
+      "narration": "今天的遂溪一边连接现代产业与交通，一边让醒狮鼓点继续穿过村镇和田野。",
+      "cesium": {
+        "cameraAction": "pullBackToParent",
+        "regionId": "440823",
+        "layers": [
+          "esri-world-imagery",
+          "ellipsoid-terrain",
+          "all-sibling-boundaries",
+          "selected-region-fill"
+        ],
+        "highlight": {
+          "type": "persistent-sibling-lines-selected-fill",
+          "colorToken": "colors.boundaryPrimary"
+        }
+      },
+      "overlay": null,
+      "imagegen": {
+        "assetId": null,
+        "usage": null
+      },
+      "subtitle": {
+        "text": "今天的遂溪一边连接现代产业与交通，一边让醒狮鼓点继续穿过村镇和田野。",
+        "maxLines": 1,
+        "maxCharsPerLine": 26
+      },
+      "transitionIn": "soft-card-fade",
+      "transitionOut": "stable-map-close",
+      "sources": [
+        "440823-economy-001"
+      ],
+      "accessibility": "旁白说明现代发展与总结，地图高亮遂溪县，所有重要文字保持在安全区。"
+    }
+  ]
+}

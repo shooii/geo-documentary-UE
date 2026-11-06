@@ -1,0 +1,36 @@
+{
+  "regionId": "440823114",
+  "profilePriority": "portrait",
+  "timingMode": "narration-cue-required",
+  "policy": "No event, meeting, competition, ceremony, performance, school-group or other activity photographs. Only static verified product or site imagery is allowed; all other sections remain map-led.",
+  "clips": [
+    {
+      "id": "suixi-roasted-sweetpotato",
+      "narrationCueIndex": 3,
+      "path": "assets/source/440823114/02-suixi-roasted-sweetpotato.png",
+      "label": "遂溪甘薯烤制成品（县域实景资料）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "requiredKeywords": [
+        "河头红壤富硒甘薯",
+        "甘薯之乡"
+      ],
+      "leadSeconds": 0.25,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "revolution-museum",
+      "narrationCueIndex": 6,
+      "path": "assets/source/440823114/03-revolution-museum-exterior.jpeg",
+      "label": "遂溪西南地区革命史馆外景（静态建筑实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "requiredKeywords": [
+        "遂溪西南地区革命史馆",
+        "河头村"
+      ],
+      "leadSeconds": 0.25,
+      "tailSeconds": 0.2
+    }
+  ]
+}

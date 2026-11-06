@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>霞山区地理图说</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1920px;height:1080px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Microsoft YaHei")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}
+    .topbar{left:72px;top:72px;display:flex;align-items:center;gap:18px;font-size:24px;letter-spacing:.16em;color:#d1dbe1;text-shadow:0 2px 16px #000}.topbar:before{content:"";width:64px;height:3px;background:#ffd166;box-shadow:0 0 16px rgba(255,209,102,.75)}
+    .subtitle{left:50%;bottom:72px;transform:translateX(-50%);max-width:1180px;font-size:38px;line-height:1.42;text-align:center;font-weight:650;text-shadow:0 2px 8px #000;white-space:nowrap}.subtitle-inner{display:block;padding:12px 24px;border-radius:14px;background:rgba(4,10,15,.72)}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440803-landscape" data-start="0" data-width="1920" data-height="1080" data-duration="50" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440803-map-landscape.mp4" muted playsinline preload="auto" data-start="0" data-duration="50" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="0" data-duration="50" data-track-index="1"></div>
+  <div id="topbar" class="clip topbar" data-start="0" data-duration="50" data-track-index="10">湛江地理图说 · 全域与区县</div>
+  <div id="caption-0" class="clip subtitle" data-start="0.100" data-duration="5.551" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">沿湛江湾西岸向南，霞山构成湛江主城区重要的滨海界面，</span></div>
+<div id="caption-1" class="clip subtitle" data-start="5.651" data-duration="2.349" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">并连接港区与城市中心。</span></div>
+<div id="caption-2" class="clip subtitle" data-start="8.000" data-duration="4.859" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">霞山现有常住人口55.1万，城镇化率超过九成，</span></div>
+<div id="caption-3" class="clip subtitle" data-start="12.859" data-duration="3.591" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">人口与公共服务集中在连续城市空间。</span></div>
+<div id="caption-4" class="clip subtitle" data-start="16.450" data-duration="4.748" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">2025年霞山地区生产总值470.12亿元，</span></div>
+<div id="caption-5" class="clip subtitle" data-start="21.198" data-duration="4.964" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">绿色石化、现代物流和商贸服务共同支撑城区经济。</span></div>
+<div id="caption-6" class="clip subtitle" data-start="26.162" data-duration="5.592" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">近代广州湾时期及其后的港城建设，在霞山留下欧陆建筑、</span></div>
+<div id="caption-7" class="clip subtitle" data-start="31.754" data-duration="1.721" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">骑楼和成片老街。</span></div>
+<div id="caption-8" class="clip subtitle" data-start="33.475" data-duration="2.994" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">这些建筑与海港生活相互叠加，</span></div>
+<div id="caption-9" class="clip subtitle" data-start="36.469" data-duration="2.993" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">构成霞山独特的滨海城市文化。</span></div>
+<div id="caption-10" class="clip subtitle" data-start="39.462" data-duration="5.072" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">今天的霞山继续连接湛江港、临港产业与现代服务，</span></div>
+<div id="caption-11" class="clip subtitle" data-start="44.534" data-duration="3.528" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">从老街到海湾延续港城更新的轨迹。</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440803-narration.wav" data-start="0" data-duration="48.120" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed" class="clip" src="media/music/ambient-map-bed.wav" data-start="0" data-duration="50" data-track-index="7" data-volume="0.5"></audio>
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner"],{opacity:0});
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.12},0.100).to("#caption-inner-0",{opacity:0,duration:.12},5.511).set("#caption-inner-0",{opacity:0},5.651);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.12},5.651).to("#caption-inner-1",{opacity:0,duration:.12},7.860).set("#caption-inner-1",{opacity:0},8.000);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.12},8.000).to("#caption-inner-2",{opacity:0,duration:.12},12.719).set("#caption-inner-2",{opacity:0},12.859);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.12},12.859).to("#caption-inner-3",{opacity:0,duration:.12},16.310).set("#caption-inner-3",{opacity:0},16.450);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.12},16.450).to("#caption-inner-4",{opacity:0,duration:.12},21.058).set("#caption-inner-4",{opacity:0},21.198);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.12},21.198).to("#caption-inner-5",{opacity:0,duration:.12},26.022).set("#caption-inner-5",{opacity:0},26.162);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.12},26.162).to("#caption-inner-6",{opacity:0,duration:.12},31.614).set("#caption-inner-6",{opacity:0},31.754);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.12},31.754).to("#caption-inner-7",{opacity:0,duration:.12},33.335).set("#caption-inner-7",{opacity:0},33.475);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.12},33.475).to("#caption-inner-8",{opacity:0,duration:.12},36.329).set("#caption-inner-8",{opacity:0},36.469);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.12},36.469).to("#caption-inner-9",{opacity:0,duration:.12},39.322).set("#caption-inner-9",{opacity:0},39.462);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.12},39.462).to("#caption-inner-10",{opacity:0,duration:.12},44.394).set("#caption-inner-10",{opacity:0},44.534);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.12},44.534).to("#caption-inner-11",{opacity:0,duration:.12},47.922).set("#caption-inner-11",{opacity:0},48.062);
+  window.__timelines=window.__timelines||{};window.__timelines["440803-landscape"]=tl;
+</script>
+</body></html>

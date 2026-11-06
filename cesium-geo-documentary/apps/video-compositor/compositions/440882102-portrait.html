@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-variables='[]'>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>客路镇地理乡土情</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1080px;height:1920px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Noto Sans SC"),local("Source Han Sans SC"),local("Microsoft YaHei")}@font-face{font-family:"GeoNumber";src:local("Roboto Flex"),local("Roboto"),local("Arial")}@font-face{font-family:"STZhongsong";src:local("STZhongsong"),local("华文中宋"),local("Source Han Serif SC"),local("SimSun")} .clip{position:absolute}.map{z-index:0;inset:0;width:100%;height:100%;object-fit:cover}.shade{z-index:1;inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}.cover{z-index:100;inset:0;width:100%;height:100%;object-fit:cover;background:#06101a}
+    .visual{z-index:20;left:64px;top:278px;width:952px;height:780px;margin:0;overflow:hidden;border:1px solid rgba(215,235,237,.32);border-radius:28px;background:#07151d;box-shadow:0 24px 80px rgba(0,0,0,.46);isolation:isolate}.visual-bg,.visual-main{position:absolute;inset:0;width:100%;height:100%}.visual-bg{z-index:0;background-size:cover;background-position:center;filter:blur(34px) saturate(.82) brightness(.56);transform:scale(1.13)}.visual-main{z-index:1}.visual-main.fit-cover{object-fit:cover}.visual-main.fit-contain{object-fit:contain;padding:18px}.visual:after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(2,9,14,.76) 100%);pointer-events:none}.visual figcaption{position:absolute;z-index:3;left:28px;right:28px;bottom:24px;font-size:30px;font-weight:650;line-height:1.25;letter-spacing:.03em;color:#f4f7f9;text-shadow:0 2px 10px rgba(0,0,0,.9)}
+    .subtitle{z-index:40;left:50%;bottom:220px;transform:translateX(-50%);max-width:900px;font-size:44px;line-height:1.38;text-align:center;font-weight:650;letter-spacing:0;text-shadow:0 2px 8px rgba(0,0,0,.96);white-space:nowrap}.subtitle-inner{display:block;padding:10px 22px;border-radius:10px;background:rgba(4,10,15,.72)}
+    .provider-credit{z-index:15;right:21px;bottom:18px;padding:5px 9px;border-radius:6px;background:rgba(4,10,15,.58);font-size:15px;letter-spacing:.02em;color:rgba(244,247,249,.78);text-shadow:0 1px 4px #000;white-space:nowrap}
+  </style>
+</head>
+<body>
+<main id="root" data-composition-id="440882102-portrait" data-start="0" data-width="1080" data-height="1920" data-duration="288.600" data-fps="30">
+  <video id="map" class="clip map" src="media/maps/440882102-map-portrait.mp4" muted playsinline preload="auto" data-start="1.600" data-duration="287.000" data-track-index="0"></video>
+  <div id="shade" class="clip shade" data-start="1.600" data-duration="287.000" data-track-index="1"></div>
+  <div id="provider-credit" class="clip provider-credit" data-start="1.600" data-duration="287.000" data-track-index="11">Cesium ion World Imagery</div>
+  <figure id="visual-town-entrance" class="clip visual visual-real" data-start="4.600" data-duration="6.628" data-track-index="20"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440882102-town-entrance.png')"></div><img class="visual-main fit-cover" src="media/images/440882102-town-entrance.png" alt="????????????????????"><figcaption id="visual-caption-town-entrance">????????????????????</figcaption></figure>
+<figure id="visual-town-market" class="clip visual visual-real" data-start="10.958" data-duration="3.879" data-track-index="21"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440882102-town-market.png')"></div><img class="visual-main fit-cover" src="media/images/440882102-town-market.png" alt="?????????????????"><figcaption id="visual-caption-town-market">?????????????????</figcaption></figure>
+<figure id="visual-white-cut-dog" class="clip visual visual-real" data-start="14.567" data-duration="6.350" data-track-index="22"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440882102-white-cut-dog.jpg')"></div><img class="visual-main fit-cover" src="media/images/440882102-white-cut-dog.jpg" alt="???????????"><figcaption id="visual-caption-white-cut-dog">???????????</figcaption></figure>
+<figure id="visual-leaf-pancake" class="clip visual visual-real" data-start="20.647" data-duration="7.536" data-track-index="23"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440882102-leaf-pancake.png')"></div><img class="visual-main fit-cover" src="media/images/440882102-leaf-pancake.png" alt="???????????"><figcaption id="visual-caption-leaf-pancake">???????????</figcaption></figure>
+<figure id="visual-canal-greenway" class="clip visual visual-real" data-start="27.913" data-duration="5.023" data-track-index="24"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440882102-canal-greenway.png')"></div><img class="visual-main fit-cover" src="media/images/440882102-canal-greenway.png" alt="??????????????????????"><figcaption id="visual-caption-canal-greenway">??????????????????????</figcaption></figure>
+<figure id="visual-opera-stage" class="clip visual visual-real" data-start="32.666" data-duration="4.410" data-track-index="25"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440882102-opera-stage.jpg')"></div><img class="visual-main fit-cover" src="media/images/440882102-opera-stage.jpg" alt="??????????????????"><figcaption id="visual-caption-opera-stage">??????????????????</figcaption></figure>
+<figure id="visual-nianli-procession" class="clip visual visual-real" data-start="36.806" data-duration="5.817" data-track-index="26"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440882102-nianli-procession.jpeg')"></div><img class="visual-main fit-cover" src="media/images/440882102-nianli-procession.jpeg" alt="??????????????"><figcaption id="visual-caption-nianli-procession">??????????????</figcaption></figure>
+<figure id="visual-sugarcane-field" class="clip visual visual-real" data-start="42.353" data-duration="12.939" data-track-index="27"><div class="visual-bg" data-layout-allow-overflow style="background-image:url('media/images/440882102-sugarcane-field.png')"></div><img class="visual-main fit-cover" src="media/images/440882102-sugarcane-field.png" alt="????????????"><figcaption id="visual-caption-sugarcane-field">????????????</figcaption></figure>
+  <div id="caption-0" class="clip subtitle" data-start="4.600" data-duration="2.060" data-track-index="5"><span id="caption-inner-0" class="subtitle-inner">客路镇在雷州市北部</span></div>
+<div id="caption-1" class="clip subtitle" data-start="6.660" data-duration="2.059" data-track-index="5"><span id="caption-inner-1" class="subtitle-inner">是雷州半岛的“北大门”</span></div>
+<div id="caption-2" class="clip subtitle" data-start="8.719" data-duration="2.289" data-track-index="5"><span id="caption-inner-2" class="subtitle-inner">207国道从墟中穿过</span></div>
+<div id="caption-3" class="clip subtitle" data-start="11.008" data-duration="2.062" data-track-index="5"><span id="caption-inner-3" class="subtitle-inner">赶上客路墟趁圩日</span></div>
+<div id="caption-4" class="clip subtitle" data-start="13.070" data-duration="1.547" data-track-index="5"><span id="caption-inner-4" class="subtitle-inner">白切狗先上桌</span></div>
+<div id="caption-5" class="clip subtitle" data-start="14.617" data-duration="2.643" data-track-index="5"><span id="caption-inner-5" class="subtitle-inner">叶搭饼、猪肠粉摆在路边</span></div>
+<div id="caption-6" class="clip subtitle" data-start="17.260" data-duration="1.587" data-track-index="5"><span id="caption-inner-6" class="subtitle-inner">雷剧锣鼓一响</span></div>
+<div id="caption-7" class="clip subtitle" data-start="18.847" data-duration="1.850" data-track-index="5"><span id="caption-inner-7" class="subtitle-inner">戏台前就围满人</span></div>
+<div id="caption-8" class="clip subtitle" data-start="20.697" data-duration="2.691" data-track-index="5"><span id="caption-inner-8" class="subtitle-inner">这里红土连片，坡地平缓</span></div>
+<div id="caption-9" class="clip subtitle" data-start="23.388" data-duration="2.153" data-track-index="5"><span id="caption-inner-9" class="subtitle-inner">靠青年运河、水库和</span></div>
+<div id="caption-10" class="clip subtitle" data-start="25.541" data-duration="2.422" data-track-index="5"><span id="caption-inner-10" class="subtitle-inner">机井把旱地浇成粮田</span></div>
+<div id="caption-11" class="clip subtitle" data-start="27.963" data-duration="2.796" data-track-index="5"><span id="caption-inner-11" class="subtitle-inner">甘蔗林像海，桉树林成排</span></div>
+<div id="caption-12" class="clip subtitle" data-start="30.759" data-duration="1.957" data-track-index="5"><span id="caption-inner-12" class="subtitle-inner">榨季时糖厂飘甜</span></div>
+<div id="caption-13" class="clip subtitle" data-start="32.716" data-duration="2.192" data-track-index="5"><span id="caption-inner-13" class="subtitle-inner">牛车和手扶拖拉机拉</span></div>
+<div id="caption-14" class="clip subtitle" data-start="34.908" data-duration="1.948" data-track-index="5"><span id="caption-inner-14" class="subtitle-inner">着甘蔗在路边排队</span></div>
+<div id="caption-15" class="clip subtitle" data-start="36.856" data-duration="1.765" data-track-index="5"><span id="caption-inner-15" class="subtitle-inner">年例游神、穿令箭</span></div>
+<div id="caption-16" class="clip subtitle" data-start="38.621" data-duration="2.017" data-track-index="5"><span id="caption-inner-16" class="subtitle-inner">翻刺床，是客路孩子</span></div>
+<div id="caption-17" class="clip subtitle" data-start="40.638" data-duration="1.765" data-track-index="5"><span id="caption-inner-17" class="subtitle-inner">认得的家乡符号</span></div>
+<div id="caption-18" class="clip subtitle" data-start="42.403" data-duration="2.787" data-track-index="5"><span id="caption-inner-18" class="subtitle-inner">2025年公开报道显示</span></div>
+<div id="caption-19" class="clip subtitle" data-start="45.190" data-duration="3.041" data-track-index="5"><span id="caption-inner-19" class="subtitle-inner">客路镇户籍人口15.3万人</span></div>
+<div id="caption-20" class="clip subtitle" data-start="48.231" data-duration="2.787" data-track-index="5"><span id="caption-inner-20" class="subtitle-inner">2024年工作报告记载</span></div>
+<div id="caption-21" class="clip subtitle" data-start="51.018" data-duration="2.280" data-track-index="5"><span id="caption-inner-21" class="subtitle-inner">全镇有32个村（社区）</span></div>
+<div id="caption-22" class="clip subtitle" data-start="53.298" data-duration="1.774" data-track-index="5"><span id="caption-inner-22" class="subtitle-inner">288条自然村</span></div>
+<div id="caption-23" class="clip subtitle" data-start="55.072" data-duration="2.086" data-track-index="5"><span id="caption-inner-23" class="subtitle-inner">2024年前三季度</span></div>
+<div id="caption-24" class="clip subtitle" data-start="57.158" data-duration="1.159" data-track-index="5"><span id="caption-inner-24" class="subtitle-inner">客路镇完成</span></div>
+<div id="caption-25" class="clip subtitle" data-start="58.317" data-duration="2.781" data-track-index="5"><span id="caption-inner-25" class="subtitle-inner">地区生产总值15.21亿元</span></div>
+<div id="caption-26" class="clip subtitle" data-start="61.098" data-duration="1.855" data-track-index="5"><span id="caption-inner-26" class="subtitle-inner">金河路、客路市场和</span></div>
+<div id="caption-27" class="clip subtitle" data-start="62.953" data-duration="2.086" data-track-index="5"><span id="caption-inner-27" class="subtitle-inner">1300米碧道一起</span></div>
+<div id="caption-28" class="clip subtitle" data-start="65.039" data-duration="1.622" data-track-index="5"><span id="caption-inner-28" class="subtitle-inner">把镇面慢慢理顺</span></div>
+<div id="caption-29" class="clip subtitle" data-start="66.661" data-duration="2.601" data-track-index="5"><span id="caption-inner-29" class="subtitle-inner">沿着运河碧道和入镇通道</span></div>
+<div id="caption-30" class="clip subtitle" data-start="69.262" data-duration="2.365" data-track-index="5"><span id="caption-inner-30" class="subtitle-inner">往里走，客路镇的故事也</span></div>
+<div id="caption-31" class="clip subtitle" data-start="71.627" data-duration="2.365" data-track-index="5"><span id="caption-inner-31" class="subtitle-inner">就从墟口，慢慢转向村口</span></div>
+<div id="caption-32" class="clip subtitle" data-start="73.992" data-duration="2.150" data-track-index="5"><span id="caption-inner-32" class="subtitle-inner">客路村靠近镇圩核心</span></div>
+<div id="caption-33" class="clip subtitle" data-start="76.142" data-duration="2.150" data-track-index="5"><span id="caption-inner-33" class="subtitle-inner">市场、学校和日常街巷</span></div>
+<div id="caption-34" class="clip subtitle" data-start="78.292" data-duration="1.911" data-track-index="5"><span id="caption-inner-34" class="subtitle-inner">都在这一带聚起来</span></div>
+<div id="caption-35" class="clip subtitle" data-start="80.203" data-duration="2.143" data-track-index="5"><span id="caption-inner-35" class="subtitle-inner">曲溪村在镇域西北侧</span></div>
+<div id="caption-36" class="clip subtitle" data-start="82.346" data-duration="1.904" data-track-index="5"><span id="caption-inner-36" class="subtitle-inner">村路绕着田块伸展</span></div>
+<div id="caption-37" class="clip subtitle" data-start="84.250" data-duration="2.619" data-track-index="5"><span id="caption-inner-37" class="subtitle-inner">和镇区保持着很近的联系</span></div>
+<div id="caption-38" class="clip subtitle" data-start="86.869" data-duration="2.426" data-track-index="5"><span id="caption-inner-38" class="subtitle-inner">大家村位于镇域中部偏南</span></div>
+<div id="caption-39" class="clip subtitle" data-start="89.295" data-duration="2.425" data-track-index="5"><span id="caption-inner-39" class="subtitle-inner">村委会旁的存量土地也被</span></div>
+<div id="caption-40" class="clip subtitle" data-start="91.720" data-duration="1.985" data-track-index="5"><span id="caption-inner-40" class="subtitle-inner">纳入产业盘活的视野</span></div>
+<div id="caption-41" class="clip subtitle" data-start="93.705" data-duration="2.766" data-track-index="5"><span id="caption-inner-41" class="subtitle-inner">水标村贴近207国道一线</span></div>
+<div id="caption-42" class="clip subtitle" data-start="96.471" data-duration="2.304" data-track-index="5"><span id="caption-inner-42" class="subtitle-inner">入镇通道和绿化步道让</span></div>
+<div id="caption-43" class="clip subtitle" data-start="98.775" data-duration="1.844" data-track-index="5"><span id="caption-inner-43" class="subtitle-inner">村口更容易被看见</span></div>
+<div id="caption-44" class="clip subtitle" data-start="100.619" data-duration="1.693" data-track-index="5"><span id="caption-inner-44" class="subtitle-inner">迈港村向东铺开</span></div>
+<div id="caption-45" class="clip subtitle" data-start="102.312" data-duration="2.660" data-track-index="5"><span id="caption-inner-45" class="subtitle-inner">农产品初加工和乡村产业</span></div>
+<div id="caption-46" class="clip subtitle" data-start="104.972" data-duration="2.418" data-track-index="5"><span id="caption-inner-46" class="subtitle-inner">在这一带寻找新的落点</span></div>
+<div id="caption-47" class="clip subtitle" data-start="107.390" data-duration="2.000" data-track-index="5"><span id="caption-inner-47" class="subtitle-inner">高桥村在镇域东北部</span></div>
+<div id="caption-48" class="clip subtitle" data-start="109.390" data-duration="2.444" data-track-index="5"><span id="caption-inner-48" class="subtitle-inner">村名里的桥意，也像这里连</span></div>
+<div id="caption-49" class="clip subtitle" data-start="111.834" data-duration="2.444" data-track-index="5"><span id="caption-inner-49" class="subtitle-inner">接村路与田埂的生活方式</span></div>
+<div id="caption-50" class="clip subtitle" data-start="114.278" data-duration="2.303" data-track-index="5"><span id="caption-inner-50" class="subtitle-inner">泰坡村靠近东北边界</span></div>
+<div id="caption-51" class="clip subtitle" data-start="116.581" data-duration="2.560" data-track-index="5"><span id="caption-inner-51" class="subtitle-inner">坡地、林地和村庄共同撑</span></div>
+<div id="caption-52" class="clip subtitle" data-start="119.141" data-duration="2.559" data-track-index="5"><span id="caption-inner-52" class="subtitle-inner">起一片安静的乡土空间</span></div>
+<div id="caption-53" class="clip subtitle" data-start="121.700" data-duration="2.377" data-track-index="5"><span id="caption-inner-53" class="subtitle-inner">高上村夹在镇区和东部</span></div>
+<div id="caption-54" class="clip subtitle" data-start="124.077" data-duration="2.140" data-track-index="5"><span id="caption-inner-54" class="subtitle-inner">村落之间，是从圩镇走</span></div>
+<div id="caption-55" class="clip subtitle" data-start="126.217" data-duration="1.902" data-track-index="5"><span id="caption-inner-55" class="subtitle-inner">向田野的一道缓冲</span></div>
+<div id="caption-56" class="clip subtitle" data-start="128.119" data-duration="2.400" data-track-index="5"><span id="caption-inner-56" class="subtitle-inner">车路村在镇域西南方向</span></div>
+<div id="caption-57" class="clip subtitle" data-start="130.519" data-duration="2.161" data-track-index="5"><span id="caption-inner-57" class="subtitle-inner">村路、林带和田块交错</span></div>
+<div id="caption-58" class="clip subtitle" data-start="132.680" data-duration="2.640" data-track-index="5"><span id="caption-inner-58" class="subtitle-inner">名字里也带着道路的记忆</span></div>
+<div id="caption-59" class="clip subtitle" data-start="135.320" data-duration="2.200" data-track-index="5"><span id="caption-inner-59" class="subtitle-inner">上梁村位于镇域北侧</span></div>
+<div id="caption-60" class="clip subtitle" data-start="137.520" data-duration="2.445" data-track-index="5"><span id="caption-inner-60" class="subtitle-inner">大片田地和村庄边界把</span></div>
+<div id="caption-61" class="clip subtitle" data-start="139.965" data-duration="1.956" data-track-index="5"><span id="caption-inner-61" class="subtitle-inner">北部空间慢慢打开</span></div>
+<div id="caption-62" class="clip subtitle" data-start="141.921" data-duration="2.379" data-track-index="5"><span id="caption-inner-62" class="subtitle-inner">东山村贴近北部边缘</span></div>
+<div id="caption-63" class="clip subtitle" data-start="144.300" data-duration="2.643" data-track-index="5"><span id="caption-inner-63" class="subtitle-inner">村域沿丘陵和田地伸展</span></div>
+<div id="caption-64" class="clip subtitle" data-start="146.943" data-duration="2.114" data-track-index="5"><span id="caption-inner-64" class="subtitle-inner">视野比镇区更开阔</span></div>
+<div id="caption-65" class="clip subtitle" data-start="149.057" data-duration="2.509" data-track-index="5"><span id="caption-inner-65" class="subtitle-inner">恒山村在西北高地一带</span></div>
+<div id="caption-66" class="clip subtitle" data-start="151.566" data-duration="1.756" data-track-index="5"><span id="caption-inner-66" class="subtitle-inner">林地和农田相接</span></div>
+<div id="caption-67" class="clip subtitle" data-start="153.322" data-duration="2.258" data-track-index="5"><span id="caption-inner-67" class="subtitle-inner">镇域北端在这里转向</span></div>
+<div id="caption-68" class="clip subtitle" data-start="155.580" data-duration="2.822" data-track-index="5"><span id="caption-inner-68" class="subtitle-inner">本立村靠近镇域北部腹地</span></div>
+<div id="caption-69" class="clip subtitle" data-start="158.402" data-duration="1.796" data-track-index="5"><span id="caption-inner-69" class="subtitle-inner">村庄沿道路散开</span></div>
+<div id="caption-70" class="clip subtitle" data-start="160.198" data-duration="2.309" data-track-index="5"><span id="caption-inner-70" class="subtitle-inner">和周边村界紧密相邻</span></div>
+<div id="caption-71" class="clip subtitle" data-start="162.507" data-duration="2.716" data-track-index="5"><span id="caption-inner-71" class="subtitle-inner">六梅村位于北部中间地带</span></div>
+<div id="caption-72" class="clip subtitle" data-start="165.223" data-duration="2.223" data-track-index="5"><span id="caption-inner-72" class="subtitle-inner">田块与村路像网格一</span></div>
+<div id="caption-73" class="clip subtitle" data-start="167.446" data-duration="1.728" data-track-index="5"><span id="caption-inner-73" class="subtitle-inner">样接住日常生产</span></div>
+<div id="caption-74" class="clip subtitle" data-start="169.174" data-duration="2.523" data-track-index="5"><span id="caption-inner-74" class="subtitle-inner">湖南村在北部腹地展开</span></div>
+<div id="caption-75" class="clip subtitle" data-start="171.697" data-duration="1.514" data-track-index="5"><span id="caption-inner-75" class="subtitle-inner">村域面积宽阔</span></div>
+<div id="caption-76" class="clip subtitle" data-start="173.211" data-duration="2.018" data-track-index="5"><span id="caption-inner-76" class="subtitle-inner">连着多条相邻村界</span></div>
+<div id="caption-77" class="clip subtitle" data-start="175.229" data-duration="2.358" data-track-index="5"><span id="caption-inner-77" class="subtitle-inner">迈哉村一带有糖蔗和红</span></div>
+<div id="caption-78" class="clip subtitle" data-start="177.587" data-duration="2.122" data-track-index="5"><span id="caption-inner-78" class="subtitle-inner">糖加工项目，田地与厂</span></div>
+<div id="caption-79" class="clip subtitle" data-start="179.709" data-duration="1.887" data-track-index="5"><span id="caption-inner-79" class="subtitle-inner">房在这里发生连接</span></div>
+<div id="caption-80" class="clip subtitle" data-start="181.596" data-duration="2.065" data-track-index="5"><span id="caption-inner-80" class="subtitle-inner">坡仔村靠近镇域中部</span></div>
+<div id="caption-81" class="clip subtitle" data-start="183.661" data-duration="2.295" data-track-index="5"><span id="caption-inner-81" class="subtitle-inner">村庄尺度不大，却稳稳嵌</span></div>
+<div id="caption-82" class="clip subtitle" data-start="185.956" data-duration="2.294" data-track-index="5"><span id="caption-inner-82" class="subtitle-inner">在周边道路和田畴之间</span></div>
+<div id="caption-83" class="clip subtitle" data-start="188.250" data-duration="1.969" data-track-index="5"><span id="caption-inner-83" class="subtitle-inner">饶里村位于镇域南端</span></div>
+<div id="caption-84" class="clip subtitle" data-start="190.219" data-duration="2.407" data-track-index="5"><span id="caption-inner-84" class="subtitle-inner">207国道饶里至迈哉段</span></div>
+<div id="caption-85" class="clip subtitle" data-start="192.626" data-duration="2.407" data-track-index="5"><span id="caption-inner-85" class="subtitle-inner">的路灯工程也从这里延伸</span></div>
+<div id="caption-86" class="clip subtitle" data-start="195.033" data-duration="2.484" data-track-index="5"><span id="caption-inner-86" class="subtitle-inner">迈坦村在西南大块土地</span></div>
+<div id="caption-87" class="clip subtitle" data-start="197.517" data-duration="1.242" data-track-index="5"><span id="caption-inner-87" class="subtitle-inner">上展开，林地</span></div>
+<div id="caption-88" class="clip subtitle" data-start="198.759" data-duration="1.738" data-track-index="5"><span id="caption-inner-88" class="subtitle-inner">田块和村路把边</span></div>
+<div id="caption-89" class="clip subtitle" data-start="200.497" data-duration="1.242" data-track-index="5"><span id="caption-inner-89" class="subtitle-inner">界拉得很长</span></div>
+<div id="caption-90" class="clip subtitle" data-start="201.739" data-duration="2.335" data-track-index="5"><span id="caption-inner-90" class="subtitle-inner">湖仔村位于镇域西侧</span></div>
+<div id="caption-91" class="clip subtitle" data-start="204.074" data-duration="2.335" data-track-index="5"><span id="caption-inner-91" class="subtitle-inner">水面、农田和聚落相互</span></div>
+<div id="caption-92" class="clip subtitle" data-start="206.409" data-duration="2.335" data-track-index="5"><span id="caption-inner-92" class="subtitle-inner">靠近空间显得更湿润</span></div>
+<div id="caption-93" class="clip subtitle" data-start="208.744" data-duration="2.299" data-track-index="5"><span id="caption-inner-93" class="subtitle-inner">塘塞村贴着西北一带</span></div>
+<div id="caption-94" class="clip subtitle" data-start="211.043" data-duration="2.044" data-track-index="5"><span id="caption-inner-94" class="subtitle-inner">塘、水和村庄的名字</span></div>
+<div id="caption-95" class="clip subtitle" data-start="213.087" data-duration="1.789" data-track-index="5"><span id="caption-inner-95" class="subtitle-inner">让人一听就能想</span></div>
+<div id="caption-96" class="clip subtitle" data-start="214.876" data-duration="1.277" data-track-index="5"><span id="caption-inner-96" class="subtitle-inner">到水岸生活</span></div>
+<div id="caption-97" class="clip subtitle" data-start="216.153" data-duration="2.035" data-track-index="5"><span id="caption-inner-97" class="subtitle-inner">赵宅村在镇域西部</span></div>
+<div id="caption-98" class="clip subtitle" data-start="218.188" data-duration="2.545" data-track-index="5"><span id="caption-inner-98" class="subtitle-inner">村域沿道路和田畴展开</span></div>
+<div id="caption-99" class="clip subtitle" data-start="220.733" data-duration="2.035" data-track-index="5"><span id="caption-inner-99" class="subtitle-inner">生活节奏靠近土地</span></div>
+<div id="caption-100" class="clip subtitle" data-start="222.768" data-duration="2.079" data-track-index="5"><span id="caption-inner-100" class="subtitle-inner">顶尾村位于西南边缘</span></div>
+<div id="caption-101" class="clip subtitle" data-start="224.847" data-duration="1.848" data-track-index="5"><span id="caption-inner-101" class="subtitle-inner">像镇域的一段收尾</span></div>
+<div id="caption-102" class="clip subtitle" data-start="226.695" data-duration="2.310" data-track-index="5"><span id="caption-inner-102" class="subtitle-inner">把田野一直带到边界处</span></div>
+<div id="caption-103" class="clip subtitle" data-start="229.005" data-duration="1.964" data-track-index="5"><span id="caption-inner-103" class="subtitle-inner">宅仔村在南部东侧</span></div>
+<div id="caption-104" class="clip subtitle" data-start="230.969" data-duration="1.965" data-track-index="5"><span id="caption-inner-104" class="subtitle-inner">村庄分布贴着田块</span></div>
+<div id="caption-105" class="clip subtitle" data-start="232.934" data-duration="1.718" data-track-index="5"><span id="caption-inner-105" class="subtitle-inner">和周边管理区边</span></div>
+<div id="caption-106" class="clip subtitle" data-start="234.652" data-duration="1.228" data-track-index="5"><span id="caption-inner-106" class="subtitle-inner">界相互咬合</span></div>
+<div id="caption-107" class="clip subtitle" data-start="235.880" data-duration="2.720" data-track-index="5"><span id="caption-inner-107" class="subtitle-inner">上塘村是典型村培育点</span></div>
+<div id="caption-108" class="clip subtitle" data-start="238.600" data-duration="2.447" data-track-index="5"><span id="caption-inner-108" class="subtitle-inner">文化墙、外立面和村庄</span></div>
+<div id="caption-109" class="clip subtitle" data-start="241.047" data-duration="2.176" data-track-index="5"><span id="caption-inner-109" class="subtitle-inner">环境都在慢慢变新</span></div>
+<div id="caption-110" class="clip subtitle" data-start="243.223" data-duration="2.217" data-track-index="5"><span id="caption-inner-110" class="subtitle-inner">林排村靠近南部东侧</span></div>
+<div id="caption-111" class="clip subtitle" data-start="245.440" data-duration="2.217" data-track-index="5"><span id="caption-inner-111" class="subtitle-inner">林地气息和农田纹理</span></div>
+<div id="caption-112" class="clip subtitle" data-start="247.657" data-duration="1.725" data-track-index="5"><span id="caption-inner-112" class="subtitle-inner">一起铺在村界里</span></div>
+<div id="caption-113" class="clip subtitle" data-start="249.382" data-duration="2.464" data-track-index="5"><span id="caption-inner-113" class="subtitle-inner">东坑村在镇域南部偏西</span></div>
+<div id="caption-114" class="clip subtitle" data-start="251.846" data-duration="2.218" data-track-index="5"><span id="caption-inner-114" class="subtitle-inner">地势和道路让村庄与</span></div>
+<div id="caption-115" class="clip subtitle" data-start="254.064" data-duration="1.972" data-track-index="5"><span id="caption-inner-115" class="subtitle-inner">周边田块连成一片</span></div>
+<div id="caption-116" class="clip subtitle" data-start="256.036" data-duration="2.450" data-track-index="5"><span id="caption-inner-116" class="subtitle-inner">深坑村位于最南端附近</span></div>
+<div id="caption-117" class="clip subtitle" data-start="258.486" data-duration="1.470" data-track-index="5"><span id="caption-inner-117" class="subtitle-inner">村域向下收束</span></div>
+<div id="caption-118" class="clip subtitle" data-start="259.956" data-duration="2.695" data-track-index="5"><span id="caption-inner-118" class="subtitle-inner">像客路镇南边的一枚扣子</span></div>
+<div id="caption-119" class="clip subtitle" data-start="262.651" data-duration="1.631" data-track-index="5"><span id="caption-inner-119" class="subtitle-inner">高坡村面积不大</span></div>
+<div id="caption-120" class="clip subtitle" data-start="264.282" data-duration="2.329" data-track-index="5"><span id="caption-inner-120" class="subtitle-inner">却处在多村相邻的位置</span></div>
+<div id="caption-121" class="clip subtitle" data-start="266.611" data-duration="2.563" data-track-index="5"><span id="caption-inner-121" class="subtitle-inner">是镇域中部一个清晰节点</span></div>
+<div id="caption-122" class="clip subtitle" data-start="273.574" data-duration="2.227" data-track-index="5"><span id="caption-inner-122" class="subtitle-inner">三塘村在西北角一带</span></div>
+<div id="caption-123" class="clip subtitle" data-start="275.801" data-duration="1.484" data-track-index="5"><span id="caption-inner-123" class="subtitle-inner">村界小而分散</span></div>
+<div id="caption-124" class="clip subtitle" data-start="277.285" data-duration="1.732" data-track-index="5"><span id="caption-inner-124" class="subtitle-inner">像散落在大片镇</span></div>
+<div id="caption-125" class="clip subtitle" data-start="279.017" data-duration="1.237" data-track-index="5"><span id="caption-inner-125" class="subtitle-inner">域里的细节</span></div>
+<div id="caption-126" class="clip subtitle" data-start="280.254" data-duration="2.337" data-track-index="5"><span id="caption-inner-126" class="subtitle-inner">从镇标、主街、市场到运</span></div>
+<div id="caption-127" class="clip subtitle" data-start="282.591" data-duration="2.598" data-track-index="5"><span id="caption-inner-127" class="subtitle-inner">河碧道，再到30个村庄</span></div>
+<div id="caption-128" class="clip subtitle" data-start="285.189" data-duration="2.597" data-track-index="5"><span id="caption-inner-128" class="subtitle-inner">客路镇的故事一直贴着</span></div>
+<div id="caption-129" class="clip subtitle" data-start="287.786" data-duration="2.337" data-track-index="5"><span id="caption-inner-129" class="subtitle-inner">道路水岸和田野生长</span></div>
+  <audio id="narration-audio" class="clip" src="media/audio/440882102-narration.wav" data-start="4.600" data-duration="285.700" data-track-index="6" data-volume="1"></audio>
+  <audio id="music-bed-0" class="clip" src="media/music/ambient-map-bed.wav" data-start="1.6" data-duration="50" data-track-index="70" data-volume="0.2"></audio>
+<audio id="music-bed-1" class="clip" src="media/music/ambient-map-bed.wav" data-start="47.6" data-duration="50" data-track-index="71" data-volume="0.2"></audio>
+<audio id="music-bed-2" class="clip" src="media/music/ambient-map-bed.wav" data-start="93.6" data-duration="50" data-track-index="72" data-volume="0.2"></audio>
+<audio id="music-bed-3" class="clip" src="media/music/ambient-map-bed.wav" data-start="139.6" data-duration="50" data-track-index="73" data-volume="0.2"></audio>
+<audio id="music-bed-4" class="clip" src="media/music/ambient-map-bed.wav" data-start="185.6" data-duration="50" data-track-index="74" data-volume="0.2"></audio>
+<audio id="music-bed-5" class="clip" src="media/music/ambient-map-bed.wav" data-start="231.6" data-duration="50" data-track-index="75" data-volume="0.2"></audio>
+<audio id="music-bed-6" class="clip" src="media/music/ambient-map-bed.wav" data-start="277.6" data-duration="11" data-track-index="76" data-volume="0.2"></audio>
+  <img id="cover" class="clip cover" src="media/images/440882102-cover.png" alt="地理乡土情·雷州市客路镇视频封面" data-start="0" data-duration="1.600" data-track-index="100">
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".subtitle-inner",".visual",".visual figcaption"],{opacity:0});
+  tl.fromTo("#cover",{opacity:1},{opacity:0,duration:0.352,ease:"power2.inOut"},1.248).set("#cover",{opacity:0},1.600);
+  
+  tl.fromTo("#visual-town-entrance",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},4.600).to("#visual-town-entrance",{opacity:0,y:-18,duration:.32,ease:"power2.in"},10.878).set("#visual-town-entrance",{opacity:0},11.228);
+tl.fromTo("#visual-town-market",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},10.958).to("#visual-town-market",{opacity:0,y:-18,duration:.32,ease:"power2.in"},14.487).set("#visual-town-market",{opacity:0},14.837);
+tl.fromTo("#visual-white-cut-dog",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},14.567).to("#visual-white-cut-dog",{opacity:0,y:-18,duration:.32,ease:"power2.in"},20.567).set("#visual-white-cut-dog",{opacity:0},20.917);
+tl.fromTo("#visual-leaf-pancake",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},20.647).to("#visual-leaf-pancake",{opacity:0,y:-18,duration:.32,ease:"power2.in"},27.833).set("#visual-leaf-pancake",{opacity:0},28.183);
+tl.fromTo("#visual-canal-greenway",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},27.913).to("#visual-canal-greenway",{opacity:0,y:-18,duration:.32,ease:"power2.in"},32.586).set("#visual-canal-greenway",{opacity:0},32.936);
+tl.fromTo("#visual-opera-stage",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},32.666).to("#visual-opera-stage",{opacity:0,y:-18,duration:.32,ease:"power2.in"},36.726).set("#visual-opera-stage",{opacity:0},37.076);
+tl.fromTo("#visual-nianli-procession",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},36.806).to("#visual-nianli-procession",{opacity:0,y:-18,duration:.32,ease:"power2.in"},42.273).set("#visual-nianli-procession",{opacity:0},42.623);
+tl.fromTo("#visual-sugarcane-field",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},42.353).to("#visual-sugarcane-field",{opacity:0,y:-18,duration:.32,ease:"power2.in"},54.942).set("#visual-sugarcane-field",{opacity:0},55.292);
+  tl.fromTo("#visual-caption-town-entrance",{opacity:0},{opacity:1,duration:.1},4.700).to("#visual-caption-town-entrance",{opacity:0,duration:.1},10.988).set("#visual-caption-town-entrance",{opacity:0},11.108);
+tl.fromTo("#visual-caption-town-market",{opacity:0},{opacity:1,duration:.1},11.108).to("#visual-caption-town-market",{opacity:0,duration:.1},14.597).set("#visual-caption-town-market",{opacity:0},14.717);
+tl.fromTo("#visual-caption-white-cut-dog",{opacity:0},{opacity:1,duration:.1},14.717).to("#visual-caption-white-cut-dog",{opacity:0,duration:.1},20.677).set("#visual-caption-white-cut-dog",{opacity:0},20.797);
+tl.fromTo("#visual-caption-leaf-pancake",{opacity:0},{opacity:1,duration:.1},20.797).to("#visual-caption-leaf-pancake",{opacity:0,duration:.1},27.943).set("#visual-caption-leaf-pancake",{opacity:0},28.063);
+tl.fromTo("#visual-caption-canal-greenway",{opacity:0},{opacity:1,duration:.1},28.063).to("#visual-caption-canal-greenway",{opacity:0,duration:.1},32.696).set("#visual-caption-canal-greenway",{opacity:0},32.816);
+tl.fromTo("#visual-caption-opera-stage",{opacity:0},{opacity:1,duration:.1},32.816).to("#visual-caption-opera-stage",{opacity:0,duration:.1},36.836).set("#visual-caption-opera-stage",{opacity:0},36.956);
+tl.fromTo("#visual-caption-nianli-procession",{opacity:0},{opacity:1,duration:.1},36.956).to("#visual-caption-nianli-procession",{opacity:0,duration:.1},42.383).set("#visual-caption-nianli-procession",{opacity:0},42.503);
+tl.fromTo("#visual-caption-sugarcane-field",{opacity:0},{opacity:1,duration:.1},42.503).to("#visual-caption-sugarcane-field",{opacity:0,duration:.1},55.052).set("#visual-caption-sugarcane-field",{opacity:0},55.172);
+  tl.fromTo("#caption-inner-0",{opacity:0,y:8},{opacity:1,y:0,duration:.08},4.600).to("#caption-inner-0",{opacity:0,duration:.08},6.560).set("#caption-inner-0",{opacity:0},6.640);
+tl.fromTo("#caption-inner-1",{opacity:0,y:8},{opacity:1,y:0,duration:.08},6.660).to("#caption-inner-1",{opacity:0,duration:.08},8.619).set("#caption-inner-1",{opacity:0},8.699);
+tl.fromTo("#caption-inner-2",{opacity:0,y:8},{opacity:1,y:0,duration:.08},8.719).to("#caption-inner-2",{opacity:0,duration:.08},10.908).set("#caption-inner-2",{opacity:0},10.988);
+tl.fromTo("#caption-inner-3",{opacity:0,y:8},{opacity:1,y:0,duration:.08},11.008).to("#caption-inner-3",{opacity:0,duration:.08},12.970).set("#caption-inner-3",{opacity:0},13.050);
+tl.fromTo("#caption-inner-4",{opacity:0,y:8},{opacity:1,y:0,duration:.08},13.070).to("#caption-inner-4",{opacity:0,duration:.08},14.517).set("#caption-inner-4",{opacity:0},14.597);
+tl.fromTo("#caption-inner-5",{opacity:0,y:8},{opacity:1,y:0,duration:.08},14.617).to("#caption-inner-5",{opacity:0,duration:.08},17.160).set("#caption-inner-5",{opacity:0},17.240);
+tl.fromTo("#caption-inner-6",{opacity:0,y:8},{opacity:1,y:0,duration:.08},17.260).to("#caption-inner-6",{opacity:0,duration:.08},18.747).set("#caption-inner-6",{opacity:0},18.827);
+tl.fromTo("#caption-inner-7",{opacity:0,y:8},{opacity:1,y:0,duration:.08},18.847).to("#caption-inner-7",{opacity:0,duration:.08},20.597).set("#caption-inner-7",{opacity:0},20.677);
+tl.fromTo("#caption-inner-8",{opacity:0,y:8},{opacity:1,y:0,duration:.08},20.697).to("#caption-inner-8",{opacity:0,duration:.08},23.288).set("#caption-inner-8",{opacity:0},23.368);
+tl.fromTo("#caption-inner-9",{opacity:0,y:8},{opacity:1,y:0,duration:.08},23.388).to("#caption-inner-9",{opacity:0,duration:.08},25.441).set("#caption-inner-9",{opacity:0},25.521);
+tl.fromTo("#caption-inner-10",{opacity:0,y:8},{opacity:1,y:0,duration:.08},25.541).to("#caption-inner-10",{opacity:0,duration:.08},27.863).set("#caption-inner-10",{opacity:0},27.943);
+tl.fromTo("#caption-inner-11",{opacity:0,y:8},{opacity:1,y:0,duration:.08},27.963).to("#caption-inner-11",{opacity:0,duration:.08},30.659).set("#caption-inner-11",{opacity:0},30.739);
+tl.fromTo("#caption-inner-12",{opacity:0,y:8},{opacity:1,y:0,duration:.08},30.759).to("#caption-inner-12",{opacity:0,duration:.08},32.616).set("#caption-inner-12",{opacity:0},32.696);
+tl.fromTo("#caption-inner-13",{opacity:0,y:8},{opacity:1,y:0,duration:.08},32.716).to("#caption-inner-13",{opacity:0,duration:.08},34.808).set("#caption-inner-13",{opacity:0},34.888);
+tl.fromTo("#caption-inner-14",{opacity:0,y:8},{opacity:1,y:0,duration:.08},34.908).to("#caption-inner-14",{opacity:0,duration:.08},36.756).set("#caption-inner-14",{opacity:0},36.836);
+tl.fromTo("#caption-inner-15",{opacity:0,y:8},{opacity:1,y:0,duration:.08},36.856).to("#caption-inner-15",{opacity:0,duration:.08},38.521).set("#caption-inner-15",{opacity:0},38.601);
+tl.fromTo("#caption-inner-16",{opacity:0,y:8},{opacity:1,y:0,duration:.08},38.621).to("#caption-inner-16",{opacity:0,duration:.08},40.538).set("#caption-inner-16",{opacity:0},40.618);
+tl.fromTo("#caption-inner-17",{opacity:0,y:8},{opacity:1,y:0,duration:.08},40.638).to("#caption-inner-17",{opacity:0,duration:.08},42.303).set("#caption-inner-17",{opacity:0},42.383);
+tl.fromTo("#caption-inner-18",{opacity:0,y:8},{opacity:1,y:0,duration:.08},42.403).to("#caption-inner-18",{opacity:0,duration:.08},45.090).set("#caption-inner-18",{opacity:0},45.170);
+tl.fromTo("#caption-inner-19",{opacity:0,y:8},{opacity:1,y:0,duration:.08},45.190).to("#caption-inner-19",{opacity:0,duration:.08},48.131).set("#caption-inner-19",{opacity:0},48.211);
+tl.fromTo("#caption-inner-20",{opacity:0,y:8},{opacity:1,y:0,duration:.08},48.231).to("#caption-inner-20",{opacity:0,duration:.08},50.918).set("#caption-inner-20",{opacity:0},50.998);
+tl.fromTo("#caption-inner-21",{opacity:0,y:8},{opacity:1,y:0,duration:.08},51.018).to("#caption-inner-21",{opacity:0,duration:.08},53.198).set("#caption-inner-21",{opacity:0},53.278);
+tl.fromTo("#caption-inner-22",{opacity:0,y:8},{opacity:1,y:0,duration:.08},53.298).to("#caption-inner-22",{opacity:0,duration:.08},54.972).set("#caption-inner-22",{opacity:0},55.052);
+tl.fromTo("#caption-inner-23",{opacity:0,y:8},{opacity:1,y:0,duration:.08},55.072).to("#caption-inner-23",{opacity:0,duration:.08},57.058).set("#caption-inner-23",{opacity:0},57.138);
+tl.fromTo("#caption-inner-24",{opacity:0,y:8},{opacity:1,y:0,duration:.08},57.158).to("#caption-inner-24",{opacity:0,duration:.08},58.217).set("#caption-inner-24",{opacity:0},58.297);
+tl.fromTo("#caption-inner-25",{opacity:0,y:8},{opacity:1,y:0,duration:.08},58.317).to("#caption-inner-25",{opacity:0,duration:.08},60.998).set("#caption-inner-25",{opacity:0},61.078);
+tl.fromTo("#caption-inner-26",{opacity:0,y:8},{opacity:1,y:0,duration:.08},61.098).to("#caption-inner-26",{opacity:0,duration:.08},62.853).set("#caption-inner-26",{opacity:0},62.933);
+tl.fromTo("#caption-inner-27",{opacity:0,y:8},{opacity:1,y:0,duration:.08},62.953).to("#caption-inner-27",{opacity:0,duration:.08},64.939).set("#caption-inner-27",{opacity:0},65.019);
+tl.fromTo("#caption-inner-28",{opacity:0,y:8},{opacity:1,y:0,duration:.08},65.039).to("#caption-inner-28",{opacity:0,duration:.08},66.561).set("#caption-inner-28",{opacity:0},66.641);
+tl.fromTo("#caption-inner-29",{opacity:0,y:8},{opacity:1,y:0,duration:.08},66.661).to("#caption-inner-29",{opacity:0,duration:.08},69.162).set("#caption-inner-29",{opacity:0},69.242);
+tl.fromTo("#caption-inner-30",{opacity:0,y:8},{opacity:1,y:0,duration:.08},69.262).to("#caption-inner-30",{opacity:0,duration:.08},71.527).set("#caption-inner-30",{opacity:0},71.607);
+tl.fromTo("#caption-inner-31",{opacity:0,y:8},{opacity:1,y:0,duration:.08},71.627).to("#caption-inner-31",{opacity:0,duration:.08},73.892).set("#caption-inner-31",{opacity:0},73.972);
+tl.fromTo("#caption-inner-32",{opacity:0,y:8},{opacity:1,y:0,duration:.08},73.992).to("#caption-inner-32",{opacity:0,duration:.08},76.042).set("#caption-inner-32",{opacity:0},76.122);
+tl.fromTo("#caption-inner-33",{opacity:0,y:8},{opacity:1,y:0,duration:.08},76.142).to("#caption-inner-33",{opacity:0,duration:.08},78.192).set("#caption-inner-33",{opacity:0},78.272);
+tl.fromTo("#caption-inner-34",{opacity:0,y:8},{opacity:1,y:0,duration:.08},78.292).to("#caption-inner-34",{opacity:0,duration:.08},80.103).set("#caption-inner-34",{opacity:0},80.183);
+tl.fromTo("#caption-inner-35",{opacity:0,y:8},{opacity:1,y:0,duration:.08},80.203).to("#caption-inner-35",{opacity:0,duration:.08},82.246).set("#caption-inner-35",{opacity:0},82.326);
+tl.fromTo("#caption-inner-36",{opacity:0,y:8},{opacity:1,y:0,duration:.08},82.346).to("#caption-inner-36",{opacity:0,duration:.08},84.150).set("#caption-inner-36",{opacity:0},84.230);
+tl.fromTo("#caption-inner-37",{opacity:0,y:8},{opacity:1,y:0,duration:.08},84.250).to("#caption-inner-37",{opacity:0,duration:.08},86.769).set("#caption-inner-37",{opacity:0},86.849);
+tl.fromTo("#caption-inner-38",{opacity:0,y:8},{opacity:1,y:0,duration:.08},86.869).to("#caption-inner-38",{opacity:0,duration:.08},89.195).set("#caption-inner-38",{opacity:0},89.275);
+tl.fromTo("#caption-inner-39",{opacity:0,y:8},{opacity:1,y:0,duration:.08},89.295).to("#caption-inner-39",{opacity:0,duration:.08},91.620).set("#caption-inner-39",{opacity:0},91.700);
+tl.fromTo("#caption-inner-40",{opacity:0,y:8},{opacity:1,y:0,duration:.08},91.720).to("#caption-inner-40",{opacity:0,duration:.08},93.605).set("#caption-inner-40",{opacity:0},93.685);
+tl.fromTo("#caption-inner-41",{opacity:0,y:8},{opacity:1,y:0,duration:.08},93.705).to("#caption-inner-41",{opacity:0,duration:.08},96.371).set("#caption-inner-41",{opacity:0},96.451);
+tl.fromTo("#caption-inner-42",{opacity:0,y:8},{opacity:1,y:0,duration:.08},96.471).to("#caption-inner-42",{opacity:0,duration:.08},98.675).set("#caption-inner-42",{opacity:0},98.755);
+tl.fromTo("#caption-inner-43",{opacity:0,y:8},{opacity:1,y:0,duration:.08},98.775).to("#caption-inner-43",{opacity:0,duration:.08},100.519).set("#caption-inner-43",{opacity:0},100.599);
+tl.fromTo("#caption-inner-44",{opacity:0,y:8},{opacity:1,y:0,duration:.08},100.619).to("#caption-inner-44",{opacity:0,duration:.08},102.212).set("#caption-inner-44",{opacity:0},102.292);
+tl.fromTo("#caption-inner-45",{opacity:0,y:8},{opacity:1,y:0,duration:.08},102.312).to("#caption-inner-45",{opacity:0,duration:.08},104.872).set("#caption-inner-45",{opacity:0},104.952);
+tl.fromTo("#caption-inner-46",{opacity:0,y:8},{opacity:1,y:0,duration:.08},104.972).to("#caption-inner-46",{opacity:0,duration:.08},107.290).set("#caption-inner-46",{opacity:0},107.370);
+tl.fromTo("#caption-inner-47",{opacity:0,y:8},{opacity:1,y:0,duration:.08},107.390).to("#caption-inner-47",{opacity:0,duration:.08},109.290).set("#caption-inner-47",{opacity:0},109.370);
+tl.fromTo("#caption-inner-48",{opacity:0,y:8},{opacity:1,y:0,duration:.08},109.390).to("#caption-inner-48",{opacity:0,duration:.08},111.734).set("#caption-inner-48",{opacity:0},111.814);
+tl.fromTo("#caption-inner-49",{opacity:0,y:8},{opacity:1,y:0,duration:.08},111.834).to("#caption-inner-49",{opacity:0,duration:.08},114.178).set("#caption-inner-49",{opacity:0},114.258);
+tl.fromTo("#caption-inner-50",{opacity:0,y:8},{opacity:1,y:0,duration:.08},114.278).to("#caption-inner-50",{opacity:0,duration:.08},116.481).set("#caption-inner-50",{opacity:0},116.561);
+tl.fromTo("#caption-inner-51",{opacity:0,y:8},{opacity:1,y:0,duration:.08},116.581).to("#caption-inner-51",{opacity:0,duration:.08},119.041).set("#caption-inner-51",{opacity:0},119.121);
+tl.fromTo("#caption-inner-52",{opacity:0,y:8},{opacity:1,y:0,duration:.08},119.141).to("#caption-inner-52",{opacity:0,duration:.08},121.600).set("#caption-inner-52",{opacity:0},121.680);
+tl.fromTo("#caption-inner-53",{opacity:0,y:8},{opacity:1,y:0,duration:.08},121.700).to("#caption-inner-53",{opacity:0,duration:.08},123.977).set("#caption-inner-53",{opacity:0},124.057);
+tl.fromTo("#caption-inner-54",{opacity:0,y:8},{opacity:1,y:0,duration:.08},124.077).to("#caption-inner-54",{opacity:0,duration:.08},126.117).set("#caption-inner-54",{opacity:0},126.197);
+tl.fromTo("#caption-inner-55",{opacity:0,y:8},{opacity:1,y:0,duration:.08},126.217).to("#caption-inner-55",{opacity:0,duration:.08},128.019).set("#caption-inner-55",{opacity:0},128.099);
+tl.fromTo("#caption-inner-56",{opacity:0,y:8},{opacity:1,y:0,duration:.08},128.119).to("#caption-inner-56",{opacity:0,duration:.08},130.419).set("#caption-inner-56",{opacity:0},130.499);
+tl.fromTo("#caption-inner-57",{opacity:0,y:8},{opacity:1,y:0,duration:.08},130.519).to("#caption-inner-57",{opacity:0,duration:.08},132.580).set("#caption-inner-57",{opacity:0},132.660);
+tl.fromTo("#caption-inner-58",{opacity:0,y:8},{opacity:1,y:0,duration:.08},132.680).to("#caption-inner-58",{opacity:0,duration:.08},135.220).set("#caption-inner-58",{opacity:0},135.300);
+tl.fromTo("#caption-inner-59",{opacity:0,y:8},{opacity:1,y:0,duration:.08},135.320).to("#caption-inner-59",{opacity:0,duration:.08},137.420).set("#caption-inner-59",{opacity:0},137.500);
+tl.fromTo("#caption-inner-60",{opacity:0,y:8},{opacity:1,y:0,duration:.08},137.520).to("#caption-inner-60",{opacity:0,duration:.08},139.865).set("#caption-inner-60",{opacity:0},139.945);
+tl.fromTo("#caption-inner-61",{opacity:0,y:8},{opacity:1,y:0,duration:.08},139.965).to("#caption-inner-61",{opacity:0,duration:.08},141.821).set("#caption-inner-61",{opacity:0},141.901);
+tl.fromTo("#caption-inner-62",{opacity:0,y:8},{opacity:1,y:0,duration:.08},141.921).to("#caption-inner-62",{opacity:0,duration:.08},144.200).set("#caption-inner-62",{opacity:0},144.280);
+tl.fromTo("#caption-inner-63",{opacity:0,y:8},{opacity:1,y:0,duration:.08},144.300).to("#caption-inner-63",{opacity:0,duration:.08},146.843).set("#caption-inner-63",{opacity:0},146.923);
+tl.fromTo("#caption-inner-64",{opacity:0,y:8},{opacity:1,y:0,duration:.08},146.943).to("#caption-inner-64",{opacity:0,duration:.08},148.957).set("#caption-inner-64",{opacity:0},149.037);
+tl.fromTo("#caption-inner-65",{opacity:0,y:8},{opacity:1,y:0,duration:.08},149.057).to("#caption-inner-65",{opacity:0,duration:.08},151.466).set("#caption-inner-65",{opacity:0},151.546);
+tl.fromTo("#caption-inner-66",{opacity:0,y:8},{opacity:1,y:0,duration:.08},151.566).to("#caption-inner-66",{opacity:0,duration:.08},153.222).set("#caption-inner-66",{opacity:0},153.302);
+tl.fromTo("#caption-inner-67",{opacity:0,y:8},{opacity:1,y:0,duration:.08},153.322).to("#caption-inner-67",{opacity:0,duration:.08},155.480).set("#caption-inner-67",{opacity:0},155.560);
+tl.fromTo("#caption-inner-68",{opacity:0,y:8},{opacity:1,y:0,duration:.08},155.580).to("#caption-inner-68",{opacity:0,duration:.08},158.302).set("#caption-inner-68",{opacity:0},158.382);
+tl.fromTo("#caption-inner-69",{opacity:0,y:8},{opacity:1,y:0,duration:.08},158.402).to("#caption-inner-69",{opacity:0,duration:.08},160.098).set("#caption-inner-69",{opacity:0},160.178);
+tl.fromTo("#caption-inner-70",{opacity:0,y:8},{opacity:1,y:0,duration:.08},160.198).to("#caption-inner-70",{opacity:0,duration:.08},162.407).set("#caption-inner-70",{opacity:0},162.487);
+tl.fromTo("#caption-inner-71",{opacity:0,y:8},{opacity:1,y:0,duration:.08},162.507).to("#caption-inner-71",{opacity:0,duration:.08},165.123).set("#caption-inner-71",{opacity:0},165.203);
+tl.fromTo("#caption-inner-72",{opacity:0,y:8},{opacity:1,y:0,duration:.08},165.223).to("#caption-inner-72",{opacity:0,duration:.08},167.346).set("#caption-inner-72",{opacity:0},167.426);
+tl.fromTo("#caption-inner-73",{opacity:0,y:8},{opacity:1,y:0,duration:.08},167.446).to("#caption-inner-73",{opacity:0,duration:.08},169.074).set("#caption-inner-73",{opacity:0},169.154);
+tl.fromTo("#caption-inner-74",{opacity:0,y:8},{opacity:1,y:0,duration:.08},169.174).to("#caption-inner-74",{opacity:0,duration:.08},171.597).set("#caption-inner-74",{opacity:0},171.677);
+tl.fromTo("#caption-inner-75",{opacity:0,y:8},{opacity:1,y:0,duration:.08},171.697).to("#caption-inner-75",{opacity:0,duration:.08},173.111).set("#caption-inner-75",{opacity:0},173.191);
+tl.fromTo("#caption-inner-76",{opacity:0,y:8},{opacity:1,y:0,duration:.08},173.211).to("#caption-inner-76",{opacity:0,duration:.08},175.129).set("#caption-inner-76",{opacity:0},175.209);
+tl.fromTo("#caption-inner-77",{opacity:0,y:8},{opacity:1,y:0,duration:.08},175.229).to("#caption-inner-77",{opacity:0,duration:.08},177.487).set("#caption-inner-77",{opacity:0},177.567);
+tl.fromTo("#caption-inner-78",{opacity:0,y:8},{opacity:1,y:0,duration:.08},177.587).to("#caption-inner-78",{opacity:0,duration:.08},179.609).set("#caption-inner-78",{opacity:0},179.689);
+tl.fromTo("#caption-inner-79",{opacity:0,y:8},{opacity:1,y:0,duration:.08},179.709).to("#caption-inner-79",{opacity:0,duration:.08},181.496).set("#caption-inner-79",{opacity:0},181.576);
+tl.fromTo("#caption-inner-80",{opacity:0,y:8},{opacity:1,y:0,duration:.08},181.596).to("#caption-inner-80",{opacity:0,duration:.08},183.561).set("#caption-inner-80",{opacity:0},183.641);
+tl.fromTo("#caption-inner-81",{opacity:0,y:8},{opacity:1,y:0,duration:.08},183.661).to("#caption-inner-81",{opacity:0,duration:.08},185.856).set("#caption-inner-81",{opacity:0},185.936);
+tl.fromTo("#caption-inner-82",{opacity:0,y:8},{opacity:1,y:0,duration:.08},185.956).to("#caption-inner-82",{opacity:0,duration:.08},188.150).set("#caption-inner-82",{opacity:0},188.230);
+tl.fromTo("#caption-inner-83",{opacity:0,y:8},{opacity:1,y:0,duration:.08},188.250).to("#caption-inner-83",{opacity:0,duration:.08},190.119).set("#caption-inner-83",{opacity:0},190.199);
+tl.fromTo("#caption-inner-84",{opacity:0,y:8},{opacity:1,y:0,duration:.08},190.219).to("#caption-inner-84",{opacity:0,duration:.08},192.526).set("#caption-inner-84",{opacity:0},192.606);
+tl.fromTo("#caption-inner-85",{opacity:0,y:8},{opacity:1,y:0,duration:.08},192.626).to("#caption-inner-85",{opacity:0,duration:.08},194.933).set("#caption-inner-85",{opacity:0},195.013);
+tl.fromTo("#caption-inner-86",{opacity:0,y:8},{opacity:1,y:0,duration:.08},195.033).to("#caption-inner-86",{opacity:0,duration:.08},197.417).set("#caption-inner-86",{opacity:0},197.497);
+tl.fromTo("#caption-inner-87",{opacity:0,y:8},{opacity:1,y:0,duration:.08},197.517).to("#caption-inner-87",{opacity:0,duration:.08},198.659).set("#caption-inner-87",{opacity:0},198.739);
+tl.fromTo("#caption-inner-88",{opacity:0,y:8},{opacity:1,y:0,duration:.08},198.759).to("#caption-inner-88",{opacity:0,duration:.08},200.397).set("#caption-inner-88",{opacity:0},200.477);
+tl.fromTo("#caption-inner-89",{opacity:0,y:8},{opacity:1,y:0,duration:.08},200.497).to("#caption-inner-89",{opacity:0,duration:.08},201.639).set("#caption-inner-89",{opacity:0},201.719);
+tl.fromTo("#caption-inner-90",{opacity:0,y:8},{opacity:1,y:0,duration:.08},201.739).to("#caption-inner-90",{opacity:0,duration:.08},203.974).set("#caption-inner-90",{opacity:0},204.054);
+tl.fromTo("#caption-inner-91",{opacity:0,y:8},{opacity:1,y:0,duration:.08},204.074).to("#caption-inner-91",{opacity:0,duration:.08},206.309).set("#caption-inner-91",{opacity:0},206.389);
+tl.fromTo("#caption-inner-92",{opacity:0,y:8},{opacity:1,y:0,duration:.08},206.409).to("#caption-inner-92",{opacity:0,duration:.08},208.644).set("#caption-inner-92",{opacity:0},208.724);
+tl.fromTo("#caption-inner-93",{opacity:0,y:8},{opacity:1,y:0,duration:.08},208.744).to("#caption-inner-93",{opacity:0,duration:.08},210.943).set("#caption-inner-93",{opacity:0},211.023);
+tl.fromTo("#caption-inner-94",{opacity:0,y:8},{opacity:1,y:0,duration:.08},211.043).to("#caption-inner-94",{opacity:0,duration:.08},212.987).set("#caption-inner-94",{opacity:0},213.067);
+tl.fromTo("#caption-inner-95",{opacity:0,y:8},{opacity:1,y:0,duration:.08},213.087).to("#caption-inner-95",{opacity:0,duration:.08},214.776).set("#caption-inner-95",{opacity:0},214.856);
+tl.fromTo("#caption-inner-96",{opacity:0,y:8},{opacity:1,y:0,duration:.08},214.876).to("#caption-inner-96",{opacity:0,duration:.08},216.053).set("#caption-inner-96",{opacity:0},216.133);
+tl.fromTo("#caption-inner-97",{opacity:0,y:8},{opacity:1,y:0,duration:.08},216.153).to("#caption-inner-97",{opacity:0,duration:.08},218.088).set("#caption-inner-97",{opacity:0},218.168);
+tl.fromTo("#caption-inner-98",{opacity:0,y:8},{opacity:1,y:0,duration:.08},218.188).to("#caption-inner-98",{opacity:0,duration:.08},220.633).set("#caption-inner-98",{opacity:0},220.713);
+tl.fromTo("#caption-inner-99",{opacity:0,y:8},{opacity:1,y:0,duration:.08},220.733).to("#caption-inner-99",{opacity:0,duration:.08},222.668).set("#caption-inner-99",{opacity:0},222.748);
+tl.fromTo("#caption-inner-100",{opacity:0,y:8},{opacity:1,y:0,duration:.08},222.768).to("#caption-inner-100",{opacity:0,duration:.08},224.747).set("#caption-inner-100",{opacity:0},224.827);
+tl.fromTo("#caption-inner-101",{opacity:0,y:8},{opacity:1,y:0,duration:.08},224.847).to("#caption-inner-101",{opacity:0,duration:.08},226.595).set("#caption-inner-101",{opacity:0},226.675);
+tl.fromTo("#caption-inner-102",{opacity:0,y:8},{opacity:1,y:0,duration:.08},226.695).to("#caption-inner-102",{opacity:0,duration:.08},228.905).set("#caption-inner-102",{opacity:0},228.985);
+tl.fromTo("#caption-inner-103",{opacity:0,y:8},{opacity:1,y:0,duration:.08},229.005).to("#caption-inner-103",{opacity:0,duration:.08},230.869).set("#caption-inner-103",{opacity:0},230.949);
+tl.fromTo("#caption-inner-104",{opacity:0,y:8},{opacity:1,y:0,duration:.08},230.969).to("#caption-inner-104",{opacity:0,duration:.08},232.834).set("#caption-inner-104",{opacity:0},232.914);
+tl.fromTo("#caption-inner-105",{opacity:0,y:8},{opacity:1,y:0,duration:.08},232.934).to("#caption-inner-105",{opacity:0,duration:.08},234.552).set("#caption-inner-105",{opacity:0},234.632);
+tl.fromTo("#caption-inner-106",{opacity:0,y:8},{opacity:1,y:0,duration:.08},234.652).to("#caption-inner-106",{opacity:0,duration:.08},235.780).set("#caption-inner-106",{opacity:0},235.860);
+tl.fromTo("#caption-inner-107",{opacity:0,y:8},{opacity:1,y:0,duration:.08},235.880).to("#caption-inner-107",{opacity:0,duration:.08},238.500).set("#caption-inner-107",{opacity:0},238.580);
+tl.fromTo("#caption-inner-108",{opacity:0,y:8},{opacity:1,y:0,duration:.08},238.600).to("#caption-inner-108",{opacity:0,duration:.08},240.947).set("#caption-inner-108",{opacity:0},241.027);
+tl.fromTo("#caption-inner-109",{opacity:0,y:8},{opacity:1,y:0,duration:.08},241.047).to("#caption-inner-109",{opacity:0,duration:.08},243.123).set("#caption-inner-109",{opacity:0},243.203);
+tl.fromTo("#caption-inner-110",{opacity:0,y:8},{opacity:1,y:0,duration:.08},243.223).to("#caption-inner-110",{opacity:0,duration:.08},245.340).set("#caption-inner-110",{opacity:0},245.420);
+tl.fromTo("#caption-inner-111",{opacity:0,y:8},{opacity:1,y:0,duration:.08},245.440).to("#caption-inner-111",{opacity:0,duration:.08},247.557).set("#caption-inner-111",{opacity:0},247.637);
+tl.fromTo("#caption-inner-112",{opacity:0,y:8},{opacity:1,y:0,duration:.08},247.657).to("#caption-inner-112",{opacity:0,duration:.08},249.282).set("#caption-inner-112",{opacity:0},249.362);
+tl.fromTo("#caption-inner-113",{opacity:0,y:8},{opacity:1,y:0,duration:.08},249.382).to("#caption-inner-113",{opacity:0,duration:.08},251.746).set("#caption-inner-113",{opacity:0},251.826);
+tl.fromTo("#caption-inner-114",{opacity:0,y:8},{opacity:1,y:0,duration:.08},251.846).to("#caption-inner-114",{opacity:0,duration:.08},253.964).set("#caption-inner-114",{opacity:0},254.044);
+tl.fromTo("#caption-inner-115",{opacity:0,y:8},{opacity:1,y:0,duration:.08},254.064).to("#caption-inner-115",{opacity:0,duration:.08},255.936).set("#caption-inner-115",{opacity:0},256.016);
+tl.fromTo("#caption-inner-116",{opacity:0,y:8},{opacity:1,y:0,duration:.08},256.036).to("#caption-inner-116",{opacity:0,duration:.08},258.386).set("#caption-inner-116",{opacity:0},258.466);
+tl.fromTo("#caption-inner-117",{opacity:0,y:8},{opacity:1,y:0,duration:.08},258.486).to("#caption-inner-117",{opacity:0,duration:.08},259.856).set("#caption-inner-117",{opacity:0},259.936);
+tl.fromTo("#caption-inner-118",{opacity:0,y:8},{opacity:1,y:0,duration:.08},259.956).to("#caption-inner-118",{opacity:0,duration:.08},262.551).set("#caption-inner-118",{opacity:0},262.631);
+tl.fromTo("#caption-inner-119",{opacity:0,y:8},{opacity:1,y:0,duration:.08},262.651).to("#caption-inner-119",{opacity:0,duration:.08},264.182).set("#caption-inner-119",{opacity:0},264.262);
+tl.fromTo("#caption-inner-120",{opacity:0,y:8},{opacity:1,y:0,duration:.08},264.282).to("#caption-inner-120",{opacity:0,duration:.08},266.511).set("#caption-inner-120",{opacity:0},266.591);
+tl.fromTo("#caption-inner-121",{opacity:0,y:8},{opacity:1,y:0,duration:.08},266.611).to("#caption-inner-121",{opacity:0,duration:.08},269.074).set("#caption-inner-121",{opacity:0},269.154);
+tl.fromTo("#caption-inner-122",{opacity:0,y:8},{opacity:1,y:0,duration:.08},273.574).to("#caption-inner-122",{opacity:0,duration:.08},275.701).set("#caption-inner-122",{opacity:0},275.781);
+tl.fromTo("#caption-inner-123",{opacity:0,y:8},{opacity:1,y:0,duration:.08},275.801).to("#caption-inner-123",{opacity:0,duration:.08},277.185).set("#caption-inner-123",{opacity:0},277.265);
+tl.fromTo("#caption-inner-124",{opacity:0,y:8},{opacity:1,y:0,duration:.08},277.285).to("#caption-inner-124",{opacity:0,duration:.08},278.917).set("#caption-inner-124",{opacity:0},278.997);
+tl.fromTo("#caption-inner-125",{opacity:0,y:8},{opacity:1,y:0,duration:.08},279.017).to("#caption-inner-125",{opacity:0,duration:.08},280.154).set("#caption-inner-125",{opacity:0},280.234);
+tl.fromTo("#caption-inner-126",{opacity:0,y:8},{opacity:1,y:0,duration:.08},280.254).to("#caption-inner-126",{opacity:0,duration:.08},282.491).set("#caption-inner-126",{opacity:0},282.571);
+tl.fromTo("#caption-inner-127",{opacity:0,y:8},{opacity:1,y:0,duration:.08},282.591).to("#caption-inner-127",{opacity:0,duration:.08},285.089).set("#caption-inner-127",{opacity:0},285.169);
+tl.fromTo("#caption-inner-128",{opacity:0,y:8},{opacity:1,y:0,duration:.08},285.189).to("#caption-inner-128",{opacity:0,duration:.08},287.686).set("#caption-inner-128",{opacity:0},287.766);
+tl.fromTo("#caption-inner-129",{opacity:0,y:8},{opacity:1,y:0,duration:.08},287.786).to("#caption-inner-129",{opacity:0,duration:.08},290.023).set("#caption-inner-129",{opacity:0},290.103);
+  window.__timelines=window.__timelines||{};window.__timelines["440882102-portrait"]=tl;
+</script>
+</body></html>

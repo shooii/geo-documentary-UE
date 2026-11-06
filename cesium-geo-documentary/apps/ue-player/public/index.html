@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>UE 地图视频流</title>
+  <style>
+    html,body,#stream{margin:0;width:100%;height:100%;overflow:hidden;background:#07121c}
+    #stream{position:absolute;inset:0}
+    #stream video{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover;object-position:center}
+    #connection{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#b8cad9;font:14px system-ui;background:#07121ceb;gap:14px}
+    #connection[hidden]{display:none}
+    button{padding:10px 18px;background:#173c57;color:white;border:1px solid #2d9cdb;border-radius:6px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div id="stream"></div>
+  <div id="connection" role="status"><span id="status">正在连接 UE 地图视频流…</span><button id="retry">连接 / 播放</button></div>
+  <script type="module" src="/player.js"></script>
+</body>
+</html>

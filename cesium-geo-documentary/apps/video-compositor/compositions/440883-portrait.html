@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-composition-variables="[]">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>吴川市地理图说</title>
+  <script src="media/gsap.min.js"></script>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
+    #root{position:relative;width:1080px;height:1920px;overflow:hidden;background:#081017}
+    @font-face{font-family:"GeoSans";src:local("Microsoft YaHei")} .clip{position:absolute}.map{inset:0;width:100%;height:100%;object-fit:cover}.shade{inset:0;background:linear-gradient(90deg,rgba(4,10,15,.72),transparent 48%),linear-gradient(0deg,rgba(4,10,15,.68),transparent 35%)}
+    .topbar{left:64px;top:64px;display:flex;align-items:center;gap:18px;font-size:27px;letter-spacing:.16em;color:#d1dbe1;text-shadow:0 2px 16px #000}.topbar:before{content:"";width:64px;height:3px;background:#ffd166;box-shadow:0 0 16px rgba(255,209,102,.75)}
+    .scene-title{left:64px;top:760px;width:952px;text-shadow:0 3px 24px #000}.scene-title span{display:inline-block;color:#ffd166;font-size:22px;letter-spacing:.16em;margin-bottom:12px;padding:4px 10px;border-radius:999px;background:rgba(4,10,15,.78);border:1px solid rgba(255,209,102,.42)}.scene-title h2{font-size:58px;line-height:1.1;margin:0;font-weight:760}
+    .fact-card{right:64px;top:1040px;width:952px;padding:28px 30px;border:1px solid rgba(255,255,255,.18);border-radius:20px;background:rgba(17,27,36,.84);box-shadow:0 18px 60px rgba(0,0,0,.34);backdrop-filter:blur(18px)}.fact-card b{font-size:28px;color:#ffd166}.fact-card p{font-size:24px;line-height:1.55;color:#d1dbe1;margin:14px 0 0}
+    .culture{right:64px;top:190px;width:952px;height:536px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.22);box-shadow:0 24px 80px rgba(0,0,0,.45);background:#111b24}.culture img{width:100%;height:100%;object-fit:cover}.badge{position:absolute;left:18px;top:18px;padding:8px 14px;border-radius:999px;background:rgba(4,10,15,.78);font-size:20px;color:#ffd166;border:1px solid rgba(255,209,102,.5)}
+    .subtitle{left:50%;bottom:118px;transform:translateX(-50%);max-width:900px;padding:12px 24px;border-radius:14px;background:rgba(4,10,15,.72);font-size:40px;line-height:1.42;text-align:center;font-weight:650;text-shadow:0 2px 8px #000;white-space:nowrap}
+    .source-card{left:64px;right:64px;bottom:180px;padding:26px 28px;border-radius:20px;background:rgba(8,16,23,.94);border:1px solid rgba(255,255,255,.16)}.source-card h3{margin:0 0 12px;font-size:30px}.source-card p{margin:0;color:#d1dbe1;font-size:20px;line-height:1.55}.source-card .notice{margin-top:10px;color:#ffd166}
+    .transition-host,.transition{inset:0;pointer-events:none}.transition{position:absolute;background:#081017}.credit{position:absolute;right:64px;bottom:18px;z-index:30;padding:5px 9px;border-radius:7px;background:rgba(4,10,15,.72);font-size:16px;color:#f4f7f9}
+  </style>
+</head>
+<body>
+<main data-hf-id="hf-58t7" id="root" data-composition-id="440883-portrait" data-start="0" data-width="1080" data-height="1920" data-duration="50" data-fps="30">
+  <video data-hf-id="hf-s2z2" id="map" class="clip map" src="media/maps/440883-map-portrait.mp4" muted playsinline preload="auto" data-start="0" data-duration="50" data-track-index="0"></video>
+  <div data-hf-id="hf-q6mu" id="shade" class="clip shade" data-start="0" data-duration="50" data-track-index="1"></div>
+  <div data-hf-id="hf-0xxu" id="topbar" class="clip topbar" data-start="0" data-duration="50" data-track-index="10">湛江地理图说 · 区县系列</div>
+  <section data-hf-id="hf-rc9n" id="scene-0" class="clip scene-title" data-start="0" data-duration="7" data-track-index="2"><div data-hf-id="hf-0pqf" id="scene-inner-0"><span data-hf-id="hf-p81i">01</span><h2 data-hf-id="hf-6xci">吴川市，位于湛江何处</h2></div></section>
+<section data-hf-id="hf-m0g0" id="scene-1" class="clip scene-title" data-start="7" data-duration="8" data-track-index="2"><div data-hf-id="hf-uk0m" id="scene-inner-1"><span data-hf-id="hf-pmcj">02</span><h2 data-hf-id="hf-xvjq">边界与邻接关系</h2></div></section>
+<section data-hf-id="hf-hig1" id="scene-2" class="clip scene-title" data-start="15" data-duration="10" data-track-index="2"><div data-hf-id="hf-qlwl" id="scene-inner-2"><span data-hf-id="hf-q0nk">03</span><h2 data-hf-id="hf-c4pf">鉴江穿城入海的粤西滨海县级市</h2></div></section>
+<section data-hf-id="hf-demd" id="scene-3" class="clip scene-title" data-start="25" data-duration="10" data-track-index="2"><div data-hf-id="hf-pu8s" id="scene-inner-3"><span data-hf-id="hf-n8id">04</span><h2 data-hf-id="hf-b49i">梅菉等城镇沿河海交通发展</h2></div></section>
+<section data-hf-id="hf-gm6h" id="scene-4" class="clip scene-title" data-start="35" data-duration="9" data-track-index="2"><div data-hf-id="hf-dbqb" id="scene-inner-4"><span data-hf-id="hf-nmte">05</span><h2 data-hf-id="hf-4sst">飘色与泥塑形成活态民俗</h2></div></section>
+<section data-hf-id="hf-qnaj" id="scene-5" class="clip scene-title" data-start="44" data-duration="6" data-track-index="2"><div data-hf-id="hf-9dma" id="scene-inner-5"><span data-hf-id="hf-o14f">06</span><h2 data-hf-id="hf-pqcx">滨海发展与县域产业共同推进</h2></div></section>
+  <aside data-hf-id="hf-txc3" id="fact-card" class="clip fact-card" data-start="15" data-duration="10" data-track-index="3"><b data-hf-id="hf-px19">鉴江穿城入海的粤西滨海县级市</b><p data-hf-id="hf-vqdi">梅菉等城镇沿河海交通发展</p></aside>
+  <figure data-hf-id="hf-g4mc" id="culture" class="clip culture" data-start="35" data-duration="9" data-track-index="4"><img data-hf-id="hf-8uxu" src="media/images/440883-culture-001.png" alt="吴川市文化章节辅助画面"><figcaption data-hf-id="hf-wl87" class="badge">AI 艺术化复原</figcaption></figure>
+  <div data-hf-id="hf-lnab" id="caption-0" class="clip subtitle" data-start="0.100" data-duration="6.213" data-track-index="5">吴川位于湛江东部，南濒南海，<br data-hf-id="hf-x5px">鉴江干流自北向南穿过市域并流</div>
+<div data-hf-id="hf-a0dh" id="caption-1" class="clip subtitle" data-start="6.313" data-duration="0.887" data-track-index="5">向海岸。</div>
+<div data-hf-id="hf-wmu6" id="caption-2" class="clip subtitle" data-start="7.200" data-duration="6.218" data-track-index="5">北高南低的地势，把河谷、平原<br data-hf-id="hf-rsrt">、城镇和海湾连接成一条清晰轴</div>
+<div data-hf-id="hf-hx2r" id="caption-3" class="clip subtitle" data-start="13.418" data-duration="0.444" data-track-index="5">线。</div>
+<div data-hf-id="hf-sf8d" id="caption-4" class="clip subtitle" data-start="13.862" data-duration="5.634" data-track-index="5">沿河海交通发展起来的梅菉等城<br data-hf-id="hf-szow">镇，积累了密集的商贸与手工业</div>
+<div data-hf-id="hf-j8uv" id="caption-5" class="clip subtitle" data-start="19.496" data-duration="0.604" data-track-index="5">传统。</div>
+<div data-hf-id="hf-7ldt" id="caption-6" class="clip subtitle" data-start="20.100" data-duration="4.980" data-track-index="5">吴川飘色以人物造型凌空巡游，<br data-hf-id="hf-sldv">泥塑则把节庆、</div>
+<div data-hf-id="hf-hxea" id="caption-7" class="clip subtitle" data-start="25.080" data-duration="2.845" data-track-index="5">戏曲和民间故事凝固成形。</div>
+<div data-hf-id="hf-jfkv" id="caption-8" class="clip subtitle" data-start="27.925" data-duration="6.575" data-track-index="5">这些技艺仍通过节庆展演、校园<br data-hf-id="hf-qluq">活动和传承实践进入当代生活。</div>
+<div data-hf-id="hf-zsq2" id="caption-9" class="clip subtitle" data-start="34.500" data-duration="4.214" data-track-index="5">今天的吴川，<br data-hf-id="hf-q7jp">一边面向滨海空间和县域产业，</div>
+<div data-hf-id="hf-500s" id="caption-10" class="clip subtitle" data-start="38.714" data-duration="3.161" data-track-index="5">一边让鲜活民俗继<br data-hf-id="hf-regs">续行走在街巷。</div>
+  <audio data-hf-id="hf-mdi1" id="narration-audio" class="clip" src="media/audio/440883-narration.wav" data-start="0" data-duration="41.930" data-track-index="6" data-volume="1"></audio>
+  <audio data-hf-id="hf-mv2o" id="music-bed" class="clip" src="media/music/ambient-map-bed.wav" data-start="0" data-duration="50" data-track-index="7" data-volume="0.5"></audio>
+  <section data-hf-id="hf-rm4u" id="sources" class="clip source-card" data-start="44" data-duration="6" data-track-index="8"><h3 data-hf-id="hf-hy2v">来源与说明</h3><p data-hf-id="hf-3gg4">吴川市人民政府：《地理位置》　湛江市人民政府：《湛江市国民经济和社会发展第十三个五年规划纲要》　吴川市人民政府：《我市举行“可持续发展 非遗同行”泥塑进校园主题活动》</p><p data-hf-id="hf-eubi" class="notice">行政区边界仅作视频可视化，不作为法定界线依据。生成素材均标注艺术化复原；未通过 QA 的素材以地图画面替代。</p></section>
+  <div data-hf-id="hf-m0g6" class="clip transition-host" id="transition-host-1" data-start="6.7" data-duration="0.6" data-track-index="9"><div data-hf-id="hf-u6rk" class="transition" id="transition-1"></div></div>
+  <div data-hf-id="hf-df6c" class="clip transition-host" id="transition-host-2" data-start="14.7" data-duration="0.6" data-track-index="9"><div data-hf-id="hf-2unf" class="transition" id="transition-2"></div></div>
+  <div data-hf-id="hf-m55w" class="clip transition-host" id="transition-host-3" data-start="24.7" data-duration="0.6" data-track-index="9"><div data-hf-id="hf-ywje" class="transition" id="transition-3"></div></div>
+  <div data-hf-id="hf-n9nk" class="clip transition-host" id="transition-host-4" data-start="34.7" data-duration="0.6" data-track-index="9"><div data-hf-id="hf-icfh" class="transition" id="transition-4"></div></div>
+  <div data-hf-id="hf-ifk7" class="credit">CesiumJS · DataV 边界可视化 · Natural Earth II</div>
+</main>
+<script>
+  const tl=gsap.timeline({paused:true});
+  gsap.set([".scene-title>div","#fact-card","#culture","#sources",".subtitle"],{opacity:0});
+  tl.fromTo("#scene-inner-0",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},0.1);
+tl.fromTo("#scene-inner-1",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},7.1);
+tl.fromTo("#scene-inner-2",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},15.1);
+tl.fromTo("#scene-inner-3",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},25.1);
+tl.fromTo("#scene-inner-4",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},35.1);
+tl.fromTo("#scene-inner-5",{opacity:0,y:28},{opacity:1,y:0,duration:.55,ease:"power2.out"},44.1);
+  tl.fromTo("#fact-card",{opacity:0,x:42},{opacity:1,x:0,duration:.65,ease:"power2.out"},15.15);
+  tl.fromTo("#culture",{opacity:0,scale:.96,x:36},{opacity:1,scale:1,x:0,duration:.75,ease:"power2.out"},35.1);
+  tl.fromTo("#sources",{opacity:0,y:28},{opacity:1,y:0,duration:.65,ease:"power2.out"},44.1);
+  tl.fromTo("#caption-0",{opacity:0,y:12},{opacity:1,y:0,duration:.18},0.100);
+tl.fromTo("#caption-1",{opacity:0,y:12},{opacity:1,y:0,duration:.18},6.313);
+tl.fromTo("#caption-2",{opacity:0,y:12},{opacity:1,y:0,duration:.18},7.200);
+tl.fromTo("#caption-3",{opacity:0,y:12},{opacity:1,y:0,duration:.18},13.418);
+tl.fromTo("#caption-4",{opacity:0,y:12},{opacity:1,y:0,duration:.18},13.862);
+tl.fromTo("#caption-5",{opacity:0,y:12},{opacity:1,y:0,duration:.18},19.496);
+tl.fromTo("#caption-6",{opacity:0,y:12},{opacity:1,y:0,duration:.18},20.100);
+tl.fromTo("#caption-7",{opacity:0,y:12},{opacity:1,y:0,duration:.18},25.080);
+tl.fromTo("#caption-8",{opacity:0,y:12},{opacity:1,y:0,duration:.18},27.925);
+tl.fromTo("#caption-9",{opacity:0,y:12},{opacity:1,y:0,duration:.18},34.500);
+tl.fromTo("#caption-10",{opacity:0,y:12},{opacity:1,y:0,duration:.18},38.714);
+  [1,2,3,4].forEach((n)=>{const starts=[6.7,14.7,24.7,34.7],selector="#transition-"+n;tl.fromTo(selector,{opacity:0},{opacity:.28,duration:.18},starts[n-1]).to(selector,{opacity:0,duration:.36},starts[n-1]+.2)});
+  window.__timelines=window.__timelines||{};window.__timelines["440883-portrait"]=tl;
+</script>
+</body></html>

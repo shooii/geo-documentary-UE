@@ -1,0 +1,67 @@
+{
+  "parentId": "440900",
+  "parentName": "茂名市",
+  "parentLevelRole": "admin2",
+  "childLevelRole": "admin3/locality",
+  "effectiveDate": "2025-12-31",
+  "classificationPolicy": "statutory-county-level-units-only; functional-new-areas-excluded",
+  "boundarySource": "Alibaba Cloud DataV administrative boundary visualization dataset",
+  "boundarySourceUrl": "https://geo.datav.aliyun.com/areas_v3/bound/440900_full.json",
+  "editorialOrder": [
+    "440902",
+    "440904",
+    "440981",
+    "440982",
+    "440983"
+  ],
+  "children": [
+    {
+      "id": "440902",
+      "name": "茂南区",
+      "included": true,
+      "classification": "statutory-immediate-child",
+      "editorialOrder": 1
+    },
+    {
+      "id": "440904",
+      "name": "电白区",
+      "included": true,
+      "classification": "statutory-immediate-child",
+      "editorialOrder": 2
+    },
+    {
+      "id": "440981",
+      "name": "高州市",
+      "included": true,
+      "classification": "statutory-immediate-child",
+      "editorialOrder": 3
+    },
+    {
+      "id": "440982",
+      "name": "化州市",
+      "included": true,
+      "classification": "statutory-immediate-child",
+      "editorialOrder": 4
+    },
+    {
+      "id": "440983",
+      "name": "信宜市",
+      "included": true,
+      "classification": "statutory-immediate-child",
+      "editorialOrder": 5
+    }
+  ],
+  "excludedFunctionalAreas": [
+    {
+      "name": "茂名滨海新区等功能区",
+      "reason": "不属于法定县级行政区，不与区、县级市并列进入主覆盖清单"
+    }
+  ],
+  "narrationCoverage": [
+    {"id": "440902", "segmentRegionId": "440902", "durationSeconds": 53, "camera": true, "highlight": true},
+    {"id": "440904", "segmentRegionId": "440904", "durationSeconds": 52, "camera": true, "highlight": true},
+    {"id": "440981", "segmentRegionId": "440981", "durationSeconds": 54, "camera": true, "highlight": true},
+    {"id": "440982", "segmentRegionId": "440982", "durationSeconds": 54, "camera": true, "highlight": true},
+    {"id": "440983", "segmentRegionId": "440983", "durationSeconds": 58, "camera": true, "highlight": true}
+  ]
+}

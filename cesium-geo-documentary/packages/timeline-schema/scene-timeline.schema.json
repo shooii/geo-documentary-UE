@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.cesium-geo-documentary/schemas/scene-timeline.schema.json",
+  "type": "object",
+  "required": ["duration", "actions"],
+  "properties": {
+    "duration": { "type": "number", "exclusiveMinimum": 0 },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "time", "duration", "type", "target"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "time": { "type": "number", "minimum": 0 },
+          "duration": { "type": "number", "minimum": 0 },
+          "type": {
+            "enum": [
+              "flyToRegion", "zoomFromGlobe", "orbitRegion", "tiltToTerrain",
+              "traceBoundary", "focusCity", "topDownMap", "obliqueTerrain",
+              "showRegionLabel", "showCultureAsset", "showEndCard",
+              "showParentOverview", "fadeSelectedFill", "showPopulation",
+              "showEconomy", "showHistory", "showCulture", "showSummary",
+              "holdRegionCamera", "fadeSelectedOut", "pullBackToParent"
+            ]
+          },
+          "target": { "type": "string" },
+          "easing": { "enum": ["linear", "cubicInOut", "sineInOut"] }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

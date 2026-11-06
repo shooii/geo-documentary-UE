@@ -1,0 +1,313 @@
+{
+  "parentId": "440823105",
+  "parentName": "江洪镇",
+  "levelRole": "township",
+  "officialLevelName": "镇",
+  "childRole": "village-or-community",
+  "source": "用户提供的广东省村级行政边界 SHP",
+  "effectiveDate": "2025-08-01",
+  "sourceAdministrativeCode": "440823105",
+  "currentReferenceAdministrativeCode": "440823105",
+  "completeImmediateChildCoverage": false,
+  "sourceDissolveCoverageComplete": true,
+  "parentDerivation": "union-of-child-shapefile-features",
+  "coverageLimitation": "当前公开参考口径为 1 个社区、8 个行政村。用户提供的 SHP 含 7 个可对应的法定下级面，另有 1 个林场管理单元面；元发村和江北村没有独立可靠面，不得推测或伪造。父级融合边界只表示所有 8 个源面要素的并集，不代表当前 9 个法定下级边界已完整分割。",
+  "officialReferenceChildren": [
+    {
+      "id": "440823105001",
+      "name": "江洪社区",
+      "unitRole": "community",
+      "boundaryStatus": "verified-source-polygon-with-name-correction"
+    },
+    {
+      "id": "440823105200",
+      "name": "大路村",
+      "unitRole": "administrative-village",
+      "boundaryStatus": "verified-source-polygon"
+    },
+    {
+      "id": "440823105201",
+      "name": "北草村",
+      "unitRole": "administrative-village",
+      "boundaryStatus": "verified-source-polygon"
+    },
+    {
+      "id": "440823105202",
+      "name": "四联村",
+      "unitRole": "administrative-village",
+      "boundaryStatus": "verified-source-polygon"
+    },
+    {
+      "id": "440823105203",
+      "name": "坛头村",
+      "unitRole": "administrative-village",
+      "boundaryStatus": "verified-source-polygon"
+    },
+    {
+      "id": "440823105204",
+      "name": "昌洋村",
+      "unitRole": "administrative-village",
+      "boundaryStatus": "verified-source-polygon"
+    },
+    {
+      "id": "440823105205",
+      "name": "姑寮村",
+      "unitRole": "administrative-village",
+      "boundaryStatus": "verified-source-polygon"
+    },
+    {
+      "id": "440823105206",
+      "name": "元发村",
+      "unitRole": "administrative-village",
+      "boundaryStatus": "missing-reliable-source-polygon"
+    },
+    {
+      "id": "440823105207",
+      "name": "江北村",
+      "unitRole": "administrative-village",
+      "boundaryStatus": "missing-reliable-source-polygon"
+    }
+  ],
+  "officialChildListEvidence": [
+    {
+      "title": "江洪镇",
+      "publisher": "遂溪县江洪镇人民政府",
+      "publishedAt": "2025-08-01",
+      "url": "http://www.suixi.gov.cn/zjsx/gzjj/content/post_1851533.html",
+      "evidence": "下辖居委会 1 个、村委会 8 个"
+    },
+    {
+      "title": "遂溪县江洪镇",
+      "publisher": "博雅地名网",
+      "accessedAt": "2026-08-08",
+      "url": "http://www.tcmap.com.cn/guangdong/suixixian_jianghongzhen.html",
+      "evidence": "列出江洪社区以及大路、北草、四联、坛头、昌洋、姑寮、元发、江北的代码与名称"
+    },
+    {
+      "title": "县政协副主席李和清率队到江洪开展‘七一’送温暖慰问活动",
+      "publisher": "湛江市遂溪县江洪镇人民政府",
+      "publishedAt": "2023-06-30",
+      "url": "http://www.suixi.gov.cn/zjsxjh/gkmlpt/content/1/1778/post_1778751.html",
+      "evidence": "正文明确出现元发村党支部"
+    },
+    {
+      "title": "‘擂台比武’励精兵 实干担当促发展",
+      "publisher": "湛江市遂溪县江洪镇人民政府",
+      "publishedAt": "2023-09-06",
+      "url": "http://www.suixi.gov.cn/zjsxjh/gkmlpt/content/1/1801/post_1801705.html",
+      "evidence": "正文明确出现江北村党支部书记"
+    }
+  ],
+  "children": [
+    {
+      "id": "440823105001",
+      "name": "江洪社区",
+      "included": true,
+      "reason": "SHP 中有稳定代码 440823105001 的面，名称依当前公开名单由江洪村校正为江洪社区",
+      "editorialOrder": 1
+    },
+    {
+      "id": "440823105200",
+      "name": "大路村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 8
+    },
+    {
+      "id": "440823105201",
+      "name": "北草村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 2
+    },
+    {
+      "id": "440823105202",
+      "name": "四联村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 3
+    },
+    {
+      "id": "440823105203",
+      "name": "坛头村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 4
+    },
+    {
+      "id": "440823105204",
+      "name": "昌洋村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 6
+    },
+    {
+      "id": "440823105205",
+      "name": "姑寮村",
+      "included": true,
+      "reason": "SHP feature",
+      "editorialOrder": 7
+    }
+  ],
+  "missingCurrentChildren": [
+    {
+      "id": "440823105206",
+      "name": "元发村",
+      "reason": "用户提供的 SHP 中无独立面；不使用手绘、质心分区或推测边界"
+    },
+    {
+      "id": "440823105207",
+      "name": "江北村",
+      "reason": "用户提供的 SHP 中无独立面；不使用手绘、质心分区或推测边界"
+    }
+  ],
+  "excludedUnits": [
+    {
+      "id": "440823105206",
+      "name": "元发村",
+      "reason": "No verified polygon in the supplied SHP"
+    },
+    {
+      "id": "440823105207",
+      "name": "江北村",
+      "reason": "No verified polygon in the supplied SHP"
+    },
+    {
+      "id": "440823105401",
+      "name": "江洪镇河头林场",
+      "reason": "Supplemental forest-farm management unit; retained in boundaryUnitIds but not presented as an ordinary village"
+    }
+  ],
+  "supplementalUnits": [
+    {
+      "id": "440823105401",
+      "name": "江洪镇河头林场",
+      "unitRole": "supplemental-management-unit",
+      "classification": "forest-farm-management-unit",
+      "includedInTour": true,
+      "labelPolicy": "persistent-when-visited"
+    }
+  ],
+  "coverageScope": "8 reliable boundary units, all retained in the narrated tour",
+  "tourChildIds": [
+    "440823105001",
+    "440823105200",
+    "440823105201",
+    "440823105202",
+    "440823105203",
+    "440823105204",
+    "440823105205",
+    "440823105401"
+  ],
+  "boundaryUnitIds": [
+    "440823105203",
+    "440823105401",
+    "440823105001",
+    "440823105200",
+    "440823105202",
+    "440823105204",
+    "440823105205",
+    "440823105201"
+  ],
+  "boundaryUnits": [
+    {
+      "id": "440823105203",
+      "name": "坛头村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823105401",
+      "name": "江洪镇河头林场",
+      "unitRole": "supplemental-management-unit",
+      "classification": "forest-farm-management-unit"
+    },
+    {
+      "id": "440823105001",
+      "name": "江洪社区",
+      "unitRole": "community"
+    },
+    {
+      "id": "440823105200",
+      "name": "大路村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823105202",
+      "name": "四联村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823105204",
+      "name": "昌洋村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823105205",
+      "name": "姑寮村",
+      "unitRole": "administrative-village"
+    },
+    {
+      "id": "440823105201",
+      "name": "北草村",
+      "unitRole": "administrative-village"
+    }
+  ],
+  "narrationCoverage": [
+    {
+      "id": "440823105001",
+      "start": 90.755,
+      "end": 99.205,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823105201",
+      "start": 99.205,
+      "end": 105.312,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823105202",
+      "start": 105.312,
+      "end": 110.625,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823105203",
+      "start": 110.625,
+      "end": 115.664,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823105401",
+      "start": 115.664,
+      "end": 123.32,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823105204",
+      "start": 123.32,
+      "end": 130.807,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823105205",
+      "start": 130.807,
+      "end": 136.445,
+      "camera": true,
+      "highlight": true
+    },
+    {
+      "id": "440823105200",
+      "start": 136.445,
+      "end": 141.914,
+      "camera": true,
+      "highlight": true
+    }
+  ]
+}

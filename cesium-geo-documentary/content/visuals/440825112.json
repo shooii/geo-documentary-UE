@@ -1,0 +1,75 @@
+{
+  "regionId": "440825112",
+  "profilePriority": "portrait",
+  "timingMode": "narration-cue-required",
+  "clips": [
+    {
+      "id": "shrimp-farm",
+      "path": "assets/source/440825112/10-small-shed-shrimp.jpg",
+      "label": "小棚虾养殖（徐闻公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 1,
+      "requiredKeywords": [
+        "虾塘"
+      ],
+      "leadSeconds": 0.25,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "aquaculture-aerial",
+      "path": "assets/source/440825112/11-coastal-aquaculture.jpg",
+      "label": "海岸养殖塘（徐闻公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 3,
+      "requiredKeywords": [
+        "海水养殖"
+      ],
+      "leadSeconds": 0.25,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "shrimp-sheds-aerial",
+      "path": "assets/source/440825112/12-shrimp-sheds-aerial.jpg",
+      "label": "连片养殖棚（徐闻公开报道实景）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 4,
+      "requiredKeywords": [
+        "渔业光伏",
+        "产业空间"
+      ],
+      "leadSeconds": 0.25,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "mangrove",
+      "path": "assets/source/440825112/03-mangrove-restoration.jpg",
+      "label": "红树林营造修复（徐闻实景资料）",
+      "fit": "cover",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 6,
+      "requiredKeywords": [
+        "红树林",
+        "木麻黄防风林"
+      ],
+      "leadSeconds": 0.25,
+      "tailSeconds": 0.2
+    },
+    {
+      "id": "leidasha",
+      "path": "assets/source/440825112/01-leidasha-womens-day.png",
+      "label": "后海村雷打沙海滩实景资料",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 11,
+      "requiredKeywords": [
+        "后海村",
+        "雷打沙海滩"
+      ],
+      "leadSeconds": 0.25,
+      "tailSeconds": 0.2
+    }
+  ]
+}

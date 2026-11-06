@@ -1,0 +1,92 @@
+{
+  "regionId": "440825110",
+  "timingMode": "narration-cue-required",
+  "clips": [
+    {
+      "id": "pineapple-training",
+      "path": "assets/source/440825110/01-pineapple-training.jpg",
+      "label": "锦和镇菠萝网络销售培训（官方实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 4,
+      "requiredKeywords": [
+        "菠萝",
+        "网络销售",
+        "锦囊金钻菠萝"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0.24
+    },
+    {
+      "id": "jinhe-middle-school",
+      "path": "assets/source/440825110/04-jinhe-middle-school.jpg",
+      "label": "锦和中学校园安全检查（官方实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 8,
+      "requiredKeywords": [
+        "锦和中学",
+        "校园"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0.24
+    },
+    {
+      "id": "naban-awards",
+      "path": "assets/source/440825110/05-naban-awards.jpg",
+      "label": "那板村2024年奖学颁奖活动（官方实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 19,
+      "requiredKeywords": [
+        "那板村",
+        "奖学"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0
+    },
+    {
+      "id": "liuji-wharf",
+      "path": "assets/source/440825110/06-liuji-wharf.jpg",
+      "label": "六极码头防台检查（官方实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 20,
+      "requiredKeywords": [
+        "六极村",
+        "六极码头"
+      ],
+      "leadSeconds": 0,
+      "tailSeconds": 0.24
+    },
+    {
+      "id": "gouxi-harbor",
+      "path": "assets/source/440825110/07-gouxi-harbor.jpg",
+      "label": "沟西避风港安全检查（官方实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 22,
+      "requiredKeywords": [
+        "沟西村",
+        "沟西避风港"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0.24
+    },
+    {
+      "id": "baimao-governance",
+      "path": "assets/source/440825110/03-baimao-governance.png",
+      "label": "白茅村积分制乡村治理活动（官方实景）",
+      "fit": "contain",
+      "sourceType": "verified-real",
+      "narrationCueIndex": 25,
+      "requiredKeywords": [
+        "白茅村",
+        "积分兑换",
+        "乡村治理"
+      ],
+      "leadSeconds": 0.3,
+      "tailSeconds": 0.24
+    }
+  ]
+}
