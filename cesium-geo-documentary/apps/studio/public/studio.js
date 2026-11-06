@@ -1,8 +1,8 @@
 import { selectSceneAssetsForNarration } from "./scene-asset-match.js?v=20260918-3";
 import { sceneRenderPlacementIndex, selectSceneRenderPlacements } from "./scene-render-placements.js?v=20261021-2";
+import { previewOrigin as CESIUM_PREVIEW_ORIGIN } from "./studio-config.js";
 
 const $ = (id) => document.getElementById(id);
-const CESIUM_PREVIEW_ORIGIN = "http://127.0.0.1:4174";
 const DEFAULT_IMAGERY_PROVIDER = "cesium-ion-world-imagery";
 const DEFAULT_MAP_VIEW = Object.freeze({ longitudeOffset: 0, latitudeOffset: 0, zoom: 1, headingOffset: 0, pitchOffset: 0 });
 const state = {

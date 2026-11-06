@@ -15,7 +15,7 @@ try{
  const deadline=Date.now()+180000;
  while(!(await readFile(log,'utf8').catch(()=>'')).includes('Websocket connection made to: ws://127.0.0.1:4776')){if(Date.now()>deadline)throw new Error('QA streamer failed');await new Promise(r=>setTimeout(r,500));}
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1196,height:956}});
- await page.route('**/studio.js*',async route=>{const response=await route.fetch();const source=await response.text();await route.fulfill({response,body:source.replace('const CESIUM_PREVIEW_ORIGIN = "http://127.0.0.1:4174";','const CESIUM_PREVIEW_ORIGIN = "http://127.0.0.1:4774";')});});
+ await page.route('**/studio-config.js',route=>route.fulfill({contentType:'text/javascript',body:'export const previewOrigin = "http://127.0.0.1:4774";'}));
  await page.goto('http://127.0.0.1:4180/');await page.locator('#timelineScenes .timeline-clip').nth(1).waitFor({timeout:60000});
  await page.locator('#timelineScenes .timeline-clip').nth(1).click();
  const frame=await page.locator('#cesiumPreview').elementHandle().then(el=>el!.contentFrame());

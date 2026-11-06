@@ -1788,6 +1788,10 @@ const server = createServer(async (request, response) => {
   try {
     queuedAt = Date.now();
     const url = new URL(request.url ?? "/", `http://${request.headers.host ?? `127.0.0.1:${port}`}`);
+    if (request.method === "GET" && url.pathname === "/studio-config.js") {
+      const previewOrigin = `http://127.0.0.1:${cesiumPreviewPort}`;
+      return sendBuffer(response, 200, Buffer.from(`export const previewOrigin = ${JSON.stringify(previewOrigin)};\n`), "text/javascript; charset=utf-8");
+    }
     const projectMatch = url.pathname.match(/^\/api\/projects\/([a-zA-Z0-9_-]+)$/);
     const renderMatch = url.pathname.match(/^\/api\/projects\/([a-zA-Z0-9_-]+)\/render$/);
     const specMatch = url.pathname.match(/^\/api\/projects\/([a-zA-Z0-9_-]+)\/render-spec$/);
