@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve, sep } from 'node:path';
 import { fitRegionProfiles, renderLayers } from './viewport.js';
-import { triangulateFeature } from './boundary-style.js';
+import { interiorLabelPoint, triangulateFeature } from './boundary-style.js';
 
 export function within(root: string, relative: string): string {
   const base = resolve(root), path = resolve(base, relative);
@@ -27,6 +27,15 @@ export async function loadScene(root: string, regionId: string, boundary: string
   ];
   const framed=fitRegionProfiles(region,geometry);
   const range=Math.min(...Object.values(framed.cameraProfiles || {}).map((p:any)=>Number(p.height)).filter(Number.isFinite),Number(region.cameraPreset?.height || 30000));
-  const rendered=renderLayers(layers,range).map(feature=>({...feature,triangulations:triangulateFeature(feature)}));
-  return { version: 1, region:framed, timeline, layers:rendered };
+  const rendered = renderLayers(layers, range).map(feature => {
+    const triangulations = triangulateFeature(feature);
+    const properties = feature.parent ? feature.properties : {
+      ...feature.properties,
+      labelPoint: interiorLabelPoint(triangulations, feature.properties?.labelPoint)
+    };
+    return { ...feature, properties, triangulations };
+  });
+  const parentTriangles = rendered.filter(feature => feature.parent).flatMap(feature => feature.triangulations);
+  const labelPoint = interiorLabelPoint(parentTriangles, framed.labelPoint);
+  return { version: 1, region: { ...framed, labelPoint }, timeline, layers: rendered };
 }

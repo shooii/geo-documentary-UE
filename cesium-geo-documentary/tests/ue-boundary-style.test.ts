@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {triangulateFeature,boundaryAnimation} from '../apps/ue-player/boundary-style.js';
+import {triangulateFeature,boundaryAnimation,interiorLabelPoint} from '../apps/ue-player/boundary-style.js';
 test('boundary fills preserve polygon holes and multipart islands',()=>{
  const feature={geometry:{type:'MultiPolygon',coordinates:[[[[0,0],[4,0],[4,4],[0,4],[0,0]],[[1,1],[1,3],[3,3],[3,1],[1,1]]],[[[5,0],[6,0],[6,1],[5,1],[5,0]]]]}};
  const meshes=triangulateFeature(feature);assert.equal(meshes.length,2);
@@ -13,4 +13,22 @@ test('boundary light head makes one timed lap and disappears after the reveal',(
  assert.equal(boundaryAnimation(5.625,5,'child').progress,.5);
  assert.equal(boundaryAnimation(6.5,5,'child').alpha,0);
  assert.equal(boundaryAnimation(8,5,'child').alpha,0);
+});
+
+test('label anchors keep valid positions and fall back outside polygon holes', () => {
+ const geometry = {
+  type: 'Polygon',
+  coordinates: [
+   [[0, 0], [6, 0], [6, 6], [0, 6], [0, 0]],
+   [[2, 2], [4, 2], [4, 4], [2, 4], [2, 2]]
+  ]
+ };
+ const triangles = triangulateFeature({ geometry });
+ assert.deepEqual(interiorLabelPoint(triangles, [1, 1]), [1, 1]);
+ const fallback = interiorLabelPoint(triangles, [3, 3]);
+ assert.ok(fallback);
+ const [x, y] = fallback;
+ assert.ok(x > 0 && x < 6 && y > 0 && y < 6);
+ assert.ok(x < 2 || x > 4 || y < 2 || y > 4);
+ assert.deepEqual(interiorLabelPoint(triangles, [30, 30]), fallback);
 });

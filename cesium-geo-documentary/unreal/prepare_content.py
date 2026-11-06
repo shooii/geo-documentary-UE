@@ -11,4 +11,82 @@ if material is None:
     unreal.MaterialEditingLibrary.connect_material_property(texture, 'RGB', unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     unreal.MaterialEditingLibrary.recompile_material(material)
 unreal.EditorAssetLibrary.save_loaded_asset(material)
+
+
+def prepare_boundary_material(name, blend_mode, opacity_code):
+    material = unreal.load_asset('/Game/Geo/' + name)
+    if material is not None:
+        return
+    tools = unreal.AssetToolsHelpers.get_asset_tools()
+    material = tools.create_asset(name, '/Game/Geo', unreal.Material, unreal.MaterialFactoryNew())
+    material.set_editor_property('shading_model', unreal.MaterialShadingModel.MSM_UNLIT)
+    material.set_editor_property('two_sided', True)
+    material.set_editor_property('blend_mode', blend_mode)
+    editor = unreal.MaterialEditingLibrary
+
+    def node(kind, x, y, **properties):
+        expression = editor.create_material_expression(material, kind, x, y)
+        for key, value in properties.items():
+            expression.set_editor_property(key, value)
+        return expression
+
+    def custom(code, output_type, y, **sources):
+        inputs = []
+        for key in sources:
+            entry = unreal.CustomInput()
+            entry.set_editor_property('input_name', key)
+            inputs.append(entry)
+        expression = node(unreal.MaterialExpressionCustom, -280, y, code=code, output_type=output_type, inputs=inputs)
+        for key, (source, output) in sources.items():
+            if not editor.connect_material_expressions(source, output, expression, key):
+                raise RuntimeError(f'Cannot connect {name}.{key}')
+        return expression
+
+    uv = node(unreal.MaterialExpressionTextureCoordinate, -680, -110)
+    color = node(unreal.MaterialExpressionVertexColor, -680, 380)
+    tint = node(unreal.MaterialExpressionVectorParameter, -680, -420,
+                parameter_name='Tint', default_value=unreal.LinearColor(0.12, 0.73, 1.0, 1.0))
+    parameters = {key: node(unreal.MaterialExpressionScalarParameter, -930, index * 100,
+                            parameter_name=key, default_value=0.0)
+                  for index, key in enumerate(('Layer', 'Strength', 'Flow', 'Scan', 'Lift'))}
+    surface = blend_mode == unreal.BlendMode.BLEND_TRANSLUCENT
+    opacity = custom(opacity_code, unreal.CustomMaterialOutputType.CMOT_FLOAT1, 20,
+                     UV=(uv, ''), Layer=(parameters['Layer'], ''), Strength=(parameters['Strength'], ''),
+                     **({'Scan': (parameters['Scan'], '')} if surface else {'Flow': (parameters['Flow'], '')}))
+    emissive_code = ('return Tint * (Layer < 0.5 ? 0.87 : 1.65);' if surface else
+                     'return lerp(Tint * 1.6, float3(4.0, 3.8, 3.4), Layer < 2.5 ? 0.7 : 0.18);')
+    emissive = custom(emissive_code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, -300,
+                      Tint=(tint, ''), Layer=(parameters['Layer'], ''))
+    lift = custom('return float3(0, 0, Weight * Lift);', unreal.CustomMaterialOutputType.CMOT_FLOAT3, 400,
+                  Weight=(color, 'A'), Lift=(parameters['Lift'], ''))
+    for expression, prop in ((opacity, unreal.MaterialProperty.MP_OPACITY),
+                             (emissive, unreal.MaterialProperty.MP_EMISSIVE_COLOR),
+                             (lift, unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)):
+        if not editor.connect_material_property(expression, '', prop):
+            raise RuntimeError(f'Cannot connect {name} to {prop}')
+    editor.recompile_material(material)
+    unreal.EditorAssetLibrary.save_loaded_asset(material)
+
+
+prepare_boundary_material('M_BoundarySurface', unreal.BlendMode.BLEND_TRANSLUCENT, """
+if (Layer < 0.5) {
+    float radius = length(UV);
+    float head = Scan * 1.23;
+    float distance = head - radius;
+    float pulse = smoothstep(-0.025, 0.005, distance) * (1 - smoothstep(0.02, 0.15, distance));
+    float fade = smoothstep(0.01, 0.14, head) * (1 - smoothstep(0.85, 1.23, head));
+    return Strength * (0.13 + 0.25 * pulse * fade);
+}
+return Strength * 0.47 * pow(saturate(UV.y), 1.65);
+""")
+
+prepare_boundary_material('M_BoundaryLight', unreal.BlendMode.BLEND_ADDITIVE, """
+float edge = saturate(1 - abs(UV.y * 2 - 1));
+float distance = frac((Flow - UV.x) * 2 + 1);
+float trail = 1 - smoothstep(0, 0.18, distance);
+if (Layer < 2.5)
+    return Strength * pow(edge, 0.7) * (0.32 + trail * 0.62);
+return Strength * pow(edge, 3.5) * (0.11 + trail * 0.48);
+""")
+
 unreal.log('GEO_CONTENT_READY')

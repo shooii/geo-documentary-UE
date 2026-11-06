@@ -3,6 +3,7 @@
 #include "CanvasItem.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
+#include "Engine/Font.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/Texture2D.h"
 #include "HAL/IConsoleManager.h"
@@ -100,6 +101,7 @@ void AGeoMap::BeginPlay()
         Rate->Set(30, ECVF_SetByCode);
     FParse::Value(FCommandLine::Get(), TEXT("GeoCaptureRoot="), CaptureRoot);
     TileMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_Tile.M_Tile"));
+    InitBoundaryEffects();
     CloudDeck = LoadCloudTexture(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Geo/cloud-deck.png")));
     CloudPass = LoadCloudTexture(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Geo/cloud-pass.png")));
     UClass *C = LoadClass<UActorComponent>(nullptr, TEXT("/Script/PixelStreaming2.PixelStreaming2Input"));
@@ -139,6 +141,8 @@ void AGeoMap::Respond(FString Id, FString Error)
     J->SetNumberField(TEXT("loadedTiles"), Resources.Num() / 3);
     J->SetNumberField(TEXT("frameMs"), AverageFrameMs);
     J->SetNumberField(TEXT("fps"), AverageFrameMs > 0 ? 1000 / AverageFrameMs : 0);
+    J->SetNumberField(TEXT("boundaryLiftMeters"), BoundaryLift / 100);
+    J->SetNumberField(TEXT("boundarySparkCount"), HasRaisedBoundary() ? BoundarySparks.Num() : 0);
     J->SetNumberField(TEXT("boundaryVertices"), BoundaryVertices);
     int32 Width = 0, Height = 0;
     if (auto *PC = GetWorld()->GetFirstPlayerController())
@@ -303,6 +307,9 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         TileTemplate = Template;
         ImageryProvider = S(Imagery, TEXT("provider"));
         ImageryAttribution = S(Imagery, TEXT("attribution"));
+        Frame.Reset();
+        UpdateBoundaryEffects(TEXT(""), 0, 0);
+        BoundaryGeneration = -1;
         DetailTiles.Reset();
         PreviousDetailTiles.Reset();
         for (auto &X : Resources)
@@ -359,8 +366,14 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
                         {
                             auto &P = Point->AsArray();
                             if (P.Num() >= 2)
-                                Out.Points.Add(Geo(P[0]->AsNumber(), P[1]->AsNumber(), 5));
+                            {
+                                const FVector Position = Geo(P[0]->AsNumber(), P[1]->AsNumber(), 5);
+                                if (Out.Points.IsEmpty() || !Out.Points.Last().Equals(Position))
+                                    Out.Points.Add(Position);
+                            }
                         }
+                        if (Out.Points.Num() >= 3 && !Out.Points[0].Equals(Out.Points.Last()))
+                            Out.Points.Add(Out.Points[0]);
                         Out.Lengths.Add(0);
                         for (int32 I = 1; I < Out.Points.Num(); I++)
                             Out.Lengths.Add(Out.Lengths.Last() + FVector::Distance(Out.Points[I - 1], Out.Points[I]));
@@ -387,10 +400,12 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
                         Fills.Add(MoveTemp(Fill));
                     }
                 const TArray<TSharedPtr<FJsonValue>> *P;
-                if (Props->TryGetArrayField(TEXT("labelPoint"), P) && P->Num() >= 2)
+                if (!Parent && Props->TryGetArrayField(TEXT("labelPoint"), P) && P->Num() >= 2)
                 {
-                    Labels.Add({Geo((*P)[0]->AsNumber(), (*P)[1]->AsNumber(), 10), S(Props, TEXT("id")),
-                                S(Props, TEXT("name")), Parent});
+                    FString LabelId = S(Props, TEXT("id"));
+                    if (LabelId.IsEmpty())
+                        LabelId = S(Props, TEXT("adcode"));
+                    Labels.Add({Geo((*P)[0]->AsNumber(), (*P)[1]->AsNumber(), 10), LabelId, S(Props, TEXT("name")), false});
                 }
             }
         for (int32 X = 0; X < 4; X++)
@@ -567,6 +582,12 @@ void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
     double Aspect = double(ViewX) / FMath::Max(1, ViewY);
     Camera->SetFieldOfView(Aspect >= 1 ? 60 : FMath::RadiansToDegrees(2 * FMath::Atan(FMath::Tan(PI / 6) * Aspect)));
     Camera->SetWorldLocationAndRotation(Position, (Target - Position).Rotation());
+    const auto Trace = O(Data, TEXT("trace"));
+    const FString FocusId = S(Data, TEXT("focusId"));
+    const double Lift = FocusId == S(Trace, TEXT("target"))
+        ? .16 * N(Trace, TEXT("alpha")) * FMath::SmoothStep(0., .25, N(Trace, TEXT("progress")))
+        : 0;
+    UpdateBoundaryEffects(FocusId, N(Data, TEXT("focus")) * Lift, N(Data, TEXT("mapTime")));
     RefreshTiles(Lon, Lat, Range);
 }
 void AGeoMap::Tick(float Delta)
@@ -609,7 +630,7 @@ void AGeoMap::Tick(float Delta)
         CaptureId.Empty();
         return;
     }
-    if (PendingTiles > 0)
+    if (PendingTiles > 0 || (TileMaterial && TileMaterial->IsCompiling()) || BoundaryEffectsCompiling())
     {
         CaptureTicks = 0;
         return;
@@ -705,6 +726,12 @@ void AGeoHUD::DrawHUD()
     const double Focus = N(F, TEXT("focus")), Reveal = N(F, TEXT("parentReveal"));
     const auto Trace = O(F, TEXT("trace"));
     const auto Accents = O(F, TEXT("accents"));
+    const auto Styles = O(F, TEXT("labels"));
+    if (LabelGeneration != Map->Generation || CachedSize != Size)
+    {
+        LabelGeneration = Map->Generation;
+        LabelPlacements.Reset();
+    }
     if (CachedFrame != F || CachedSize != Size)
     {
         CachedFrame = F;
@@ -712,14 +739,22 @@ void AGeoHUD::DrawHUD()
         Strokes.Reset();
         FocusTriangles.Reset();
         DimRects.Reset();
+        for (auto &Layer : ShadowRects)
+            Layer.Reset();
         TArray<TArray<FVector2D>> FocusRings;
+        const FGeoRing *TraceRing = nullptr;
+        if (N(Trace, TEXT("alpha")) > .01)
+            for (const auto &Ring : Map->Rings)
+                if ((Current.IsEmpty() ? Ring.Parent : Ring.Id == Current) && Ring.Points.Num() >= 4 &&
+                    (!TraceRing || Ring.Lengths.Last() > TraceRing->Lengths.Last()))
+                    TraceRing = &Ring;
         for (const auto &Ring : Map->Rings)
         {
             const bool Focused = FocusId.IsEmpty() ? Ring.Parent : Ring.Id == FocusId;
             if (Focused && Focus > .001)
                 FocusRings.Add(ProjectFocusRing(Ring.Points, Map->Camera, Size.X, Size.Y));
             const double Accent = Ring.Parent ? N(F, TEXT("parentAccent")) : N(Accents, *Ring.Id);
-            const bool Show = Ring.Parent || Accent > .01 || N(F, TEXT("childReveal")) > .01;
+            const bool Show = Ring.Parent || Accent > .01 || Styles->HasField(Ring.Id);
             if (!Show || Ring.Points.Num() < 2)
                 continue;
             FVector2D A;
@@ -733,7 +768,8 @@ void AGeoHUD::DrawHUD()
                     !(FMath::Max(A.X, B.X) < -20 || FMath::Min(A.X, B.X) > Size.X + 20 || FMath::Max(A.Y, B.Y) < -20 ||
                       FMath::Min(A.Y, B.Y) > Size.Y + 20))
                     Strokes.Add(
-                        {A, B, Ring.Parent, Ring.Id == Current, (Ring.Lengths[I - 1] + Ring.Lengths[I]) * .5 / Length, Accent});
+                        {A, B, Ring.Parent, &Ring == TraceRing, Ring.Lengths[I - 1] / Length,
+                         Ring.Lengths[I] / Length, Accent});
                 A = B;
                 HasA = HasB;
             }
@@ -774,6 +810,10 @@ void AGeoHUD::DrawHUD()
         const int Band = 2, Rows = FocusRings.IsEmpty() ? 0 : FMath::CeilToInt(double(Size.Y) / Band);
         TArray<TArray<Edge>> Starts;
         Starts.SetNum(Rows);
+        using FSpans = TArray<FVector2D, TInlineAllocator<4>>;
+        TArray<FSpans> InsideRows, OutsideRows;
+        InsideRows.SetNum(Rows);
+        OutsideRows.SetNum(Rows);
         TArray<Edge> Active;
         for (const auto &Ring : FocusRings)
             for (int I = 0; I < Ring.Num(); I++)
@@ -800,99 +840,157 @@ void AGeoHUD::DrawHUD()
             {
                 const double Right = FMath::Clamp(Active[I].X, 0., double(Size.X));
                 if (Right > Left)
-                    DimRects.Add(FVector4(Left, Row * Band, Right - Left, Band));
+                    OutsideRows[Row].Emplace(Left, Right);
                 Left = I + 1 < Active.Num() ? FMath::Clamp(Active[I + 1].X, 0., double(Size.X)) : Size.X;
+                if (Left > Right)
+                    InsideRows[Row].Emplace(Right, Left);
             }
             if (Left < Size.X)
-                DimRects.Add(FVector4(Left, Row * Band, Size.X - Left, Band));
+                OutsideRows[Row].Emplace(Left, Size.X);
             for (auto &E : Active)
                 E.X += E.Step;
         }
+        // Dilate the silhouette in three soft steps, shifted down toward the
+        // ground. Clip each step to the exact exterior spans, including holes.
+        const double Radii[] = {13, 7, 3.5};
+        const double Drops[] = {3, 4, 3.5};
+        for (int Row = 0; Row < Rows; ++Row)
+        {
+            const double Height = FMath::Min(Band, Size.Y - Row * Band);
+            for (const FVector2D &Gap : OutsideRows[Row])
+                DimRects.Emplace(Gap.X, Row * Band, Gap.Y - Gap.X, Height);
+            if (OutsideRows[Row].IsEmpty())
+                continue;
+            for (int Layer = 0; Layer < UE_ARRAY_COUNT(Radii); ++Layer)
+            {
+                const double Radius = Radii[Layer] * Scale;
+                const int Center = Row - FMath::RoundToInt(Drops[Layer] * Scale / Band);
+                const int Range = FMath::FloorToInt(Radius / Band);
+                TArray<FVector2D, TInlineAllocator<32>> Candidates;
+                for (int Sample = FMath::Max(0, Center - Range); Sample <= FMath::Min(Rows - 1, Center + Range); ++Sample)
+                {
+                    const double Spread = FMath::Sqrt(FMath::Max(0., FMath::Square(Radius) - FMath::Square(double((Sample - Center) * Band))));
+                    for (const FVector2D &Span : InsideRows[Sample])
+                        Candidates.Emplace(Span.X - Spread, Span.Y + Spread);
+                }
+                Candidates.Sort([](const FVector2D &A, const FVector2D &B) { return A.X < B.X; });
+                for (const FVector2D &Gap : OutsideRows[Row])
+                {
+                    double End = Gap.X;
+                    for (const FVector2D &Span : Candidates)
+                    {
+                        if (Span.X >= Gap.Y)
+                            break;
+                        const double Left = FMath::Max(End, Span.X), Right = FMath::Min(Gap.Y, Span.Y);
+                        if (Right <= Left)
+                            continue;
+                        ShadowRects[Layer].Emplace(Left, Row * Band, Right - Left, Height);
+                        End = Right;
+                    }
+                }
+            }
+        }
     }
-    const FLinearColor Dim(.012, .026, .040, (FocusId.IsEmpty() ? .22 : .32) * Focus);
-    for (const auto &Rect : DimRects)
-    {
-        FCanvasTileItem Tile(FVector2D(Rect.X, Rect.Y), FVector2D(Rect.Z, Rect.W), Dim);
-        Tile.BlendMode = SE_BLEND_Translucent;
-        Canvas->DrawItem(Tile);
-    }
+    const auto DrawRects = [this](const TArray<FVector4> &Rects, const FLinearColor &Color) {
+        for (const auto &Rect : Rects)
+        {
+            FCanvasTileItem Tile(FVector2D(Rect.X, Rect.Y), FVector2D(Rect.Z, Rect.W), Color);
+            Tile.BlendMode = SE_BLEND_Translucent;
+            Canvas->DrawItem(Tile);
+        }
+    };
+    DrawRects(DimRects, FLinearColor(.018, .024, .022, (FocusId.IsEmpty() ? .30 : .22) * Focus));
+    const double ShadowOpacity[] = {.08, .15, .33};
+    for (int Layer = 0; Layer < UE_ARRAY_COUNT(ShadowRects); ++Layer)
+        DrawRects(ShadowRects[Layer], FLinearColor(.006, .010, .010, ShadowOpacity[Layer] * Focus));
     if (FocusTriangles.Num())
     {
-        const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.12, .66, .88, .065 * Focus)
-                                                   : FLinearColor(1, .69, .24, .095 * Focus);
+        const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.15, .55, .10, .38 * Focus)
+                                                   : FLinearColor(.12, .45, .58, .30 * Focus);
         for (auto &Triangle : FocusTriangles)
             Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
         FCanvasTriangleItem Fill(FocusTriangles, GWhiteTexture);
         Fill.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Fill);
     }
-    for (int Pass = 0; Pass < 4; Pass++)
-        for (const auto &Stroke : Strokes)
-        {
-            const float Accent = Stroke.Accent;
-            if (Stroke.Parent && Stroke.Progress > Reveal)
-                continue;
-            if (Accent <= .01 && Pass != 2)
-                continue;
-            const FLinearColor Edge = Stroke.Parent ? FLinearColor(.24, .78, .96) : FLinearColor(1, .70, .25);
-            const double Coverage = FMath::Clamp(FVector2D::Distance(Stroke.A, Stroke.B) / (6 * Scale), .08, 1.);
-            FCanvasLineItem Line(Stroke.A, Stroke.B);
-            if (Pass == 0)
-            {
-                Line.SetColor(Edge.CopyWithNewOpacity(.19 * Accent * Coverage));
-                Line.LineThickness = 12 * Scale;
-            }
-            else if (Pass == 1)
-            {
-                Line.SetColor(FLinearColor(.008, .019, .030, .93 * Accent));
-                Line.LineThickness = 7.0 * Scale;
-            }
-            else if (Pass == 2)
-            {
-                const FLinearColor Context(.55, .70, .75, Stroke.Parent ? .61 : .20);
-                Line.SetColor(FMath::Lerp(Context, Edge.CopyWithNewOpacity(.98), Accent));
-                Line.LineThickness = FMath::Lerp(Stroke.Parent ? 1.55f : .85f, 3.85f, Accent) * Scale;
-            }
-            else
-            {
-                Line.SetColor(FMath::Lerp(Edge, FLinearColor::White, .62f).CopyWithNewOpacity(.94 * Accent));
-                Line.LineThickness = 1.55 * Scale;
-            }
-            Canvas->DrawItem(Line);
-        }
+    const FLinearColor TownEdge(.031, .070, .026), VillageEdge(.035, .086, .092);
+    const FLinearColor ContextEdge(.35, .43, .41), DarkEdge(.009, .018, .021);
+    TArray<FCanvasUVTri> BoundaryTriangles;
+    const auto AddStroke = [&BoundaryTriangles](const FVector2D &A, const FVector2D &B, double Width,
+                                                const FLinearColor &ColorA, const FLinearColor &ColorB) {
+        const FVector2D Direction = (B - A).GetSafeNormal();
+        if (Direction.IsNearlyZero())
+            return;
+        const FVector2D Offset = FVector2D(-Direction.Y, Direction.X) * (Width * .5);
+        FCanvasUVTri Triangle;
+        Triangle.V0_Pos = A - Offset;
+        Triangle.V1_Pos = A + Offset;
+        Triangle.V2_Pos = B + Offset;
+        Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
+        Triangle.V0_Color = Triangle.V1_Color = ColorA;
+        Triangle.V2_Color = ColorB;
+        BoundaryTriangles.Add(Triangle);
+        Triangle.V1_Pos = Triangle.V2_Pos;
+        Triangle.V2_Pos = B - Offset;
+        Triangle.V1_Color = ColorB;
+        BoundaryTriangles.Add(Triangle);
+    };
+    for (const auto &Stroke : Strokes)
+    {
+        if (Stroke.Parent && Stroke.Start >= Reveal)
+            continue;
+        const FVector2D End = Stroke.Parent && Stroke.End > Reveal
+            ? FMath::Lerp(Stroke.A, Stroke.B, (Reveal - Stroke.Start) / (Stroke.End - Stroke.Start))
+            : Stroke.B;
+        const FLinearColor Edge = Stroke.Parent ? TownEdge : VillageEdge;
+        const FLinearColor Context = ContextEdge.CopyWithNewOpacity(Stroke.Parent ? .53f : .48f);
+        const FLinearColor Color = FMath::Lerp(Context, Edge.CopyWithNewOpacity(.78f), float(Stroke.Accent));
+        AddStroke(Stroke.A, End, FMath::Lerp(1.2f, 1.7f, float(Stroke.Accent)) * Scale, Color, Color);
+    }
     const double Head = N(Trace, TEXT("progress")), TraceAlpha = N(Trace, TEXT("alpha"));
     if (TraceAlpha > .01)
-        for (const auto &Stroke : Strokes)
-        {
-            if (!(Current.IsEmpty() ? Stroke.Parent : Stroke.Current))
-                continue;
-            const double Behind = Head - Stroke.Progress;
-            if (Behind < 0 || Behind > .065)
-                continue;
-            const double Strength = (1 - Behind / .065) * TraceAlpha;
-            for (int Pass = 0; Pass < 3; Pass++)
+        for (int Pass = 0; Pass < 2; ++Pass)
+            for (const auto &Stroke : Strokes)
             {
-                FCanvasLineItem Line(Stroke.A, Stroke.B);
-                Line.LineThickness = (Pass == 0 ? 12 : Pass == 1 ? 5 : 2.5) * Scale;
-                const double Coverage=Pass<2?FMath::Clamp(FVector2D::Distance(Stroke.A,Stroke.B)/FMath::Max(.1f,Line.LineThickness),.025,1.):1.;
-                Line.SetColor(FLinearColor(1,.72,.25,Strength*Coverage*(Pass==0?.035:Pass==1?.16:1)));
-                Canvas->DrawItem(Line);
+                if (!Stroke.Trace)
+                    continue;
+                const double Start = FMath::Max(Head - .065, Stroke.Start), End = FMath::Min(Head, Stroke.End);
+                if (End <= Start)
+                    continue;
+                const double Span = Stroke.End - Stroke.Start;
+                const FVector2D A = FMath::Lerp(Stroke.A, Stroke.B, (Start - Stroke.Start) / Span);
+                const FVector2D B = FMath::Lerp(Stroke.A, Stroke.B, (End - Stroke.Start) / Span);
+                const double Opacity = TraceAlpha * (Pass == 0 ? .14 : .98);
+                const FLinearColor Trail(1, .79, .18);
+                AddStroke(A, B, (Pass == 0 ? 9.5 : 3.3) * Scale,
+                          Trail.CopyWithNewOpacity((1 - (Head - Start) / .065) * Opacity),
+                          Trail.CopyWithNewOpacity((1 - (Head - End) / .065) * Opacity));
             }
-        }
+    if (BoundaryTriangles.Num())
+    {
+        FCanvasTriangleItem Lines(BoundaryTriangles, GWhiteTexture);
+        Lines.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Lines);
+    }
     struct FLabelDraw
     {
         FString Id, Name;
-        FVector2D Position;
-        FBox2D Bounds;
+        FVector2D Anchor, Extent;
         FLinearColor Color;
-        float Scale, Emphasis;
-        bool Primary;
+        float TextScale, Emphasis;
+        int32 Priority;
     };
     TArray<FLabelDraw> DrawLabels;
-    const auto Styles = O(F, TEXT("labels"));
-    const auto *Font = GEngine->GetLargeFont();
+    if (!LabelFont)
+    {
+        LabelFont = DuplicateObject<UFont>(GEngine->GetLargeFont(), this);
+        // Rasterize Chinese glyphs near their display size instead of
+        // enlarging the low-resolution legacy Canvas glyph atlas.
+        if (LabelFont->FontCacheType == EFontCacheType::Runtime)
+            LabelFont->LegacyFontSize = 64;
+    }
     float GlyphWidth, GlyphHeight;
-    Canvas->StrLen(Font, TEXT("国"), GlyphWidth, GlyphHeight);
+    Canvas->StrLen(LabelFont, TEXT("国"), GlyphWidth, GlyphHeight);
     const double Reference = FMath::Max(1., N(F, TEXT("labelReferenceDistance"), 38000));
     const FVector Eye = Map->Camera->GetComponentLocation();
     for (const auto &Label : Map->Labels)
@@ -901,69 +999,122 @@ void AGeoHUD::DrawHUD()
         if (!Label.Parent && !Styles->TryGetObjectField(Label.Id, Style))
             continue;
         const double Alpha = Label.Parent ? N(F, TEXT("parentLabel")) : N(*Style, TEXT("alpha"));
-        if (Alpha <= .01)
+        if (Alpha <= .01 || Label.Name.IsEmpty())
             continue;
         FVector2D Point;
         if (!PlayerOwner->ProjectWorldLocationToScreen(Label.Position, Point))
             continue;
-        if (Label.Parent)
-            Point.Y -= 18 * Scale;
+        if (Point.X < 0 || Point.X > Size.X || Point.Y < 0 || Point.Y > Size.Y)
+            continue;
 
         // The shader's NearFarScalar uses squared eye distance and a fifth-root ease.
         const double DistanceRatioSq = FVector::DistSquared(Eye, Label.Position) / FMath::Square(Reference * 100);
         const auto Ramp = [DistanceRatioSq](double Near, double Far) {
             return FMath::Pow(FMath::Clamp((DistanceRatioSq - Near * Near) / (Far * Far - Near * Near), 0., 1.), .2);
         };
-        const float Opacity = Alpha * (1 - Ramp(1, 2.8));
+        const bool CurrentVillage = !Label.Parent && Label.Id == Current;
+        const bool Primary = Label.Parent || CurrentVillage;
+        const float Opacity = Alpha * (1 - Ramp(1, 2.8) * (Primary ? .40 : 1.));
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
-        const float SizePx = (Label.Parent ? 86 : 56) * Scale * (Label.Parent ? 1 : N(*Style, TEXT("scale"), 1))
-                             * FMath::Lerp(1.1, .68, Ramp(.5, 3));
-        const float TextScale = SizePx / FMath::Max(1.f, GlyphHeight);
+        const float SizePx = (Label.Parent ? 74.f : FMath::Lerp(35.f, 64.f, Emphasis)) * Scale
+                             * FMath::Lerp(1.f, Primary ? .90f : .82f, Ramp(.5, 3));
         float Width, Height;
-        Canvas->StrLen(Font, Label.Name, Width, Height);
-        const FVector2D Extent = FVector2D(Width, Height) * TextScale * .5 + FVector2D(5, 3) * Scale;
-        if (Point.X < 0 || Point.X > Size.X || Point.Y < 0 || Point.Y > Size.Y)
-            continue;
-        const FLinearColor Color = FMath::Lerp(FLinearColor::White, FLinearColor(1, .77, .35), .58f * Emphasis)
-                                   .CopyWithNewOpacity(Opacity);
-        DrawLabels.Add({Label.Id, Label.Name, Point, FBox2D(Point - Extent, Point + Extent), Color, TextScale,
-                        Emphasis, Label.Parent || Label.Id == Current});
+        Canvas->StrLen(LabelFont, Label.Name, Width, Height);
+        const float TextScale = FMath::Min(SizePx / FMath::Max(1.f, GlyphHeight), Size.X * .80f / FMath::Max(1.f, Width));
+        const FVector2D Extent = FVector2D(Width, Height) * TextScale * .5
+                                 + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
+        const FLinearColor Color = FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
+                                               Primary ? 1.f : Emphasis).CopyWithNewOpacity(Opacity);
+        DrawLabels.Add({Label.Id, Label.Name, Point, Extent, Color, TextScale, Emphasis,
+                        CurrentVillage ? 2 : Label.Parent ? 1 : 0});
     }
     DrawLabels.Sort([this](const FLabelDraw &A, const FLabelDraw &B) {
-        if (A.Primary != B.Primary)
-            return A.Primary;
+        if (A.Priority != B.Priority)
+            return A.Priority > B.Priority;
         if (A.Emphasis != B.Emphasis)
             return A.Emphasis > B.Emphasis;
-        const bool WasVisible = VisibleLabelIds.Contains(A.Id), OtherWasVisible = VisibleLabelIds.Contains(B.Id);
+        const bool WasVisible = LabelPlacements.Contains(A.Id), OtherWasVisible = LabelPlacements.Contains(B.Id);
         if (WasVisible != OtherWasVisible)
             return WasVisible;
-        return A.Position.Y == B.Position.Y ? A.Position.X < B.Position.X : A.Position.Y < B.Position.Y;
+        return A.Id < B.Id;
     });
-    VisibleLabelIds.Reset();
-    TArray<FBox2D> Occupied;
+    // Studio and the video compositor center captions 25% above the bottom edge.
+    const double CaptionY = .75 * Size.Y;
+    TArray<FBox2D> Occupied{FBox2D(FVector2D(.08 * Size.X, CaptionY - 56 * Scale),
+                                  FVector2D(.92 * Size.X, CaptionY + 56 * Scale))};
+    const FBox2D SafeFrame(FVector2D(20, 20) * Scale, FVector2D(Size.X, Size.Y) - FVector2D(20, 20) * Scale);
+    TMap<FString, int32> Placements;
     for (const auto &Label : DrawLabels)
     {
-        if (Occupied.ContainsByPredicate([&Label](const FBox2D &Box) { return Box.Intersect(Label.Bounds); }))
+        const double Gap = 12 * Scale;
+        const double X = Label.Extent.X + Gap, Y = Label.Extent.Y + Gap;
+        const FVector2D Offsets[] = {{0, 0}, {0, -Y}, {X, 0}, {-X, 0}, {0, Y},
+                                     {X, -Y}, {-X, -Y}, {0, -Y - 60 * Scale}, {0, Y + 60 * Scale}};
+        const int32 OffsetCount = UE_ARRAY_COUNT(Offsets);
+        const int32 *Previous = LabelPlacements.Find(Label.Id);
+        int32 Selected = INDEX_NONE;
+        FBox2D Bounds;
+        // Reuse a valid placement during motion. A primary name may fall back to
+        // covering a line if the remaining space is needed for captions or other names.
+        for (int32 Pass = 0; Pass < (Label.Priority ? 2 : 1) && Selected == INDEX_NONE; ++Pass)
+            for (int32 Order = Previous ? -1 : 0; Order < OffsetCount; ++Order)
+            {
+                const int32 Candidate = Order < 0 ? *Previous : Order;
+                if (Order >= 0 && Previous && Candidate == *Previous)
+                    continue;
+                const FVector2D Point = Label.Anchor + Offsets[Candidate];
+                const FBox2D Box(Point - Label.Extent, Point + Label.Extent);
+                if (!SafeFrame.IsInside(Box) || Occupied.ContainsByPredicate([&Box](const FBox2D &Other) {
+                        return Other.Intersect(Box);
+                    }))
+                    continue;
+                const FBox EdgeBox(FVector(Box.Min, -1), FVector(Box.Max, 1));
+                if (Pass == 0 && Strokes.ContainsByPredicate([&](const FGeoStroke &Stroke) {
+                        if (Stroke.Parent && Stroke.Start >= Reveal)
+                            return false;
+                        const FVector Start(Stroke.A, 0), End(Stroke.B, 0);
+                        return FMath::LineBoxIntersection(EdgeBox, Start, End, End - Start);
+                    }))
+                    continue;
+                Selected = Candidate;
+                Bounds = Box;
+                break;
+            }
+        if (Selected == INDEX_NONE)
             continue;
-        Occupied.Add(Label.Bounds);
-        VisibleLabelIds.Add(Label.Id);
-        FCanvasTextItem Text(Label.Position, FText::FromString(Label.Name), Font, Label.Color);
+        Occupied.Add(Bounds.ExpandBy(4 * Scale));
+        Placements.Add(Label.Id, Selected);
+        const FVector2D Position = Bounds.GetCenter();
+        if (Label.Priority && Selected != 0)
+        {
+            const FVector2D Tip(FMath::Clamp(Label.Anchor.X, Bounds.Min.X, Bounds.Max.X),
+                                FMath::Clamp(Label.Anchor.Y, Bounds.Min.Y, Bounds.Max.Y));
+            FCanvasLineItem Leader(Label.Anchor, Tip);
+            Leader.BlendMode = SE_BLEND_Translucent;
+            Leader.LineThickness = 3.5f * Scale;
+            Leader.SetColor(DarkEdge.CopyWithNewOpacity(.82 * Label.Color.A));
+            Canvas->DrawItem(Leader);
+            Leader.LineThickness = 1.5f * Scale;
+            Leader.SetColor((Label.Priority == 2 ? VillageEdge : TownEdge).CopyWithNewOpacity(.90 * Label.Color.A));
+            Canvas->DrawItem(Leader);
+        }
+        if (Label.Priority == 2 && Selected != 0)
+        {
+            FCanvasTileItem Backdrop(Bounds.Min, Bounds.GetSize(), DarkEdge.CopyWithNewOpacity(.66 * Label.Color.A));
+            Backdrop.BlendMode = SE_BLEND_Translucent;
+            Canvas->DrawItem(Backdrop);
+        }
+        FCanvasTextItem Text(Position, FText::FromString(Label.Name), LabelFont, Label.Color);
         Text.bCentreX = true;
         Text.bCentreY = true;
-        Text.Scale = FVector2D(Label.Scale);
-        const double Radius = FMath::Max(1.25, 3.2 * Scale);
-        Text.SetColor(FLinearColor(.008, .014, .024, Label.Color.A));
-        for (int Direction = 0; Direction < 8; ++Direction)
-        {
-            const double Angle = Direction * PI / 4;
-            Canvas->DrawItem(Text, Label.Position + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * Radius);
-        }
-        Text.SetColor(Label.Color);
-        Text.Position = Label.Position;
+        Text.bOutlined = true;
+        Text.OutlineColor = DarkEdge.CopyWithNewOpacity(Label.Color.A);
+        Text.Scale = FVector2D(Label.TextScale);
         Canvas->DrawItem(Text);
     }
+    LabelPlacements = MoveTemp(Placements);
     const auto Clouds = O(F, TEXT("clouds"));
     const double Raw = N(Clouds, TEXT("raw"), 1);
     auto CloudLayer = [this](UTexture2D *Texture, double Alpha, double Zoom, double X, double Y) {
@@ -981,6 +1132,7 @@ void AGeoHUD::DrawHUD()
     CloudLayer(Map->CloudPass, N(Clouds, TEXT("veil")), 1.06 + Raw * .13, (Raw - .5) * -31, (Raw - .5) * 17);
     if (Map->ImageryProvider == TEXT("cesium-ion-world-imagery") && !Map->ImageryAttribution.IsEmpty())
     {
+        const auto *Font = GEngine->GetLargeFont();
         float Width, Height;
         Canvas->StrLen(Font, Map->ImageryAttribution, Width, Height);
         const float CreditScale = FMath::Min(18 * Scale / FMath::Max(1.f, Height), (Size.X - 24 * Scale) / FMath::Max(1.f, Width));

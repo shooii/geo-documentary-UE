@@ -7,8 +7,11 @@
 #include "GameFramework/HUD.h"
 #include "GeoMap.generated.h"
 class UCameraComponent;
+class UFont;
 class UProceduralMeshComponent;
 class UMaterialInterface;
+class UMaterialInstanceDynamic;
+class UNiagaraComponent;
 class UTexture2D;
 class IHttpRequest;
 struct FGeoTileRequest
@@ -50,6 +53,15 @@ class AGeoMap : public AActor
     UPROPERTY() TObjectPtr<UActorComponent> Input;
     UPROPERTY() TObjectPtr<UCameraComponent> Camera;
     UPROPERTY() TObjectPtr<UMaterialInterface> TileMaterial;
+    UPROPERTY() TObjectPtr<UProceduralMeshComponent> BoundaryMesh;
+    UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> BoundaryLayers;
+    UPROPERTY() TArray<TObjectPtr<UNiagaraComponent>> BoundarySparks;
+    FString BoundaryFocus;
+    int32 BoundaryGeneration = -1;
+    TArray<int32> BoundaryPaths;
+    double BoundaryHeight = 0, BoundaryLift = 0, BoundaryWidth = 0;
+    bool HasRaisedBoundary() const { return BoundaryLift > 0; }
+    bool BoundaryEffectsCompiling() const;
     UPROPERTY() TObjectPtr<UTexture2D> CloudDeck;
     UPROPERTY() TObjectPtr<UTexture2D> CloudPass;
     UPROPERTY() TArray<TObjectPtr<UObject>> Resources;
@@ -76,14 +88,16 @@ class AGeoMap : public AActor
     void Respond(FString RequestId, FString Error = TEXT(""));
     void LoadScene(const TSharedPtr<FJsonObject> &Data, FString RequestId);
     void ApplyFrame(const TSharedPtr<FJsonObject> &Data);
+    void InitBoundaryEffects();
+    void UpdateBoundaryEffects(const FString &FocusId, double Focus, double Time);
     void Tile(int32 Z, int32 X, int32 Y, bool Detail);
     void RefreshTiles(double Lon, double Lat, double Range);
 };
 struct FGeoStroke
 {
     FVector2D A, B;
-    bool Parent = false, Current = false;
-    double Progress = 0, Accent = 0;
+    bool Parent = false, Trace = false;
+    double Start = 0, End = 0, Accent = 0;
 };
 UCLASS()
 class AGeoHUD : public AHUD
@@ -98,7 +112,10 @@ class AGeoHUD : public AHUD
     FIntPoint CachedSize;
     TArray<FCanvasUVTri> FocusTriangles;
     TArray<FVector4> DimRects;
-    TSet<FString> VisibleLabelIds;
+    TArray<FVector4> ShadowRects[3];
+    UPROPERTY() TObjectPtr<UFont> LabelFont;
+    TMap<FString, int32> LabelPlacements;
+    int32 LabelGeneration = -1;
 };
 UCLASS()
 class AGeoGameMode : public AGameModeBase

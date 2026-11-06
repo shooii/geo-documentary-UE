@@ -111,9 +111,9 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   }
 
   const current = stop ? String(stop.id) : '';
-  const reveal = smooth((mapTime - .35) / 2.2);
+  const reveal = smooth((mapTime - .35) / 1.25);
   const parentOverview = openingOnly ? 1 : 1 - smooth((mapTime - Number(stops[0]?.start ?? Infinity)) / .45);
-  let parentLabel = reveal >= .999 ? .9 * parentOverview * smooth(smooth((mapTime - 2.11) / .28)) : 0;
+  let parentLabel = .98 * parentOverview * smooth((mapTime - 1.16) / .48);
   let parentAccent = returning?.progress ?? parentOverview;
   const labels: Record<string, LabelStyle> = {};
   const accents: Record<string, number> = {};
@@ -165,7 +165,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
 
   const focusId = Object.keys(accents).reduce((best, id) => accents[id]! > (accents[best] ?? parentAccent) ? id : best, '');
   const nextAccent = Math.max(focusId ? parentAccent : 0, ...Object.entries(accents).filter(([id]) => id !== focusId).map(([, value]) => value));
-  const focus = ((accents[focusId] ?? parentAccent) - nextAccent) * smooth((mapTime - 2.89) / .6);
+  const focus = ((accents[focusId] ?? parentAccent) - nextAccent) * smooth((mapTime - .18) / 1.15);
   const traceStart = stop ? Number(stop.start) + flightDuration * .75 : .35;
   return {
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
