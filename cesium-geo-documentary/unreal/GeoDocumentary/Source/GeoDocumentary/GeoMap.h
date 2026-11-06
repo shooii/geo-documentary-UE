@@ -60,11 +60,11 @@ class AGeoMap : public AActor
     double OriginLon = 110, OriginLat = 20;
     int32 Generation = 0, PendingTiles = 0, FailedTiles = 0;
     TSet<FString> TileKeys;
-    TMap<FString, TObjectPtr<UProceduralMeshComponent>> DetailTiles;
-    TArray<TObjectPtr<UProceduralMeshComponent>> PreviousDetailTiles;
+    UPROPERTY() TMap<FString, TObjectPtr<UProceduralMeshComponent>> DetailTiles;
+    UPROPERTY() TArray<TObjectPtr<UProceduralMeshComponent>> PreviousDetailTiles;
     int32 DetailZoom = -1;
     FString CaptureId, CaptureRoot;
-    FString TileTemplate, ImageryProvider;
+    FString TileTemplate, ImageryProvider, ImageryAttribution;
     FString RenderProfile;
     FIntPoint RequestedSize;
     int32 CaptureIndex = 0, CaptureTicks = 0;
@@ -83,7 +83,7 @@ struct FGeoStroke
 {
     FVector2D A, B;
     bool Parent = false, Current = false;
-    double Progress = 0;
+    double Progress = 0, Accent = 0;
 };
 UCLASS()
 class AGeoHUD : public AHUD
@@ -98,6 +98,7 @@ class AGeoHUD : public AHUD
     FIntPoint CachedSize;
     TArray<FCanvasUVTri> FocusTriangles;
     TArray<FVector4> DimRects;
+    TSet<FString> VisibleLabelIds;
 };
 UCLASS()
 class AGeoGameMode : public AGameModeBase

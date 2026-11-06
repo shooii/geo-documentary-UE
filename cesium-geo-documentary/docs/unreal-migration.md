@@ -34,7 +34,8 @@ pnpm studio
 | 行政区描边 | Polygon/MultiPolygon 多环、逐步描边、持续显示 |
 | 标签 | UE HUD 中文标签、巡游已访问标签保持、改名消息 |
 | 镜头 | 开场下降、巡游、返航、播放/停止、场景片段；竖屏总览复用原 Cesium 边界/视锥取景算法，其他画幅使用同一拟合方式；整体仍未逐帧验收 |
-| 卫星底图 | Esri、Mapbox 卫星瓦片（沿用原配置样式）；其余选项明确报错，尚未移植 |
+| 卫星底图 | 默认 Cesium ion 资产 2（Bing Maps 航拍），另支持 Esri 和 Mapbox |
+| 场景视角 | 在实际画面的「底图视角」调整中心、缩放、旋转、俯仰，随方案保存并用于导出 |
 | 导出 | 独立 UE 实例、离线确定时间截图、逐帧回执、FFmpeg 编码，再沿用原字幕/素材/配音合成链路 |
 | 穿云 | 补齐开场参数，按参考 SVG/CSS 生成云层纹理并在 UE HUD 内合成；云层显隐/透明度时序与参考算法对照通过；原 Cumulus 体积云形态未逐像素验收 |
 | 行政边界后期风格 | 在 UE 内绘制区域填色、黑灰接触阴影、短金色追光、外围压暗；当前村落突出，邻村轮廓减弱；多面与孔洞正确三角化；预览与原生截图共用 |
@@ -51,7 +52,7 @@ pnpm studio
 
 嵌入工作台验证：`pnpm exec tsx scripts/ue-editor-qa.ts` 使用独立 UE/信令实例，在 1196×956 工作台中从方形启动画面切换到竖屏，断言原生画幅和解码视频均为 720×1280，再检查总览和真实村落镜头；截图位于 `workspace/ue-qa/editor-overview.png`、`editor-child.png`、`editor-child-trace.png`。416 项回归通过。
 
-Mapbox 沿用 `MAPBOX_ACCESS_TOKEN` 或 `config/project.yaml` 中的影像配置；令牌只在服务端读取，UE 与浏览器通过本机瓦片接口取图。需要代理时，启动服务前设置 `UE_HTTP_PROXY=http://127.0.0.1:10090`。缺少令牌、授权失败和网络故障均返回明确错误，不会暗中替换成其他底图。
+Cesium ion 使用拥有资产 2 读取权限的 `CESIUM_ION_TOKEN`，可放在本机忽略的 `.env.local` 中。Mapbox 沿用 `MAPBOX_ACCESS_TOKEN` 或 `config/project.yaml` 中的影像配置。令牌只在服务端读取，UE 与浏览器通过本机瓦片接口取图。需要代理时，启动服务前设置 `UE_HTTP_PROXY=http://127.0.0.1:10090`。缺少令牌、授权失败和网络故障均返回明确错误。
 
 ```powershell
 pnpm typecheck

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { buildSingleLineCues, normalizeSubtitleSemantics, splitSingleLineText, type SingleLineCueOverride } from "../content-engine/subtitles.js";
-import { normalizeSemanticText, type AssetPlacement, type StudioScene, type VideoProject } from "../project-schema/index.js";
+import { normalizeSemanticText, type AssetPlacement, type MapView, type StudioScene, type VideoProject } from "../project-schema/index.js";
 import { MINIMUM_RENDERED_VISUAL_SECONDS, planVisualClip, resolveVisualClipWindow } from "./visual-timeline.js";
 
 export interface TimedCue {
@@ -47,6 +47,7 @@ export interface RenderSpec {
   imagery: VideoProject["imagery"];
   /** Presentation-relative narration windows whose Tianditu label layer is visible. */
   annotationWindows: Array<{ sceneId: string; start: number; end: number }>;
+  mapViewTrack?: Array<{ start: number; view: MapView | null }>;
   cover: VideoProject["cover"];
   opening: {
     descentSeconds: number;
@@ -306,6 +307,9 @@ export function buildRenderSpec(input: {
       const range = rangeByScene.get(scene.id);
       return range ? [{ sceneId: scene.id, start: range.start, end: range.end }] : [];
     });
+  const mapViewTrack = project.scenes.some(scene => scene.mapView)
+    ? ranges.map(range => ({ start: range.start, view: project.scenes.find(scene => scene.id === range.sceneId)?.mapView ?? null }))
+    : undefined;
   const narrationDurationSeconds = input.narrationDurationSeconds ?? cues.at(-1)?.end ?? 0;
   const timelineDurationSeconds = input.timelineDurationSeconds ?? Math.ceil(narrationDurationSeconds + project.template.openingDescentSeconds);
   const signatureInput = {
@@ -314,6 +318,7 @@ export function buildRenderSpec(input: {
     output: project.output,
     imagery: project.imagery,
     annotations: annotationWindows,
+    mapViewTrack,
     opening: project.template,
     tour: project.scenes.filter((scene) => scene.section === "child").map((scene) => ({ id: scene.childId, name: scene.childName, camera: scene.camera, timing: defaultTiming(scene) })),
     outro: project.template.tourReturnSeconds,
@@ -330,6 +335,7 @@ export function buildRenderSpec(input: {
     output: project.output,
     imagery: project.imagery,
     annotationWindows,
+    ...(mapViewTrack ? { mapViewTrack } : {}),
     cover: project.cover,
     opening: {
       descentSeconds: project.template.openingDescentSeconds,

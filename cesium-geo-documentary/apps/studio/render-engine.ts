@@ -407,6 +407,7 @@ async function writeRegionAnnotationWindows(sandbox: string, regionId: string, s
   const regionPath = join(sandbox, "data", "regions", `${regionId}.json`);
   const region = JSON.parse(await readFile(regionPath, "utf8")) as Record<string, unknown>;
   region.annotationWindows = spec.annotationWindows;
+  region.mapViewTrack = spec.mapViewTrack;
   await writeFile(regionPath, JSON.stringify(region, null, 2), "utf8");
 }
 

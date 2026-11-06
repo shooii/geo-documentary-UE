@@ -23,6 +23,30 @@ test('Mapbox descriptor returns a local template without credentials', async () 
     assert.ok(!JSON.stringify(descriptor).includes('test-only-key'));
   }finally{await f.close();}
 });
+
+test('Cesium ion resolves asset 2 and keeps Bing credentials on the server for each viewer session', async () => {
+  const f = await fixture();
+  try {
+    const ion = f.agent.get('https://api.cesium.com');
+    ion.intercept({ path: '/v1/assets/2/endpoint', headers: { authorization: 'Bearer local-test-token' } })
+      .reply(200, { type: 'IMAGERY', externalType: 'BING', options: { url: 'https://dev.virtualearth.net/', key: 'test-bing-key', mapStyle: 'Aerial' } }).times(2);
+    f.agent.get('https://dev.virtualearth.net').intercept({ path: '/REST/v1/Imagery/Metadata/Aerial?incl=ImageryProviders&key=test-bing-key&uriScheme=https' })
+      .reply(200, { resourceSets: [{ resources: [{ imageUrl: 'https://{subdomain}.tiles.virtualearth.net/tiles/a{quadkey}.jpeg', imageUrlSubdomains: ['t0'], imageryProviders: [{ attribution: '© Example' }] }] }] }).times(2);
+    f.agent.get('https://t0.tiles.virtualearth.net').intercept({ path: '/tiles/a13.jpeg?n=z' })
+      .reply(200, Buffer.from([255, 216, 255]), { headers: { 'content-type': 'image/jpeg' } });
+    const service = new ImageryService(f.root, { CESIUM_ION_TOKEN: 'local-test-token' }, f.agent);
+    const provider = 'cesium-ion-world-imagery';
+    const origin = 'http://127.0.0.1:4174';
+    const descriptor = await service.descriptor(provider, origin, 'viewer-one');
+    assert.equal(descriptor.tileTemplate, `${origin}/api/imagery/${provider}/{z}/{x}/{y}?session=viewer-one`);
+    assert.match(descriptor.attribution, /© Example/);
+    assert.doesNotMatch(JSON.stringify(descriptor), /local-test-token|test-bing-key/);
+    assert.deepEqual(await service.descriptor(provider, origin, 'viewer-one'), descriptor);
+    assert.equal((await service.tile(provider, 2, 3, 1, 'viewer-one')).type, 'image/jpeg');
+    await service.descriptor(provider, origin, 'viewer-two');
+    f.agent.assertNoPendingInterceptors();
+  } finally { await f.close(); }
+});
 test('Mapbox tiles honor the original style, environment token and deduplicate requests', async () => {
   const f=await fixture('map:\n  mapbox_access_token: config-key\n  mapbox_map_id: mapbox/satellite-v9\n');
   try {

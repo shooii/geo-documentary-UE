@@ -806,3 +806,53 @@ button:focus-visible{outline:2px solid #58ddcf;outline-offset:2px}
 .export-timeline .tl-ticks>span:first-child{transform:none}
 .export-timeline .tl-ticks>span:last-child{transform:translateX(-100%)}
 @media(max-width:900px){.export-timeline .tl-row,.export-timeline .tl-axis{grid-template-columns:86px minmax(100px,1fr) 28px}.export-timeline{margin-inline:12px}}
+
+
+/* Scene camera adjustment opens over the preview without resizing it. */
+.stage-toolbar:has(.map-view-controls[open]) { position: relative; z-index: 16; }
+.map-view-controls {
+  position: relative;
+  z-index: 15;
+  margin-left: auto;
+  margin-right: 12px;
+}
+.map-view-controls[hidden] { display: none; }
+.stage-wrap:has(.map-view-controls[open]) .preview-asset-frame { display: none; }
+.map-view-controls > summary {
+  padding: 6px 9px;
+  border: 1px solid #324a55;
+  border-radius: 6px;
+  color: #cfe6e8;
+  background: #101e26;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.map-view-fields {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  width: min(272px, 75vw);
+  padding: 12px;
+  border: 1px solid #324a55;
+  border-radius: 8px;
+  background: #0d1921;
+  box-shadow: 0 12px 30px #0009;
+}
+.map-view-fields label, .map-view-fields small {
+  display: block;
+  color: #afc0c9;
+  font-size: 11px;
+}
+.map-view-fields input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 5px 7px;
+  border: 1px solid #324a55;
+  border-radius: 5px;
+  color: #eaf2f5;
+  background: #091218;
+}
+.map-view-fields small { margin: 10px 0 7px; }
+.map-view-fields button { padding: 5px 9px; font-size: 11px; }

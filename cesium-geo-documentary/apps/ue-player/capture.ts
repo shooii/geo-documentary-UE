@@ -1,13 +1,17 @@
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
+import { dirname, resolve, join } from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { chromium } from 'playwright';
+import { DEFAULT_IMAGERY_PROVIDER } from '../../packages/project-schema/index.js';
+import { ionToken } from './imagery.js';
 const root = resolve(process.cwd());
 const option = (name:string, fallback='') => { const i=process.argv.indexOf(`--${name}`); return i>=0?process.argv[i+1] || fallback:fallback; };
 const region = option('region'), profile=option('profile','portrait');
 if (!/^[\w-]+$/.test(region)) throw new Error('A valid --region is required');
 const runtimePath = process.env.GEO_UE_RUNTIME || join(root,'workspace/ue-runtime.json');
 const runtime=JSON.parse((await readFile(runtimePath,'utf8')).replace(/^\uFEFF/,''));
+const imagery = option('imagery', DEFAULT_IMAGERY_PROVIDER);
+const token = imagery === 'cesium-ion-world-imagery' ? await ionToken(resolve(dirname(runtimePath), '..'), process.env) : '';
 const port=Number(option('port','4674')),signallingPort=port+1,streamerPort=port+2;
 const preview=process.argv.includes('--preview') && process.argv.includes('--qa'),scale=preview?2/3:1;
 const width=(profile==='landscape'?1920:1080)*scale,height=(profile==='landscape'?1080:profile==='square'?1080:1920)*scale;
@@ -25,7 +29,7 @@ const tsx=join(root,'node_modules/tsx/dist/cli.mjs');
 let browser:Awaited<ReturnType<typeof chromium.launch>>|undefined;
 try{
  start(process.execPath,[tsx,join(root,'apps/ue-player/signalling.ts')],{UE_SIGNALLING_PORT:String(signallingPort),UE_STREAMER_PORT:String(streamerPort)});
- start(process.execPath,[tsx,join(root,'apps/ue-player/server.ts'),`--port=${port}`],{UE_SIGNALLING_URL:`ws://127.0.0.1:${signallingPort}`});
+ start(process.execPath,[tsx,join(root,'apps/ue-player/server.ts'),`--port=${port}`],{UE_SIGNALLING_URL:`ws://127.0.0.1:${signallingPort}`, ...(token ? { CESIUM_ION_TOKEN: token } : {})});
  const deadline=Date.now()+30000;
  while(true){try{const r=await fetch(`http://127.0.0.1:${port}/runtime-config.json`);if(r.ok)break;}catch{}if(Date.now()>deadline)throw new Error('UE player startup timeout');await new Promise(r=>setTimeout(r,200));}
  start(join(runtime.engineRoot,'Engine/Binaries/Win64/UnrealEditor.exe'),[runtime.project,'/Engine/Maps/Entry','-game','-RenderOffscreen','-Unattended','-NoSplash','-AudioMixer',`-PixelStreamingURL=ws://127.0.0.1:${streamerPort}`,`-GeoCaptureRoot=${frames}`,`-ResX=${width}`,`-ResY=${height}`,'-ForceRes',`-abslog=${unrealLog}`]);
@@ -38,7 +42,7 @@ try{
  }
  browser=await chromium.launch({headless:true});
  const page=await browser.newPage({viewport:{width,height}});
- await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=${profile}&imagery=${encodeURIComponent(option('imagery','esri-world-imagery'))}`);
+ await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=${profile}&imagery=${encodeURIComponent(imagery)}`);
  await page.waitForFunction(()=>Boolean((window as any).geoVideo?.getDiagnostics().ready),{},{timeout:180000});
  const qa=process.argv.includes('--qa');
  const sampleTimes=qa?[0,2.1,8]:undefined;
@@ -66,5 +70,5 @@ try{
  const ffmpeg=join(root,'node_modules/ffmpeg-static',process.platform==='win32'?'ffmpeg.exe':'ffmpeg');
  const encoder=start(ffmpeg,['-y','-framerate',String(fps),'-start_number','0','-i',join(frames,'frame-%06d.png'),'-frames:v',String(total),'-c:v','libx264','-crf','16','-pix_fmt','yuv420p',output]);
  await new Promise<void>((ok,no)=>{encoder.once('error',no);encoder.once('exit',code=>code===0?ok():no(new Error(`FFmpeg exited ${code}`)));});
- await writeFile(join(frames,'capture-report.json'),JSON.stringify({engine:'unreal',region,profile,imagery:option('imagery','esri-world-imagery'),fps,total,sourceDurationSeconds:seconds,capturedDurationSeconds:total/fps,startTime,sampleTimes,qualityReport,output},null,2));
+ await writeFile(join(frames,'capture-report.json'),JSON.stringify({engine:'unreal',region,profile,imagery,fps,total,sourceDurationSeconds:seconds,capturedDurationSeconds:total/fps,startTime,sampleTimes,qualityReport,output},null,2));
 }finally{await browser?.close();for(const child of children)if(child.exitCode===null)child.kill();}

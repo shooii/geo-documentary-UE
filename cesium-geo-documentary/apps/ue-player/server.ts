@@ -1,9 +1,11 @@
 import { createServer } from 'node:http';
+import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { build } from 'esbuild';
 import { loadScene, within } from './scene.js';
 import { ImageryService, ImageryError } from './imagery.js';
+import { DEFAULT_IMAGERY_PROVIDER } from '../../packages/project-schema/index.js';
 
 const root = resolve(process.cwd());
 const publicRoot = resolve(root, 'apps/ue-player/public');
@@ -20,13 +22,13 @@ createServer(async (req, res) => {
     }
     if (url.pathname === '/api/scene') {
       const scene = await loadScene(root, url.searchParams.get('region') || '', url.searchParams.get('boundary'));
-      const source = await imagery.descriptor(url.searchParams.get('imagery') || 'esri-world-imagery', `http://127.0.0.1:${port}`);
+      const source = await imagery.descriptor(url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER, `http://127.0.0.1:${port}`, url.searchParams.get('session') || randomUUID());
       res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
       res.end(JSON.stringify({ ...scene, imagery: source })); return;
     }
     const tile = /^\/api\/imagery\/([\w-]+)\/(\d+)\/(\d+)\/(\d+)$/.exec(url.pathname);
     if (tile) {
-      const result = await imagery.tile(tile[1]!, Number(tile[2]), Number(tile[3]), Number(tile[4]));
+      const result = await imagery.tile(tile[1]!, Number(tile[2]), Number(tile[3]), Number(tile[4]), url.searchParams.get('session') || '');
       res.writeHead(200, { 'content-type': result.type, 'cache-control': 'private, max-age=3600' });
       res.end(result.bytes); return;
     }

@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { buildRenderSpec, mapScenesToCues, parseSrt, updateProjectMeasuredDurations, type RenderSpec, type TimedCue } from "../../packages/render-spec/index.js";
 import { mediaKindForPath } from "../../packages/content-engine/media.js";
-import { outputSize, type AssetFit, type AssetPlacement, type StudioAsset, type StudioScene, type VideoProject } from "../../packages/project-schema/index.js";
+import { DEFAULT_IMAGERY_PROVIDER, outputSize, type AssetFit, type AssetPlacement, type StudioAsset, type StudioScene, type VideoProject } from "../../packages/project-schema/index.js";
 import { portraitChildCameraPreset, type GeoBounds } from "../../packages/geo-camera/index.js";
 import { snapshotFile } from "./boundary-snapshot.js";
 import { readFileResilient, readJsonResilient } from "./fs-resilience.js";
@@ -350,7 +350,7 @@ export async function makeProject(root: string, regionId?: string, options: { pr
       contentMeta: "地理 · 人文 · 时代"
     },
     output: { profile: "portrait", ...size, fps: 30, quality: "high" },
-    imagery: { provider: "mapbox-satellite" },
+    imagery: { provider: DEFAULT_IMAGERY_PROVIDER },
     style: { theme: "midnight-globe", primaryColor: "#48d6c9", boundaryColor: "#ffd166", fontFamily: "Microsoft YaHei", subtitleSafeMargin: 220, subtitleMaxLines: 2 },
     voice: { enabled: true, voiceId: content.voiceId ?? "zh-CN-YunyangNeural", speed: rateToSpeed(content.voiceRate), volume: 1 },
     assets: [], scenes

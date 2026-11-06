@@ -70,6 +70,16 @@ export interface SceneTiming {
   mapHoldSeconds: number;
 }
 
+export const DEFAULT_IMAGERY_PROVIDER = "cesium-ion-world-imagery";
+
+export interface MapView {
+  longitudeOffset: number;
+  latitudeOffset: number;
+  zoom: number;
+  headingOffset: number;
+  pitchOffset: number;
+}
+
 export interface StudioScene {
   id: string;
   type: SceneType;
@@ -93,6 +103,7 @@ export interface StudioScene {
   childName?: string;
   /** Tianditu imagery labels for this scene only. Project-level imagery remains the base layer. */
   imageryAnnotation?: boolean;
+  mapView?: MapView;
   camera?: {
     longitude: number;
     latitude: number;
@@ -259,6 +270,15 @@ export function validateVideoProject(value: unknown): asserts value is VideoProj
     }
     if (scene.imageryAnnotation !== undefined && typeof scene.imageryAnnotation !== "boolean") {
       throw new Error(`Imagery annotation selection for ${scene.id} must be a boolean`);
+    }
+    if (scene.mapView !== undefined) {
+      const view = scene.mapView;
+      if (!view || typeof view !== "object" || scene.section === "cover") throw new Error(`Invalid map view for ${scene.id}`);
+      finiteRange(view.longitudeOffset, -180, 180, `Longitude offset for ${scene.id}`);
+      finiteRange(view.latitudeOffset, -85, 85, `Latitude offset for ${scene.id}`);
+      finiteRange(view.zoom, .25, 4, `Map zoom for ${scene.id}`);
+      finiteRange(view.headingOffset, -180, 180, `Heading offset for ${scene.id}`);
+      finiteRange(view.pitchOffset, -60, 60, `Pitch offset for ${scene.id}`);
     }
     if (scene.section === "child") {
       if (!scene.childId || !scene.childName) throw new Error(`Child scene ${scene.id} is missing administrative metadata`);

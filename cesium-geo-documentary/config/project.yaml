@@ -20,12 +20,13 @@ scope:
   include_children: false
 
 map:
-  imagery_provider: esri-world-imagery
+  imagery_provider: cesium-ion-world-imagery
   imagery_ion_asset_id: 2
-  imagery_attribution: Esri World Imagery
+  imagery_attribution: Cesium ion · Microsoft Bing Maps
   mapbox_map_id: mapbox/satellite-v9
   # 密钥不再写入文件，请通过环境变量提供（server.ts 优先读 env）：
   #   MAPBOX_ACCESS_TOKEN   → mapbox satellite 影像
+  #   CESIUM_ION_TOKEN      → Cesium ion 资产 2（Bing Maps 航拍）
   #   CESIUM_ION_TOKEN      → Cesium Ion 资产
   #   TIANDITU_TOKEN        → 天地图影像与影像注记（也可直接配置下方 tianditu_token）
   mapbox_access_token: ""

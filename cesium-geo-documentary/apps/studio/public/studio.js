@@ -3,6 +3,8 @@ import { sceneRenderPlacementIndex, selectSceneRenderPlacements } from "./scene-
 
 const $ = (id) => document.getElementById(id);
 const CESIUM_PREVIEW_ORIGIN = "http://127.0.0.1:4174";
+const DEFAULT_IMAGERY_PROVIDER = "cesium-ion-world-imagery";
+const DEFAULT_MAP_VIEW = Object.freeze({ longitudeOffset: 0, latitudeOffset: 0, zoom: 1, headingOffset: 0, pitchOffset: 0 });
 const state = {
   project: null, projects: [], renderSpec: null, renderSpecStale: false, readiness: null, selectedSceneId: null, selectedAssetId: null,
   dirty: false, pollTimer: null, outputJob: null, exportJobs: [], exportJobStates: {}, playTimer: null, subtitleTimers: [], previewUrl: "",
@@ -1803,7 +1805,7 @@ function playSelectedScenePreview() {
   state.previewAssetReadySceneId = null;
   setPreviewAssetVisible(false);
   const opening = openingPreviewSettings();
-  $("cesiumPreview").contentWindow?.postMessage({ type: "geo-video-studio", action: "play-opening", opening }, CESIUM_PREVIEW_ORIGIN);
+  $("cesiumPreview").contentWindow?.postMessage({ type: "geo-video-studio", action: "play-opening", opening, mapView: scene.mapView ?? null }, CESIUM_PREVIEW_ORIGIN);
 }
 
 // The child-tour payload the preview needs. Studio builds it once and uses it
@@ -1863,12 +1865,15 @@ function pushTourContext() {
 // both region shapes: with a descent the player removes it, without one there is
 // nothing to remove.
 function showSelectedTourFrame() {
-  const scene = selectedScene(); if (!['child', 'outro'].includes(scene?.section) || !state.renderSpec || $("cesiumPreview").hidden) return;
+  const scene = selectedScene(); if (!['child', 'outro', 'overview'].includes(scene?.section) || !state.renderSpec || $("cesiumPreview").hidden) return;
   const payload = tourPreviewPayload(); if (!payload) return;
   const { tourStops, returnDuration, annotationWindows } = payload;
   let time;
   let action = "show-tour-frame";
-  if (scene.section === "outro") {
+  if (scene.section === "overview") {
+    action = "play-parent-overview";
+    time = 0;
+  } else if (scene.section === "outro") {
     const last = tourStops.at(-1); if (!last) return;
     action = "play-tour-outro";
     time = last.end;
@@ -1882,6 +1887,7 @@ function showSelectedTourFrame() {
   $("cesiumPreview").contentWindow?.postMessage({
     type: "geo-video-studio",
     action,
+    mapView: scene.mapView ?? null,
     preview: { tourStops, time, returnDuration, annotationWindows, targetId: scene.childId, segmentDuration: sceneDuration(scene) }
   }, CESIUM_PREVIEW_ORIGIN);
 }
@@ -1889,6 +1895,7 @@ function showSelectedTourFrame() {
 function previewSelectedScene() {
   if (isOpeningScene(selectedScene())) playSelectedScenePreview();
   else showSelectedTourFrame();
+  pushMapView();
   // Always last: the messages above restored the film's own windows, which never
   // overlap the frame the editor actually parks on.
   pushPreviewAnnotationWindows();
@@ -1919,8 +1926,8 @@ function selectSceneFromUi(sceneId) {
   const continuous = state.playbackContinuous;
   if (continuePlaying) stopPlayback();
   selectScene(sceneId, false);
-  previewSelectedScene();
   if (continuePlaying) startPlaybackFromSelected({ continuous });
+  else previewSelectedScene();
 }
 
 function defaultPlacement(asset, scene) {
@@ -2324,17 +2331,20 @@ function render() {
   $("currentRegionName").textContent = project.regionName || project.cover?.town || project.regionId || "未选择地区";
   $("currentRegionPath").textContent = [project.cover?.province, project.cover?.city, project.cover?.county, project.regionId].filter(Boolean).join(" / ");
   $("projectName").value = project.name; $("profileSelect").value = project.output.profile; $("qualitySelect").value = project.output.quality === "draft" ? "draft" : "high"; syncPresetUI(); refreshExportEstimate();
-  $("imageryProviderSelect").value = project.imagery?.provider || "esri-world-imagery";
-  const imageryProviderForHint = project.imagery?.provider || "esri-world-imagery";
+  const imageryProvider = project.imagery?.provider || DEFAULT_IMAGERY_PROVIDER;
+  $("imageryProviderSelect").value = imageryProvider;
+  const imageryProviderForHint = imageryProvider;
   $("imageryProviderHint").textContent = imageryProviderForHint === "bing-aerial"
     ? "必应需在 config/project.yaml 配置 bing_maps_key，或设置 BING_MAPS_KEY。"
     : imageryProviderForHint === "tianditu-imagery"
       ? "天地图影像与注记已配置；在右侧场景编辑中逐场勾选“天地图影像注记”。"
-      : "预览与导出共用此影像源，切换后会重新生成地图缓存。";
+      : imageryProviderForHint === DEFAULT_IMAGERY_PROVIDER
+        ? "Cesium ion 资产 2 · Bing Maps 航拍，预览和导出共用。"
+        : "预览与导出共用此影像源，切换后会重新生成地图缓存。";
   $("voiceId").value = project.voice.voiceId; $("voiceSpeed").value = project.voice.speed;
   $("previewFrame").className = `preview-frame ${project.output.profile}`;
   requestAnimationFrame(syncPreviewTypography);
-  const imageryProvider = project.imagery?.provider || "esri-world-imagery";
+  renderMapView();
   // `boundary` pins the preview to this scheme's frozen boundary. Without it the
   // player would read `data/`, so re-importing the region would silently redraw
   // a scheme that was already authored against the previous boundary.
@@ -2473,8 +2483,6 @@ function renderInspector() {
   $("sceneAnnotationControl").hidden = scene.section === "cover";
   $("deleteScene").hidden = !sceneCanDelete(scene);
   const isCoverScene = scene.section === "cover";
-  $("coverTextEditor").hidden = !isCoverScene;
-  $("sceneCoverContentMeta").value = state.project.cover.contentMeta ?? "";
   const tools = $("sceneCopyTools");
   if (tools) {
     tools.hidden = isCoverScene;
@@ -2663,6 +2671,35 @@ function applyPreviewStagePlacement(scene, placement) {
 }
 
 
+function renderMapView() {
+  const scene = selectedScene();
+  const panel = $("mapViewControls");
+  panel.hidden = state.previewMode !== "actual" || !scene || scene.section === "cover";
+  if (panel.hidden) panel.open = false;
+  const view = scene?.mapView ?? DEFAULT_MAP_VIEW;
+  for (const input of panel.querySelectorAll("input[name]")) input.value = view[input.name];
+  $("resetMapView").disabled = !scene?.mapView;
+}
+
+function pushMapView() {
+  if ($("cesiumPreview").hidden) return;
+  $("cesiumPreview").contentWindow?.postMessage({
+    type: "geo-video-studio", action: "set-map-view", mapView: selectedScene()?.mapView ?? null
+  }, CESIUM_PREVIEW_ORIGIN);
+}
+
+function updateMapView(input) {
+  const scene = selectedScene();
+  if (!scene || scene.section === "cover") return;
+  if (input) {
+    const value = Number.isFinite(input.valueAsNumber) ? input.valueAsNumber : DEFAULT_MAP_VIEW[input.name];
+    scene.mapView = { ...DEFAULT_MAP_VIEW, ...scene.mapView, [input.name]: Math.min(Number(input.max), Math.max(Number(input.min), value)) };
+  } else delete scene.mapView;
+  markDirty();
+  renderMapView();
+  pushMapView();
+}
+
 function setPreviewMode(mode) {
   state.previewMode = mode === "safe" ? "safe" : "actual";
   $("actualViewTab").classList.toggle("active", state.previewMode === "actual");
@@ -2670,6 +2707,7 @@ function setPreviewMode(mode) {
   $("actualViewTab").setAttribute("aria-pressed", String(state.previewMode === "actual"));
   $("safeAreaTab").setAttribute("aria-pressed", String(state.previewMode === "safe"));
   $("safeArea").hidden = state.previewMode !== "safe";
+  renderMapView();
 }
 
 function bindAssetToScene(id) {
@@ -3874,6 +3912,8 @@ function bind() {
   });
   $("actualViewTab").onclick = () => setPreviewMode("actual");
   $("safeAreaTab").onclick = () => setPreviewMode("safe");
+  for (const input of $("mapViewControls").querySelectorAll("input[name]")) input.onchange = () => updateMapView(input);
+  $("resetMapView").onclick = () => updateMapView();
   $("projectName").onclick = () => setSaveProjectOpen(true);
   $("projectName").onfocus = () => { $("projectName").blur(); setSaveProjectOpen(true); };
   $("provinceSelect").onchange = async (event) => { try { await selectProvince(event.target.value); } catch (error) { toastError(error.message); } };
@@ -4111,7 +4151,7 @@ function bind() {
   // Adding a scene is offered on each block's heading (see render), not from a header
   // button, so there is nothing to wire here — the per-heading buttons bind in render.
   $("planTourRoute").onclick = planTourRoute;
-  const coverFields = { coverAdministrativeLabel: "administrativeLabel", coverSubtitle: "subtitle", coverContentMeta: "contentMeta", sceneCoverContentMeta: "contentMeta" };
+  const coverFields = { coverAdministrativeLabel: "administrativeLabel", coverSubtitle: "subtitle", coverContentMeta: "contentMeta" };
   Object.entries(coverFields).forEach(([id, key]) => $(id).oninput = (event) => { state.project.cover[key] = event.target.value; markDirty(); render(); scheduleCoverPreview(); });
   $("coverIntro").onchange = (event) => { const value = clampInputValue(event.target, 0.25, 10); state.project.cover.introSeconds = value; const coverScene = state.project.scenes.find((scene) => scene.section === "cover"); if (coverScene) coverScene.duration = value; markDirty(); render(); scheduleCoverPreview(); };
   $("coverFadeOut").onchange = (event) => { state.project.cover.fadeOutSeconds = clampInputValue(event.target, 0, 3); markDirty(); }; $("coverOverlay").oninput = (event) => { const v = clampInputValue(event.target, 0, 1); state.project.cover.overlayOpacity = v; markDirty(); };
