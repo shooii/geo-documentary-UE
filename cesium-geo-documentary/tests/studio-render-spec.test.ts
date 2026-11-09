@@ -1402,8 +1402,13 @@ test("the preview iframe boots only the one region the open project asks for", a
   // The scheme id rides along as `boundary`: the preview has to read that
   // scheme's frozen boundary rather than whatever `data/` holds now, or
   // re-importing a region would redraw a scheme that was already authored.
-  assert.match(source, /`\$\{CESIUM_PREVIEW_ORIGIN\}\/\?region=\$\{encodeURIComponent\(project\.regionId\)\}&profile=\$\{encodeURIComponent\(project\.output\.profile\)\}&studioPreview=2&imagery=\$\{encodeURIComponent\(imageryProvider\)\}&boundary=\$\{encodeURIComponent\(project\.id\)\}&parentOrigin=\$\{encodeURIComponent\(location\.origin\)\}`/,
+  assert.match(source, /`\$\{CESIUM_PREVIEW_ORIGIN\}\/\?region=\$\{encodeURIComponent\(project\.regionId\)\}&profile=\$\{encodeURIComponent\(project\.output\.profile\)\}&studioPreview=2&imagery=\$\{encodeURIComponent\(loadedImagery\)\}&boundary=\$\{encodeURIComponent\(project\.id\)\}&parentOrigin=\$\{encodeURIComponent\(location\.origin\)\}`/,
     "the assigned URL must carry studioPreview so the preview uses the light profile, and boundary so it reads the scheme's frozen data");
+  // The URL pins the provider the iframe was *loaded* with. A later basemap switch
+  // travels over postMessage, so the src (and with it the pixel-stream session) stays.
+  assert.match(source, /const loadedImagery = state\.previewImagery \|\| imageryProvider;/,
+    "basemap switches must not rewrite the iframe URL");
+  assert.match(source, /action: "switch-imagery"/, "the studio asks the running player to swap its tile source");
 });
 
 test("a bound scene asset can be removed by keyboard and at any asset count", async () => {

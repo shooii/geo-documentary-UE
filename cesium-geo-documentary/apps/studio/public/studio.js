@@ -8,6 +8,8 @@ const DEFAULT_MAP_VIEW = Object.freeze({ longitudeOffset: 0, latitudeOffset: 0, 
 const state = {
   project: null, projects: [], renderSpec: null, renderSpecStale: false, readiness: null, selectedSceneId: null, selectedAssetId: null,
   dirty: false, pollTimer: null, outputJob: null, exportJobs: [], exportJobStates: {}, playTimer: null, subtitleTimers: [], previewUrl: "",
+  /** Provider the preview iframe was actually loaded with; imagery switches leave it untouched. */
+  previewImagery: null, pendingImagery: null, previewProjectId: null,
   durationDrafts: new Map(), editEpoch: 0, savePromise: null, specRequest: 0,
   exportRequest: 0, exportPollFailures: 0, exportLastUpdated: null,
   assetUploadBatch: null,
@@ -510,6 +512,20 @@ function revealSelectedSceneAsset(placement = state.playbackStageActive ? state.
 function handleCesiumPreviewMessage(event) {
   if (event.source !== $("cesiumPreview").contentWindow || event.origin !== CESIUM_PREVIEW_ORIGIN) return;
   if (event.data?.type !== "geo-video-player") return;
+  if (event.data.event === "engine-ready") {
+    // A message sent while the iframe was still booting is lost, so replay the
+    // requested basemap once the engine reports ready.
+    if (state.pendingImagery && state.pendingImagery !== state.previewImagery) {
+      $("cesiumPreview").contentWindow?.postMessage(
+        { type: "geo-video-studio", action: "switch-imagery", imagery: state.pendingImagery }, CESIUM_PREVIEW_ORIGIN);
+    }
+    return;
+  }
+  if (event.data.event === "imagery-changed") {
+    state.previewImagery = event.data.provider || state.previewImagery;
+    state.pendingImagery = null;
+    return;
+  }
   const scene = selectedScene();
   const openingLabelVisible = event.data.event === "opening-label-visible" && isOpeningScene(scene);
   const childFlightComplete = event.data.event === "tour-flight-complete"
@@ -2351,7 +2367,7 @@ function render() {
       ? "天地图影像与注记已配置；在右侧场景编辑中逐场勾选“天地图影像注记”。"
       : imageryProviderForHint === DEFAULT_IMAGERY_PROVIDER
         ? "Cesium ion 资产 2 · Bing Maps 航拍，预览和导出共用。"
-        : "预览与导出共用此影像源，切换后会重新生成地图缓存。";
+        : "预览与导出共用此影像源；切换立即生效，不会重连像素流。";
   $("voiceId").value = project.voice.voiceId; $("voiceSpeed").value = project.voice.speed;
   $("previewFrame").className = `preview-frame ${project.output.profile}`;
   requestAnimationFrame(syncPreviewTypography);
@@ -2359,8 +2375,17 @@ function render() {
   // `boundary` pins the preview to this scheme's frozen boundary. Without it the
   // player would read `data/`, so re-importing the region would silently redraw
   // a scheme that was already authored against the previous boundary.
-  const previewUrl = `${CESIUM_PREVIEW_ORIGIN}/?region=${encodeURIComponent(project.regionId)}&profile=${encodeURIComponent(project.output.profile)}&studioPreview=2&imagery=${encodeURIComponent(imageryProvider)}&boundary=${encodeURIComponent(project.id)}&parentOrigin=${encodeURIComponent(location.origin)}`;
-  if (state.previewUrl !== previewUrl) { state.previewUrl = previewUrl; $("cesiumPreview").src = previewUrl; }
+  // The iframe only carries the provider it was *loaded* with. Switching the basemap
+  // afterwards is a postMessage away, so the URL stays stable and the iframe (and its
+  // pixel-stream session) is never reloaded.
+  if (state.previewProjectId !== project.id) {
+    state.previewProjectId = project.id;
+    state.previewImagery = imageryProvider;
+    state.pendingImagery = null;
+  }
+  const loadedImagery = state.previewImagery || imageryProvider;
+  const previewUrl = `${CESIUM_PREVIEW_ORIGIN}/?region=${encodeURIComponent(project.regionId)}&profile=${encodeURIComponent(project.output.profile)}&studioPreview=2&imagery=${encodeURIComponent(loadedImagery)}&boundary=${encodeURIComponent(project.id)}&parentOrigin=${encodeURIComponent(location.origin)}`;
+  if (state.previewUrl !== previewUrl) { state.previewUrl = previewUrl; state.previewImagery = loadedImagery; $("cesiumPreview").src = previewUrl; }
   const sectionLabels = { cover: "1 · 统一封面", overview: "2-3 · 穿云与总体介绍", child: "4 · 下级行政区巡游", outro: "5 · 拉回上级区域结尾" };
   // 结尾补充 shares the pull-back's heading instead of owning a separate group: the
   // two sections read as one 结尾 area, with the 结尾补充 rows simply listed under the
@@ -3982,9 +4007,17 @@ function bind() {
   }
   setPresetFromCard();
   $("imageryProviderSelect").onchange = (event) => {
-    state.project.imagery = { provider: event.target.value };
-    if (event.target.value === "bing-aerial") toast("必应卫星需先配置 Bing Maps Key");
+    const provider = event.target.value;
+    state.project.imagery = { provider };
+    if (provider === "bing-aerial") toast("必应卫星需先配置 Bing Maps Key");
     markDirty();
+    // Tell the running player to swap its tile source in place. Reloading the iframe
+    // here would restart WebRTC and drop the whole scene.
+    if (state.previewImagery && provider !== state.previewImagery) {
+      state.pendingImagery = provider;
+      $("cesiumPreview").contentWindow?.postMessage(
+        { type: "geo-video-studio", action: "switch-imagery", imagery: provider }, CESIUM_PREVIEW_ORIGIN);
+    }
     render();
   };
   $("voiceId").onchange = (event) => { state.project.voice.voiceId = event.target.value; markDirty(); }; $("voiceSpeed").onchange = (event) => { const speed = clampInputValue(event.target, 0.7, 1.3); state.project.voice.speed = speed; markDirty(); };

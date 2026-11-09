@@ -7,10 +7,15 @@ const query = new URLSearchParams(location.search);
 const parentOrigin = new URL(query.get('parentOrigin') || 'http://127.0.0.1:4180').origin;
 const profile = query.get('profile') || 'portrait';
 const imagery = query.get('imagery') || DEFAULT_IMAGERY_PROVIDER;
-const sceneParams = new URLSearchParams({ region: query.get('region') || '', imagery });
-if (imagery === 'cesium-ion-world-imagery') sceneParams.set('session', crypto.randomUUID());
-if (query.has('boundary')) sceneParams.set('boundary', query.get('boundary')!);
-const sceneUrl = `/api/scene?${sceneParams}`;
+let imageryProvider = imagery;
+const boundary = query.get('boundary');
+function sceneQuery(provider = imageryProvider) {
+  const params = new URLSearchParams({ region: query.get('region') || '', imagery: provider });
+  if (provider === 'cesium-ion-world-imagery') params.set('session', crypto.randomUUID());
+  if (boundary) params.set('boundary', boundary);
+  return params;
+}
+const sceneUrl = () => `/api/scene?${sceneQuery()}`;
 async function fetchScene(url: string, signal?: AbortSignal) {
   const response = await fetch(url, { ...(signal ? { signal } : {}) });
   const data = await response.json();
@@ -18,7 +23,7 @@ async function fetchScene(url: string, signal?: AbortSignal) {
   return data;
 }
 // Start the scene and two local fallback tiles during the WebRTC handshake.
-let preloadedScene = query.has('studioPreview') ? fetchScene(`${sceneUrl}&warm=1`).catch(() => undefined) : undefined;
+let preloadedScene = query.has('studioPreview') ? fetchScene(`${sceneUrl()}&warm=1`).catch(() => undefined) : undefined;
 const overlay = document.getElementById('connection')!;
 const status = document.getElementById('status')!;
 let scene: any, stops: any[] | undefined, duration = 4.4, time = 0, raf = 0, ready = false, openingOnly = false, contextIntro = false;
@@ -87,6 +92,7 @@ function handle(data: any) {
     return;
   }
   if (!ready) { queuedMotion = data; return; }
+  if (data.action === 'switch-imagery') { void switchImagery(String(data.imagery || '')).catch(fail); return; }
   const descent = scene.region.openingDescent?.enabled === false ? 0 : Number(scene.region.openingDescent?.seconds || 0);
   const wasPlaying = raf !== 0;
   stop();
@@ -137,19 +143,33 @@ function handle(data: any) {
     play(start, end, 'tour-segment-complete', { childId:target.id }, Number(target.flightDuration));
   } else draw(true);
 }
-function fail(error: unknown) { status.textContent = String(error); overlay.hidden = false; notify('engine-error',{ message:String(error) }); }
+function fail(error: unknown) { status.textContent = String(error); retryButton.hidden = false; overlay.hidden = false; notify('engine-error',{ message:String(error) }); }
+// The basemap is a tile source, not a scene: swapping it re-resolves the provider and
+// hands the new template to UE, which rebuilds only its tile layer. Geometry, labels
+// and the camera stay where they are, so the video stream is never torn down.
+async function switchImagery(provider: string) {
+  if (!provider || provider === imageryProvider) return;
+  const response = await fetch(`/api/imagery-descriptor?imagery=${encodeURIComponent(provider)}`);
+  const descriptor = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(descriptor.error || '影像源切换失败');
+  await send('set-imagery', { imagery: descriptor });
+  imageryProvider = provider;
+  if (scene) scene.imagery = descriptor;
+  draw(true);
+  notify('imagery-changed', { provider });
+}
 async function load(signal: AbortSignal) {
   ready = false; status.textContent = '正在加载 UE 地图场景…'; overlay.hidden = false;
   if (!scene) {
     const preload = preloadedScene;
     preloadedScene = undefined;
-    const loaded = await preload ?? await fetchScene(sceneUrl, signal);
+    const loaded = await preload ?? await fetchScene(sceneUrl(), signal);
     signal.throwIfAborted();
     scene = loaded;
     stops ??= scene.region.tourStops || [];
   }
   const size=profile==='landscape'?[1280,720]:profile==='square'?[720,720]:[720,1280];
-  await send('load-scene',{ url: `${location.origin}${sceneUrl}`, profile, width:query.has('studioPreview')?size[0]:innerWidth,height:query.has('studioPreview')?size[1]:innerHeight,imagery });
+  await send('load-scene',{ url: `${location.origin}${sceneUrl()}`, profile, width:query.has('studioPreview')?size[0]:innerWidth,height:query.has('studioPreview')?size[1]:innerHeight,imagery:imageryProvider });
   const expected=query.has('studioPreview')?size:[innerWidth,innerHeight];
   const until=performance.now()+8000;
   while (!signal.aborted && performance.now() < until) {
@@ -222,6 +242,7 @@ function standDown(message: string) {
   teardown();
   stream.disconnect();
   status.textContent = message;
+  retryButton.hidden = false;
   retryButton.textContent = '重新连接';
   overlay.hidden = false;
 }
@@ -238,15 +259,55 @@ retryButton.onclick = () => {
   armJoining();
 };
 window.addEventListener('message',event => { if (event.source === parent && event.origin === parentOrigin && event.data?.type === 'geo-video-studio') handle(event.data); });
-window.addEventListener('pagehide', () => { teardown(); stream.disconnect(); });
+window.addEventListener('pagehide', () => { teardown(); releaseSlot(); stream.disconnect(); });
 Object.assign(window,{ geoVideo: {
-  getDiagnostics: () => ({ engine:'unreal', ready, time, imagery:scene?.imagery?.provider }),
+  getDiagnostics: () => ({ engine:'unreal', ready, time, imagery:scene?.imagery?.provider, imageProvider:imageryProvider }),
   getRendererStatus: () => send('get-status'),
+  setImagery: (provider: string) => switchImagery(provider),
   playOpeningPreview: (opening={}) => handle({action:'play-opening',opening}),
   prepareStudioTour: (preview:any) => handle({action:'prepare-tour',preview}),
   renderFrame: async (t: number) => { stop(); time=t; openingOnly=false; if (!ready) throw new Error('UE renderer not ready'); return send('capture-frame',{ frame:frameAt(scene,stops ?? [],t,profile,duration,false) }); },
   seek: async (t: number) => { stop(); flightOrigin=undefined; time=t; draw(true); },
   getFrameStatus: () => ({ initialized:ready, renderStable:ready, time, engine:'unreal' })
 } });
-stream.connect();
-armJoining();
+// --- single-viewer lease -------------------------------------------------
+// One UE instance drives one stream, and the streamer takes a single subscriber.
+// The first window to arrive holds the slot; every later window is told the instance
+// is busy and keeps polling, so it joins by itself the moment the holder goes away.
+const viewerId = crypto.randomUUID();
+const slotEnabled = query.get('slot') !== 'off';
+let slotHeartbeat: ReturnType<typeof setInterval> | undefined;
+let slotPoll: ReturnType<typeof setTimeout> | undefined;
+async function claimSlot(): Promise<'granted' | 'busy' | 'offline'> {
+  const response = await fetch('/api/viewer-slot', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: viewerId })
+  }).catch(() => undefined);
+  if (!response) return 'offline';
+  const data = await response.json().catch(() => ({}));
+  return data.granted ? 'granted' : 'busy';
+}
+function releaseSlot() {
+  clearInterval(slotHeartbeat);
+  clearTimeout(slotPoll);
+  slotHeartbeat = undefined;
+  slotPoll = undefined;
+  navigator.sendBeacon?.('/api/viewer-slot/release', new Blob([JSON.stringify({ id: viewerId })], { type: 'application/json' }));
+}
+async function joinWithSlot() {
+  if (!slotEnabled) { stream.connect(); armJoining(); return; }
+  const state = await claimSlot();
+  if (state === 'granted') {
+    retryButton.hidden = false;
+    slotHeartbeat = setInterval(() => { void claimSlot(); }, 4000);
+    stream.connect();
+    armJoining();
+    return;
+  }
+  retryButton.hidden = true;
+  overlay.hidden = false;
+  status.textContent = state === 'busy'
+    ? '地图实例正在被另一个窗口使用。\n关闭那个窗口后，本窗口会自动接入，无需刷新。'
+    : '预览服务暂时不可用，正在自动重试…';
+  slotPoll = setTimeout(joinWithSlot, 2000);
+}
+void joinWithSlot();

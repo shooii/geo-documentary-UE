@@ -233,6 +233,11 @@ void AGeoMap::OnInput(const FString &Descriptor)
         LoadScene(J, Id);
         return;
     }
+    if (Action == TEXT("set-imagery"))
+    {
+        SetImagery(J, Id);
+        return;
+    }
     if (Action == TEXT("get-status"))
     {
         Respond(Id);
@@ -537,6 +542,66 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         Respond(Id);
     });
     R->ProcessRequest();
+}
+void AGeoMap::SetImagery(const TSharedPtr<FJsonObject> &Data, FString Id)
+{
+    auto Imagery = O(Data, TEXT("imagery"));
+    FString Template = S(Imagery, TEXT("tileTemplate"));
+    if (Template.IsEmpty())
+    {
+        // Also accept the descriptor as the whole payload, so a caller does not have
+        // to know whether it should be wrapped or not.
+        Imagery = Data;
+        Template = S(Imagery, TEXT("tileTemplate"));
+    }
+    if (!Template.StartsWith(TEXT("http://127.0.0.1:")))
+    {
+        Respond(Id, TEXT("Invalid local imagery service configuration"));
+        return;
+    }
+    // Swapping the basemap is a tile-layer operation only. Everything that makes the
+    // scene the scene — rings, fills, labels, the boundary block and the camera — is
+    // deliberately left untouched, so the pixel stream keeps its session and the
+    // picture simply resolves into the new imagery as fresh tiles arrive.
+    TileTemplate = Template;
+    ImageryProvider = S(Imagery, TEXT("provider"));
+    ImageryAttribution = S(Imagery, TEXT("attribution"));
+    ++Generation;
+    for (const auto &Entry : ActiveTiles)
+    {
+        Entry.Value->OnProcessRequestComplete().Unbind();
+        Entry.Value->CancelRequest();
+    }
+    ActiveTiles.Reset();
+    // Drop the old tiles one by one instead of clearing `Resources`: that array also
+    // owns the boundary meshes, and emptying it would take the 3D relief with it.
+    for (const auto &Entry : TileMeshes)
+    {
+        auto *Mesh = Entry.Value.Get();
+        if (!IsValid(Mesh))
+            continue;
+        auto *Material = Cast<UMaterialInstanceDynamic>(Mesh->GetMaterial(0));
+        UTexture *Texture = nullptr;
+        if (Material)
+            Material->GetTextureParameterValue(FMaterialParameterInfo(TEXT("Imagery")), Texture);
+        Resources.Remove(Texture);
+        Resources.Remove(Material);
+        Resources.Remove(Mesh);
+        Mesh->DestroyComponent();
+    }
+    TileMeshes.Reset();
+    TileCacheOrder.Reset();
+    TileQueue.Reset();
+    TileAttempts.Reset();
+    TileFailures.Reset();
+    VisibleTiles.Reset();
+    RequiredTiles.Reset();
+    // RefreshTiles short-circuits when the tile window did not move, so the centre
+    // has to be invalidated explicitly or the new provider would never be fetched.
+    TileCenter = FIntVector(0, 0, -1);
+    PendingTiles = FailedTiles = 0;
+    UE_LOG(LogTemp, Display, TEXT("GEO_IMAGERY %s %s"), *ImageryProvider, *Template);
+    Respond(Id);
 }
 void AGeoMap::TileFailed(const FIntVector &Key)
 {

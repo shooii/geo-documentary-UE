@@ -109,6 +109,12 @@ class AGeoMap : public AActor
     FVector Geo(double Lon, double Lat, double Height = 0) const;
     void Respond(FString RequestId, FString Error = TEXT(""));
     void LoadScene(const TSharedPtr<FJsonObject> &Data, FString RequestId);
+    /**
+     * Swaps only the basemap layer (tile template + provider). The rings, the fills,
+     * the labels and the camera are left alone, so changing imagery never restarts
+     * the scene and never costs a pixel-stream reconnect.
+     */
+    void SetImagery(const TSharedPtr<FJsonObject> &Data, FString RequestId);
     void ApplyFrame(const TSharedPtr<FJsonObject> &Data);
     void InitBoundaryEffects();
     /**

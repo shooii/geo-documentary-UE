@@ -14,19 +14,18 @@ const server = new SignallingServer({
   playerKeepaliveTimeout:Number(process.env.UE_PLAYER_KEEPALIVE_MS || 15000)
 });
 
-// One UE instance serves exactly one controller, and the newest controller wins. Pages
-// that are closed, hidden behind the panel or simply forgotten never told us they were
-// done, so the slot has to be handed over on arrival. The slot is released synchronously
-// (the websocket close is async) so the newcomer's very first subscribe lands on a free
-// streamer instead of racing the disconnect.
+// One UE instance serves exactly one controller, and the controller that is already
+// watching keeps it. The old policy handed the slot to whoever arrived last, which
+// made two open studio tabs evict each other in a loop. Contention is resolved one
+// layer up, in the player's viewer lease (/api/viewer-slot): the holder keeps the
+// slot, later windows show "实例正在占用" and join by themselves once it is released.
+// Here we only report a second subscriber so the log still explains a stuck window.
 server.playerRegistry.on('added', (playerId: string) => {
   for (const other of server.playerRegistry.listPlayers()) {
     if (other.playerId === playerId || !other.subscribedStreamer) continue;
-    other.subscribedStreamer.subscribers.delete(other.playerId);
-    console.log(`UE_PLAYER_TAKEOVER ${other.playerId} -> ${playerId}`);
-    other.protocol.disconnect(4000, 'replaced by a newer controller');
+    console.log(`UE_PLAYER_BUSY ${playerId} waits for ${other.playerId} (one controller per UE instance)`);
   }
 });
 
-console.log('UE_SIGNALLING_STARTED (loopback, one controller per UE instance, newest controller wins)');
+console.log('UE_SIGNALLING_STARTED (loopback, one controller per UE instance, first viewer keeps it)');
 void server;

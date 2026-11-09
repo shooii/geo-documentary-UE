@@ -7,13 +7,19 @@ import { fetch, ProxyAgent, type Dispatcher } from 'undici';
 export class ImageryError extends Error {
   constructor(public readonly status: number, message: string) { super(message); }
 }
-export async function ionToken(root: string, env: NodeJS.ProcessEnv) {
-  if (env.CESIUM_ION_TOKEN?.trim()) return env.CESIUM_ION_TOKEN.trim();
+/** `.env.local` is read directly: the player is often started without a shell that exported it. */
+async function localEnv(root: string) {
   const local = await readFile(join(root, '.env.local'), 'utf8').catch((error: NodeJS.ErrnoException) => {
     if (error.code === 'ENOENT') return '';
     throw error;
   });
-  return parseEnv(local).CESIUM_ION_TOKEN?.trim() || '';
+  return parseEnv(local) as Record<string, string | undefined>;
+}
+async function secret(root: string, env: NodeJS.ProcessEnv, key: string) {
+  return env[key]?.trim() || (await localEnv(root))[key]?.trim() || '';
+}
+export async function ionToken(root: string, env: NodeJS.ProcessEnv) {
+  return secret(root, env, 'CESIUM_ION_TOKEN');
 }
 
 type BingTiles = { template: string; subdomains: string[]; culture: string; attribution: string };
@@ -43,6 +49,29 @@ async function json(url: URL, dispatcher?: Dispatcher, authorization?: string) {
   return response.json();
 }
 
+async function bingMetadata(base: URL, key: string, style: string, culture: string, dispatcher?: Dispatcher, mapLayer?: string): Promise<BingTiles> {
+  if (!base.pathname.endsWith('/')) base.pathname += '/';
+  const metadata = httpsUrl('REST/v1/Imagery/Metadata/' + encodeURIComponent(style || 'Aerial'), base);
+  metadata.searchParams.set('incl', 'ImageryProviders');
+  metadata.searchParams.set('key', key);
+  metadata.searchParams.set('uriScheme', 'https');
+  if (mapLayer) metadata.searchParams.set('mapLayer', mapLayer);
+  if (culture) metadata.searchParams.set('culture', culture);
+  const data = await json(metadata, dispatcher) as {
+    resourceSets?: { resources?: { imageUrl?: string; imageUrlSubdomains?: string[]; imageryProviders?: { attribution?: string }[] }[] }[];
+  };
+  const imagery = data.resourceSets?.[0]?.resources?.[0];
+  if (!imagery?.imageUrl?.includes('{quadkey}') || !imagery.imageUrlSubdomains?.length) {
+    throw new ImageryError(502, 'Bing Maps 影像缺少可用的瓦片地址。');
+  }
+  const names = new Set(['Microsoft Bing Maps']);
+  for (const provider of imagery.imageryProviders ?? []) {
+    const credit = provider.attribution?.replace(/<[^>]*>/g, '').replace(/&copy;/gi, '©').replace(/&amp;/gi, '&').trim();
+    if (credit) names.add(credit);
+  }
+  return { template: imagery.imageUrl, subdomains: imagery.imageUrlSubdomains, culture: culture || '', attribution: [...names].join(' · ') };
+}
+
 export async function resolveIonTiles(assetId: number, token: string, dispatcher?: Dispatcher): Promise<BingTiles> {
   const endpoint = await json(new URL('https://api.cesium.com/v1/assets/' + assetId + '/endpoint'), dispatcher, token) as {
     type?: string; externalType?: string;
@@ -52,28 +81,27 @@ export async function resolveIonTiles(assetId: number, token: string, dispatcher
   if (endpoint.type !== 'IMAGERY' || endpoint.externalType !== 'BING' || !options?.url || !options.key) {
     throw new ImageryError(502, 'Cesium ion 资产未返回 Bing Maps 航拍影像。');
   }
+  const tiles = await bingMetadata(httpsUrl(options.url), options.key, options.mapStyle || 'Aerial', options.culture || '', dispatcher, options.mapLayer);
+  // The attribution of an ion asset is credited to the asset, not just to Bing.
+  return { ...tiles, attribution: ['Cesium ion', tiles.attribution].join(' · ') };
+}
 
-  const base = httpsUrl(options.url);
-  if (!base.pathname.endsWith('/')) base.pathname += '/';
-  const metadata = httpsUrl('REST/v1/Imagery/Metadata/' + encodeURIComponent(options.mapStyle || 'Aerial'), base);
-  metadata.searchParams.set('incl', 'ImageryProviders');
-  metadata.searchParams.set('key', options.key);
-  metadata.searchParams.set('uriScheme', 'https');
-  if (options.mapLayer) metadata.searchParams.set('mapLayer', options.mapLayer);
-  if (options.culture) metadata.searchParams.set('culture', options.culture);
-  const data = await json(metadata, dispatcher) as {
-    resourceSets?: { resources?: { imageUrl?: string; imageUrlSubdomains?: string[]; imageryProviders?: { attribution?: string }[] }[] }[];
-  };
-  const imagery = data.resourceSets?.[0]?.resources?.[0];
-  if (!imagery?.imageUrl?.includes('{quadkey}') || !imagery.imageUrlSubdomains?.length) {
-    throw new ImageryError(502, 'Cesium ion 影像缺少可用的瓦片地址。');
-  }
-  const names = new Set(['Cesium ion', 'Microsoft Bing Maps']);
-  for (const provider of imagery.imageryProviders ?? []) {
-    const credit = provider.attribution?.replace(/<[^>]*>/g, '').replace(/&copy;/gi, '©').replace(/&amp;/gi, '&').trim();
-    if (credit) names.add(credit);
-  }
-  return { template: imagery.imageUrl, subdomains: imagery.imageUrlSubdomains, culture: options.culture || '', attribution: [...names].join(' · ') };
+/** 天地图 `img` 影像（EPSG:3857 球面墨卡托，即旧项目使用的同一套瓦片）。 */
+export function tiandituTile(token: string, z: number, x: number, y: number) {
+  const subdomain = (x + y) % 8;
+  const url = new URL(`https://t${subdomain}.tianditu.gov.cn/img_w/wmts`);
+  url.searchParams.set('SERVICE', 'WMTS');
+  url.searchParams.set('REQUEST', 'GetTile');
+  url.searchParams.set('VERSION', '1.0.0');
+  url.searchParams.set('LAYER', 'img');
+  url.searchParams.set('STYLE', 'default');
+  url.searchParams.set('TILEMATRIXSET', 'w');
+  url.searchParams.set('FORMAT', 'tiles');
+  url.searchParams.set('TILEMATRIX', String(z));
+  url.searchParams.set('TILEROW', String(y));
+  url.searchParams.set('TILECOL', String(x));
+  url.searchParams.set('tk', token);
+  return url;
 }
 
 export function ionTileUrl(tiles: BingTiles, z: number, x: number, y: number) {
@@ -91,6 +119,7 @@ export class ImageryService {
   private cacheBytes = 0;
   private readonly pending = new Map<string, Promise<{ bytes: Buffer; type: string; expires: number }>>();
   private readonly ionSessions = new Map<string, Promise<BingTiles>>();
+  private readonly bingSessions = new Map<string, Promise<BingTiles>>();
   private readonly dispatcher: Dispatcher | undefined;
   constructor(private readonly root: string, private readonly env: NodeJS.ProcessEnv = process.env, dispatcher?: Dispatcher) {
     const proxy = env.UE_HTTP_PROXY || env.HTTPS_PROXY || env.HTTP_PROXY;
@@ -122,6 +151,25 @@ export class ImageryService {
   private async source(provider: string, z: number, x: number, y: number, session: string): Promise<URL> {
     if (provider === 'cesium-ion-world-imagery') return ionTileUrl(await this.ionTiles(session), z, x, y);
     const settings = await this.settings();
+    if (provider === 'tianditu-imagery') {
+      const key = await secret(this.root, this.env, 'TIANDITU_TOKEN') || String(settings.tianditu_token || '').trim();
+      if (!key) throw new ImageryError(503, '天地图尚未配置访问令牌，请在本机 .env.local 设置 TIANDITU_TOKEN。');
+      return tiandituTile(key, z, x, y);
+    }
+    if (provider === 'bing-aerial') {
+      const key = await secret(this.root, this.env, 'BING_MAPS_KEY') || String(settings.bing_maps_key || '').trim();
+      if (!key) throw new ImageryError(503, '必应卫星尚未配置 Bing Maps Key，请设置 BING_MAPS_KEY 或项目影像配置。');
+      const style = String(settings.bing_map_style || 'Aerial');
+      const cacheKey = `${style}:${key}`;
+      let tiles = this.bingSessions.get(cacheKey);
+      if (!tiles) {
+        tiles = bingMetadata(new URL('https://dev.virtualearth.net'), key, style, '', this.dispatcher);
+        const pending = tiles;
+        this.bingSessions.set(cacheKey, pending);
+        pending.catch(() => { if (this.bingSessions.get(cacheKey) === pending) this.bingSessions.delete(cacheKey); });
+      }
+      return ionTileUrl(await tiles, z, x, y);
+    }
     if (provider === 'esri-world-imagery') {
       const base = String(settings.esri_world_imagery_url || 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer').replace(/\/$/, '');
       const url = new URL(`${base}/tile/${z}/${y}/${x}`);
@@ -139,7 +187,7 @@ export class ImageryService {
       url.searchParams.set('access_token', token);
       return url;
     }
-    throw new ImageryError(400, '该卫星影像源尚未接入 UE，请选择 Cesium ion、Esri 或 Mapbox。');
+    throw new ImageryError(400, '该卫星影像源尚未接入 UE，请选择 Esri、天地图、Mapbox、Bing 或 Cesium ion。');
   }
   async descriptor(provider: string, origin: string, session = '') {
     const tileTemplate = `${origin}/api/imagery/${provider}/{z}/{x}/{y}`;
@@ -148,7 +196,13 @@ export class ImageryService {
       return { provider, tileTemplate: `${tileTemplate}?session=${session}`, attribution: tiles.attribution };
     }
     await this.source(provider, 0, 0, 0, session);
-    return { provider, tileTemplate, attribution: provider === 'mapbox-satellite' ? '© Mapbox © OpenStreetMap' : 'Esri World Imagery' };
+    const credit: Record<string, string> = {
+      'mapbox-satellite': '© Mapbox © OpenStreetMap',
+      'tianditu-imagery': '© 天地图',
+      'bing-aerial': '© Microsoft Bing Maps',
+      'esri-world-imagery': 'Esri World Imagery'
+    };
+    return { provider, tileTemplate, attribution: credit[provider] || 'Esri World Imagery' };
   }
   warmCenter(provider: string, session: string, lon: number, lat: number) {
     if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
@@ -177,7 +231,11 @@ export class ImageryService {
     if (existing) return existing;
     const request = (async () => {
       let response;
-      try { response = await fetch(url, { signal: AbortSignal.timeout(20000), ...(this.dispatcher ? { dispatcher: this.dispatcher } : {}) }); }
+      // 天地图对非浏览器 UA 直接返回 403（与 Referer 无关），而 Node 的默认 UA
+      // 正是 `undici`；这里统一伪装成普通浏览器，影像服务本身都在本机代理后面。
+      const headers: Record<string, string> = { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36' };
+      if (provider === 'tianditu-imagery') headers.referer = 'http://127.0.0.1/';
+      try { response = await fetch(url, { signal: AbortSignal.timeout(20000), headers, ...(this.dispatcher ? { dispatcher: this.dispatcher } : {}) }); }
       catch { throw new ImageryError(502, '卫星影像服务连接失败，请检查网络或 UE_HTTP_PROXY 代理配置。'); }
       if (!response.ok) {
         await response.body?.cancel();
@@ -188,8 +246,11 @@ export class ImageryService {
         if (ion && [401, 403].includes(response.status)) this.ionSessions.delete(session);
         throw new ImageryError(502, reason);
       }
-      const type = response.headers.get('content-type')?.split(';')[0] || '';
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(type)) {
+      // 天地图返回的是 `image/jpg`（不是标准写法 `image/jpeg`），只按白名单精确匹配
+      // 会把它判成“没有返回图片”。这里归一化后再判断大类。
+      const rawType = response.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase() || '';
+      const type = rawType === 'image/jpg' ? 'image/jpeg' : rawType;
+      if (!type.startsWith('image/')) {
         await response.body?.cancel(); throw new ImageryError(502, '影像服务未返回有效图片');
       }
       const bytes = Buffer.from(await response.arrayBuffer());

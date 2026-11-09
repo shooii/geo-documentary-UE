@@ -1,4 +1,4 @@
-import { createServer } from 'node:http';
+import { createServer, type IncomingMessage } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
@@ -13,6 +13,25 @@ const publicRoot = resolve(root, 'apps/ue-player/public');
 const port = Number(process.argv.find(x => x.startsWith('--port='))?.split('=')[1] ?? process.env.UE_PLAYER_PORT ?? 4174);
 const signallingUrl = process.env.UE_SIGNALLING_URL || 'ws://127.0.0.1:8888';
 const imagery = new ImageryService(root);
+async function readJsonBody(request: IncomingMessage, limit = 4096) {
+  const chunks: Buffer[] = [];
+  let total = 0;
+  for await (const chunk of request) {
+    total += (chunk as Buffer).length;
+    if (total > limit) throw new Error('request body too large');
+    chunks.push(chunk as Buffer);
+  }
+  if (!chunks.length) return {} as Record<string, unknown>;
+  return JSON.parse(Buffer.concat(chunks).toString('utf8')) as Record<string, unknown>;
+}
+// One UE instance drives one video stream, and the streamer only accepts a single
+// subscriber. Without a lease two open windows keep evicting each other and both look
+// broken. The first window holds this slot; later ones are told the instance is busy
+// and poll until the holder releases it (or its heartbeat times out), then join by
+// themselves — no manual reconnect.
+let viewerSlot: { id: string; seen: number } = { id: '', seen: 0 };
+const VIEWER_SLOT_TTL = 12000;
+const viewerSlotFree = () => !viewerSlot.id || Date.now() - viewerSlot.seen > VIEWER_SLOT_TTL;
 await build({ entryPoints: [resolve(root, 'apps/ue-player/client.ts')], outfile: resolve(publicRoot, 'player.js'), bundle: true, format: 'esm', sourcemap: true, target: 'es2022' });
 createServer(async (req, res) => {
   try {
@@ -20,6 +39,34 @@ createServer(async (req, res) => {
     if (url.pathname === '/runtime-config.json') {
       res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
       res.end(JSON.stringify({ engine: 'unreal', version: '5.7', signallingUrl })); return;
+    }
+    if (url.pathname === '/api/imagery-descriptor') {
+      // Used when the basemap is switched from the studio: only the tile source is
+      // resolved, the scene stays exactly as it is and no reconnect is needed.
+      const session = url.searchParams.get('session') || randomUUID();
+      const source = await imagery.descriptor(url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER, `http://127.0.0.1:${port}`, session);
+      res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+      res.end(JSON.stringify(source)); return;
+    }
+    if (url.pathname === '/api/viewer-slot' || url.pathname === '/api/viewer-slot/release') {
+      const body = await readJsonBody(req);
+      const id = typeof body.id === 'string' ? body.id : '';
+      if (!id) {
+        res.writeHead(400, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ granted: false, error: '缺少窗口标识' })); return;
+      }
+      if (url.pathname === '/api/viewer-slot/release') {
+        if (viewerSlot.id === id) viewerSlot = { id: '', seen: 0 };
+        res.writeHead(204, { 'cache-control': 'no-store' });
+        res.end(); return;
+      }
+      if (viewerSlot.id === id || viewerSlotFree()) {
+        viewerSlot = { id, seen: Date.now() };
+        res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+        res.end(JSON.stringify({ granted: true })); return;
+      }
+      res.writeHead(409, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+      res.end(JSON.stringify({ granted: false, busy: true, since: viewerSlot.seen })); return;
     }
     if (url.pathname === '/api/scene') {
       const scene = await loadScene(root, url.searchParams.get('region') || '', url.searchParams.get('boundary'));
