@@ -942,6 +942,10 @@ void AGeoHUD::DrawHUD()
     // `contextOpacity` fades the whole context layer, so the town can finish first.
     const double ContextReveal = FMath::Clamp(N(F, TEXT("contextReveal"), 1), 0., 1.);
     const double ContextOpacity = FMath::Clamp(N(F, TEXT("contextOpacity"), 1), 0., 1.);
+    // One gate for every name on the opening shot. The player keeps it at zero while
+    // the camera is still inside the cloud deck and only opens it after the boundary
+    // beam has swept the rim, so no label can leak into the descent.
+    const double LabelsReveal = FMath::Clamp(N(F, TEXT("labelsReveal"), 1), 0., 1.);
     const double ContextAlpha = Map->HasContext && ContextSpanMeters > 1
         ? FMath::SmoothStep(.55, 1.25, CameraHeight / ContextSpanMeters) * ContextOpacity
         : 0;
@@ -1396,7 +1400,7 @@ void AGeoHUD::DrawHUD()
         Lines.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Lines);
     }
-    const double ContextLabelAlpha = ContextAlpha * FMath::SmoothStep(.82, 1., ContextReveal);
+    const double ContextLabelAlpha = ContextAlpha * FMath::SmoothStep(.82, 1., ContextReveal) * LabelsReveal;
     if (ContextLabelAlpha > .05 && !Map->ContextLabel.Name.IsEmpty())
     {
         FVector2D Point;
@@ -1479,7 +1483,7 @@ void AGeoHUD::DrawHUD()
         };
         const bool CurrentVillage = !Label.Parent && Label.Id == Current;
         const bool Primary = Label.Parent || CurrentVillage;
-        const float Opacity = Alpha * (1 - Ramp(1, 2.8) * (Primary ? .40 : 1.));
+        const float Opacity = float(Alpha * LabelsReveal * (1 - Ramp(1, 2.8) * (Primary ? .40 : 1.)));
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));

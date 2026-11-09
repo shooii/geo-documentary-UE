@@ -73,6 +73,35 @@ test('UE keeps the displayed camera and label when jumping to a nonadjacent vill
   assert.equal(returned.labels.c!.scale, .9 * .68);
 });
 
+test('UE opening hides every label inside the cloud and releases it only after the boundary beam', () => {
+  const base = { longitude: 110, latitude: 20, height: 26000, pitch: -64, heading: 0 };
+  const scene = {
+    region: { cameraPreset: base, openingDescent: { enabled: true, seconds: 3 } },
+    context: { cameraPreset: { ...base, height: 120000 } }
+  };
+  const at = (time: number) => frameAt(scene, [], time, 'portrait', 4.4, true, undefined, undefined, null, true);
+  const insideCloud = at(2.5);
+  assert.equal(insideCloud.labelsReveal, 0);
+  assert.equal(insideCloud.parentLabel, 0);
+  assert.equal(insideCloud.contextReveal, 0);
+  const beamSweeping = at(4.2);
+  assert.equal(beamSweeping.labelsReveal, 0);
+  assert.ok(beamSweeping.parentReveal > .5);
+  assert.equal(beamSweeping.parentLabel, 0);
+  const settled = at(5.6);
+  assert.equal(settled.labelsReveal, 1);
+  assert.ok(settled.parentLabel > .9);
+});
+
+test('UE tour villages are not held back by the opening label gate', () => {
+  const base = { longitude: 110, latitude: 20, height: 20000, pitch: -64, heading: 0 };
+  const scene = { region: { cameraPreset: base, openingDescent: { enabled: true, seconds: 3 } } };
+  const stops = [{ id: 'v', start: 10, end: 20, flightDuration: 4, cameraPreset: { ...base, height: 5000 } }];
+  const settled = frameAt(scene, stops, 18, 'portrait', 4.4);
+  assert.equal(settled.labelsReveal, 1);
+  assert.ok((settled.labels.v?.alpha ?? 0) > .01);
+});
+
 test('UE preview and capture honor scene map views while preserving the displayed flight origin', () => {
   const preset = { longitude: 109.9, latitude: 21.3, height: 20000, heading: 0, pitch: -64 };
   const view = { longitudeOffset: .05, latitudeOffset: -.05, zoom: 2, headingOffset: 20, pitchOffset: 8 };

@@ -176,9 +176,16 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   // The front itself clears the last sliver, so this only softens the very end.
   const contextOpacity = countyActive ? smooth(contextWipe / .06) : 0;
   const reveal = smooth((mapTime - .35) / 1.25);
+  // The opening has to read as one gesture: the camera drops out of the deck, the
+  // rim is traced by the light beam, and only then may a name or a pin appear.
+  // Anything drawn while the camera is still inside the cloud breaks the shot, so
+  // every label on the opening shot is gated by this single ramp. The beam fades
+  // out at mapTime 1.45; the gate opens just behind it.
+  const openingShot = openingOnly || stops.length === 0 ||
+    (Boolean(contextPose && contextPending) && time < contextIntro);
+  const labelsReveal = openingShot && descent > 0 ? smooth((time - descent - 1.45) / .55) : 1;
   const parentOverview = openingOnly ? 1 : 1 - smooth((mapTime - Number(stops[0]?.start ?? Infinity)) / .45);
-  let parentLabel = .98 * parentOverview * smooth((mapTime - 1.16) / .48);
-  if (contextPose && time < contextIntro) parentLabel = Math.max(parentLabel, .98 * smooth(time / .35));
+  let parentLabel = .98 * parentOverview * smooth((mapTime - 1.16) / .48) * labelsReveal;
   let parentAccent = returning?.progress ?? parentOverview;
   const labels: Record<string, LabelStyle> = {};
   const accents: Record<string, number> = {};
@@ -187,7 +194,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
       const id = String(item.id);
       const label = tourLabelPresentationAt(mapTime, tour, returning, item, stopIndex);
       if (label.visible) labels[id] = {
-        alpha: label.alpha, scale: label.scale * lerp(1, .68, returning?.progress ?? 0), emphasis: label.emphasis
+        alpha: label.alpha * labelsReveal, scale: label.scale * lerp(1, .68, returning?.progress ?? 0), emphasis: label.emphasis
       };
       const accent = tourHighlightStrength(tour, returning, id);
       if (accent > 0) accents[id] = accent;
@@ -236,7 +243,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
     parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity, contextErasing,
-    labels, accents, labelReferenceDistance, focusId, focus,
+    labels, accents, labelReferenceDistance, focusId, focus, labelsReveal,
     clouds: cloudStateAt(time, opening, pose.height),
     trace: boundaryAnimation(mapTime, traceStart, current)
   };
