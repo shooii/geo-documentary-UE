@@ -37,6 +37,7 @@ createServer(async (req, res) => {
       }
       const session = url.searchParams.get('session') || randomUUID();
       const source = await imagery.descriptor(url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER, `http://127.0.0.1:${port}`, session);
+      if (process.env.GEO_ACCESS_LOG) console.log(`GEO_SCENE ${url.search} -> ${source.provider} ${source.tileTemplate}`);
       if (url.searchParams.get('warm') === '1' && Array.isArray(scene.region.center)) {
         imagery.warmCenter(source.provider, session, Number(scene.region.center[0]), Number(scene.region.center[1]));
       }
@@ -46,6 +47,7 @@ createServer(async (req, res) => {
     const tile = /^\/api\/imagery\/([\w-]+)\/(\d+)\/(\d+)\/(\d+)$/.exec(url.pathname);
     if (tile) {
       const result = await imagery.tile(tile[1]!, Number(tile[2]), Number(tile[3]), Number(tile[4]), url.searchParams.get('session') || '');
+      if (process.env.GEO_ACCESS_LOG) console.log(`GEO_TILE ${url.pathname} ${result.type} ${result.bytes.length}`);
       res.writeHead(200, { 'content-type': result.type, 'cache-control': 'private, max-age=3600' });
       res.end(result.bytes); return;
     }
