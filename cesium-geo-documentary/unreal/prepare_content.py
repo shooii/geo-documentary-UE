@@ -89,4 +89,17 @@ if (Layer < 2.5)
 return Strength * pow(edge, 3.5) * (0.11 + trail * 0.48);
 """)
 
+# --- 穿云水汽：Niagara ------------------------------------------------
+# 复制引擎自带的轻量粒子系统作为水汽基底，挂到天空 Actor 上，穿云时按穿透
+# 深度缩放 / 淡入。工程内资源优先，引擎模板兜底。
+MIST = '/Game/Geo/NS_CloudMist'
+if not unreal.EditorAssetLibrary.does_asset_exist(MIST):
+    source = unreal.load_asset('/Niagara/DefaultAssets/Templates/Systems/MinimalLightweight')
+    if source:
+        duplicated = unreal.AssetToolsHelpers.get_asset_tools().duplicate_asset(
+            'NS_CloudMist', '/Game/Geo', source)
+        if duplicated:
+            unreal.EditorAssetLibrary.save_loaded_asset(duplicated)
+            unreal.log('GEO_CLOUD_MIST_READY')
+
 unreal.log('GEO_CONTENT_READY')

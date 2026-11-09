@@ -13,6 +13,8 @@ class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UNiagaraComponent;
 class UTexture2D;
+class AGeoVolumetricSky;
+class APostProcessVolume;
 class IHttpRequest;
 struct FGeoTileRequest
 {
@@ -76,6 +78,9 @@ class AGeoMap : public AActor
     FVector ContextOrigin = FVector::ZeroVector;
     double ContextReachMeters = 0;
     bool HasContext = false;
+    UPROPERTY() TObjectPtr<AGeoVolumetricSky> Sky;
+    UPROPERTY() TObjectPtr<APostProcessVolume> PostProcess;
+    bool UsesNativeClouds() const;
     TSharedPtr<FJsonObject> Frame;
     double OriginLon = 110, OriginLat = 20;
     int32 SceneRequest = 0, Generation = 0, PendingTiles = 0, FailedTiles = 0;

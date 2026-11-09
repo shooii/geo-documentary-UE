@@ -1,4 +1,7 @@
 #include "GeoMap.h"
+#include "GeoSky.h"
+#include "Engine/PostProcessVolume.h"
+#include "Engine/Scene.h"
 #include "Camera/CameraComponent.h"
 #include "CanvasItem.h"
 #include "Engine/Canvas.h"
@@ -103,6 +106,24 @@ void AGeoMap::BeginPlay()
         Rate->Set(30, ECVF_SetByCode);
     FParse::Value(FCommandLine::Get(), TEXT("GeoCaptureRoot="), CaptureRoot);
     TileMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_Tile.M_Tile"));
+    // Native UE5 sky: SkyAtmosphere + VolumetricCloud (1.5-3.5 km) + sun. The old
+    // canvas cloud overlay stands down as soon as this actor exists.
+    Sky = GetWorld()->SpawnActor<AGeoVolumetricSky>(AGeoVolumetricSky::StaticClass(), FTransform::Identity);
+    if (auto *Volume = GetWorld()->SpawnActor<APostProcessVolume>())
+    {
+        Volume->bUnbound = true;
+        Volume->BlendWeight = 1.f;
+        Volume->Priority = 10.f;
+        Volume->Settings.bOverride_AutoExposureMethod = true;
+        Volume->Settings.AutoExposureMethod = EAutoExposureMethod::AEM_Manual;
+        Volume->Settings.bOverride_AutoExposureBias = true;
+        Volume->Settings.AutoExposureBias = 0.f;
+        Volume->Settings.bOverride_BloomIntensity = true;
+        Volume->Settings.BloomIntensity = 1.f;
+        Volume->Settings.bOverride_BloomThreshold = true;
+        Volume->Settings.BloomThreshold = 1.1f;
+        PostProcess = Volume;
+    }
     InitBoundaryEffects();
     CloudDeck = LoadCloudTexture(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Geo/cloud-deck.png")));
     CloudPass = LoadCloudTexture(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Geo/cloud-pass.png")));
@@ -745,6 +766,23 @@ void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
     const double RevealScale = FocusId.IsEmpty() ? N(Data, TEXT("parentReveal"), 1) : 1.;
     const double Lift = .16 * Rise * FMath::Clamp(RevealScale, 0., 1.);
     UpdateBoundaryEffects(FocusId, N(Data, TEXT("focus")) * Lift, N(Data, TEXT("mapTime")));
+    if (Sky)
+    {
+        // Pierce factor: where the camera physically sits inside the 1.5-3.5 km deck,
+        // plus the scripted opening pass so the graded "through the clouds" beat still
+        // reads when the shot stays above the layer.
+        const FVector CameraLocation = Camera->GetComponentLocation();
+        Sky->UpdateView(CameraLocation, Camera->GetForwardVector(), CameraLocation.Z / 100.0);
+        const double Scripted = N(O(Data, TEXT("clouds")), TEXT("volume"));
+        const double Pierce = FMath::Clamp(FMath::Max(Sky->GetPierce(), Scripted), 0.0, 1.0);
+        if (PostProcess)
+        {
+            FPostProcessSettings &Settings = PostProcess->Settings;
+            // Darken inside the water, then flash up on the way out.
+            Settings.AutoExposureBias = -1.8 * Pierce + .85 * Sky->GetExitBurst();
+            Settings.BloomIntensity = 1.05 + 2.4 * Sky->GetExitBurst();
+        }
+    }
     RefreshTiles(Lon, Lat, Range);
 }
 void AGeoMap::UpdateTileCounts()
@@ -1528,9 +1566,12 @@ void AGeoHUD::DrawHUD()
         Tile.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Tile);
     };
-    CloudLayer(Map->CloudDeck, N(Clouds, TEXT("deck")), 1.05 + Raw * .16, (Raw - .5) * -28, (Raw - .5) * 20);
-    CloudLayer(Map->CloudDeck, N(Clouds, TEXT("volume")) * .18, 1.5 + Raw * .8, (Raw - .5) * 100, (Raw - .5) * -70);
-    CloudLayer(Map->CloudPass, N(Clouds, TEXT("veil")), 1.06 + Raw * .13, (Raw - .5) * -31, (Raw - .5) * 17);
+    if (!Map->UsesNativeClouds())
+    {
+        CloudLayer(Map->CloudDeck, N(Clouds, TEXT("deck")), 1.05 + Raw * .16, (Raw - .5) * -28, (Raw - .5) * 20);
+        CloudLayer(Map->CloudDeck, N(Clouds, TEXT("volume")) * .18, 1.5 + Raw * .8, (Raw - .5) * 100, (Raw - .5) * -70);
+        CloudLayer(Map->CloudPass, N(Clouds, TEXT("veil")), 1.06 + Raw * .13, (Raw - .5) * -31, (Raw - .5) * 17);
+    }
     if (Map->ImageryProvider == TEXT("cesium-ion-world-imagery") && !Map->ImageryAttribution.IsEmpty())
     {
         const auto *Font = GEngine->GetLargeFont();
@@ -1544,6 +1585,11 @@ void AGeoHUD::DrawHUD()
         Canvas->DrawItem(Credit);
     }
 }
+bool AGeoMap::UsesNativeClouds() const
+{
+    return Sky != nullptr && Sky->HasCloudDeck();
+}
+
 AGeoGameMode::AGeoGameMode()
 {
     HUDClass = AGeoHUD::StaticClass();
