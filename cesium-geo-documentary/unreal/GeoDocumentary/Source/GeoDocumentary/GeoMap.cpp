@@ -1067,7 +1067,10 @@ void AGeoHUD::DrawHUD()
             if (Focused && Focus > .001)
                 FocusRings.Add(ProjectFocusRing(Ring.Points, Map->Camera, Size.X, Size.Y));
             const double Accent = Ring.Parent ? N(F, TEXT("parentAccent")) : N(Accents, *Ring.Id);
-            const bool Show = Ring.Parent || (ChildReveal > .01 && Ring.Id == Current);
+            // Visited villages keep a thin outline for the rest of the film, so the
+            // accumulated green still reads as separate places instead of one blob.
+            const bool Show = Ring.Parent ||
+                              (ChildReveal > .01 && (Ring.Id == Current || Map->BoundaryVisited.Contains(Ring.Id)));
             if (!Show || Ring.Points.Num() < 2)
                 continue;
             FVector2D A;
@@ -1453,7 +1456,12 @@ void AGeoHUD::DrawHUD()
             // Fade with the accent instead of cutting: at a hand-off the old village
             // dims out while the new one lights up, so the rim never snaps away.
             if (Stroke.Accent < .02)
+            {
+                // Already toured: hairline that stays for the rest of the film.
+                const FLinearColor Ghost(.92, .99, .92);
+                AddStroke(Stroke.A, Stroke.B, 2.0 * Scale, Ghost.CopyWithNewOpacity(.40), Ghost.CopyWithNewOpacity(.40));
                 continue;
+            }
             const FLinearColor Rim(.93, 1., .90);
             const float A = float(FMath::Clamp(Stroke.Accent, 0., 1.));
             AddStroke(Stroke.A, Stroke.B, 13. * Scale, Rim.CopyWithNewOpacity(.12 * A), Rim.CopyWithNewOpacity(.12 * A));

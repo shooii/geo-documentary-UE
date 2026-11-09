@@ -152,7 +152,10 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     pose = flight(origin?.camera ?? (previous ? stopCamera(previous) : overview), stopCamera(stop), rawProgress);
   }
 
-  const current = stop ? String(stop.id) : '';
+  // Once the last village's shot is over the tour is done: nothing is the current
+  // village any more, so its pin and plaque have to let go while the camera pulls back.
+  const tourFinished = stops.length > 0 && mapTime >= Number(stops.at(-1)!.end);
+  const current = stop && !tourFinished ? String(stop.id) : '';
   // County choreography. The county used to bloom outward from the town centre;
   // it now arrives as a PPT-style wipe — a straight front travels across the
   // shape, and nothing ahead of it is drawn. After the full county has been on
@@ -241,7 +244,10 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   const focusId = Object.keys(accents).reduce((best, id) => accents[id]! > (accents[best] ?? parentAccent) ? id : best, '');
   const nextAccent = Math.max(focusId ? parentAccent : 0, ...Object.entries(accents).filter(([id]) => id !== focusId).map(([, value]) => value));
   const focus = ((accents[focusId] ?? parentAccent) - nextAccent) * smooth((mapTime - .18) / 1.15);
-  const traceStart = stop ? Number(stop.start) + flightDuration * .75 : .35;
+  // The village beam used to start 75% into the flight — while the village was still a
+  // speck in the corner, so nobody ever saw it. It now starts on touchdown, so the
+  // sweep travels the village rim while the plate and the name come in.
+  const traceStart = stop ? Number(stop.start) + flightDuration : .35;
   return {
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
