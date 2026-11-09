@@ -53,11 +53,11 @@ void AddRing(const FGeoRing &Path, double Width, FBoundarySection &Wall, FBounda
         const FVector Right = FVector::CrossProduct(FVector::UpVector, (Next - Point).GetSafeNormal2D());
         const FVector Miter = (Left + Right).GetSafeNormal2D();
         const FVector Offset = Miter.IsNearlyZero() ? Right : Miter / FMath::Max(.45, FVector::DotProduct(Miter, Right));
-        const FVector Top = Point + FVector(0, 0, 4);
+        const FVector Top = Point + FVector(0, 0, 6);
         Line.Add(Top - Offset * Width, FVector2D(U, 0), 1);
         Line.Add(Top + Offset * Width, FVector2D(U, 1), 1);
-        Glow.Add(Top - Offset * (Width * 4.0), FVector2D(U, 0), 1);
-        Glow.Add(Top + Offset * (Width * 4.0), FVector2D(U, 1), 1);
+        Glow.Add(Top - Offset * (Width * 5.4), FVector2D(U, 0), 1);
+        Glow.Add(Top + Offset * (Width * 5.4), FVector2D(U, 1), 1);
         if (I > 0)
         {
             Wall.Connect();
@@ -155,8 +155,8 @@ void AGeoMap::UpdateBoundaryEffects(const FString &FocusId, double Focus, double
         if (Bounds.IsValid)
         {
             const double Span = Bounds.GetSize().Size2D();
-            BoundaryHeight = FMath::Clamp(Span * .088, 4300., 450000.);
-            BoundaryWidth = FMath::Clamp(Span * .0018, 90., 18000.);
+            BoundaryHeight = FMath::Clamp(Span * .104, 4800., 500000.);
+            BoundaryWidth = FMath::Clamp(Span * .0022, 110., 21000.);
             const FVector Center = Bounds.GetCenter();
             const double Radius = FMath::Max(1., Span * .5);
             FBoundarySection Sections[LayerCount];
@@ -187,16 +187,18 @@ void AGeoMap::UpdateBoundaryEffects(const FString &FocusId, double Focus, double
 
     const double Strength = FMath::SmoothStep(.015, .82, Focus);
     BoundaryLift = BoundaryHeight * Strength;
-    const float Flow = FMath::Frac(Time * .16);
-    const float Scan = FMath::Frac(Time * .255);
+    const float Flow = FMath::Frac(Time * .135);
+    const float Scan = FMath::Frac(Time * .225);
     const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.24, .74, .14) : FLinearColor(.12, .73, 1);
-    for (const auto &Material : BoundaryLayers)
+    for (int32 Layer = 0; Layer < BoundaryLayers.Num(); ++Layer)
     {
+        UMaterialInstanceDynamic *Material = BoundaryLayers[Layer];
+        const bool LightLayer = Layer >= 2;
         Material->SetScalarParameterValue(TEXT("Lift"), BoundaryLift);
-        Material->SetScalarParameterValue(TEXT("Strength"), Strength);
+        Material->SetScalarParameterValue(TEXT("Strength"), Strength * (LightLayer ? 1.24 : 1.12));
         Material->SetScalarParameterValue(TEXT("Flow"), Flow);
         Material->SetScalarParameterValue(TEXT("Scan"), Scan);
-        Material->SetVectorParameterValue(TEXT("Tint"), Tint);
+        Material->SetVectorParameterValue(TEXT("Tint"), LightLayer ? Tint * 1.12 : Tint);
     }
 
     const auto &Path = Rings[BoundaryPaths[0]];
@@ -211,7 +213,7 @@ void AGeoMap::UpdateBoundaryEffects(const FString &FocusId, double Focus, double
         FVector Position = FMath::Lerp(Path.Points[End - 1], Path.Points[End], Portion);
         Position.Z += BoundaryLift + BoundaryWidth * (.5 + (I % 3) * .85);
         Spark->SetWorldLocation(Position);
-        Spark->SetWorldScale3D(FVector(BoundaryWidth / (16. * (1 + I % 3))));
+        Spark->SetWorldScale3D(FVector(BoundaryWidth / (12.5 * (1 + I % 3))));
         if (!Spark->IsActive())
             Spark->Activate();
     }
