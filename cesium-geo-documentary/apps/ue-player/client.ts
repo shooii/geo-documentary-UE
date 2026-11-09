@@ -7,7 +7,18 @@ const query = new URLSearchParams(location.search);
 const parentOrigin = new URL(query.get('parentOrigin') || 'http://127.0.0.1:4180').origin;
 const profile = query.get('profile') || 'portrait';
 const imagery = query.get('imagery') || DEFAULT_IMAGERY_PROVIDER;
-const imagerySession = crypto.randomUUID();
+const sceneParams = new URLSearchParams({ region: query.get('region') || '', imagery });
+if (imagery === 'cesium-ion-world-imagery') sceneParams.set('session', crypto.randomUUID());
+if (query.has('boundary')) sceneParams.set('boundary', query.get('boundary')!);
+const sceneUrl = `/api/scene?${sceneParams}`;
+async function fetchScene(url: string, signal?: AbortSignal) {
+  const response = await fetch(url, { ...(signal ? { signal } : {}) });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || '地图场景加载失败');
+  return data;
+}
+// Start the scene and two local fallback tiles during the WebRTC handshake.
+let preloadedScene = query.has('studioPreview') ? fetchScene(`${sceneUrl}&warm=1`).catch(() => undefined) : undefined;
 const overlay = document.getElementById('connection')!;
 const status = document.getElementById('status')!;
 let scene: any, stops: any[] | undefined, duration = 4.4, time = 0, raf = 0, ready = false, openingOnly = false;
@@ -124,20 +135,16 @@ function handle(data: any) {
 function fail(error: unknown) { status.textContent = String(error); overlay.hidden = false; notify('engine-error',{ message:String(error) }); }
 async function load(signal: AbortSignal) {
   ready = false; status.textContent = '正在加载 UE 地图场景…'; overlay.hidden = false;
-  const params = new URLSearchParams({ region:query.get('region') || '' });
-  params.set('imagery', imagery);
-  if (imagery === 'cesium-ion-world-imagery') params.set('session', imagerySession);
-  if (query.has('boundary')) params.set('boundary',query.get('boundary')!);
   if (!scene) {
-    const response = await fetch(`/api/scene?${params}`, { signal });
-    if (!response.ok) { const error=await response.json(); throw new Error(error.error || '地图场景加载失败'); }
-    const loaded = await response.json();
+    const preload = preloadedScene;
+    preloadedScene = undefined;
+    const loaded = await preload ?? await fetchScene(sceneUrl, signal);
     signal.throwIfAborted();
     scene = loaded;
     stops ??= scene.region.tourStops || [];
   }
   const size=profile==='landscape'?[1280,720]:profile==='square'?[720,720]:[720,1280];
-  await send('load-scene',{ url: `${location.origin}/api/scene?${params}`, profile, width:query.has('studioPreview')?size[0]:innerWidth,height:query.has('studioPreview')?size[1]:innerHeight,imagery });
+  await send('load-scene',{ url: `${location.origin}${sceneUrl}`, profile, width:query.has('studioPreview')?size[0]:innerWidth,height:query.has('studioPreview')?size[1]:innerHeight,imagery });
   const expected=query.has('studioPreview')?size:[innerWidth,innerHeight];
   const until=performance.now()+8000;
   while (!signal.aborted && performance.now() < until) {

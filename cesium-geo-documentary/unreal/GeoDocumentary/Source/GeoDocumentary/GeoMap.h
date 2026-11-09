@@ -16,8 +16,8 @@ class UTexture2D;
 class IHttpRequest;
 struct FGeoTileRequest
 {
-    TSharedPtr<IHttpRequest, ESPMode::ThreadSafe> Request;
-    bool Detail = false;
+    FIntVector Tile;
+    double Priority = 0;
 };
 
 struct FGeoRing
@@ -70,11 +70,15 @@ class AGeoMap : public AActor
     TArray<FGeoLabel> Labels;
     TSharedPtr<FJsonObject> Frame;
     double OriginLon = 110, OriginLat = 20;
-    int32 Generation = 0, PendingTiles = 0, FailedTiles = 0;
-    TSet<FString> TileKeys;
-    UPROPERTY() TMap<FString, TObjectPtr<UProceduralMeshComponent>> DetailTiles;
-    UPROPERTY() TArray<TObjectPtr<UProceduralMeshComponent>> PreviousDetailTiles;
-    int32 DetailZoom = -1;
+    int32 SceneRequest = 0, Generation = 0, PendingTiles = 0, FailedTiles = 0;
+    UPROPERTY() TMap<FIntVector, TObjectPtr<UProceduralMeshComponent>> TileMeshes;
+    TArray<FIntVector> TileCacheOrder;
+    TSet<FIntVector> VisibleTiles, RequiredTiles, TileFailures;
+    TMap<FIntVector, uint8> TileAttempts;
+    TMap<FIntVector, TSharedPtr<IHttpRequest, ESPMode::ThreadSafe>> ActiveTiles;
+    TArray<FGeoTileRequest> TileQueue;
+    FIntVector TileCenter = FIntVector(0, 0, -1);
+    FIntPoint TileMin, TileMax;
     FString CaptureId, CaptureRoot;
     FString TileTemplate, ImageryProvider, ImageryAttribution;
     FString RenderProfile;
@@ -82,15 +86,17 @@ class AGeoMap : public AActor
     int32 CaptureIndex = 0, CaptureTicks = 0;
     double CaptureStarted = 0;
     double AverageFrameMs = 0;
-    int32 BoundaryVertices = 0, ActiveTileRequests = 0;
-    TQueue<FGeoTileRequest> TileRequests;
+    int32 BoundaryVertices = 0;
     FVector Geo(double Lon, double Lat, double Height = 0) const;
     void Respond(FString RequestId, FString Error = TEXT(""));
     void LoadScene(const TSharedPtr<FJsonObject> &Data, FString RequestId);
     void ApplyFrame(const TSharedPtr<FJsonObject> &Data);
     void InitBoundaryEffects();
     void UpdateBoundaryEffects(const FString &FocusId, double Focus, double Time);
-    void Tile(int32 Z, int32 X, int32 Y, bool Detail);
+    void StartTile(const FIntVector &Key);
+    void TileFailed(const FIntVector &Key);
+    void TrimTileCache();
+    void UpdateTileCounts();
     void RefreshTiles(double Lon, double Lat, double Range);
 };
 struct FGeoStroke

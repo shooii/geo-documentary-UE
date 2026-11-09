@@ -96,6 +96,7 @@ AGeoMap::AGeoMap()
 void AGeoMap::BeginPlay()
 {
     Super::BeginPlay();
+    GAreScreenMessagesEnabled = false;
     if (auto *Limit = IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS")))
         Limit->Set(30.f, ECVF_SetByCode);
     if (auto *Rate = IConsoleManager::Get().FindConsoleVariable(TEXT("PixelStreaming2.WebRTC.Fps")))
@@ -131,6 +132,7 @@ void AGeoMap::Respond(FString Id, FString Error)
 {
     if (!Input)
         return;
+    UpdateTileCounts();
     auto J = MakeShared<FJsonObject>();
     J->SetStringField(TEXT("type"), TEXT("geo-video-ue"));
     J->SetStringField(TEXT("requestId"), Id);
@@ -138,6 +140,8 @@ void AGeoMap::Respond(FString Id, FString Error)
         J->SetStringField(TEXT("error"), Error);
     J->SetNumberField(TEXT("pendingTiles"), PendingTiles);
     J->SetNumberField(TEXT("failedTiles"), FailedTiles);
+    J->SetNumberField(TEXT("wantedDetailTiles"), RequiredTiles.Num());
+    J->SetNumberField(TEXT("visibleDetailTiles"), RequiredTiles.Num() - PendingTiles - FailedTiles);
     J->SetStringField(TEXT("imagery"), ImageryProvider);
     J->SetNumberField(TEXT("loadedTiles"), Resources.Num() / 3);
     J->SetNumberField(TEXT("frameMs"), AverageFrameMs);
@@ -274,13 +278,13 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         Respond(Id, TEXT("Only loopback scene sources are allowed"));
         return;
     }
-    int32 G = ++Generation;
+    const int32 G = ++SceneRequest;
     auto R = FHttpModule::Get().CreateRequest();
     R->SetURL(Url);
     R->SetVerb(TEXT("GET"));
     R->OnProcessRequestComplete().BindWeakLambda(this, [this, Id, G](FHttpRequestPtr, FHttpResponsePtr Response,
                                                                      bool Ok) {
-        if (G != Generation)
+        if (G != SceneRequest)
             return;
         if (!Ok || !Response || Response->GetResponseCode() != 200)
         {
@@ -308,11 +312,23 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         TileTemplate = Template;
         ImageryProvider = S(Imagery, TEXT("provider"));
         ImageryAttribution = S(Imagery, TEXT("attribution"));
+        ++Generation;
+        for (const auto &Entry : ActiveTiles)
+        {
+            Entry.Value->OnProcessRequestComplete().Unbind();
+            Entry.Value->CancelRequest();
+        }
+        ActiveTiles.Reset();
+        TileMeshes.Reset();
+        TileCacheOrder.Reset();
+        TileQueue.Reset();
+        TileAttempts.Reset();
+        TileFailures.Reset();
+        VisibleTiles.Reset();
+        RequiredTiles.Reset();
         Frame.Reset();
         UpdateBoundaryEffects(TEXT(""), 0, 0);
         BoundaryGeneration = -1;
-        DetailTiles.Reset();
-        PreviousDetailTiles.Reset();
         for (auto &X : Resources)
             if (auto *C = Cast<UProceduralMeshComponent>(X))
                 C->DestroyComponent();
@@ -320,13 +336,8 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         Rings.Empty();
         Fills.Empty();
         BoundaryVertices = 0;
-        FGeoTileRequest OldRequest;
-        while (TileRequests.Dequeue(OldRequest))
-        {
-        }
         Labels.Empty();
-        TileKeys.Empty();
-        DetailZoom = -1;
+        TileCenter.Z = -1;
         PendingTiles = FailedTiles = 0;
         const auto Region = O(Scene, TEXT("region"));
         const TArray<TSharedPtr<FJsonValue>> *Center;
@@ -409,59 +420,54 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
                     Labels.Add({Geo((*P)[0]->AsNumber(), (*P)[1]->AsNumber(), 10), LabelId, S(Props, TEXT("name")), false});
                 }
             }
-        for (int32 X = 0; X < 4; X++)
-            for (int32 Y = 0; Y < 4; Y++)
-                Tile(2, X, Y, false);
-        RefreshTiles(OriginLon, OriginLat, 30000);
         Respond(Id);
     });
     R->ProcessRequest();
 }
-void AGeoMap::Tile(int32 Z, int32 X, int32 Y, bool Detail)
+void AGeoMap::TileFailed(const FIntVector &Key)
 {
-    int32 Size = 1 << Z;
-    if (Y < 0 || Y >= Size)
+    if (!VisibleTiles.Contains(Key))
         return;
-    X = (X % Size + Size) % Size;
-    FString Key = FString::Printf(TEXT("%d/%d/%d"), Z, X, Y);
-    if (TileKeys.Contains(Key))
-        return;
-    TileKeys.Add(Key);
-    int32 G = Generation;
-    PendingTiles++;
-    auto R = FHttpModule::Get().CreateRequest();
+    if (TileAttempts.FindRef(Key) < 2)
+        TileQueue.Insert({Key, DBL_MAX}, 0);
+    else
+        TileFailures.Add(Key);
+}
+
+void AGeoMap::StartTile(const FIntVector &Key)
+{
+    const int32 X = Key.X, Y = Key.Y, Z = Key.Z, Size = 1 << Z, G = Generation;
+    auto Request = FHttpModule::Get().CreateRequest();
     FString Url = TileTemplate;
     Url.ReplaceInline(TEXT("{z}"), *FString::FromInt(Z));
     Url.ReplaceInline(TEXT("{x}"), *FString::FromInt(X));
     Url.ReplaceInline(TEXT("{y}"), *FString::FromInt(Y));
-    R->SetURL(Url);
-    R->OnProcessRequestComplete().BindWeakLambda(
-        this, [this, Z, X, Y, Size, G, Key, Detail](FHttpRequestPtr, FHttpResponsePtr Response, bool Ok) {
-            ActiveTileRequests--;
-            if (G != Generation)
+    Request->SetURL(Url);
+    Request->SetTimeout(8.f);
+    ++TileAttempts.FindOrAdd(Key);
+    ActiveTiles.Add(Key, Request);
+    Request->OnProcessRequestComplete().BindWeakLambda(
+        this, [this, X, Y, Z, Size, G, Key](FHttpRequestPtr, FHttpResponsePtr Response, bool Ok) {
+            if (G != Generation || !ActiveTiles.Remove(Key) || !VisibleTiles.Contains(Key))
                 return;
-            PendingTiles--;
             if (!Ok || !Response || Response->GetResponseCode() != 200)
             {
-                FailedTiles++;
-                TileKeys.Remove(Key);
+                TileFailed(Key);
                 return;
             }
-            if (Detail && Z != DetailZoom)
-                return;
             auto &M = FModuleManager::LoadModuleChecked<IImageWrapperModule>(TEXT("ImageWrapper"));
             auto Type = M.DetectImageFormat(Response->GetContent().GetData(), Response->GetContentLength());
             if (Type == EImageFormat::Invalid)
             {
-                FailedTiles++;
+                TileFailed(Key);
                 return;
             }
             auto W = M.CreateImageWrapper(Type);
             TArray64<uint8> Pixels;
-            if (!W->SetCompressed(Response->GetContent().GetData(), Response->GetContentLength()) ||
+            if (!W.IsValid() || !W->SetCompressed(Response->GetContent().GetData(), Response->GetContentLength()) ||
                 !W->GetRaw(ERGBFormat::BGRA, 8, Pixels))
             {
-                FailedTiles++;
+                TileFailed(Key);
                 return;
             }
             auto *Texture = UTexture2D::CreateTransient(W->GetWidth(), W->GetHeight(), PF_B8G8R8A8);
@@ -478,13 +484,15 @@ void AGeoMap::Tile(int32 Z, int32 X, int32 Y, bool Detail)
             TArray<FVector> Vertices;
             TArray<int32> Indices;
             TArray<FVector2D> UV;
-            const int32 Steps = Z == 2 ? 24 : 4;
+            // Power-of-two subdivisions align the parent and child surfaces.
+            // Otherwise their triangles can intersect during the LOD handoff.
+            const int32 Steps = FMath::Max(4, 128 >> Z);
             for (int32 J = 0; J <= Steps; J++)
                 for (int32 I = 0; I <= Steps; I++)
                 {
                     double U = double(I) / Steps, V = double(J) / Steps, Lon = (X + U) / Size * 360 - 180,
                            Lat = FMath::RadiansToDegrees(FMath::Atan(FMath::Sinh(PI * (1 - 2 * (Y + V) / Size))));
-                    Vertices.Add(Geo(Lon, Lat, Detail ? 2+Z*.1 : 0));
+                    Vertices.Add(Geo(Lon, Lat, Z == 2 ? 0.0 : 2.0 + Z * .2));
                     UV.Add(FVector2D(U, V));
                 }
             for (int32 J = 0; J < Steps; J++)
@@ -498,74 +506,130 @@ void AGeoMap::Tile(int32 Z, int32 X, int32 Y, bool Detail)
             Mesh->SetMaterial(0, Material);
             Mesh->SetCastShadow(false);
             Resources.Append({Texture, Material, Mesh});
-            if (Detail)
-                DetailTiles.Add(Key, Mesh);
+            TileMeshes.Add(Key, Mesh);
+            TileCacheOrder.Add(Key);
+            TileAttempts.Remove(Key);
+            TrimTileCache();
         });
-    TileRequests.Enqueue({R, Detail});
+    if (!Request->ProcessRequest() && ActiveTiles.Remove(Key))
+        TileFailed(Key);
 }
+
+void AGeoMap::TrimTileCache()
+{
+    constexpr int32 CacheLimit = 512;
+    for (int32 Index = 0; TileMeshes.Num() > CacheLimit && Index < TileCacheOrder.Num();)
+    {
+        const FIntVector Key = TileCacheOrder[Index];
+        if (VisibleTiles.Contains(Key))
+        {
+            ++Index;
+            continue;
+        }
+        auto *Mesh = TileMeshes.FindRef(Key).Get();
+        TileMeshes.Remove(Key);
+        TileCacheOrder.RemoveAt(Index, EAllowShrinking::No);
+        if (!IsValid(Mesh))
+            continue;
+        auto *Material = Cast<UMaterialInstanceDynamic>(Mesh->GetMaterial(0));
+        UTexture *Texture = nullptr;
+        if (Material)
+            Material->GetTextureParameterValue(FMaterialParameterInfo(TEXT("Imagery")), Texture);
+        Resources.Remove(Texture);
+        Resources.Remove(Material);
+        Resources.Remove(Mesh);
+        Mesh->DestroyComponent();
+    }
+}
+
+static FIntPoint TileAt(double Lon, double Lat, int32 Size)
+{
+    return FIntPoint(FMath::FloorToInt((Lon + 180) / 360 * Size),
+        FMath::FloorToInt((1 - std::asinh(FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(Lat, -85.0, 85.0)))) / PI) / 2 * Size));
+}
+
 void AGeoMap::RefreshTiles(double Lon, double Lat, double Range)
 {
-    const int32 Z = FMath::Clamp(FMath::FloorToInt(FMath::Log2(40075016.0 / FMath::Max(500.0, Range * .14))), 3, 15);
-    if (Z != DetailZoom)
-    {
-        FGeoTileRequest Queued;
-        TArray<FGeoTileRequest> Base;
-        while (TileRequests.Dequeue(Queued))
+    int32 W = 1080, H = 1920;
+    if (auto *PC = GetWorld()->GetFirstPlayerController())
+        PC->GetViewportSize(W, H);
+    const double TX = FMath::Tan(FMath::DegreesToRadians(Camera->FieldOfView * .5));
+    const double TY = TX * H / FMath::Max(1, W);
+    // Target approximately one source texel per display pixel at the subject.
+    const double ProjectedWorld = 40075016.0 * FMath::Cos(FMath::DegreesToRadians(Lat)) * W / FMath::Max(1.0, 2 * TX * Range);
+    const int32 Z = FMath::Clamp(FMath::CeilToInt(FMath::Log2(FMath::Max(1.0, ProjectedWorld / 256))), 3, 15);
+    const int32 Size = 1 << Z;
+    const FIntPoint Center = TileAt(Lon, Lat, Size);
+    FIntPoint Min = Center, Max = Center;
+    const FVector Target = Geo(Lon, Lat), Eye = Camera->GetComponentLocation();
+    for (int SX : {-1, 1})
+        for (int SY : {-1, 1})
         {
-            if (Queued.Detail)
-                PendingTiles--;
-            else
-                Base.Add(Queued);
+            const FVector Ray =
+                Camera->GetForwardVector() + Camera->GetRightVector() * TX * SX + Camera->GetUpVector() * TY * SY;
+            if (Ray.Z >= -.01)
+                continue;
+            const FVector Corner = Eye + Ray * ((Target.Z - Eye.Z) / Ray.Z);
+            const double CornerLon = Lon + (Corner.Y - Target.Y) / (11132000 * FMath::Cos(FMath::DegreesToRadians(Lat)));
+            const double CornerLat = Lat + (Corner.X - Target.X) / 11057000;
+            const FIntPoint Tile = TileAt(CornerLon, CornerLat, Size);
+            Min.X = FMath::Min(Min.X, Tile.X);
+            Min.Y = FMath::Min(Min.Y, Tile.Y);
+            Max.X = FMath::Max(Max.X, Tile.X);
+            Max.Y = FMath::Max(Max.Y, Tile.Y);
         }
-        for (const auto &Entry : Base)
-            TileRequests.Enqueue(Entry);
-        // Keep the previous LOD visible beneath incoming tiles during camera travel.
-        for (const auto &Entry : DetailTiles)
-            PreviousDetailTiles.Add(Entry.Value);
-        DetailTiles.Reset();
-        DetailZoom = Z;
-        TileKeys.Empty();
-    }
-    int32 Size = 1 << Z, X = FMath::FloorToInt((Lon + 180) / 360 * Size),
-          Y = FMath::FloorToInt(
-              (1 - std::asinh(FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(Lat, -85.0, 85.0)))) / PI) / 2 * Size);
-    int32 MinX = X - 3, MaxX = X + 3, MinY = Y - 3, MaxY = Y + 3;
-    if (Frame.IsValid() && Camera->GetComponentLocation().Z > Geo(Lon, Lat).Z + 100)
-    {
-        MinX = MinY = INT_MAX;
-        MaxX = MaxY = INT_MIN;
-        int32 W = 1080, H = 1920;
-        if (auto *PC = GetWorld()->GetFirstPlayerController())
-            PC->GetViewportSize(W, H);
-        const double TX = FMath::Tan(FMath::DegreesToRadians(Camera->FieldOfView * .5)), TY = TX * H / FMath::Max(1, W);
-        const FVector Target = Geo(Lon, Lat), Eye = Camera->GetComponentLocation();
-        for (int SX : {-1, 1})
-            for (int SY : {-1, 1})
+    Min.X = FMath::Max(Min.X, Center.X - 12);
+    Min.Y = FMath::Clamp(Min.Y, FMath::Max(0, Center.Y - 12), Size - 1);
+    Max.X = FMath::Min(Max.X, Center.X + 12);
+    Max.Y = FMath::Clamp(Max.Y, 0, FMath::Min(Size - 1, Center.Y + 12));
+    const FIntVector CenterKey(Center.X, Center.Y, Z);
+    if (TileCenter == CenterKey && TileMin == Min && TileMax == Max)
+        return;
+    TileCenter = CenterKey;
+    TileMin = Min;
+    TileMax = Max;
+
+    RequiredTiles.Reset();
+    VisibleTiles.Reset();
+    TileQueue.Reset();
+    TMap<FIntVector, double> Plan;
+    const int32 CoarseLevel = FMath::Max(2, Z - 2);
+    for (int32 X = Min.X; X <= Max.X; ++X)
+        for (int32 Y = Min.Y; Y <= Max.Y; ++Y)
+        {
+            const FIntVector Key((X % Size + Size) % Size, Y, Z);
+            RequiredTiles.Add(Key);
+            // Keep cached ancestors visible while detailed tiles arrive. Only
+            // fetch a base level, one intermediate level and the final detail.
+            for (int32 Level = Z; Level >= 2; --Level)
             {
-                const FVector Ray =
-                    Camera->GetForwardVector() + Camera->GetRightVector() * TX * SX + Camera->GetUpVector() * TY * SY;
-                if (Ray.Z >= -.01)
+                const int32 Shift = Z - Level;
+                const FIntVector Parent(Key.X >> Shift, Key.Y >> Shift, Level);
+                VisibleTiles.Add(Parent);
+                if (Level != Z && Level != CoarseLevel && Level != 2)
                     continue;
-                const FVector Corner = Eye + Ray * ((Target.Z - Eye.Z) / Ray.Z);
-                const double CornerLon =
-                    Lon + (Corner.Y - Target.Y) / 100 / (111320 * FMath::Cos(FMath::DegreesToRadians(Lat)));
-                const double CornerLat = FMath::Clamp(Lat + (Corner.X - Target.X) / 100 / 110570, -85., 85.);
-                const int CX = FMath::FloorToInt((CornerLon + 180) / 360 * Size);
-                const int CY =
-                    FMath::FloorToInt((1 - std::asinh(FMath::Tan(FMath::DegreesToRadians(CornerLat))) / PI) / 2 * Size);
-                MinX = FMath::Min(MinX, CX);
-                MaxX = FMath::Max(MaxX, CX);
-                MinY = FMath::Min(MinY, CY);
-                MaxY = FMath::Max(MaxY, CY);
+                const double Distance = (FMath::Square(X - Center.X) + FMath::Square(Y - Center.Y)) / double(1 << (2 * Shift));
+                const double Priority = Distance + (Level == 2 ? 0 : Level == CoarseLevel ? 100 : 500);
+                if (auto *Existing = Plan.Find(Parent))
+                    *Existing = FMath::Min(*Existing, Priority);
+                else
+                    Plan.Add(Parent, Priority);
             }
-        MinX = FMath::Clamp(MinX - 1, X - 12, X);
-        MaxX = FMath::Clamp(MaxX + 1, X, X + 12);
-        MinY = FMath::Clamp(MinY - 1, Y - 12, Y);
-        MaxY = FMath::Clamp(MaxY + 1, Y, Y + 12);
-    }
-    for (int32 CX = MinX; CX <= MaxX; CX++)
-        for (int32 CY = MinY; CY <= MaxY; CY++)
-            Tile(Z, CX, CY, true);
+        }
+    for (auto It = TileFailures.CreateIterator(); It; ++It)
+        if (!VisibleTiles.Contains(*It))
+            It.RemoveCurrent();
+    for (auto It = TileAttempts.CreateIterator(); It; ++It)
+        if (!VisibleTiles.Contains(It.Key()) && !ActiveTiles.Contains(It.Key()))
+            It.RemoveCurrent();
+    for (auto &Entry : TileMeshes)
+        if (IsValid(Entry.Value.Get()))
+            Entry.Value->SetVisibility(VisibleTiles.Contains(Entry.Key));
+    for (const auto &Entry : Plan)
+        if (!TileMeshes.Contains(Entry.Key) && !ActiveTiles.Contains(Entry.Key) && !TileFailures.Contains(Entry.Key))
+            TileQueue.Add({Entry.Key, Entry.Value});
+    TileQueue.Sort([](const FGeoTileRequest &A, const FGeoTileRequest &B) { return A.Priority > B.Priority; });
+    TrimTileCache();
 }
 void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
 {
@@ -591,40 +655,29 @@ void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
     UpdateBoundaryEffects(FocusId, N(Data, TEXT("focus")) * Lift, N(Data, TEXT("mapTime")));
     RefreshTiles(Lon, Lat, Range);
 }
+void AGeoMap::UpdateTileCounts()
+{
+    PendingTiles = FailedTiles = 0;
+    for (const auto &Key : RequiredTiles)
+        if (!TileMeshes.Contains(Key))
+        {
+            if (TileFailures.Contains(Key))
+                ++FailedTiles;
+            else
+                ++PendingTiles;
+        }
+}
+
 void AGeoMap::Tick(float Delta)
 {
     Super::Tick(Delta);
     AverageFrameMs = AverageFrameMs == 0 ? Delta * 1000 : FMath::Lerp(AverageFrameMs, double(Delta * 1000), .05);
-    FGeoTileRequest Request;
-    while (ActiveTileRequests < 4 && TileRequests.Dequeue(Request))
-    {
-        ActiveTileRequests++;
-        if (!Request.Request->ProcessRequest())
-        {
-            ActiveTileRequests--;
-            PendingTiles--;
-            FailedTiles++;
-        }
-    }
-    if (PendingTiles == 0 && !PreviousDetailTiles.IsEmpty())
-    {
-        for (auto &Mesh : PreviousDetailTiles)
-        {
-            if (!IsValid(Mesh.Get()))
-                continue;
-            auto *Material = Cast<UMaterialInstanceDynamic>(Mesh->GetMaterial(0));
-            UTexture *Texture = nullptr;
-            if (Material)
-                Material->GetTextureParameterValue(FMaterialParameterInfo(TEXT("Imagery")), Texture);
-            Resources.Remove(Texture);
-            Resources.Remove(Material);
-            Resources.Remove(Mesh);
-            Mesh->DestroyComponent();
-        }
-        PreviousDetailTiles.Reset();
-    }
+    constexpr int32 MaxActiveTiles = 18;
+    while (ActiveTiles.Num() < MaxActiveTiles && !TileQueue.IsEmpty())
+        StartTile(TileQueue.Pop(EAllowShrinking::No).Tile);
     if (CaptureId.IsEmpty())
         return;
+    UpdateTileCounts();
     if (FPlatformTime::Seconds() - CaptureStarted > 45)
     {
         Respond(CaptureId, TEXT("Timed out waiting for imagery"));

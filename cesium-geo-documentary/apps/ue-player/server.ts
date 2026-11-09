@@ -22,7 +22,11 @@ createServer(async (req, res) => {
     }
     if (url.pathname === '/api/scene') {
       const scene = await loadScene(root, url.searchParams.get('region') || '', url.searchParams.get('boundary'));
-      const source = await imagery.descriptor(url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER, `http://127.0.0.1:${port}`, url.searchParams.get('session') || randomUUID());
+      const session = url.searchParams.get('session') || randomUUID();
+      const source = await imagery.descriptor(url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER, `http://127.0.0.1:${port}`, session);
+      if (url.searchParams.get('warm') === '1' && Array.isArray(scene.region.center)) {
+        imagery.warmCenter(source.provider, session, Number(scene.region.center[0]), Number(scene.region.center[1]));
+      }
       res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
       res.end(JSON.stringify({ ...scene, imagery: source })); return;
     }

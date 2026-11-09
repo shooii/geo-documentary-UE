@@ -88,6 +88,7 @@ export function ionTileUrl(tiles: BingTiles, z: number, x: number, y: number) {
 type Settings = { map?: Record<string, unknown> };
 export class ImageryService {
   private readonly cache = new Map<string, { bytes: Buffer; type: string; expires: number }>();
+  private cacheBytes = 0;
   private readonly pending = new Map<string, Promise<{ bytes: Buffer; type: string; expires: number }>>();
   private readonly ionSessions = new Map<string, Promise<BingTiles>>();
   private readonly dispatcher: Dispatcher | undefined;
@@ -149,6 +150,16 @@ export class ImageryService {
     await this.source(provider, 0, 0, 0, session);
     return { provider, tileTemplate, attribution: provider === 'mapbox-satellite' ? '© Mapbox © OpenStreetMap' : 'Esri World Imagery' };
   }
+  warmCenter(provider: string, session: string, lon: number, lat: number) {
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
+    const longitude = ((lon + 180) % 360 + 360) % 360 / 360;
+    const latitude = Math.max(-85, Math.min(85, lat)) * Math.PI / 180;
+    const row = (1 - Math.asinh(Math.tan(latitude)) / Math.PI) / 2;
+    for (const z of [2, 6]) {
+      const count = 2 ** z;
+      void this.tile(provider, z, Math.floor(longitude * count), Math.floor(row * count), session).catch(() => undefined);
+    }
+  }
   async tile(provider: string, z: number, x: number, y: number, session = '') {
     if (![z, x, y].every(Number.isSafeInteger) || z < 0 || z > 22 || x < 0 || y < 0 || x >= 2 ** z || y >= 2 ** z) {
       throw new ImageryError(400, '影像瓦片坐标无效');
@@ -157,7 +168,11 @@ export class ImageryService {
     const ion = provider === 'cesium-ion-world-imagery';
     const key = ion ? `${session}/${z}/${x}/${y}` : url.href;
     const cached = this.cache.get(key);
-    if (cached && cached.expires > Date.now()) { this.cache.delete(key); this.cache.set(key, cached); return cached; }
+    if (cached) {
+      this.cache.delete(key);
+      if (cached.expires > Date.now()) { this.cache.set(key, cached); return cached; }
+      this.cacheBytes -= cached.bytes.length;
+    }
     const existing = this.pending.get(key);
     if (existing) return existing;
     const request = (async () => {
@@ -181,7 +196,12 @@ export class ImageryService {
       if (bytes.length > 4 * 1024 * 1024) throw new ImageryError(502, '影像瓦片超出大小限制');
       const result = { bytes, type, expires: Date.now() + 3600000 };
       this.cache.set(key, result);
-      while (this.cache.size > 256) this.cache.delete(this.cache.keys().next().value!);
+      this.cacheBytes += bytes.length;
+      while (this.cache.size > 1024 || this.cacheBytes > 64 * 1024 * 1024) {
+        const oldest = this.cache.keys().next().value!;
+        this.cacheBytes -= this.cache.get(oldest)!.bytes.length;
+        this.cache.delete(oldest);
+      }
       return result;
     })();
     this.pending.set(key, request);
