@@ -312,12 +312,18 @@ try {
 }
 
 if (region.coverageManifestPath) {
-  const coveragePath = resolve(root, String(region.coverageManifestPath));
-  const coverage = JSON.parse(await readFile(coveragePath, "utf8")) as { children: Array<Record<string, unknown>>; [key: string]: unknown };
-  const orderMap = new Map(content.tourOrder.map((id, index) => [String(id), index + 1]));
-  coverage.children = coverage.children.map((child) => ({ ...child, editorialOrder: orderMap.get(String(child.id)) }));
-  coverage.narrationCoverage = tourStops.map((stop) => ({ id: stop.id, start: stop.start, end: stop.end, camera: true, highlight: true }));
-  await writeFile(coveragePath, JSON.stringify(coverage, null, 2), "utf8");
+  // The manifest is an editorial sidecar: towns planned before coverage tracking existed
+  // simply do not have it, and a missing sidecar must not abort a whole export.
+  try {
+    const coveragePath = resolve(root, String(region.coverageManifestPath));
+    const coverage = JSON.parse(await readFile(coveragePath, "utf8")) as { children: Array<Record<string, unknown>>; [key: string]: unknown };
+    const orderMap = new Map(content.tourOrder.map((id, index) => [String(id), index + 1]));
+    coverage.children = coverage.children.map((child) => ({ ...child, editorialOrder: orderMap.get(String(child.id)) }));
+    coverage.narrationCoverage = tourStops.map((stop) => ({ id: stop.id, start: stop.start, end: stop.end, camera: true, highlight: true }));
+    await writeFile(coveragePath, JSON.stringify(coverage, null, 2), "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
 }
 
 process.stdout.write(`CHILD_TOUR_READY ${regionId} ${tourStops.length} ${timelineDuration}s return=${returnFlightSeconds.toFixed(2)}s closing=${closingNarrationStart?.toFixed(2) ?? "none"}\n`);

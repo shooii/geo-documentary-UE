@@ -266,6 +266,10 @@ async function prepareSandbox(root: string, jobRoot: string, project: VideoProje
       await copyIfExists(join(root, asset.path), join(sandbox, asset.path));
     }
   }
+  // The sandbox is a trimmed copy of the repo. Narration runs inside it and reads its
+  // provider credentials from `.env.local` (Cesium ion, 天地图, 讯飞…); without this
+  // the export dies at “生成或复用正式配音” with “缺少凭据”.
+  await copyIfExists(join(root, ".env.local"), join(sandbox, ".env.local"));
   return sandbox;
 }
 
