@@ -21,6 +21,7 @@ export async function loadScene(root: string, regionId: string, boundary: string
   const geometry = await json(region.geometryPath || `data/normalized/${regionId}.geojson`);
   const children = region.childGeometryPath ? await json(region.childGeometryPath) : { features: [] };
   const timeline = await json(`data/regions/${regionId}.timeline.json`);
+  const parent = region.parentId ? await json(`data/regions/${region.parentId}.json`) : null;
   const layers = [
     ...(geometry.features || []).map((feature: any) => ({ ...feature, parent: true })),
     ...(children.features || []).map((feature: any) => ({ ...feature, parent: false }))
@@ -39,5 +40,25 @@ export async function loadScene(root: string, regionId: string, boundary: string
     ? geometry.features.map((feature: any) => feature.geometry)
     : geometry;
   const labelPoint = interiorLabelPoint(parentGeometries, framed.labelPoint);
-  return { version: 1, region: { ...framed, labelPoint }, timeline, layers: rendered };
+  let context = null;
+  if (parent?.geometryPath) {
+    const parentGeometry = await json(parent.geometryPath);
+    const parentFeatures = (parentGeometry.features || [parentGeometry]).map((feature: any) => ({ ...feature, parent: true }));
+    const parentRange = Number(parent.cameraPreset?.height || 100000);
+    const parentRendered = renderLayers(parentFeatures, parentRange).map(feature => ({
+      ...feature,
+      triangulations: triangulateFeature(feature)
+    }));
+    context = {
+      id: parent.id,
+      name: parent.name,
+      center: parent.center,
+      labelPoint: interiorLabelPoint(parentGeometry, parent.labelPoint),
+      bbox: parent.bbox,
+      cameraPreset: parent.cameraPreset,
+      cameraProfiles: parent.cameraProfiles,
+      layers: parentRendered
+    };
+  }
+  return { version: 1, region: { ...framed, labelPoint }, timeline, layers: rendered, context };
 }

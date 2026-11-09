@@ -4,7 +4,7 @@ import type { MapView } from '../../packages/project-schema/index.js';
 import { cloudStateAt } from './opening.js';
 import { boundaryAnimation } from './boundary-style.js';
 
-export const actions = new Set(['prepare-tour', 'play-opening', 'set-annotations', 'show-tour-frame', 'play-tour-segment', 'play-scene-range', 'stop-scene-playback', 'update-tour-labels', 'play-tour-outro', 'play-parent-overview', 'set-map-view']);
+export const actions = new Set(['prepare-tour', 'play-opening', 'set-annotations', 'show-tour-frame', 'play-tour-segment', 'play-scene-range', 'stop-scene-playback', 'update-tour-labels', 'play-tour-outro', 'play-parent-overview', 'preview-child-camera', 'set-map-view']);
 export const clamp = (x: number) => Math.max(0, Math.min(1, x));
 export const smooth = (x: number) => { x = clamp(x); return x*x*x*(x*(x*6-15)+10); };
 const lerp = (from: number, to: number, progress: number) => from + (to - from) * progress;
@@ -60,9 +60,25 @@ function adjustView(pose: Camera, view: MapView | null | undefined, strength = 1
   };
 }
 
-export function frameAt(scene: any, stops: any[], time: number, profile: string, returnDuration: number, openingOnly = false, origin?: PreviewFlightOrigin, overviewProgress?: number, previewView?: MapView | null) {
+// Scene 2 choreography shared by the exporter, the studio preview and the
+// standalone capture: the town settles first, the county is traced while the
+// camera pulls back, then the shot settles back on the town.
+const CONTEXT_INTRO = { town: 2.4, out: 3.2, hold: 1.4, back: 2.2, total: 9.2 };
+function openingSeconds(scene: any) {
+  const opening = scene?.region?.openingDescent;
+  if (!opening || opening.enabled === false) return 0;
+  return Math.max(2, Math.min(16, Number(opening.seconds ?? 3)));
+}
+export function contextIntroSeconds(scene: any) {
+  const hasCounty = Boolean(scene?.context?.cameraProfiles?.['portrait'] || scene?.context?.cameraPreset);
+  return hasCounty ? openingSeconds(scene) + CONTEXT_INTRO.total : 0;
+}
+
+export function frameAt(scene: any, stops: any[], time: number, profile: string, returnDuration: number, openingOnly = false, origin?: PreviewFlightOrigin, overviewProgress?: number, previewView?: MapView | null, contextIntroEnabled?: boolean) {
   const region = scene.region;
   const preset = camera(region.cameraProfiles?.[profile] || region.cameraPreset);
+  const contextPreset = scene.context?.cameraProfiles?.[profile] || scene.context?.cameraPreset;
+  const contextPose = contextPreset ? camera(contextPreset) : undefined;
   const overview = { ...preset, height: preset.height * (stops.length ? .9 : 1) };
   const labelReferenceDistance = preset.height / Math.max(.35, Math.sin(Math.abs(preset.pitch * Math.PI / 180)));
   const opening = region.openingDescent?.enabled === false ? null : region.openingDescent;
@@ -90,7 +106,19 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     if (!profilePreset && profile === 'portrait') pose.height *= Number(region.portraitChildCameraScale ?? 1);
     return pose;
   };
+  const tourStart = Number(stops[0]?.start ?? Infinity);
+  // The county only ever appears on the shot that introduces the town. Once the
+  // village tour has started (`mapTime` reached the first stop) the context must
+  // never take the camera away from a village preview.
+  // Only the shot that introduces the town shows the county: the standalone capture
+  // (no tour stops) always does, the studio asks for it explicitly on `play-opening`,
+  // and a village preview never does.
+  const contextPending = (contextIntroEnabled ?? stops.length === 0) &&
+    (!Number.isFinite(tourStart) || mapTime < tourStart);
+  const contextIntro = contextPose && contextPending ? descent + CONTEXT_INTRO.total : 0;
   if (time < descent) {
+    // The shot always arrives from the sky, county or not. The rim only starts
+    // drawing once the camera has landed, so no dim outline hangs in mid-air.
     const eased = smooth(time / descent);
     const startHeight = Math.max(800000, Number(opening.startHeightMeters ?? 900000));
     const approach = Math.max(.18, Math.min(.38, (startHeight - overview.height) / 2600000));
@@ -102,6 +130,17 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
       height: lerp(startHeight, overview.height, Math.pow(eased, .86)),
       pitch: lerp(Number(opening.startPitchDegrees ?? -52), overview.pitch, eased)
     };
+  } else if (contextPose && contextPending && time < contextIntro) {
+    // 1. the town boundary finishes drawing, 2. the camera eases back while UE
+    // traces the county outline, 3. hold the county long enough to read where the
+    // town sits inside it, 4. settle back on the town.
+    const drawn = descent + CONTEXT_INTRO.town;
+    const wide = drawn + CONTEXT_INTRO.out;
+    const held = wide + CONTEXT_INTRO.hold;
+    if (time < drawn) pose = overview;
+    else if (time < wide) pose = flight(overview, contextPose, smooth((time - drawn) / CONTEXT_INTRO.out));
+    else if (time < held) pose = contextPose;
+    else pose = flight(contextPose, overview, smooth((time - held) / CONTEXT_INTRO.back));
   } else if (origin && overviewProgress !== undefined) {
     pose = flight(origin.camera, overview, overviewProgress);
   } else if (returnProgress !== null) {
@@ -111,9 +150,16 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   }
 
   const current = stop ? String(stop.id) : '';
+  const contextReveal = contextPose && contextPending
+    ? smooth((time - descent - CONTEXT_INTRO.town - .2) / (CONTEXT_INTRO.out + .3))
+    : 0;
+  const contextOpacity = contextPose && contextPending
+    ? 1 - smooth((time - descent - CONTEXT_INTRO.town - CONTEXT_INTRO.out - CONTEXT_INTRO.hold - CONTEXT_INTRO.back * .45) / (CONTEXT_INTRO.back * .55))
+    : 0;
   const reveal = smooth((mapTime - .35) / 1.25);
   const parentOverview = openingOnly ? 1 : 1 - smooth((mapTime - Number(stops[0]?.start ?? Infinity)) / .45);
   let parentLabel = .98 * parentOverview * smooth((mapTime - 1.16) / .48);
+  if (contextPose && time < contextIntro) parentLabel = Math.max(parentLabel, .98 * smooth(time / .35));
   let parentAccent = returning?.progress ?? parentOverview;
   const labels: Record<string, LabelStyle> = {};
   const accents: Record<string, number> = {};
@@ -170,7 +216,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   return {
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
-    parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent,
+    parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity,
     labels, accents, labelReferenceDistance, focusId, focus,
     clouds: cloudStateAt(time, opening, pose.height),
     trace: boundaryAnimation(mapTime, traceStart, current)

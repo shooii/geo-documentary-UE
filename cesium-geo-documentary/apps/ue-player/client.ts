@@ -1,5 +1,5 @@
 import { Config, PixelStreaming } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.7';
-import { actions, frameAt, type PreviewFlightOrigin } from './presentation.js';
+import { actions, contextIntroSeconds, frameAt, type PreviewFlightOrigin } from './presentation.js';
 import { configureOpening } from './opening.js';
 import { DEFAULT_IMAGERY_PROVIDER, type MapView } from '../../packages/project-schema/index.js';
 
@@ -21,7 +21,7 @@ async function fetchScene(url: string, signal?: AbortSignal) {
 let preloadedScene = query.has('studioPreview') ? fetchScene(`${sceneUrl}&warm=1`).catch(() => undefined) : undefined;
 const overlay = document.getElementById('connection')!;
 const status = document.getElementById('status')!;
-let scene: any, stops: any[] | undefined, duration = 4.4, time = 0, raf = 0, ready = false, openingOnly = false;
+let scene: any, stops: any[] | undefined, duration = 4.4, time = 0, raf = 0, ready = false, openingOnly = false, contextIntro = false;
 let channelReady = false;
 let sceneLoad: AbortController | undefined;
 let queuedMotion: any;
@@ -52,7 +52,7 @@ function draw(force=false) {
   if (!ready || !scene) return;
   const now=performance.now();if(!force && now-lastDrawAt<1000/30)return;lastDrawAt=now;
   const overviewProgress = flightOrigin?.overviewStart === undefined ? undefined : (time - flightOrigin.overviewStart) / duration;
-  const frame = frameAt(scene, stops ?? [], time, profile, duration, openingOnly, flightOrigin, overviewProgress, previewView);
+  const frame = frameAt(scene, stops ?? [], time, profile, duration, openingOnly, flightOrigin, overviewProgress, previewView, contextIntro);
   if (stream.emitUIInteraction({ type: 'geo-video-ue', version: 1, action: 'apply-frame', frame })) displayedFrame = frame;
 }
 function stop() { cancelAnimationFrame(raf); raf = 0; }
@@ -92,11 +92,16 @@ function handle(data: any) {
   stop();
   if (data.action === 'stop-scene-playback') return;
   openingOnly = false;
+  contextIntro = false;
   flightOrigin = undefined;
   if (data.action === 'play-opening') {
     openingOnly = true;
+    contextIntro = true;
     scene.region=configureOpening(scene.region,data.opening || {});
-    const seconds = Number(scene.region.openingDescent.seconds)+3.2;
+    // Play the whole county-establishing shot, not just the descent: the town
+    // draws its rim, then the parent county is traced in before the camera
+    // settles back. Stopping at the descent hid that choreography in preview.
+    const seconds = Math.max(Number(scene.region.openingDescent.seconds)+3.2, contextIntroSeconds(scene)+.6);
     play(0,seconds,'opening-label-visible'); return;
   }
   if (data.action === 'play-scene-range') {
@@ -153,7 +158,11 @@ async function load(signal: AbortSignal) {
     await new Promise(resolve => setTimeout(resolve, 100));
   }
   signal.throwIfAborted();
-  ready = true; overlay.hidden = true; draw(true);
+  ready = true; overlay.hidden = true;
+  // The standalone capture publishes no tour stops: it always opens on the town and
+  // therefore carries the county establishing shot.
+  contextIntro = (stops ?? scene.region?.tourStops ?? []).length === 0;
+  draw(true);
   controls.forEach(handle);
   const motion = queuedMotion;
   queuedMotion = undefined;
