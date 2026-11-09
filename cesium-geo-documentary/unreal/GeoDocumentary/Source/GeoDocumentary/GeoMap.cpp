@@ -1587,12 +1587,14 @@ void AGeoHUD::DrawHUD()
                            + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
         const FLinearColor Color = FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
                                                Primary ? 1.f : Emphasis).CopyWithNewOpacity(Opacity);
-        const float IconSize = Primary
-            ? (CurrentVillage ? 150.f : 170.f) * Scale * FMath::Lerp(1.f, .90f, Ramp(.5, 3))
+        // The town's name is plain text on the map, like the Cesium build: no pin and no
+        // plaque. Villages keep the pin because they are the subject of their own shot.
+        const float IconSize = CurrentVillage
+            ? 150.f * Scale * FMath::Lerp(1.f, .90f, Ramp(.5, 3))
             : 0.f;
         float PlateHeight = 0;
         UTexture2D *PlateTexture = nullptr;
-        if (Primary && !Label.PlatePath.IsEmpty())
+        if (CurrentVillage && !Label.PlatePath.IsEmpty())
         {
             PlateTexture = LabelPlates.FindRef(Label.PlatePath);
             if (!PlateTexture)
@@ -1701,7 +1703,7 @@ void AGeoHUD::DrawHUD()
         Occupied.Add(Bounds.ExpandBy(4 * Scale));
         Placements.Add(Label.Id, Selected);
         const FVector2D Position = Bounds.GetCenter();
-        if (Label.Priority && Selected != 0 && !Pinned)
+        if (Label.Priority == 2 && Selected != 0 && !Pinned)
         {
             const FVector2D Tip(FMath::Clamp(Label.Anchor.X, Bounds.Min.X, Bounds.Max.X),
                                 FMath::Clamp(Label.Anchor.Y, Bounds.Min.Y, Bounds.Max.Y));

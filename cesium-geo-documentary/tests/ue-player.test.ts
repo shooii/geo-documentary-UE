@@ -73,7 +73,7 @@ test('UE keeps the displayed camera and label when jumping to a nonadjacent vill
   assert.equal(returned.labels.c!.scale, .9 * .68);
 });
 
-test('UE opening hides every label inside the cloud and releases it only after the boundary beam', () => {
+test('UE opening hides every label inside the cloud and releases it when the boundary beam is halfway', () => {
   const base = { longitude: 110, latitude: 20, height: 26000, pitch: -64, heading: 0 };
   const scene = {
     region: { cameraPreset: base, openingDescent: { enabled: true, seconds: 3 } },
@@ -84,10 +84,14 @@ test('UE opening hides every label inside the cloud and releases it only after t
   assert.equal(insideCloud.labelsReveal, 0);
   assert.equal(insideCloud.parentLabel, 0);
   assert.equal(insideCloud.contextReveal, 0);
+  // 光束从 0.35 s 扫到 1.6 s；过半（mapTime≈0.98）时名字开始出现，不再等光束消失。
+  const beforeHalf = at(3.9);
+  assert.equal(beforeHalf.labelsReveal, 0);
+  assert.equal(beforeHalf.parentLabel, 0);
   const beamSweeping = at(4.2);
-  assert.equal(beamSweeping.labelsReveal, 0);
+  assert.ok(beamSweeping.labelsReveal > 0 && beamSweeping.labelsReveal < 1);
   assert.ok(beamSweeping.parentReveal > .5);
-  assert.equal(beamSweeping.parentLabel, 0);
+  assert.ok(beamSweeping.parentLabel > 0);
   const settled = at(5.6);
   assert.equal(settled.labelsReveal, 1);
   assert.ok(settled.parentLabel > .9);

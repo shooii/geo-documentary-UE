@@ -183,9 +183,12 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   // out at mapTime 1.45; the gate opens just behind it.
   const openingShot = openingOnly || stops.length === 0 ||
     (Boolean(contextPose && contextPending) && time < contextIntro);
-  const labelsReveal = openingShot && descent > 0 ? smooth((time - descent - 1.45) / .55) : 1;
+  // The beam sweeps for 1.25 s starting at 0.35 s after the descent ends. The name used
+  // to wait for the beam to fade out entirely (1.45 s); it now starts at the halfway
+  // point of the sweep and lands just as the beam goes, so the two read as one beat.
+  const labelsReveal = openingShot && descent > 0 ? smooth((mapTime - .98) / .5) : 1;
   const parentOverview = openingOnly ? 1 : 1 - smooth((mapTime - Number(stops[0]?.start ?? Infinity)) / .45);
-  let parentLabel = .98 * parentOverview * smooth((mapTime - 1.16) / .48) * labelsReveal;
+  let parentLabel = .98 * parentOverview * smooth((mapTime - .95) / .45) * labelsReveal;
   let parentAccent = returning?.progress ?? parentOverview;
   const labels: Record<string, LabelStyle> = {};
   const accents: Record<string, number> = {};
