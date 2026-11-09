@@ -13,6 +13,7 @@ import {
   stableNarrationTextHash,
   type TourOutroPausePlan
 } from "./narration-timing.js";
+import { isXfyunVoice, synthesizeXfyun, xfyunCredentialsFromEnvFile } from "../../../../packages/xfyun-tts/index.js";
 
 interface PronunciationRecord { term: string; pinyin: string; spokenForm?: string }
 interface RegionContent {
@@ -378,38 +379,59 @@ for (const id of ids) {
     || existingMetadata?.voiceId !== requestedVoiceId
     || existingMetadata?.rate !== requestedRate
     || existingMetadata?.narrationTextHash !== narrationTextHash
-    || (!draftMode && existingMetadata?.provider !== "edge-tts");
+    || (!draftMode && existingMetadata?.provider !== "edge-tts" && existingMetadata?.provider !== "xfyun-tts");
   if (shouldGenerate) {
-    provider = "edge-tts";
-    actualVoiceId = requestedVoiceId;
     fallbackReason = null;
-    try {
-      runEdgeTtsWithRetry([
-        "-m", "edge_tts", "--voice", requestedVoiceId, `--rate=${requestedRate}`,
-        "--file", ttsInputPath, "--write-media", sourceMp3, "--write-subtitles", sourceEdgeSrt
-      ], { ...process.env, PYTHONPATH: pythonPath });
-    } catch (error) {
-      fallbackReason = error instanceof Error ? error.message.slice(0, 2_000) : String(error).slice(0, 2_000);
-      if (!draftMode) {
-        throw new Error(`Formal narration failed for ${id} with ${requestedVoiceId}. Windows SAPI fallback is draft-only.${edgeTtsFailureHint(fallbackReason)}\n${fallbackReason}`);
+    if (isXfyunVoice(requestedVoiceId)) {
+      // 讯飞在线合成只返回音频，不返回句级时间戳，字幕按段落字数比例铺开。
+      // 音色与音质由讯飞云端决定，和 Edge 一样可以直接进成片（不再降级）。
+      provider = "xfyun-tts";
+      actualVoiceId = requestedVoiceId;
+      const credentials = xfyunCredentialsFromEnvFile(resolve(root, ".env.local"));
+      if (!credentials) {
+        throw new Error(
+          `讯飞语音合成缺少凭据：请在 .env.local 配置 XFYUN_APP_ID / XFYUN_API_KEY / XFYUN_API_SECRET（当前音色 ${requestedVoiceId}）。`
+        );
       }
-      provider = "windows-sapi";
-      actualVoiceId = "Microsoft Huihui Desktop";
-      run("powershell", [
-        "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
-        ".agents/skills/cesium-geo-documentary/scripts/generate-windows-sapi.ps1",
-        "-TextPath", ttsInputPath,
-        "-OutputPath", sapiWav,
-        "-Voice", actualVoiceId,
-        "-Rate", String(sapiRate)
-      ]);
-      run(ffmpeg, ["-y", "-i", sapiWav, "-c:a", "libmp3lame", "-b:a", "192k", sourceMp3]);
-      const fallbackDuration = durationFromFfmpeg(sourceMp3);
-      await writeProportionalSrt(sourceEdgeSrt, content.narration, fallbackDuration);
+      // Edge 的 -4% 对应讯飞 speed 约 48（50 为常速）。
+      const xfyunSpeed = Math.max(0, Math.min(100, 50 + Math.round(requestedRatePercent / 2)));
+      const audio = await synthesizeXfyun(ttsInput, credentials, {
+        voice: requestedVoiceId.replace(/^xfyun:/, ""),
+        speed: xfyunSpeed
+      });
+      await writeFile(sourceMp3, audio);
+      await writeProportionalSrt(sourceEdgeSrt, content.narration, durationFromFfmpeg(sourceMp3));
+    } else {
+      provider = "edge-tts";
+      actualVoiceId = requestedVoiceId;
+      try {
+        runEdgeTtsWithRetry([
+          "-m", "edge_tts", "--voice", requestedVoiceId, `--rate=${requestedRate}`,
+          "--file", ttsInputPath, "--write-media", sourceMp3, "--write-subtitles", sourceEdgeSrt
+        ], { ...process.env, PYTHONPATH: pythonPath });
+      } catch (error) {
+        fallbackReason = error instanceof Error ? error.message.slice(0, 2_000) : String(error).slice(0, 2_000);
+        if (!draftMode) {
+          throw new Error(`Formal narration failed for ${id} with ${requestedVoiceId}. Windows SAPI fallback is draft-only.${edgeTtsFailureHint(fallbackReason)}\n${fallbackReason}`);
+        }
+        provider = "windows-sapi";
+        actualVoiceId = "Microsoft Huihui Desktop";
+        run("powershell", [
+          "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+          ".agents/skills/cesium-geo-documentary/scripts/generate-windows-sapi.ps1",
+          "-TextPath", ttsInputPath,
+          "-OutputPath", sapiWav,
+          "-Voice", actualVoiceId,
+          "-Rate", String(sapiRate)
+        ]);
+        run(ffmpeg, ["-y", "-i", sapiWav, "-c:a", "libmp3lame", "-b:a", "192k", sourceMp3]);
+        const fallbackDuration = durationFromFfmpeg(sourceMp3);
+        await writeProportionalSrt(sourceEdgeSrt, content.narration, fallbackDuration);
+    }
     }
   }
-  if (!draftMode && provider !== "edge-tts") {
-    throw new Error(`Formal narration for ${id} is not premium TTS; regenerate with Edge TTS before release.`);
+  if (!draftMode && provider !== "edge-tts" && provider !== "xfyun-tts") {
+    throw new Error(`Formal narration for ${id} is not premium TTS; regenerate with Edge TTS or 讯飞配音 before release.`);
   }
   const outroPause = await buildFinalNarrationAssets(content, sourceMp3, sourceEdgeSrt, mp3, edgeSrt);
   const loudness = loudnessNormalize(mp3, wav);
@@ -429,6 +451,7 @@ for (const id of ids) {
     generatedAt,
     edgeTtsFallbackReason: fallbackReason,
     timingMode: provider === "edge-tts" ? "provider-sentence-boundaries" : "paragraph-proportional",
+    xfyunVoice: provider === "xfyun-tts" ? actualVoiceId.replace(/^xfyun:/, "") : null,
     pauseProfile: outroPause
       ? "sentence punctuation with blank-line paragraph pauses and parent-return silence"
       : "sentence punctuation with blank-line paragraph pauses",
@@ -437,7 +460,7 @@ for (const id of ids) {
     truePeakTargetDbtp: -1.5,
     measuredInputLufs: Number(loudness.input_i),
     measuredInputTruePeakDbtp: Number(loudness.input_tp),
-    formalReleaseReady: provider === "edge-tts",
+    formalReleaseReady: provider === "edge-tts" || provider === "xfyun-tts",
     pronunciationRecordPath: `assets/audio/${id}/pronunciation-map.json`
   }, null, 2), "utf8");
   // Subtitles go to the same override directory as the audio, otherwise this run

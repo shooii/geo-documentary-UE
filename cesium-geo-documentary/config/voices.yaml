@@ -9,3 +9,27 @@ voices:
     voice_id: zh-CN-XiaoxiaoNeural
     rate: "+0%"
     pitch: "+0Hz"
+
+  # 讯飞在线语音合成（v2，wss://tts-api.xfyun.cn/v2/tts）
+  # 凭据放在 .env.local：XFYUN_APP_ID / XFYUN_API_KEY / XFYUN_API_SECRET
+  # 项目里的 voiceId 直接用下面的 voice_id（`xfyun:` 前缀表示走讯飞）。
+  xfyun-male-documentary:
+    provider: xfyun-tts
+    voice_id: "xfyun:aisjiuxu"
+    rate: "+0%"
+  xfyun-female-standard:
+    provider: xfyun-tts
+    voice_id: "xfyun:xiaoyan"
+    rate: "+0%"
+  xfyun-female-warm:
+    provider: xfyun-tts
+    voice_id: "xfyun:aisxping"
+    rate: "+0%"
+  xfyun-female-clear:
+    provider: xfyun-tts
+    voice_id: "xfyun:aisjinger"
+    rate: "+0%"
+  xfyun-child:
+    provider: xfyun-tts
+    voice_id: "xfyun:aisbabyxu"
+    rate: "+0%"
