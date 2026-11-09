@@ -386,8 +386,21 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         }
         const TArray<TSharedPtr<FJsonValue>> *LabelPoint;
         if (Region->TryGetArrayField(TEXT("labelPoint"), LabelPoint) && LabelPoint->Num() >= 2)
+        {
+            // The town's name is set with a full-width space between characters, the way
+            // the Cesium build tracked it out. Done here rather than in the HUD so label
+            // measuring, collision and the text itself all see the same string.
+            const FString Name = S(Region, TEXT("name"));
+            FString Spaced;
+            for (int32 Index = 0; Index < Name.Len(); ++Index)
+            {
+                if (Index > 0)
+                    Spaced.AppendChar(TEXT('\u3000'));
+                Spaced.AppendChar(Name[Index]);
+            }
             Labels.Add({Geo((*LabelPoint)[0]->AsNumber(), (*LabelPoint)[1]->AsNumber(), 10), S(Region, TEXT("id")),
-                        S(Region, TEXT("name")), true, S(Region, TEXT("labelPlate"))});
+                        Spaced, true, S(Region, TEXT("labelPlate"))});
+        }
         const TArray<TSharedPtr<FJsonValue>> *Layers;
         if (Scene->TryGetArrayField(TEXT("layers"), Layers))
             for (auto &V : *Layers)
@@ -1578,7 +1591,9 @@ void AGeoHUD::DrawHUD()
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
-        const float SizePx = (Label.Parent ? 80.f : FMath::Lerp(35.f, 64.f, Emphasis) * (Primary ? 1.06f : 1.f))
+        // The town name sits 50% larger than it used to: it is the only label on screen at
+        // that moment and has to hold the frame while the boundary beam finishes.
+        const float SizePx = (Label.Parent ? 120.f : FMath::Lerp(35.f, 64.f, Emphasis) * (Primary ? 1.06f : 1.f))
                              * Scale * FMath::Lerp(1.f, Primary ? .90f : .82f, Ramp(.5, 3));
         float Width, Height;
         Canvas->StrLen(LabelFont, Label.Name, Width, Height);
