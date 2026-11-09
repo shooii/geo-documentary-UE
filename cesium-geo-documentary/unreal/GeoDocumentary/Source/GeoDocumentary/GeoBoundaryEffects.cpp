@@ -7,7 +7,33 @@
 
 namespace
 {
-enum EBoundaryLayer { Face, Curtain, Rim, Halo, LayerCount };
+enum EBoundaryLayer { Face, Curtain, LayerCount };
+
+// The raised block is only the extruded top face plus its curtain. The two flat
+// light ribbons that used to lie on the ground either side of the ring (a pale
+// "rim" and a wider "halo") painted a grey band outside the block that fought
+// with the 3D silhouette, so they are gone. GEO_BOUNDARY_OFF=face|curtain|all
+// still mutes a layer for A/B diagnosis.
+uint8 ParseBoundaryOff()
+{
+    FString Spec = FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_BOUNDARY_OFF"));
+    Spec.TrimStartAndEndInline();
+    Spec.ToLowerInline();
+    if (Spec.IsEmpty())
+        return 0;
+    if (Spec == TEXT("all"))
+        return (1 << LayerCount) - 1;
+    uint8 Mask = 0;
+    TArray<FString> Parts;
+    Spec.ParseIntoArray(Parts, TEXT(","), true);
+    for (FString Part : Parts)
+    {
+        Part.TrimStartAndEndInline();
+        if (Part == TEXT("face")) Mask |= 1 << Face;
+        else if (Part == TEXT("curtain")) Mask |= 1 << Curtain;
+    }
+    return Mask;
+}
 
 struct FBoundarySection
 {
@@ -36,7 +62,9 @@ struct FBoundarySection
     }
 };
 
-void AddRing(const FGeoRing &Path, double Width, FBoundarySection &Wall, FBoundarySection &Line, FBoundarySection &Glow)
+// Only the extruded curtain is built: `Point` on the ground, `Point` lifted to
+// `Lift` on top, so the ring reads as a solid 3D step and nothing else.
+void AddRing(const FGeoRing &Path, FBoundarySection &Wall)
 {
     const int32 Count = Path.Points.Num() - 1;
     const double Length = Path.Lengths.Last();
@@ -46,33 +74,17 @@ void AddRing(const FGeoRing &Path, double Width, FBoundarySection &Wall, FBounda
         const double U = Path.Lengths[I] / Length;
         Wall.Add(Point, FVector2D(U, 0), 0);
         Wall.Add(Point, FVector2D(U, 1), 1);
-
-        const FVector Previous = Path.Points[(I + Count - 1) % Count];
-        const FVector Next = Path.Points[(I + 1) % Count];
-        const FVector Left = FVector::CrossProduct(FVector::UpVector, (Point - Previous).GetSafeNormal2D());
-        const FVector Right = FVector::CrossProduct(FVector::UpVector, (Next - Point).GetSafeNormal2D());
-        const FVector Miter = (Left + Right).GetSafeNormal2D();
-        const FVector Offset = Miter.IsNearlyZero() ? Right : Miter / FMath::Max(.45, FVector::DotProduct(Miter, Right));
-        const FVector Top = Point + FVector(0, 0, 6);
-        Line.Add(Top - Offset * Width, FVector2D(U, 0), 1);
-        Line.Add(Top + Offset * Width, FVector2D(U, 1), 1);
-        Glow.Add(Top - Offset * (Width * 5.4), FVector2D(U, 0), 1);
-        Glow.Add(Top + Offset * (Width * 5.4), FVector2D(U, 1), 1);
         if (I > 0)
-        {
             Wall.Connect();
-            Line.Connect();
-            Glow.Connect();
-        }
     }
 }
 }
 
 void AGeoMap::InitBoundaryEffects()
 {
+    BoundaryOff = ParseBoundaryOff();
     auto *Surface = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_BoundarySurface.M_BoundarySurface"));
-    auto *Light = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_BoundaryLight.M_BoundaryLight"));
-    if (!Surface || !Light)
+    if (!Surface)
         return;
 
     BoundaryMesh = NewObject<UProceduralMeshComponent>(this);
@@ -83,7 +95,7 @@ void AGeoMap::InitBoundaryEffects()
     BoundaryMesh->RegisterComponent();
     for (int32 Layer = 0; Layer < LayerCount; ++Layer)
     {
-        auto *Material = UMaterialInstanceDynamic::Create(Layer < Rim ? Surface : Light, this);
+        auto *Material = UMaterialInstanceDynamic::Create(Surface, this);
         Material->SetScalarParameterValue(TEXT("Layer"), Layer);
         BoundaryLayers.Add(Material);
         BoundaryMesh->SetMaterial(Layer, Material);
@@ -171,7 +183,7 @@ void AGeoMap::UpdateBoundaryEffects(const FString &FocusId, double Focus, double
                     Sections[Face].Indices.Add(Start + Index);
             }
             for (const int32 I : BoundaryPaths)
-                AddRing(Rings[I], BoundaryWidth, Sections[Curtain], Sections[Rim], Sections[Halo]);
+                AddRing(Rings[I], Sections[Curtain]);
             BoundaryPaths.Sort([this](int32 A, int32 B) { return Rings[A].Lengths.Last() > Rings[B].Lengths.Last(); });
             for (int32 Layer = 0; Layer < LayerCount; ++Layer)
                 Sections[Layer].Create(*BoundaryMesh, Layer);
@@ -193,12 +205,12 @@ void AGeoMap::UpdateBoundaryEffects(const FString &FocusId, double Focus, double
     for (int32 Layer = 0; Layer < BoundaryLayers.Num(); ++Layer)
     {
         UMaterialInstanceDynamic *Material = BoundaryLayers[Layer];
-        const bool LightLayer = Layer >= 2;
+        const bool Muted = (BoundaryOff & (1 << Layer)) != 0;
         Material->SetScalarParameterValue(TEXT("Lift"), BoundaryLift);
-        Material->SetScalarParameterValue(TEXT("Strength"), Strength * (LightLayer ? 1.24 : 1.12));
+        Material->SetScalarParameterValue(TEXT("Strength"), Muted ? 0.f : Strength * 1.12);
         Material->SetScalarParameterValue(TEXT("Flow"), Flow);
         Material->SetScalarParameterValue(TEXT("Scan"), Scan);
-        Material->SetVectorParameterValue(TEXT("Tint"), LightLayer ? Tint * 1.12 : Tint);
+        Material->SetVectorParameterValue(TEXT("Tint"), Tint);
     }
 
     const auto &Path = Rings[BoundaryPaths[0]];

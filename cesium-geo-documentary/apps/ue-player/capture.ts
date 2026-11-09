@@ -44,8 +44,9 @@ try{
  const page=await browser.newPage({viewport:{width,height}});
  await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=${profile}&imagery=${encodeURIComponent(imagery)}`);
  await page.waitForFunction(()=>Boolean((window as any).geoVideo?.getDiagnostics().ready),{},{timeout:180000});
- const qa=process.argv.includes('--qa');
- const sampleTimes=qa?[0,2.1,8]:undefined;
+const qa=process.argv.includes('--qa');
+const requestedTimes=process.env.GEO_QA_TIMES?process.env.GEO_QA_TIMES.split(',').map(Number):undefined;
+const sampleTimes=requestedTimes ?? (qa?[0,2.1,8]:undefined);
  if(qa){await page.evaluate(()=>(window as any).geoVideo.playOpeningPreview({descentSeconds:3}));}
  for(let i=0;i<total;i++){
    await page.evaluate(t=>(window as any).geoVideo.renderFrame(t),sampleTimes?.[i] ?? startTime+i/fps);

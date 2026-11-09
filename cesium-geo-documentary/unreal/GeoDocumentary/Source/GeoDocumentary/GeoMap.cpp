@@ -1122,44 +1122,84 @@ void AGeoHUD::DrawHUD()
     const double ShadowOpacity[] = {.08, .15, .33};
     for (int Layer = 0; Layer < UE_ARRAY_COUNT(ShadowRects); ++Layer)
         DrawRects(ShadowRects[Layer], FLinearColor(.006, .010, .010, ShadowOpacity[Layer] * Focus));
-    // Flood the county outward from the town: every fill triangle is gated by its
-    // distance to the town centre, so the boundary reads as water spreading rather
-    // than a shape fading in. The crest band stays bright so the front is visible.
-    const double FloodFront = ContextReveal * Map->ContextReachMeters;
-    const double FloodBand = FMath::Max(1600.0, Map->ContextReachMeters * .055);
-    const FLinearColor FloodCrest(.46, .90, 1, .72), FloodBody(.05, .28, .66, .30);
-    if (ContextAlpha > .01 && ContextReveal > .0005 && Map->ContextFills.Num())
+    // The county arrives as a wipe: a straight front travels across the shape and
+    // everything behind it is drawn, nothing ahead of it is. The front is placed on
+    // the polygon's own projected extent — the world-space AABB projects far wider
+    // than the county once perspective is in play, which made the wipe finish early —
+    // so it starts at one edge and lands just past the other. `contextErasing` says
+    // which way the front is travelling, which only tints the cut.
+    const double Wipe = FMath::Clamp(ContextReveal, 0., 1.);
+    const double Erasing = FMath::Clamp(N(F, TEXT("contextErasing"), 0), 0., 1.);
+    struct FProjectedFill
     {
-        TArray<FCanvasUVTri> ContextTriangles;
-        for (const auto &Fill : Map->ContextFills)
+        TArray<FVector2D> Points;
+        TArray<bool> Valid;
+    };
+    TArray<FProjectedFill> Projected;
+    double CountyLeft = 0, CountyRight = 0, FrontX = 0;
+    bool CountyFramed = false;
+    // Sutherland-Hodgman against the single axis the wipe moves along: keeps the
+    // blade dead straight instead of letting the triangulation show through.
+    const auto ClipTriangle = [](const FVector2D &A, const FVector2D &B, const FVector2D &C, double X,
+                                 const FLinearColor &Color, TArray<FCanvasUVTri> &Out) {
+        FVector2D Poly[4];
+        int Count = 0;
+        const FVector2D In[3] = {A, B, C};
+        for (int I = 0; I < 3; ++I)
         {
-            TArray<FVector2D> Points;
-            TArray<bool> Valid;
-            for (const auto &Vertex : Fill.Vertices)
+            const FVector2D From = In[I], To = In[(I + 1) % 3];
+            const bool FromIn = From.X <= X, ToIn = To.X <= X;
+            if (FromIn)
+                Poly[Count++] = From;
+            if (FromIn != ToIn)
+                Poly[Count++] = FMath::Lerp(From, To, (X - From.X) / (To.X - From.X));
+        }
+        for (int I = 1; I + 1 < Count; ++I)
+        {
+            FCanvasUVTri Triangle;
+            Triangle.V0_Pos = Poly[0];
+            Triangle.V1_Pos = Poly[I];
+            Triangle.V2_Pos = Poly[I + 1];
+            Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
+            Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Color;
+            Out.Add(Triangle);
+        }
+    };
+    if (ContextAlpha > .01 && Wipe > .0005 && Map->ContextFills.Num())
+    {
+        Projected.SetNum(Map->ContextFills.Num());
+        for (int Filled = 0; Filled < Map->ContextFills.Num(); ++Filled)
+        {
+            for (const auto &Vertex : Map->ContextFills[Filled].Vertices)
             {
-                FVector2D Pixel;
-                Valid.Add(PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel));
-                Points.Add(Pixel);
+                FVector2D Pixel = FVector2D::ZeroVector;
+                const bool OnScreen = PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel);
+                Projected[Filled].Valid.Add(OnScreen);
+                Projected[Filled].Points.Add(Pixel);
+                if (!OnScreen)
+                    continue;
+                if (!CountyFramed)
+                {
+                    CountyLeft = CountyRight = Pixel.X;
+                    CountyFramed = true;
+                }
+                CountyLeft = FMath::Min(CountyLeft, Pixel.X);
+                CountyRight = FMath::Max(CountyRight, Pixel.X);
             }
+        }
+        FrontX = FMath::Lerp(CountyLeft, CountyRight, Wipe);
+        const FLinearColor FloodBody(.05, .28, .66, .30 * ContextAlpha);
+        TArray<FCanvasUVTri> ContextTriangles;
+        for (int Filled = 0; Filled < Projected.Num(); ++Filled)
+        {
+            const auto &Fill = Map->ContextFills[Filled];
+            const auto &Entry = Projected[Filled];
             for (int I = 0; I + 2 < Fill.Indices.Num(); I += 3)
             {
                 const int A = Fill.Indices[I], B = Fill.Indices[I + 1], C = Fill.Indices[I + 2];
-                if (!Valid[A] || !Valid[B] || !Valid[C])
+                if (!Entry.Valid[A] || !Entry.Valid[B] || !Entry.Valid[C])
                     continue;
-                const FVector Centroid = (Fill.Vertices[A] + Fill.Vertices[B] + Fill.Vertices[C]) / 3.0;
-                const double Distance = FVector::Dist2D(Centroid, Map->ContextOrigin) / 100.0;
-                if (Distance > FloodFront)
-                    continue;
-                const float Crest = float(FMath::Clamp((FloodFront - Distance) / FloodBand, 0., 1.));
-                const FLinearColor Tint = FloodCrest + (FloodBody - FloodCrest) * Crest;
-                FCanvasUVTri Triangle;
-                Triangle.V0_Pos = Points[A];
-                Triangle.V1_Pos = Points[B];
-                Triangle.V2_Pos = Points[C];
-                Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
-                Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color =
-                    FLinearColor(Tint.R, Tint.G, Tint.B, Tint.A * ContextAlpha);
-                ContextTriangles.Add(Triangle);
+                ClipTriangle(Entry.Points[A], Entry.Points[B], Entry.Points[C], FrontX, FloodBody, ContextTriangles);
             }
         }
         if (ContextTriangles.Num())
@@ -1167,6 +1207,38 @@ void AGeoHUD::DrawHUD()
             FCanvasTriangleItem Fill(ContextTriangles, GWhiteTexture);
             Fill.BlendMode = SE_BLEND_Translucent;
             Canvas->DrawItem(Fill);
+        }
+        // The blade itself: one hot hairline sitting exactly on the cut. No trail —
+        // a soft gradient behind it read as a translucent panel floating over the
+        // terrain, and a PPT wipe is a clean edge anyway.
+        const double BladeGain = FMath::Clamp(FMath::Min(Wipe, 1. - Wipe) / .05, 0., 1.) * ContextAlpha;
+        if (BladeGain > .002 && Map->ContextRings.Num())
+        {
+            TArray<double> Cuts;
+            for (const auto &Ring : Map->ContextRings)
+                for (int I = 0; I + 1 < Ring.Points.Num(); I++)
+                {
+                    FVector2D A, B;
+                    if (!PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I], A) ||
+                        !PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I + 1], B))
+                        continue;
+                    if ((A.X - FrontX) * (B.X - FrontX) > 0)
+                        continue;
+                    const double Span = B.X - A.X;
+                    Cuts.Add(FMath::Abs(Span) < .001 ? A.Y : FMath::Lerp(A.Y, B.Y, (FrontX - A.X) / Span));
+                }
+            Cuts.Sort();
+            const double BladeWidth = FMath::Max(1.5, 2.2 * Scale);
+            for (int I = 0; I + 1 < Cuts.Num(); I += 2)
+            {
+                const double Top = Cuts[I], Height = Cuts[I + 1] - Cuts[I];
+                if (Height < 1)
+                    continue;
+                FCanvasTileItem Blade(FVector2D(FrontX - BladeWidth * .5, Top), FVector2D(BladeWidth, Height),
+                                      FLinearColor(.76, .95, 1, float((.52 + .14 * Erasing) * BladeGain)));
+                Blade.BlendMode = SE_BLEND_Translucent;
+                Canvas->DrawItem(Blade);
+            }
         }
     }
     if (ContextAlpha > .01 && Focus < .05 && Map->Fills.Num())
@@ -1200,7 +1272,9 @@ void AGeoHUD::DrawHUD()
         }
         if (TownTriangles.Num())
         {
-            const FLinearColor Tint(.12, .55, .14, .45 * ContextAlpha * FMath::SmoothStep(.2, 1., ContextReveal));
+            // The town is not part of the wipe: it is what the county is erased back
+            // down to, so it keeps its tint for the whole county phase.
+            const FLinearColor Tint(.12, .55, .14, .45 * ContextAlpha);
             for (auto &Triangle : TownTriangles)
                 Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
             FCanvasTriangleItem Fill(TownTriangles, GWhiteTexture);
@@ -1240,19 +1314,16 @@ void AGeoHUD::DrawHUD()
         Triangle.V1_Color = ColorB;
         BoundaryTriangles.Add(Triangle);
     };
-    if (ContextAlpha > .01 && ContextReveal > .0005 && Map->ContextRings.Num())
+    if (CountyFramed && Map->ContextRings.Num())
     {
-        // The county rim lights up exactly where the flood has already reached, so
-        // the outline and the fill share one front instead of racing each other.
-        const FLinearColor ParentLine(.40, .76, .98), CrestLine(.82, .97, 1);
+        // The county rim follows the same blade: segments ahead of the front are
+        // not drawn, and the couple of centimetres of rim right under the blade
+        // brighten so the edge reads as a hot cut rather than a hard clip.
+        const FLinearColor ParentLine(.36, .70, .96), CrestLine(.62, .92, 1);
         for (const auto &Ring : Map->ContextRings)
         {
             for (int I = 0; I + 1 < Ring.Points.Num(); I++)
             {
-                const FVector Mid = (Ring.Points[I] + Ring.Points[I + 1]) * .5;
-                const double Distance = FVector::Dist2D(Mid, Map->ContextOrigin) / 100.0;
-                if (Distance > FloodFront + FloodBand * .4)
-                    continue;
                 FVector2D A, B;
                 if (!PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I], A) ||
                     !PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I + 1], B))
@@ -1260,13 +1331,19 @@ void AGeoHUD::DrawHUD()
                 if ((A.X < -100 && B.X < -100) || (A.X > Size.X + 100 && B.X > Size.X + 100) ||
                     (A.Y < -100 && B.Y < -100) || (A.Y > Size.Y + 100 && B.Y > Size.Y + 100))
                     continue;
-                const float Crest = float(FMath::Clamp((FloodFront - Distance) / FloodBand, 0., 1.));
-                const FLinearColor Line = CrestLine + (ParentLine - CrestLine) * Crest;
+                if (A.X > FrontX && B.X > FrontX)
+                    continue;
+                if (A.X > FrontX)
+                    A = FMath::Lerp(A, B, (FrontX - A.X) / (B.X - A.X));
+                else if (B.X > FrontX)
+                    B = FMath::Lerp(B, A, (FrontX - B.X) / (A.X - B.X));
+                const double Crest = FMath::Clamp(1. - FMath::Abs((A.X + B.X) * .5 - FrontX) / (42. * Scale), 0., 1.);
+                const FLinearColor Line = ParentLine + (CrestLine - ParentLine) * float(Crest);
                 const double LineAlpha = ContextAlpha;
-                AddStroke(A, B, 5.0 * Scale, DarkEdge.CopyWithNewOpacity(.34 * LineAlpha),
-                          DarkEdge.CopyWithNewOpacity(.34 * LineAlpha));
-                AddStroke(A, B, 2.4 * Scale, FLinearColor(Line.R, Line.G, Line.B, .92 * LineAlpha),
-                          FLinearColor(Line.R, Line.G, Line.B, .92 * LineAlpha));
+                // Keep the county rim at the same hairline weight as the town outline
+                // (pre-4fcd4ef look). A wide dark underlay read as a grey wall.
+                AddStroke(A, B, 1.6 * Scale, FLinearColor(Line.R, Line.G, Line.B, .78 * LineAlpha),
+                          FLinearColor(Line.R, Line.G, Line.B, .78 * LineAlpha));
             }
         }
     }
@@ -1276,22 +1353,22 @@ void AGeoHUD::DrawHUD()
         // for the trace head below, so the flat line does not double the 3D rim.
         if (!Stroke.Parent)
             continue;
+        // While the county flood layer is up it already outlines the county rim;
+        // stroking the same rim again doubled it into a heavy band.
+        if (ContextAlpha > .01 && ContextReveal > .0005 && Map->ContextRings.Num())
+            continue;
         if (Stroke.Parent && Stroke.Start >= Reveal)
             continue;
         const FVector2D End = Stroke.Parent && Stroke.End > Reveal
             ? FMath::Lerp(Stroke.A, Stroke.B, (Reveal - Stroke.Start) / (Stroke.End - Stroke.Start))
             : Stroke.B;
         const FLinearColor Edge = Stroke.Parent ? TownEdge : VillageEdge;
-        const FLinearColor Context = Stroke.Parent ? ContextEdge.CopyWithNewOpacity(.55f) : VillageEdge.CopyWithNewOpacity(.55f);
-        FLinearColor Color = FMath::Lerp(Context, Edge.CopyWithNewOpacity(Stroke.Parent ? .85f : .98f), float(Stroke.Accent));
+        const FLinearColor Context = Stroke.Parent ? ContextEdge.CopyWithNewOpacity(.53f) : VillageEdge.CopyWithNewOpacity(.48f);
+        FLinearColor Color = FMath::Lerp(Context, Edge.CopyWithNewOpacity(.78f), float(Stroke.Accent));
         if (!Stroke.Parent)
             Color.A *= ChildReveal;
-        const double BaseWidth = (Stroke.Parent
-            ? FMath::Lerp(2.0f, 2.6f, float(Stroke.Accent))
-            : FMath::Lerp(3.0f, 4.0f, float(Stroke.Accent))) * Scale;
-        const double UnderlayAlpha = .40 * (Stroke.Parent ? 1.0 : ChildReveal);
-        AddStroke(Stroke.A, End, BaseWidth + 2.2 * Scale, DarkEdge.CopyWithNewOpacity(UnderlayAlpha),
-                  DarkEdge.CopyWithNewOpacity(UnderlayAlpha));
+        // Single hairline, no dark underlay: the raised 3D rim already frames the town.
+        const double BaseWidth = FMath::Lerp(1.2f, 1.7f, float(Stroke.Accent)) * Scale;
         AddStroke(Stroke.A, End, BaseWidth, Color, Color);
     }
     const double Head = N(Trace, TEXT("progress")), TraceAlpha = N(Trace, TEXT("alpha"));

@@ -63,7 +63,7 @@ function adjustView(pose: Camera, view: MapView | null | undefined, strength = 1
 // Scene 2 choreography shared by the exporter, the studio preview and the
 // standalone capture: the town settles first, the county is traced while the
 // camera pulls back, then the shot settles back on the town.
-const CONTEXT_INTRO = { town: 2.4, out: 3.2, hold: 1.4, back: 2.2, total: 9.2 };
+const CONTEXT_INTRO = { town: 2.4, out: 3.2, hold: 1.9, lean: .8, back: 3, total: 10.5 };
 function openingSeconds(scene: any) {
   const opening = scene?.region?.openingDescent;
   if (!opening || opening.enabled === false) return 0;
@@ -131,16 +131,19 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
       pitch: lerp(Number(opening.startPitchDegrees ?? -52), overview.pitch, eased)
     };
   } else if (contextPose && contextPending && time < contextIntro) {
-    // 1. the town boundary finishes drawing, 2. the camera eases back while UE
-    // traces the county outline, 3. hold the county long enough to read where the
-    // town sits inside it, 4. settle back on the town.
+    // 1. the town boundary finishes drawing, 2. the camera eases back while a wipe
+    // front travels across the county, 3. the full county holds long enough to read
+    // where the town sits inside it, 4. the front rewinds as the camera settles back
+    // on the town. `lean` keeps the camera parked on the county for the first beat of
+    // the rewind, so the erase is actually watched instead of happening mid-flight.
     const drawn = descent + CONTEXT_INTRO.town;
     const wide = drawn + CONTEXT_INTRO.out;
     const held = wide + CONTEXT_INTRO.hold;
     if (time < drawn) pose = overview;
     else if (time < wide) pose = flight(overview, contextPose, smooth((time - drawn) / CONTEXT_INTRO.out));
-    else if (time < held) pose = contextPose;
-    else pose = flight(contextPose, overview, smooth((time - held) / CONTEXT_INTRO.back));
+    else
+      pose = flight(contextPose, overview,
+        smooth((time - held - CONTEXT_INTRO.lean) / (CONTEXT_INTRO.back - CONTEXT_INTRO.lean)));
   } else if (origin && overviewProgress !== undefined) {
     pose = flight(origin.camera, overview, overviewProgress);
   } else if (returnProgress !== null) {
@@ -150,12 +153,28 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   }
 
   const current = stop ? String(stop.id) : '';
-  const contextReveal = contextPose && contextPending
-    ? smooth((time - descent - CONTEXT_INTRO.town - .2) / (CONTEXT_INTRO.out + .3))
-    : 0;
-  const contextOpacity = contextPose && contextPending
-    ? 1 - smooth((time - descent - CONTEXT_INTRO.town - CONTEXT_INTRO.out - CONTEXT_INTRO.hold - CONTEXT_INTRO.back * .45) / (CONTEXT_INTRO.back * .55))
-    : 0;
+  // County choreography. The county used to bloom outward from the town centre;
+  // it now arrives as a PPT-style wipe — a straight front travels across the
+  // shape, and nothing ahead of it is drawn. After the full county has been on
+  // screen for `hold`, the same front rewinds while the camera flies home, so the
+  // county is erased back down to 迈陈镇, which sits at its west end.
+  const countyIn = descent + CONTEXT_INTRO.town;
+  const countyHeld = countyIn + CONTEXT_INTRO.out + CONTEXT_INTRO.hold;
+  const countyActive = Boolean(contextPose && contextPending);
+  // The rewind is front-loaded on purpose: `smooth` kept the county intact for the
+  // first half-second of the flight, so the erase was never actually watched. A
+  // power curve pulls most of the county away while the shot is still wide and lets
+  // the last sliver, which is 迈陈镇, linger until the camera lands.
+  const contextWipe = !countyActive ? 0
+    : time < countyHeld
+      ? smooth((time - countyIn) / (CONTEXT_INTRO.out * .92))
+      : 1 - Math.pow(clamp((time - countyHeld) / (CONTEXT_INTRO.back * .9)), .75);
+  const contextErasing = countyActive && time >= countyHeld ? 1 : 0;
+  // `contextReveal` is the wipe front position now: 0 = nothing drawn, 1 = the
+  // whole county. Everything downstream (fill, rim, county name) keys off it.
+  const contextReveal = contextWipe;
+  // The front itself clears the last sliver, so this only softens the very end.
+  const contextOpacity = countyActive ? smooth(contextWipe / .06) : 0;
   const reveal = smooth((mapTime - .35) / 1.25);
   const parentOverview = openingOnly ? 1 : 1 - smooth((mapTime - Number(stops[0]?.start ?? Infinity)) / .45);
   let parentLabel = .98 * parentOverview * smooth((mapTime - 1.16) / .48);
@@ -216,7 +235,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   return {
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
-    parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity,
+    parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity, contextErasing,
     labels, accents, labelReferenceDistance, focusId, focus,
     clouds: cloudStateAt(time, opening, pose.height),
     trace: boundaryAnimation(mapTime, traceStart, current)

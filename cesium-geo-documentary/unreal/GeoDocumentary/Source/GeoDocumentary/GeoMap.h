@@ -60,6 +60,8 @@ class AGeoMap : public AActor
     UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> BoundaryLayers;
     UPROPERTY() TArray<TObjectPtr<UNiagaraComponent>> BoundarySparks;
     FString BoundaryFocus;
+    /** Layers muted for diagnosis, parsed from GEO_BOUNDARY_OFF at BeginPlay. */
+    uint8 BoundaryOff = 0;
     int32 BoundaryGeneration = -1;
     TArray<int32> BoundaryPaths;
     double BoundaryHeight = 0, BoundaryLift = 0, BoundaryWidth = 0;
