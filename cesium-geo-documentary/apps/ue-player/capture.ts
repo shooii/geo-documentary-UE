@@ -1,6 +1,7 @@
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve, join } from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
+import { createServer } from 'node:net';
 import { chromium } from 'playwright';
 import { DEFAULT_IMAGERY_PROVIDER } from '../../packages/project-schema/index.js';
 import { ionToken } from './imagery.js';
@@ -12,7 +13,26 @@ const runtimePath = process.env.GEO_UE_RUNTIME || join(root,'workspace/ue-runtim
 const runtime=JSON.parse((await readFile(runtimePath,'utf8')).replace(/^\uFEFF/,''));
 const imagery = option('imagery', DEFAULT_IMAGERY_PROVIDER);
 const token = imagery === 'cesium-ion-world-imagery' ? await ionToken(resolve(dirname(runtimePath), '..'), process.env) : '';
-const port=Number(option('port','4674')),signallingPort=port+1,streamerPort=port+2;
+// Three consecutive ports, all bindable here. Windows reserves whole ranges for
+// Hyper-V/WinNAT, and binding one of them fails with EACCES rather than EADDRINUSE —
+// the player then starts fine while the signalling server dies, and the capture page
+// waits forever for a streamer that can never connect. Probe before committing.
+const probe = (candidate: number) => new Promise<boolean>(resolve => {
+  const server = createServer();
+  server.once('error', () => resolve(false));
+  server.once('listening', () => server.close(() => resolve(true)));
+  server.listen(candidate, '127.0.0.1');
+});
+async function usablePort(start: number) {
+  for (let candidate = start; candidate < start + 300; candidate += 3) {
+    const ok = await Promise.all([0, 1, 2].map((offset) => probe(candidate + offset)));
+    if (ok.every(Boolean)) return candidate;
+  }
+  throw new Error('没有可用的本机端口可以启动录制');
+}
+const port = await usablePort(Number(option('port', '4674')));
+const signallingPort = port + 1, streamerPort = port + 2;
+if (port !== Number(option('port', '4674'))) console.log(`UE_CAPTURE_PORTS ${port}-${streamerPort} (requested ${option('port','4674')})`);
 const preview=process.argv.includes('--preview') && process.argv.includes('--qa'),scale=preview?2/3:1;
 const width=(profile==='landscape'?1920:1080)*scale,height=(profile==='landscape'?1080:profile==='square'?1080:1920)*scale;
 const frames=join(root,'renders','ue-frames',`${region}-${profile}`);
@@ -42,8 +62,19 @@ try{
  }
  browser=await chromium.launch({headless:true});
  const page=await browser.newPage({viewport:{width,height}});
+ // The player only exposes its state through the overlay; when it never becomes ready
+ // the useful information is the HTTP failure or the exception, so surface both.
+ page.on('console',m=>{ if(m.type()==='error') console.log('UE_PAGE_CONSOLE',m.text()); });
+ page.on('pageerror',e=>console.log('UE_PAGE_ERROR',e.message));
+ page.on('response',r=>{ if(r.status()>=400) console.log('UE_PAGE_HTTP',r.status(),r.url()); });
  await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=${profile}&imagery=${encodeURIComponent(imagery)}`);
- await page.waitForFunction(()=>Boolean((window as any).geoVideo?.getDiagnostics().ready),{},{timeout:180000});
+ try {
+   await page.waitForFunction(()=>Boolean((window as any).geoVideo?.getDiagnostics().ready),{},{timeout:180000});
+ } catch (error) {
+   const status=await page.evaluate(()=>document.getElementById('status')?.textContent||'').catch(()=>'');
+   console.log('UE_PAGE_OVERLAY',JSON.stringify(status));
+   throw error;
+ }
 const qa=process.argv.includes('--qa');
 const requestedTimes=process.env.GEO_QA_TIMES?process.env.GEO_QA_TIMES.split(',').map(Number):undefined;
 const sampleTimes=requestedTimes ?? (qa?[0,2.1,8]:undefined);

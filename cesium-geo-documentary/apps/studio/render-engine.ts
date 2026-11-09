@@ -258,6 +258,21 @@ async function prepareSandbox(root: string, jobRoot: string, project: VideoProje
   await copyFile(regionSource, join(sandbox, regionRelative));
   await copyIfExists(await boundarySource(`data/regions/${project.regionId}.timeline.json`), join(sandbox, "data", "regions", `${project.regionId}.timeline.json`));
   for (const path of [region.geometryPath, region.childGeometryPath].filter((value): value is string => Boolean(value))) await copyIfExists(await boundarySource(path), join(sandbox, path));
+  // The scene endpoint also reads the parent county (its outline carries the
+  // establishing shot's context layer) and the parent of that. Staging only the town
+  // left `loadScene` throwing ENOENT, so /api/scene answered 404 and the capture page
+  // sat on "正在加载 UE 地图场景" until the 180 s wait expired.
+  let parentId = (region as { parentId?: string }).parentId;
+  while (parentId) {
+    const parentRelative = `data/regions/${parentId}.json`;
+    const parentSource = await boundarySource(parentRelative);
+    if (!existsSync(parentSource)) break;
+    await copyIfExists(parentSource, join(sandbox, parentRelative));
+    await copyIfExists(await boundarySource(`data/regions/${parentId}.timeline.json`), join(sandbox, "data", "regions", `${parentId}.timeline.json`));
+    const parent = JSON.parse(await readFile(parentSource, "utf8")) as { geometryPath?: string; parentId?: string };
+    if (parent.geometryPath) await copyIfExists(await boundarySource(parent.geometryPath), join(sandbox, parent.geometryPath));
+    parentId = parent.parentId;
+  }
   for (const asset of project.assets) {
     if (asset.path.startsWith("/workspace-assets/")) {
       const name = asset.path.slice("/workspace-assets/".length);
