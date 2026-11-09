@@ -108,21 +108,27 @@ void AGeoMap::BeginPlay()
     TileMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_Tile.M_Tile"));
     // Native UE5 sky: SkyAtmosphere + VolumetricCloud (1.5-3.5 km) + sun. The old
     // canvas cloud overlay stands down as soon as this actor exists.
-    Sky = GetWorld()->SpawnActor<AGeoVolumetricSky>(AGeoVolumetricSky::StaticClass(), FTransform::Identity);
-    if (auto *Volume = GetWorld()->SpawnActor<APostProcessVolume>())
+    // GEO_NO_SKY=1 keeps the pre-sky render path for A/B diagnosis.
+    const bool bNoSky = FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_NO_SKY")).Len() > 0;
+    if (!bNoSky)
     {
-        Volume->bUnbound = true;
-        Volume->BlendWeight = 1.f;
-        Volume->Priority = 10.f;
-        Volume->Settings.bOverride_AutoExposureMethod = true;
-        Volume->Settings.AutoExposureMethod = EAutoExposureMethod::AEM_Manual;
-        Volume->Settings.bOverride_AutoExposureBias = true;
-        Volume->Settings.AutoExposureBias = 0.f;
-        Volume->Settings.bOverride_BloomIntensity = true;
-        Volume->Settings.BloomIntensity = 1.f;
-        Volume->Settings.bOverride_BloomThreshold = true;
-        Volume->Settings.BloomThreshold = 1.1f;
-        PostProcess = Volume;
+        Sky = GetWorld()->SpawnActor<AGeoVolumetricSky>(AGeoVolumetricSky::StaticClass(), FTransform::Identity);
+        if (auto *Volume = GetWorld()->SpawnActor<APostProcessVolume>())
+        {
+            Volume->bUnbound = true;
+            Volume->BlendWeight = 1.f;
+            Volume->Priority = 10.f;
+            // Do not switch the exposure method here: AEM_Manual pulls the whole map
+            // about 2.5 stops down and the tiles are unlit, so nothing adapts back.
+            // The shot-driven bias below is enough for the through-cloud beat.
+            Volume->Settings.bOverride_AutoExposureBias = true;
+            Volume->Settings.AutoExposureBias = 0.f;
+            Volume->Settings.bOverride_BloomIntensity = true;
+            Volume->Settings.BloomIntensity = 1.f;
+            Volume->Settings.bOverride_BloomThreshold = true;
+            Volume->Settings.BloomThreshold = 1.1f;
+            PostProcess = Volume;
+        }
     }
     InitBoundaryEffects();
     CloudDeck = LoadCloudTexture(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Geo/cloud-deck.png")));
@@ -772,16 +778,33 @@ void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
         // plus the scripted opening pass so the graded "through the clouds" beat still
         // reads when the shot stays above the layer.
         const FVector CameraLocation = Camera->GetComponentLocation();
-        Sky->UpdateView(CameraLocation, Camera->GetForwardVector(), CameraLocation.Z / 100.0);
         const double Scripted = N(O(Data, TEXT("clouds")), TEXT("volume"));
-        const double Pierce = FMath::Clamp(FMath::Max(Sky->GetPierce(), Scripted), 0.0, 1.0);
+        Sky->UpdateView(CameraLocation, Camera->GetForwardVector(), CameraLocation.Z / 100.0, Scripted);
+        const double Pierce = Sky->GetPierce();
+        const double Burst = Sky->GetExitBurst();
+        // The deck is a real 1.5-3.5 km layer and reads as opaque, so it may only be
+        // visible while a shot asks for cloud. Left on, it sits between the ~27 km
+        // camera and the map and blanks the imagery.
+        Sky->SetDeckOpacity(Pierce);
         if (PostProcess)
         {
             FPostProcessSettings &Settings = PostProcess->Settings;
-            // Darken inside the water, then flash up on the way out.
-            Settings.AutoExposureBias = -1.8 * Pierce + .85 * Sky->GetExitBurst();
-            Settings.BloomIntensity = 1.05 + 2.4 * Sky->GetExitBurst();
+            // Inside the deck the light has to fall off: pull exposure down, drop the
+            // bloom threshold so the cloud edge still glows a little, and close the
+            // corners in. Punching out of the top reverses all three and flashes.
+            // The drop stays around one stop: pushing further turned the deck orange,
+            // because ACES lifts red and green faster than blue in the low end.
+            Settings.AutoExposureBias = -1.3 * Pierce + 1.25 * Burst;
+            Settings.BloomIntensity = 1.0 + 3.2 * Burst + .5 * Pierce;
+            Settings.BloomThreshold = 1.1 - .55 * Burst;
+            Settings.VignetteIntensity = .35 + .5 * Pierce;
         }
+        static int32 SkyReport = 0;
+        if (++SkyReport % 90 == 0)
+            UE_LOG(LogTemp, Display, TEXT("GEO_SKY deck=%.2f pierce=%.2f bias=%.2f tiles=%d visible=%d"),
+                   Sky->GetDeckOpacity(), Sky->GetPierce(),
+                   PostProcess ? PostProcess->Settings.AutoExposureBias : 0.f, TileMeshes.Num(),
+                   VisibleTiles.Num());
     }
     RefreshTiles(Lon, Lat, Range);
 }
@@ -1587,7 +1610,9 @@ void AGeoHUD::DrawHUD()
 }
 bool AGeoMap::UsesNativeClouds() const
 {
-    return Sky != nullptr && Sky->HasCloudDeck();
+    // A hidden deck must not suppress the canvas overlay either, otherwise cloud shots
+    // would fall back to nothing at all.
+    return Sky != nullptr && Sky->HasCloudDeck() && Sky->GetDeckOpacity() > .02;
 }
 
 AGeoGameMode::AGeoGameMode()
