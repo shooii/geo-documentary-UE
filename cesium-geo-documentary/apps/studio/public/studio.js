@@ -1812,16 +1812,26 @@ function playSelectedScenePreview() {
 // both to configure the tour context up front and to drive the per-scene
 // preview messages.
 function tourPreviewPayload() {
-  if (!state.renderSpec || !state.project) return null;
+  if (!state.project) return null;
   const childScenes = state.project.scenes.filter((item) => item.section === "child" && item.childId && item.camera);
+  // A project that has not produced a render spec yet (no narration audio) still
+  // has to preview a village: without ranges the payload used to bail out and a
+  // clip click left the camera on the overview. Fall back to cumulative scene
+  // durations so the preview keeps the film's slow flight into the village.
+  const ranges = state.renderSpec?.sceneCueRanges || null;
+  let cursor = 0;
   const tourStops = childScenes.map((item) => {
-    const range = state.renderSpec.sceneCueRanges.find((candidate) => candidate.sceneId === item.id);
-    const duration = Math.max(0.001, Number(range?.end || 0) - Number(range?.start || 0));
+    const range = ranges?.find((candidate) => candidate.sceneId === item.id);
+    const span = range ? Number(range.end) - Number(range.start) : sceneDuration(item);
+    const duration = Math.max(0.001, Number(span) || 0.001);
+    const start = range ? Number(range.start) || 0 : cursor;
+    const end = range ? Number(range.end) || start + duration : start + duration;
+    cursor = Math.max(cursor, end);
     return {
       id: item.childId,
       name: item.childName || item.title,
-      start: Number(range?.start || 0),
-      end: Number(range?.end || 0),
+      start,
+      end,
       flightDuration: Math.min(4.2, Math.max(3.2, duration - Number(item.timing?.mapHoldSeconds || 0))),
       cameraPreset: item.camera,
       cameraProfiles: { portrait: item.camera }
@@ -1865,8 +1875,9 @@ function pushTourContext() {
 // both region shapes: with a descent the player removes it, without one there is
 // nothing to remove.
 function showSelectedTourFrame() {
-  const scene = selectedScene(); if (!['child', 'outro', 'overview'].includes(scene?.section) || !state.renderSpec || $("cesiumPreview").hidden) return;
-  const payload = tourPreviewPayload(); if (!payload) return;
+  const scene = selectedScene(); if (!['child', 'outro', 'overview'].includes(scene?.section) || $("cesiumPreview").hidden) return;
+  const payload = tourPreviewPayload();
+  if (!payload) return;
   const { tourStops, returnDuration, annotationWindows } = payload;
   let time;
   let action = "show-tour-frame";
