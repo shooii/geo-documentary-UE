@@ -247,7 +247,7 @@ function standDown(message: string) {
   overlay.hidden = false;
 }
 document.addEventListener('loadedmetadata',maybeLoad,true);
-stream.addEventListener('dataChannelOpen',() => { channelReady=true; stopJoining(); maybeLoad(); });
+stream.addEventListener('dataChannelOpen',() => { channelReady=true; clearTimeout(slotGuard); stopJoining(); maybeLoad(); });
 stream.addEventListener('dataChannelClose',() => standDown('视频流已断开'));
 stream.addEventListener('webRtcDisconnected',() => standDown('视频流已断开'));
 stream.addEventListener('playStreamRejected',() => { status.textContent = '点击播放 UE 地图视频流'; overlay.hidden = false; });
@@ -278,6 +278,8 @@ const viewerId = crypto.randomUUID();
 const slotEnabled = query.get('slot') !== 'off';
 let slotHeartbeat: ReturnType<typeof setInterval> | undefined;
 let slotPoll: ReturnType<typeof setTimeout> | undefined;
+let slotGuard: ReturnType<typeof setTimeout> | undefined;
+let holdsSlot = false;
 async function claimSlot(): Promise<'granted' | 'busy' | 'offline'> {
   const response = await fetch('/api/viewer-slot', {
     method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: viewerId })
@@ -286,19 +288,42 @@ async function claimSlot(): Promise<'granted' | 'busy' | 'offline'> {
   const data = await response.json().catch(() => ({}));
   return data.granted ? 'granted' : 'busy';
 }
-function releaseSlot() {
+function releaseSlot(keepWaiting = false) {
   clearInterval(slotHeartbeat);
   clearTimeout(slotPoll);
+  if (!keepWaiting) clearTimeout(slotGuard);
   slotHeartbeat = undefined;
   slotPoll = undefined;
+  holdsSlot = false;
   navigator.sendBeacon?.('/api/viewer-slot/release', new Blob([JSON.stringify({ id: viewerId })], { type: 'application/json' }));
+}
+/**
+ * Holding the lease is not proof that we got the video: a page opened before the
+ * lease existed (or a session whose socket died without a close frame) can still
+ * occupy the streamer's single subscriber slot. When that happens we hand the lease
+ * back instead of squatting it, show the same "another window is using it" notice,
+ * and keep polling — so the moment that unknown holder goes away we join.
+ */
+function armSlotGuard() {
+  clearTimeout(slotGuard);
+  slotGuard = setTimeout(() => {
+    if (channelReady || ready || !holdsSlot) return;
+    releaseSlot(true);
+    retryButton.hidden = true;
+    overlay.hidden = false;
+    status.textContent = '地图实例正在被另一个窗口使用。\n关闭那个窗口后，本窗口会自动接入，无需刷新。';
+    slotPoll = setTimeout(joinWithSlot, 4000);
+  }, 25000);
 }
 async function joinWithSlot() {
   if (!slotEnabled) { stream.connect(); armJoining(); return; }
   const state = await claimSlot();
   if (state === 'granted') {
+    holdsSlot = true;
+    joinAttempts = 0;
     retryButton.hidden = false;
     slotHeartbeat = setInterval(() => { void claimSlot(); }, 4000);
+    armSlotGuard();
     stream.connect();
     armJoining();
     return;
