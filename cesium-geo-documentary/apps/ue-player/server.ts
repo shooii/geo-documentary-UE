@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { build } from 'esbuild';
 import { loadScene, within } from './scene.js';
+import { labelPlate } from './label-plate.js';
 import { ImageryService, ImageryError } from './imagery.js';
 import { DEFAULT_IMAGERY_PROVIDER } from '../../packages/project-schema/index.js';
 
@@ -22,6 +23,18 @@ createServer(async (req, res) => {
     }
     if (url.pathname === '/api/scene') {
       const scene = await loadScene(root, url.searchParams.get('region') || '', url.searchParams.get('boundary'));
+      const plates = new Map<string, string>();
+      const ensurePlate = async (name: string | undefined) => {
+        if (!name) return '';
+        if (!plates.has(name)) plates.set(name, await labelPlate(root, name));
+        return plates.get(name)!;
+      };
+      scene.region.labelPlate = await ensurePlate(scene.region.name);
+      for (const layer of scene.layers || []) {
+        if (layer.parent) continue;
+        const name = layer.properties?.name;
+        if (name) layer.properties.labelPlate = await ensurePlate(name);
+      }
       const session = url.searchParams.get('session') || randomUUID();
       const source = await imagery.descriptor(url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER, `http://127.0.0.1:${port}`, session);
       if (url.searchParams.get('warm') === '1' && Array.isArray(scene.region.center)) {

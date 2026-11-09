@@ -31,11 +31,13 @@ export async function loadScene(root: string, regionId: string, boundary: string
     const triangulations = triangulateFeature(feature);
     const properties = feature.parent ? feature.properties : {
       ...feature.properties,
-      labelPoint: interiorLabelPoint(triangulations, feature.properties?.labelPoint)
+      labelPoint: interiorLabelPoint(feature.geometry, feature.properties?.labelPoint)
     };
     return { ...feature, properties, triangulations };
   });
-  const parentTriangles = rendered.filter(feature => feature.parent).flatMap(feature => feature.triangulations);
-  const labelPoint = interiorLabelPoint(parentTriangles, framed.labelPoint);
+  const parentGeometries = geometry.features
+    ? geometry.features.map((feature: any) => feature.geometry)
+    : geometry;
+  const labelPoint = interiorLabelPoint(parentGeometries, framed.labelPoint);
   return { version: 1, region: { ...framed, labelPoint }, timeline, layers: rendered };
 }

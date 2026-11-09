@@ -349,7 +349,7 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         const TArray<TSharedPtr<FJsonValue>> *LabelPoint;
         if (Region->TryGetArrayField(TEXT("labelPoint"), LabelPoint) && LabelPoint->Num() >= 2)
             Labels.Add({Geo((*LabelPoint)[0]->AsNumber(), (*LabelPoint)[1]->AsNumber(), 10), S(Region, TEXT("id")),
-                        S(Region, TEXT("name")), true});
+                        S(Region, TEXT("name")), true, S(Region, TEXT("labelPlate"))});
         const TArray<TSharedPtr<FJsonValue>> *Layers;
         if (Scene->TryGetArrayField(TEXT("layers"), Layers))
             for (auto &V : *Layers)
@@ -417,7 +417,8 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
                     FString LabelId = S(Props, TEXT("id"));
                     if (LabelId.IsEmpty())
                         LabelId = S(Props, TEXT("adcode"));
-                    Labels.Add({Geo((*P)[0]->AsNumber(), (*P)[1]->AsNumber(), 10), LabelId, S(Props, TEXT("name")), false});
+                    Labels.Add({Geo((*P)[0]->AsNumber(), (*P)[1]->AsNumber(), 10), LabelId, S(Props, TEXT("name")), false,
+                                S(Props, TEXT("labelPlate"))});
                 }
             }
         Respond(Id);
@@ -785,6 +786,7 @@ void AGeoHUD::DrawHUD()
     {
         LabelGeneration = Map->Generation;
         LabelPlacements.Reset();
+        LabelPlates.Reset();
     }
     if (CachedFrame != F || CachedSize != Size)
     {
@@ -1028,10 +1030,11 @@ void AGeoHUD::DrawHUD()
     }
     struct FLabelDraw
     {
-        FString Id, Name;
+        FString Id, Name, PlatePath;
         FVector2D Anchor, Extent;
         FLinearColor Color;
-        float TextScale, Emphasis;
+        float TextScale, Emphasis, IconSize, PlateHeight;
+        UTexture2D *PlateTexture = nullptr;
         int32 Priority;
     };
     TArray<FLabelDraw> DrawLabels;
@@ -1059,6 +1062,8 @@ void AGeoHUD::DrawHUD()
         if (LabelFont->FontCacheType == EFontCacheType::Runtime)
             LabelFont->LegacyFontSize = 64;
     }
+    if (!LabelPin)
+        LabelPin = LoadCloudTexture(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Geo/label-pin.png")));
     float GlyphWidth, GlyphHeight;
     Canvas->StrLen(LabelFont, TEXT("国"), GlyphWidth, GlyphHeight);
     const double Reference = FMath::Max(1., N(F, TEXT("labelReferenceDistance"), 38000));
@@ -1088,17 +1093,38 @@ void AGeoHUD::DrawHUD()
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
-        const float SizePx = (Label.Parent ? 74.f : FMath::Lerp(35.f, 64.f, Emphasis)) * Scale
-                             * FMath::Lerp(1.f, Primary ? .90f : .82f, Ramp(.5, 3));
+        const float SizePx = (Label.Parent ? 80.f : FMath::Lerp(35.f, 64.f, Emphasis) * (Primary ? 1.06f : 1.f))
+                             * Scale * FMath::Lerp(1.f, Primary ? .90f : .82f, Ramp(.5, 3));
         float Width, Height;
         Canvas->StrLen(LabelFont, Label.Name, Width, Height);
         const float TextScale = FMath::Min(SizePx / FMath::Max(1.f, GlyphHeight), Size.X * .80f / FMath::Max(1.f, Width));
-        const FVector2D Extent = FVector2D(Width, Height) * TextScale * .5
-                                 + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
+        FVector2D Extent = FVector2D(Width, Height) * TextScale * .5
+                           + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
         const FLinearColor Color = FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
                                                Primary ? 1.f : Emphasis).CopyWithNewOpacity(Opacity);
-        DrawLabels.Add({Label.Id, Label.Name, Point, Extent, Color, TextScale, Emphasis,
-                        CurrentVillage ? 2 : Label.Parent ? 1 : 0});
+        const float IconSize = Primary
+            ? (CurrentVillage ? 150.f : 170.f) * Scale * FMath::Lerp(1.f, .90f, Ramp(.5, 3))
+            : 0.f;
+        float PlateHeight = 0;
+        UTexture2D *PlateTexture = nullptr;
+        if (Primary && !Label.PlatePath.IsEmpty())
+        {
+            PlateTexture = LabelPlates.FindRef(Label.PlatePath);
+            if (!PlateTexture)
+            {
+                PlateTexture = LoadCloudTexture(Label.PlatePath);
+                if (PlateTexture)
+                    LabelPlates.Add(Label.PlatePath, PlateTexture);
+            }
+            if (PlateTexture)
+            {
+                PlateHeight = (CurrentVillage ? 138.f : 150.f) * Scale * FMath::Lerp(1.f, .90f, Ramp(.5, 3));
+                const float Aspect = float(PlateTexture->GetSizeX()) / FMath::Max(1, PlateTexture->GetSizeY());
+                Extent = FVector2D(PlateHeight * Aspect, PlateHeight) * .5;
+            }
+        }
+        DrawLabels.Add({Label.Id, Label.Name, Label.PlatePath, Point, Extent, Color, TextScale, Emphasis,
+                        IconSize, PlateHeight, PlateTexture, CurrentVillage ? 2 : Label.Parent ? 1 : 0});
     }
     DrawLabels.Sort([this](const FLabelDraw &A, const FLabelDraw &B) {
         if (A.Priority != B.Priority)
@@ -1118,50 +1144,86 @@ void AGeoHUD::DrawHUD()
     TMap<FString, int32> Placements;
     for (const auto &Label : DrawLabels)
     {
-        const double Gap = 12 * Scale;
+        const bool Pinned = Label.IconSize > 0;
+        const double Gap = (Pinned ? 20 : 12) * Scale;
         const double X = Label.Extent.X + Gap, Y = Label.Extent.Y + Gap;
-        const FVector2D Offsets[] = {{0, 0}, {0, -Y}, {X, 0}, {-X, 0}, {0, Y},
-                                     {X, -Y}, {-X, -Y}, {0, -Y - 60 * Scale}, {0, Y + 60 * Scale}};
-        const int32 OffsetCount = UE_ARRAY_COUNT(Offsets);
-        const int32 *Previous = LabelPlacements.Find(Label.Id);
+        const double BaseY = Pinned ? -(Label.IconSize + Gap + Label.Extent.Y) : 0;
+        TArray<FVector2D> Offsets;
+        if (Pinned)
+            Offsets = {FVector2D(0, BaseY), FVector2D(0, BaseY - Y), FVector2D(X, BaseY),
+                       FVector2D(-X, BaseY), FVector2D(X, BaseY - Y), FVector2D(-X, BaseY - Y),
+                       FVector2D(0, BaseY - 2 * Y)};
+        else
+            Offsets = {{0, 0}, {0, -Y}, {X, 0}, {-X, 0}, {0, Y},
+                       {X, -Y}, {-X, -Y}, {0, -Y - 60 * Scale}, {0, Y + 60 * Scale}};
+        const int32 OffsetCount = Offsets.Num();
+        if (Pinned && LabelPin)
+        {
+            const float IconSize = Label.IconSize;
+            const FVector2D IconMin(Label.Anchor.X - IconSize * .5f, Label.Anchor.Y - IconSize);
+            FCanvasTileItem Icon(IconMin, FVector2D(IconSize, IconSize),
+                                 FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.08f)));
+            Icon.Texture = LabelPin->GetResource();
+            Icon.BlendMode = SE_BLEND_Translucent;
+            Canvas->DrawItem(Icon);
+            Occupied.Add(FBox2D(FVector2D(Label.Anchor.X - IconSize * .5f, Label.Anchor.Y - IconSize),
+                                FVector2D(Label.Anchor.X + IconSize * .5f, Label.Anchor.Y))
+                             .ExpandBy(2 * Scale));
+        }
+        const int32 *PreviousRaw = LabelPlacements.Find(Label.Id);
+        const int32 *Previous = PreviousRaw && *PreviousRaw < OffsetCount ? PreviousRaw : nullptr;
         int32 Selected = INDEX_NONE;
         FBox2D Bounds;
-        // Reuse a valid placement during motion. A primary name may fall back to
-        // covering a line if the remaining space is needed for captions or other names.
-        for (int32 Pass = 0; Pass < (Label.Priority ? 2 : 1) && Selected == INDEX_NONE; ++Pass)
-            for (int32 Order = Previous ? -1 : 0; Order < OffsetCount; ++Order)
-            {
-                const int32 Candidate = Order < 0 ? *Previous : Order;
-                if (Order >= 0 && Previous && Candidate == *Previous)
-                    continue;
-                const FVector2D Point = Label.Anchor + Offsets[Candidate];
-                const FBox2D Box(Point - Label.Extent, Point + Label.Extent);
-                if (!SafeFrame.IsInside(Box) || Occupied.ContainsByPredicate([&Box](const FBox2D &Other) {
-                        return Other.Intersect(Box);
-                    }))
-                    continue;
-                const FBox EdgeBox(FVector(Box.Min, -1), FVector(Box.Max, 1));
-                if (Pass == 0 && Strokes.ContainsByPredicate([&](const FGeoStroke &Stroke) {
-                        if (Stroke.Parent && Stroke.Start >= Reveal)
-                            return false;
-                        const FVector Start(Stroke.A, 0), End(Stroke.B, 0);
-                        return FMath::LineBoxIntersection(EdgeBox, Start, End, End - Start);
-                    }))
-                    continue;
-                Selected = Candidate;
-                Bounds = Box;
-                break;
-            }
-        if (Selected == INDEX_NONE)
-            continue;
+        if (Pinned)
+        {
+            // The pin and its plaque are one unit: keep the plaque centered directly above
+            // the pin and never draw a leader line to it.
+            const FVector2D Point = Label.Anchor + FVector2D(0, BaseY);
+            Bounds = FBox2D(Point - Label.Extent, Point + Label.Extent);
+            Selected = 0;
+        }
+        else
+        {
+            // Reuse a valid placement during motion. A primary name may fall back to
+            // covering a line if the remaining space is needed for captions or other names.
+            for (int32 Pass = 0; Pass < (Label.Priority ? 2 : 1) && Selected == INDEX_NONE; ++Pass)
+                for (int32 Order = Previous ? -1 : 0; Order < OffsetCount; ++Order)
+                {
+                    const int32 Candidate = Order < 0 ? *Previous : Order;
+                    if (Order >= 0 && Previous && Candidate == *Previous)
+                        continue;
+                    const FVector2D Point = Label.Anchor + Offsets[Candidate];
+                    const FBox2D Box(Point - Label.Extent, Point + Label.Extent);
+                    if (!SafeFrame.IsInside(Box) || Occupied.ContainsByPredicate([&Box](const FBox2D &Other) {
+                            return Other.Intersect(Box);
+                        }))
+                        continue;
+                    const FBox EdgeBox(FVector(Box.Min, -1), FVector(Box.Max, 1));
+                    if (Pass == 0 && Strokes.ContainsByPredicate([&](const FGeoStroke &Stroke) {
+                            if (Stroke.Parent && Stroke.Start >= Reveal)
+                                return false;
+                            const FVector Start(Stroke.A, 0), End(Stroke.B, 0);
+                            return FMath::LineBoxIntersection(EdgeBox, Start, End, End - Start);
+                        }))
+                        continue;
+                    Selected = Candidate;
+                    Bounds = Box;
+                    break;
+                }
+            if (Selected == INDEX_NONE)
+                continue;
+        }
         Occupied.Add(Bounds.ExpandBy(4 * Scale));
         Placements.Add(Label.Id, Selected);
         const FVector2D Position = Bounds.GetCenter();
-        if (Label.Priority && Selected != 0)
+        if (Label.Priority && Selected != 0 && !Pinned)
         {
             const FVector2D Tip(FMath::Clamp(Label.Anchor.X, Bounds.Min.X, Bounds.Max.X),
                                 FMath::Clamp(Label.Anchor.Y, Bounds.Min.Y, Bounds.Max.Y));
-            FCanvasLineItem Leader(Label.Anchor, Tip);
+            FVector2D LeaderStart = Label.Anchor;
+            if (Pinned)
+                LeaderStart.Y -= Label.IconSize * .92f;
+            FCanvasLineItem Leader(LeaderStart, Tip);
             Leader.BlendMode = SE_BLEND_Translucent;
             Leader.LineThickness = 3.5f * Scale;
             Leader.SetColor(DarkEdge.CopyWithNewOpacity(.82 * Label.Color.A));
@@ -1170,12 +1232,22 @@ void AGeoHUD::DrawHUD()
             Leader.SetColor((Label.Priority == 2 ? VillageEdge : TownEdge).CopyWithNewOpacity(.90 * Label.Color.A));
             Canvas->DrawItem(Leader);
         }
-        if (Label.Priority == 2 && Selected != 0)
+        if (Label.Priority == 2 && Selected != 0 && !Label.PlateTexture)
         {
             FCanvasTileItem Backdrop(Bounds.Min, Bounds.GetSize(), DarkEdge.CopyWithNewOpacity(.66 * Label.Color.A));
             Backdrop.BlendMode = SE_BLEND_Translucent;
             Canvas->DrawItem(Backdrop);
         }
+        if (Label.PlateTexture)
+        {
+            FCanvasTileItem Plate(Position - Label.Extent, Label.Extent * 2,
+                                  FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.05f)));
+            Plate.Texture = Label.PlateTexture->GetResource();
+            Plate.BlendMode = SE_BLEND_Translucent;
+            Canvas->DrawItem(Plate);
+        }
+        else
+        {
         FCanvasTextItem Text(Position, FText::FromString(Label.Name), LabelFont, Label.Color);
         Text.bCentreX = true;
         Text.bCentreY = true;
@@ -1189,6 +1261,7 @@ void AGeoHUD::DrawHUD()
         Text.bOutlined = true;
         Text.OutlineColor = Outline;
         Canvas->DrawItem(Text, Position);
+        }
     }
     LabelPlacements = MoveTemp(Placements);
     const auto Clouds = O(F, TEXT("clouds"));

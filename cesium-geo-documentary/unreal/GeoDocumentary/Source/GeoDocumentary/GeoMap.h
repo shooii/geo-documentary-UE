@@ -39,6 +39,7 @@ struct FGeoLabel
     FVector Position;
     FString Id, Name;
     bool Parent = false;
+    FString PlatePath;
 };
 
 UCLASS()
@@ -120,6 +121,8 @@ class AGeoHUD : public AHUD
     TArray<FVector4> DimRects;
     TArray<FVector4> ShadowRects[3];
     UPROPERTY() TObjectPtr<UFont> LabelFont;
+    UPROPERTY() TObjectPtr<UTexture2D> LabelPin;
+    UPROPERTY() TMap<FString, TObjectPtr<UTexture2D>> LabelPlates;
     TMap<FString, int32> LabelPlacements;
     int32 LabelGeneration = -1;
 };

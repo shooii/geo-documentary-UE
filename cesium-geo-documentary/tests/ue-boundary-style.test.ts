@@ -15,7 +15,35 @@ test('boundary light head makes one timed lap and disappears after the reveal',(
  assert.equal(boundaryAnimation(8,5,'child').alpha,0);
 });
 
-test('label anchors keep valid positions and fall back outside polygon holes', () => {
+test('label anchors use the interior center and never a point inside a hole', () => {
+ const geometry = {
+  type: 'Polygon',
+  coordinates: [
+   [[0, 0], [6, 0], [6, 6], [0, 6], [0, 0]],
+   [[2, 2], [4, 2], [4, 4], [2, 4], [2, 2]]
+  ]
+ };
+ const point = interiorLabelPoint(geometry);
+ assert.ok(point);
+ const [x, y] = point;
+ assert.ok(x > 0 && x < 6 && y > 0 && y < 6);
+ assert.ok(x < 2 || x > 4 || y < 2 || y > 4);
+});
+
+test('label anchors stay inside a concave region instead of the bounding-box center', () => {
+ const lShape = {
+  type: 'Polygon',
+  coordinates: [[[0, 0], [6, 0], [6, 2], [2, 2], [2, 6], [0, 6], [0, 0]]]
+ };
+ const point = interiorLabelPoint(lShape);
+ assert.ok(point);
+ const [x, y] = point;
+ assert.ok(x >= 0 && x <= 6 && y >= 0 && y <= 6);
+ assert.ok(x < 2 || y < 2);
+ assert.ok(!(Math.abs(x - 3) < .25 && Math.abs(y - 3) < .25));
+});
+
+test('triangulation fallback keeps a valid interior point for legacy callers', () => {
  const geometry = {
   type: 'Polygon',
   coordinates: [
@@ -24,11 +52,9 @@ test('label anchors keep valid positions and fall back outside polygon holes', (
   ]
  };
  const triangles = triangulateFeature({ geometry });
- assert.deepEqual(interiorLabelPoint(triangles, [1, 1]), [1, 1]);
  const fallback = interiorLabelPoint(triangles, [3, 3]);
  assert.ok(fallback);
  const [x, y] = fallback;
  assert.ok(x > 0 && x < 6 && y > 0 && y < 6);
  assert.ok(x < 2 || x > 4 || y < 2 || y > 4);
- assert.deepEqual(interiorLabelPoint(triangles, [30, 30]), fallback);
 });
