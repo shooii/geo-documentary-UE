@@ -354,7 +354,7 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         VisibleTiles.Reset();
         RequiredTiles.Reset();
         Frame.Reset();
-        UpdateBoundaryEffects(TEXT(""), 0, 0);
+        UpdateBoundaryEffects(TEXT(""), 0, 0, 0);
         BoundaryGeneration = -1;
         for (auto &X : Resources)
             if (auto *C = Cast<UProceduralMeshComponent>(X))
@@ -763,15 +763,16 @@ void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
     Camera->SetWorldLocationAndRotation(Position, (Target - Position).Rotation());
     const auto Trace = O(Data, TEXT("trace"));
     const FString FocusId = S(Data, TEXT("focusId"));
-    // The raised rim belongs to the focused area for its whole shot, not just the
-    // 1.4 s the trace head sweeps it: after the sweep ends the extrusion stays up.
-    // The parent only grows in while its own outline is still being drawn.
+    // The parent's slab is the base of the whole scene: it grows in while its own
+    // outline is drawn and then stays up for every later shot, so the map keeps its
+    // relief when the tour moves down into the villages.
+    const double BaseFocus = .16 * FMath::Clamp(N(Data, TEXT("parentReveal"), 1), 0., 1.);
+    // The child's block is the highlight on top of that slab, so it still rises with
+    // the trace head and follows the focus strength of its own shot.
     const double Rise = FocusId == S(Trace, TEXT("target"))
         ? FMath::SmoothStep(0., .25, N(Trace, TEXT("progress")))
         : 1.;
-    const double RevealScale = FocusId.IsEmpty() ? N(Data, TEXT("parentReveal"), 1) : 1.;
-    const double Lift = .16 * Rise * FMath::Clamp(RevealScale, 0., 1.);
-    UpdateBoundaryEffects(FocusId, N(Data, TEXT("focus")) * Lift, N(Data, TEXT("mapTime")));
+    UpdateBoundaryEffects(FocusId, BaseFocus, .16 * N(Data, TEXT("focus")) * Rise, N(Data, TEXT("mapTime")));
     if (Sky)
     {
         // Pierce factor: where the camera physically sits inside the 1.5-3.5 km deck,

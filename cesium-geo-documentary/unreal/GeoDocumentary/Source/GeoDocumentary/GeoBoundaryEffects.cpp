@@ -7,12 +7,15 @@
 
 namespace
 {
-enum EBoundaryLayer { Face, Curtain, LayerCount };
+// Two blocks share the mesh: the parent's slab, which is the base of every shot in
+// the scene, and the focused child's block, which stands on top of it. Each needs its
+// own face and curtain so the two can carry different lifts.
+enum EBoundaryLayer { Face, Curtain, FocusFace, FocusCurtain, LayerCount };
 
 // The raised block is only the extruded top face plus its curtain. The two flat
 // light ribbons that used to lie on the ground either side of the ring (a pale
 // "rim" and a wider "halo") painted a grey band outside the block that fought
-// with the 3D silhouette, so they are gone. GEO_BOUNDARY_OFF=face|curtain|all
+// with the 3D silhouette, so they are gone. GEO_BOUNDARY_OFF=face|curtain|child|all
 // still mutes a layer for A/B diagnosis.
 uint8 ParseBoundaryOff()
 {
@@ -29,10 +32,23 @@ uint8 ParseBoundaryOff()
     for (FString Part : Parts)
     {
         Part.TrimStartAndEndInline();
-        if (Part == TEXT("face")) Mask |= 1 << Face;
-        else if (Part == TEXT("curtain")) Mask |= 1 << Curtain;
+        if (Part == TEXT("face")) Mask |= (1 << Face) | (1 << FocusFace);
+        else if (Part == TEXT("curtain")) Mask |= (1 << Curtain) | (1 << FocusCurtain);
+        else if (Part == TEXT("child")) Mask |= (1 << FocusFace) | (1 << FocusCurtain);
     }
     return Mask;
+}
+
+// Block proportions are derived from the footprint the block covers, so a village
+// block is as tall relative to itself as the town's is to the town.
+double BlockHeight(const FBox &Bounds)
+{
+    // FBox::IsValid is a flag on the struct, not a predicate.
+    return Bounds.IsValid ? FMath::Clamp(Bounds.GetSize().Size2D() * .104, 4800., 500000.) : 0.;
+}
+double BlockWidth(const FBox &Bounds)
+{
+    return Bounds.IsValid ? FMath::Clamp(Bounds.GetSize().Size2D() * .0022, 110., 21000.) : 0.;
 }
 
 struct FBoundarySection
@@ -96,7 +112,9 @@ void AGeoMap::InitBoundaryEffects()
     for (int32 Layer = 0; Layer < LayerCount; ++Layer)
     {
         auto *Material = UMaterialInstanceDynamic::Create(Surface, this);
-        Material->SetScalarParameterValue(TEXT("Layer"), Layer);
+        // The material only knows two shapes: 0 = top face, 1 = curtain. The child's
+        // pair reuses them and differs only in the lift/strength/tint driven per frame.
+        Material->SetScalarParameterValue(TEXT("Layer"), Layer & 1);
         BoundaryLayers.Add(Material);
         BoundaryMesh->SetMaterial(Layer, Material);
     }
@@ -132,19 +150,11 @@ bool AGeoMap::BoundaryEffectsCompiling() const
     return false;
 }
 
-void AGeoMap::UpdateBoundaryEffects(const FString &FocusId, double Focus, double Time)
+void AGeoMap::UpdateBoundaryEffects(const FString &FocusId, double BaseFocus, double Focus, double Time)
 {
     BoundaryLift = 0;
     if (!BoundaryMesh)
         return;
-
-    if (Focus <= .015)
-    {
-        BoundaryMesh->SetVisibility(false);
-        for (const auto &Spark : BoundarySparks)
-            Spark->SetRenderingEnabled(false);
-        return;
-    }
 
     if (BoundaryGeneration != Generation || BoundaryFocus != FocusId)
     {
@@ -152,68 +162,110 @@ void AGeoMap::UpdateBoundaryEffects(const FString &FocusId, double Focus, double
         BoundaryFocus = FocusId;
         BoundaryMesh->ClearAllMeshSections();
         BoundaryPaths.Reset();
+        FocusPaths.Reset();
         BoundaryHeight = 0;
-        FBox Bounds(ForceInit);
+        BoundaryFocusHeight = 0;
+        // The parent's slab is the base of every shot in the scene, so it is built
+        // for every focus. Building only the focused area is what made 迈陈镇's block
+        // vanish the moment a village took the focus — and once the tour had moved
+        // past it there was no shot left that built it again.
+        FBox Bounds(ForceInit), FocusBounds(ForceInit);
         for (int32 I = 0; I < Rings.Num(); ++I)
         {
             const auto &Path = Rings[I];
-            const bool Selected = FocusId.IsEmpty() ? Path.Parent : Path.Id == FocusId;
-            if (!Selected || Path.Points.Num() < 4 || Path.Lengths.Last() <= 1)
+            if (Path.Points.Num() < 4 || Path.Lengths.Last() <= 1)
                 continue;
-            BoundaryPaths.Add(I);
-            for (const FVector &Point : Path.Points)
-                Bounds += Point;
+            if (Path.Parent)
+            {
+                BoundaryPaths.Add(I);
+                for (const FVector &Point : Path.Points)
+                    Bounds += Point;
+            }
+            else if (!FocusId.IsEmpty() && Path.Id == FocusId)
+            {
+                FocusPaths.Add(I);
+                for (const FVector &Point : Path.Points)
+                    FocusBounds += Point;
+            }
         }
-        if (Bounds.IsValid)
-        {
-            const double Span = Bounds.GetSize().Size2D();
-            BoundaryHeight = FMath::Clamp(Span * .104, 4800., 500000.);
-            BoundaryWidth = FMath::Clamp(Span * .0022, 110., 21000.);
-            const FVector Center = Bounds.GetCenter();
-            const double Radius = FMath::Max(1., Span * .5);
-            FBoundarySection Sections[LayerCount];
+        BoundaryHeight = BlockHeight(Bounds);
+        BoundaryFocusHeight = BlockHeight(FocusBounds);
+        BoundaryWidth = BlockWidth(Bounds);
+        BoundaryFocusWidth = BlockWidth(FocusBounds);
+        // Longest first: the spark riders follow the primary path of each block.
+        const auto Longer = [this](int32 A, int32 B) { return Rings[A].Lengths.Last() > Rings[B].Lengths.Last(); };
+        BoundaryPaths.Sort(Longer);
+        FocusPaths.Sort(Longer);
+
+        FBoundarySection Sections[LayerCount];
+        const auto BuildFace = [&](bool bParent, EBoundaryLayer Layer, const FBox &Box) {
+            if (!Box.IsValid)
+                return;
+            const FVector Center = Box.GetCenter();
+            const double Radius = FMath::Max(1., Box.GetSize().Size2D() * .5);
             for (const auto &Fill : Fills)
             {
-                if (!(FocusId.IsEmpty() ? Fill.Parent : Fill.Id == FocusId))
+                if (Fill.Parent != bParent || (!bParent && Fill.Id != FocusId))
                     continue;
-                const int32 Start = Sections[Face].Vertices.Num();
+                const int32 Start = Sections[Layer].Vertices.Num();
                 for (const FVector &Point : Fill.Vertices)
-                    Sections[Face].Add(Point, FVector2D(Point - Center) / Radius, 1);
+                    Sections[Layer].Add(Point, FVector2D(Point - Center) / Radius, 1);
                 for (const int32 Index : Fill.Indices)
-                    Sections[Face].Indices.Add(Start + Index);
+                    Sections[Layer].Indices.Add(Start + Index);
             }
-            for (const int32 I : BoundaryPaths)
-                AddRing(Rings[I], Sections[Curtain]);
-            BoundaryPaths.Sort([this](int32 A, int32 B) { return Rings[A].Lengths.Last() > Rings[B].Lengths.Last(); });
-            for (int32 Layer = 0; Layer < LayerCount; ++Layer)
-                Sections[Layer].Create(*BoundaryMesh, Layer);
-        }
+        };
+        BuildFace(true, Face, Bounds);
+        BuildFace(false, FocusFace, FocusBounds);
+        for (const int32 I : BoundaryPaths)
+            AddRing(Rings[I], Sections[Curtain]);
+        for (const int32 I : FocusPaths)
+            AddRing(Rings[I], Sections[FocusCurtain]);
+        for (int32 Layer = 0; Layer < LayerCount; ++Layer)
+            Sections[Layer].Create(*BoundaryMesh, Layer);
     }
 
-    const bool Visible = !BoundaryPaths.IsEmpty();
+    const double BaseStrength = FMath::SmoothStep(.015, .82, BaseFocus);
+    const double FocusStrength = FMath::SmoothStep(.015, .82, Focus);
+    // Nothing is raised yet (the opening descent, or a new scene before its outline is
+    // drawn): keep the whole thing off so the flat block cannot z-fight with the map.
+    const bool Visible = (BaseFocus > .015 && !BoundaryPaths.IsEmpty()) ||
+                         (Focus > .015 && !FocusPaths.IsEmpty());
     BoundaryMesh->SetVisibility(Visible);
     for (const auto &Spark : BoundarySparks)
         Spark->SetRenderingEnabled(Visible);
     if (!Visible)
         return;
 
-    const double Strength = FMath::SmoothStep(.015, .82, Focus);
-    BoundaryLift = BoundaryHeight * Strength;
+    const double BaseLift = BoundaryHeight * BaseStrength;
+    // The child stands on the parent's slab, so its floor is the base lift rather
+    // than the ground; anything else would bury it inside the slab it sits on.
+    const double FocusLift = BaseLift + BoundaryFocusHeight * FocusStrength;
+    const bool ShowFocus = !FocusPaths.IsEmpty() && FocusStrength > .002;
+    BoundaryLift = ShowFocus ? FocusLift : BaseLift;
     const float Flow = FMath::Frac(Time * .135);
     const float Scan = FMath::Frac(Time * .225);
-    const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.24, .74, .14) : FLinearColor(.12, .73, 1);
+    const FLinearColor ParentTint(.24, .74, .14), FocusTint(.12, .73, 1);
     for (int32 Layer = 0; Layer < BoundaryLayers.Num(); ++Layer)
     {
         UMaterialInstanceDynamic *Material = BoundaryLayers[Layer];
+        const bool IsChild = Layer >= FocusFace;
         const bool Muted = (BoundaryOff & (1 << Layer)) != 0;
-        Material->SetScalarParameterValue(TEXT("Lift"), BoundaryLift);
-        Material->SetScalarParameterValue(TEXT("Strength"), Muted ? 0.f : Strength * 1.12);
+        const double Strength = IsChild ? FocusStrength : BaseStrength;
+        const double Lift = IsChild && ShowFocus ? FocusLift : BaseLift;
+        Material->SetScalarParameterValue(TEXT("Lift"), Lift);
+        Material->SetScalarParameterValue(TEXT("Strength"), Muted || (IsChild && !ShowFocus) ? 0.f : Strength * 1.12);
         Material->SetScalarParameterValue(TEXT("Flow"), Flow);
         Material->SetScalarParameterValue(TEXT("Scan"), Scan);
-        Material->SetVectorParameterValue(TEXT("Tint"), Tint);
+        Material->SetVectorParameterValue(TEXT("Tint"), IsChild ? FocusTint : ParentTint);
     }
 
-    const auto &Path = Rings[BoundaryPaths[0]];
+    // Sparks ride the block that is actually on screen: the child's ring while it is
+    // up, otherwise the parent's.
+    const bool SparkOnFocus = ShowFocus && !FocusPaths.IsEmpty();
+    if (!SparkOnFocus && BoundaryPaths.IsEmpty())
+        return;
+    const auto &Path = SparkOnFocus ? Rings[FocusPaths[0]] : Rings[BoundaryPaths[0]];
+    const double SparkWidth = SparkOnFocus ? BoundaryFocusWidth : BoundaryWidth;
     const double Length = Path.Lengths.Last();
     for (int32 I = 0; I < BoundarySparks.Num(); ++I)
     {
@@ -223,9 +275,9 @@ void AGeoMap::UpdateBoundaryEffects(const FString &FocusId, double Focus, double
         const int32 End = FMath::Clamp(Algo::UpperBound(Path.Lengths, Distance), 1, Path.Points.Num() - 1);
         const double Portion = (Distance - Path.Lengths[End - 1]) / FMath::Max(1., Path.Lengths[End] - Path.Lengths[End - 1]);
         FVector Position = FMath::Lerp(Path.Points[End - 1], Path.Points[End], Portion);
-        Position.Z += BoundaryLift + BoundaryWidth * (.5 + (I % 3) * .85);
+        Position.Z += BoundaryLift + SparkWidth * (.5 + (I % 3) * .85);
         Spark->SetWorldLocation(Position);
-        Spark->SetWorldScale3D(FVector(BoundaryWidth / (12.5 * (1 + I % 3))));
+        Spark->SetWorldScale3D(FVector(SparkWidth / (12.5 * (1 + I % 3))));
         if (!Spark->IsActive())
             Spark->Activate();
     }

@@ -63,8 +63,12 @@ class AGeoMap : public AActor
     /** Layers muted for diagnosis, parsed from GEO_BOUNDARY_OFF at BeginPlay. */
     uint8 BoundaryOff = 0;
     int32 BoundaryGeneration = -1;
+    /** Parent rings — the slab that stays up for the whole scene. */
     TArray<int32> BoundaryPaths;
+    /** Rings of the focused child, drawn as a second block on top of the slab. */
+    TArray<int32> FocusPaths;
     double BoundaryHeight = 0, BoundaryLift = 0, BoundaryWidth = 0;
+    double BoundaryFocusHeight = 0, BoundaryFocusWidth = 0;
     bool HasRaisedBoundary() const { return BoundaryLift > 0; }
     bool BoundaryEffectsCompiling() const;
     UPROPERTY() TObjectPtr<UTexture2D> CloudDeck;
@@ -107,7 +111,11 @@ class AGeoMap : public AActor
     void LoadScene(const TSharedPtr<FJsonObject> &Data, FString RequestId);
     void ApplyFrame(const TSharedPtr<FJsonObject> &Data);
     void InitBoundaryEffects();
-    void UpdateBoundaryEffects(const FString &FocusId, double Focus, double Time);
+    /**
+     * @param BaseFocus 0..1 strength of the parent slab, which never goes away once raised.
+     * @param Focus     0..1 strength of the focused child's block on top of it.
+     */
+    void UpdateBoundaryEffects(const FString &FocusId, double BaseFocus, double Focus, double Time);
     void StartTile(const FIntVector &Key);
     void TileFailed(const FIntVector &Key);
     void TrimTileCache();
