@@ -178,7 +178,8 @@ function maybeLoad() {
     fail(error);
   });
 }
-function resetConnection() {
+const retryButton = document.getElementById('retry')!;
+function teardown() {
   channelReady = false;
   ready = false;
   stop();
@@ -189,20 +190,46 @@ function resetConnection() {
     request.reject(new Error('UE data channel closed'));
   }
   pending.clear();
-  status.textContent = 'UE 视频流已断开，正在重新连接…';
+}
+// The streamer accepts a single controller. A page that loses the slot stays down and
+// waits for a click: reconnecting by itself would make two windows evict each other in a
+// loop. A page that never manages to subscribe must retry on its own instead — a refused
+// subscription raises no event here, so without this the overlay sits on "正在连接" forever.
+let joinTimer: ReturnType<typeof setTimeout> | undefined;
+let joinAttempts = 0;
+function stopJoining() { clearTimeout(joinTimer); joinTimer = undefined; }
+function armJoining() {
+  stopJoining();
+  joinTimer = setTimeout(() => {
+    if (channelReady || ready) return;
+    if (joinAttempts >= 6) { status.textContent = '视频流连接失败'; retryButton.textContent = '重新连接'; return; }
+    joinAttempts += 1;
+    stream.reconnect();
+    armJoining();
+  }, 4000);
+}
+function standDown(message: string) {
+  stopJoining();
+  teardown();
+  stream.disconnect();
+  status.textContent = message;
+  retryButton.textContent = '重新连接';
   overlay.hidden = false;
 }
 document.addEventListener('loadedmetadata',maybeLoad,true);
-stream.addEventListener('dataChannelOpen',() => { channelReady=true; maybeLoad(); });
-stream.addEventListener('dataChannelClose', resetConnection);
-stream.addEventListener('webRtcDisconnected', resetConnection);
+stream.addEventListener('dataChannelOpen',() => { channelReady=true; stopJoining(); maybeLoad(); });
+stream.addEventListener('dataChannelClose',() => standDown('视频流已断开'));
+stream.addEventListener('webRtcDisconnected',() => standDown('视频流已断开'));
 stream.addEventListener('playStreamRejected',() => { status.textContent = '点击播放 UE 地图视频流'; overlay.hidden = false; });
-document.getElementById('retry')!.onclick = () => {
-  if (channelReady) { stream.play(); maybeLoad(); }
-  else stream.reconnect();
+retryButton.onclick = () => {
+  joinAttempts = 0;
+  status.textContent = '正在连接 UE 地图视频流…';
+  overlay.hidden = false;
+  stream.reconnect();
+  armJoining();
 };
 window.addEventListener('message',event => { if (event.source === parent && event.origin === parentOrigin && event.data?.type === 'geo-video-studio') handle(event.data); });
-window.addEventListener('pagehide', () => { resetConnection(); stream.disconnect(); });
+window.addEventListener('pagehide', () => { teardown(); stream.disconnect(); });
 Object.assign(window,{ geoVideo: {
   getDiagnostics: () => ({ engine:'unreal', ready, time, imagery:scene?.imagery?.provider }),
   getRendererStatus: () => send('get-status'),
@@ -213,3 +240,4 @@ Object.assign(window,{ geoVideo: {
   getFrameStatus: () => ({ initialized:ready, renderStable:ready, time, engine:'unreal' })
 } });
 stream.connect();
+armJoining();
