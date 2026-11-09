@@ -69,6 +69,13 @@ class AGeoMap : public AActor
     TArray<FGeoRing> Rings;
     TArray<FGeoFill> Fills;
     TArray<FGeoLabel> Labels;
+    TArray<FGeoRing> ContextRings;
+    TArray<FGeoFill> ContextFills;
+    FGeoLabel ContextLabel;
+    FBox ContextBounds = FBox(ForceInit);
+    FVector ContextOrigin = FVector::ZeroVector;
+    double ContextReachMeters = 0;
+    bool HasContext = false;
     TSharedPtr<FJsonObject> Frame;
     double OriginLon = 110, OriginLat = 20;
     int32 SceneRequest = 0, Generation = 0, PendingTiles = 0, FailedTiles = 0;

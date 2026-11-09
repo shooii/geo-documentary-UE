@@ -337,6 +337,12 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         Fills.Empty();
         BoundaryVertices = 0;
         Labels.Empty();
+        ContextRings.Empty();
+        ContextFills.Empty();
+        ContextBounds = FBox(ForceInit);
+        ContextOrigin = FVector::ZeroVector;
+        ContextReachMeters = 0;
+        HasContext = false;
         TileCenter.Z = -1;
         PendingTiles = FailedTiles = 0;
         const auto Region = O(Scene, TEXT("region"));
@@ -421,6 +427,86 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
                                 S(Props, TEXT("labelPlate"))});
                 }
             }
+        const auto Context = O(Scene, TEXT("context"));
+        const TArray<TSharedPtr<FJsonValue>> *ContextLayers;
+        if (Context->TryGetArrayField(TEXT("layers"), ContextLayers))
+            for (auto &V : *ContextLayers)
+            {
+                auto F = V->AsObject();
+                auto Geometry = O(F, TEXT("geometry"));
+                const TArray<TSharedPtr<FJsonValue>> *Coords;
+                if (!Geometry->TryGetArrayField(TEXT("coordinates"), Coords))
+                    continue;
+                TArray<TSharedPtr<FJsonValue>> Polys =
+                    S(Geometry, TEXT("type")) == TEXT("Polygon")
+                        ? TArray<TSharedPtr<FJsonValue>>{MakeShared<FJsonValueArray>(*Coords)}
+                        : *Coords;
+                for (auto &Poly : Polys)
+                    for (auto &Ring : Poly->AsArray())
+                    {
+                        FGeoRing Out;
+                        Out.Parent = true;
+                        for (auto &Point : Ring->AsArray())
+                        {
+                            auto &P = Point->AsArray();
+                            if (P.Num() >= 2)
+                            {
+                                const FVector Position = Geo(P[0]->AsNumber(), P[1]->AsNumber(), 5);
+                                if (Out.Points.IsEmpty() || !Out.Points.Last().Equals(Position))
+                                    Out.Points.Add(Position);
+                            }
+                        }
+                        if (Out.Points.Num() >= 3 && !Out.Points[0].Equals(Out.Points.Last()))
+                            Out.Points.Add(Out.Points[0]);
+                        Out.Lengths.Add(0);
+                        for (int32 I = 1; I < Out.Points.Num(); I++)
+                            Out.Lengths.Add(Out.Lengths.Last() + FVector::Distance(Out.Points[I - 1], Out.Points[I]));
+                        for (const FVector &Point : Out.Points)
+                            ContextBounds += Point;
+                        BoundaryVertices += Out.Points.Num();
+                        ContextRings.Add(MoveTemp(Out));
+                    }
+                const TArray<TSharedPtr<FJsonValue>> *Triangulations;
+                if (F->TryGetArrayField(TEXT("triangulations"), Triangulations))
+                    for (const auto &Tri : *Triangulations)
+                    {
+                        const auto Data = Tri->AsObject();
+                        const auto &Vertices = Data->GetArrayField(TEXT("vertices"));
+                        const auto &Indices = Data->GetArrayField(TEXT("indices"));
+                        FGeoFill Fill;
+                        Fill.Parent = true;
+                        const int32 Dimensions = int32(N(Data, TEXT("dimensions"), 2));
+                        for (int32 I = 0; I + 1 < Vertices.Num(); I += Dimensions)
+                            Fill.Vertices.Add(Geo(Vertices[I]->AsNumber(), Vertices[I + 1]->AsNumber(), 5));
+                        for (const auto &Index : Indices)
+                            Fill.Indices.Add(int32(Index->AsNumber()));
+                        ContextFills.Add(MoveTemp(Fill));
+                    }
+            }
+        const TArray<TSharedPtr<FJsonValue>> *ContextLabelPoint;
+        if (Context->TryGetArrayField(TEXT("labelPoint"), ContextLabelPoint) && ContextLabelPoint->Num() >= 2)
+        {
+            ContextLabel.Position = Geo((*ContextLabelPoint)[0]->AsNumber(), (*ContextLabelPoint)[1]->AsNumber(), 10);
+            ContextLabel.Id = S(Context, TEXT("id"));
+            ContextLabel.Name = S(Context, TEXT("name"));
+            ContextLabel.Parent = true;
+        }
+        HasContext = ContextRings.Num() > 0 && ContextBounds.IsValid;
+        if (HasContext)
+        {
+            // The county fills outward from the town the same way water would, so the
+            // front is a real distance rather than a timeline or arc-length ratio.
+            ContextOrigin = Geo(OriginLon, OriginLat, 5);
+            const FVector BoundsCenter = ContextBounds.GetCenter();
+            double Reach = 0;
+            for (int32 Corner = 0; Corner < 4; Corner++)
+            {
+                const FVector CornerPoint((Corner & 1) ? ContextBounds.Max.X : ContextBounds.Min.X,
+                                          (Corner & 2) ? ContextBounds.Max.Y : ContextBounds.Min.Y, BoundsCenter.Z);
+                Reach = FMath::Max(Reach, FVector::Dist2D(ContextOrigin, CornerPoint));
+            }
+            ContextReachMeters = FMath::Max(1000.0, Reach / 100.0);
+        }
         Respond(Id);
     });
     R->ProcessRequest();
@@ -650,9 +736,14 @@ void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
     Camera->SetWorldLocationAndRotation(Position, (Target - Position).Rotation());
     const auto Trace = O(Data, TEXT("trace"));
     const FString FocusId = S(Data, TEXT("focusId"));
-    const double Lift = FocusId == S(Trace, TEXT("target"))
-        ? .16 * N(Trace, TEXT("alpha")) * FMath::SmoothStep(0., .25, N(Trace, TEXT("progress")))
-        : 0;
+    // The raised rim belongs to the focused area for its whole shot, not just the
+    // 1.4 s the trace head sweeps it: after the sweep ends the extrusion stays up.
+    // The parent only grows in while its own outline is still being drawn.
+    const double Rise = FocusId == S(Trace, TEXT("target"))
+        ? FMath::SmoothStep(0., .25, N(Trace, TEXT("progress")))
+        : 1.;
+    const double RevealScale = FocusId.IsEmpty() ? N(Data, TEXT("parentReveal"), 1) : 1.;
+    const double Lift = .16 * Rise * FMath::Clamp(RevealScale, 0., 1.);
     UpdateBoundaryEffects(FocusId, N(Data, TEXT("focus")) * Lift, N(Data, TEXT("mapTime")));
     RefreshTiles(Lon, Lat, Range);
 }
@@ -779,9 +870,20 @@ void AGeoHUD::DrawHUD()
     const float Scale = Canvas->SizeX / (Map->RenderProfile == TEXT("landscape") ? 1920.f : 1080.f);
     const FIntPoint Size(Canvas->SizeX, Canvas->SizeY);
     const double Focus = N(F, TEXT("focus")), Reveal = N(F, TEXT("parentReveal"));
+    const double ChildReveal = N(F, TEXT("childReveal"), 1);
     const auto Trace = O(F, TEXT("trace"));
     const auto Accents = O(F, TEXT("accents"));
     const auto Styles = O(F, TEXT("labels"));
+    const auto ContextCamera = O(F, TEXT("camera"));
+    const double CameraHeight = N(ContextCamera, TEXT("height"), 30000);
+    const double ContextSpanMeters = Map->ContextBounds.IsValid ? Map->ContextBounds.GetSize().Size2D() / 100.0 : 0;
+    // The county is drawn on its own clock: `contextReveal` traces the outline and
+    // `contextOpacity` fades the whole context layer, so the town can finish first.
+    const double ContextReveal = FMath::Clamp(N(F, TEXT("contextReveal"), 1), 0., 1.);
+    const double ContextOpacity = FMath::Clamp(N(F, TEXT("contextOpacity"), 1), 0., 1.);
+    const double ContextAlpha = Map->HasContext && ContextSpanMeters > 1
+        ? FMath::SmoothStep(.55, 1.25, CameraHeight / ContextSpanMeters) * ContextOpacity
+        : 0;
     if (LabelGeneration != Map->Generation || CachedSize != Size)
     {
         LabelGeneration = Map->Generation;
@@ -810,7 +912,7 @@ void AGeoHUD::DrawHUD()
             if (Focused && Focus > .001)
                 FocusRings.Add(ProjectFocusRing(Ring.Points, Map->Camera, Size.X, Size.Y));
             const double Accent = Ring.Parent ? N(F, TEXT("parentAccent")) : N(Accents, *Ring.Id);
-            const bool Show = Ring.Parent || Accent > .01 || Styles->HasField(Ring.Id);
+            const bool Show = Ring.Parent || (ChildReveal > .01 && Ring.Id == Current);
             if (!Show || Ring.Points.Num() < 2)
                 continue;
             FVector2D A;
@@ -959,6 +1061,92 @@ void AGeoHUD::DrawHUD()
     const double ShadowOpacity[] = {.08, .15, .33};
     for (int Layer = 0; Layer < UE_ARRAY_COUNT(ShadowRects); ++Layer)
         DrawRects(ShadowRects[Layer], FLinearColor(.006, .010, .010, ShadowOpacity[Layer] * Focus));
+    // Flood the county outward from the town: every fill triangle is gated by its
+    // distance to the town centre, so the boundary reads as water spreading rather
+    // than a shape fading in. The crest band stays bright so the front is visible.
+    const double FloodFront = ContextReveal * Map->ContextReachMeters;
+    const double FloodBand = FMath::Max(1600.0, Map->ContextReachMeters * .055);
+    const FLinearColor FloodCrest(.46, .90, 1, .72), FloodBody(.05, .28, .66, .30);
+    if (ContextAlpha > .01 && ContextReveal > .0005 && Map->ContextFills.Num())
+    {
+        TArray<FCanvasUVTri> ContextTriangles;
+        for (const auto &Fill : Map->ContextFills)
+        {
+            TArray<FVector2D> Points;
+            TArray<bool> Valid;
+            for (const auto &Vertex : Fill.Vertices)
+            {
+                FVector2D Pixel;
+                Valid.Add(PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel));
+                Points.Add(Pixel);
+            }
+            for (int I = 0; I + 2 < Fill.Indices.Num(); I += 3)
+            {
+                const int A = Fill.Indices[I], B = Fill.Indices[I + 1], C = Fill.Indices[I + 2];
+                if (!Valid[A] || !Valid[B] || !Valid[C])
+                    continue;
+                const FVector Centroid = (Fill.Vertices[A] + Fill.Vertices[B] + Fill.Vertices[C]) / 3.0;
+                const double Distance = FVector::Dist2D(Centroid, Map->ContextOrigin) / 100.0;
+                if (Distance > FloodFront)
+                    continue;
+                const float Crest = float(FMath::Clamp((FloodFront - Distance) / FloodBand, 0., 1.));
+                const FLinearColor Tint = FloodCrest + (FloodBody - FloodCrest) * Crest;
+                FCanvasUVTri Triangle;
+                Triangle.V0_Pos = Points[A];
+                Triangle.V1_Pos = Points[B];
+                Triangle.V2_Pos = Points[C];
+                Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
+                Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color =
+                    FLinearColor(Tint.R, Tint.G, Tint.B, Tint.A * ContextAlpha);
+                ContextTriangles.Add(Triangle);
+            }
+        }
+        if (ContextTriangles.Num())
+        {
+            FCanvasTriangleItem Fill(ContextTriangles, GWhiteTexture);
+            Fill.BlendMode = SE_BLEND_Translucent;
+            Canvas->DrawItem(Fill);
+        }
+    }
+    if (ContextAlpha > .01 && Focus < .05 && Map->Fills.Num())
+    {
+        TArray<FCanvasUVTri> TownTriangles;
+        for (const auto &Fill : Map->Fills)
+        {
+            if (!Fill.Parent)
+                continue;
+            TArray<FVector2D> Points;
+            TArray<bool> Valid;
+            for (const auto &Vertex : Fill.Vertices)
+            {
+                FVector2D Pixel;
+                Valid.Add(PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel));
+                Points.Add(Pixel);
+            }
+            for (int I = 0; I + 2 < Fill.Indices.Num(); I += 3)
+            {
+                const int A = Fill.Indices[I], B = Fill.Indices[I + 1], C = Fill.Indices[I + 2];
+                if (!Valid[A] || !Valid[B] || !Valid[C])
+                    continue;
+                FCanvasUVTri Triangle;
+                Triangle.V0_Pos = Points[A];
+                Triangle.V1_Pos = Points[B];
+                Triangle.V2_Pos = Points[C];
+                Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
+                Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = FLinearColor::White;
+                TownTriangles.Add(Triangle);
+            }
+        }
+        if (TownTriangles.Num())
+        {
+            const FLinearColor Tint(.12, .55, .14, .45 * ContextAlpha * FMath::SmoothStep(.2, 1., ContextReveal));
+            for (auto &Triangle : TownTriangles)
+                Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
+            FCanvasTriangleItem Fill(TownTriangles, GWhiteTexture);
+            Fill.BlendMode = SE_BLEND_Translucent;
+            Canvas->DrawItem(Fill);
+        }
+    }
     if (FocusTriangles.Num())
     {
         const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.15, .55, .10, .38 * Focus)
@@ -969,7 +1157,7 @@ void AGeoHUD::DrawHUD()
         Fill.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Fill);
     }
-    const FLinearColor TownEdge(.031, .070, .026), VillageEdge(.035, .086, .092);
+    const FLinearColor TownEdge(.031, .070, .026), VillageEdge(.070, .480, .540);
     const FLinearColor ContextEdge(.35, .43, .41), DarkEdge(.009, .018, .021);
     TArray<FCanvasUVTri> BoundaryTriangles;
     const auto AddStroke = [&BoundaryTriangles](const FVector2D &A, const FVector2D &B, double Width,
@@ -991,17 +1179,59 @@ void AGeoHUD::DrawHUD()
         Triangle.V1_Color = ColorB;
         BoundaryTriangles.Add(Triangle);
     };
+    if (ContextAlpha > .01 && ContextReveal > .0005 && Map->ContextRings.Num())
+    {
+        // The county rim lights up exactly where the flood has already reached, so
+        // the outline and the fill share one front instead of racing each other.
+        const FLinearColor ParentLine(.40, .76, .98), CrestLine(.82, .97, 1);
+        for (const auto &Ring : Map->ContextRings)
+        {
+            for (int I = 0; I + 1 < Ring.Points.Num(); I++)
+            {
+                const FVector Mid = (Ring.Points[I] + Ring.Points[I + 1]) * .5;
+                const double Distance = FVector::Dist2D(Mid, Map->ContextOrigin) / 100.0;
+                if (Distance > FloodFront + FloodBand * .4)
+                    continue;
+                FVector2D A, B;
+                if (!PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I], A) ||
+                    !PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I + 1], B))
+                    continue;
+                if ((A.X < -100 && B.X < -100) || (A.X > Size.X + 100 && B.X > Size.X + 100) ||
+                    (A.Y < -100 && B.Y < -100) || (A.Y > Size.Y + 100 && B.Y > Size.Y + 100))
+                    continue;
+                const float Crest = float(FMath::Clamp((FloodFront - Distance) / FloodBand, 0., 1.));
+                const FLinearColor Line = CrestLine + (ParentLine - CrestLine) * Crest;
+                const double LineAlpha = ContextAlpha;
+                AddStroke(A, B, 5.0 * Scale, DarkEdge.CopyWithNewOpacity(.34 * LineAlpha),
+                          DarkEdge.CopyWithNewOpacity(.34 * LineAlpha));
+                AddStroke(A, B, 2.4 * Scale, FLinearColor(Line.R, Line.G, Line.B, .92 * LineAlpha),
+                          FLinearColor(Line.R, Line.G, Line.B, .92 * LineAlpha));
+            }
+        }
+    }
     for (const auto &Stroke : Strokes)
     {
+        // The focused child already has the raised 3D boundary. Keep its stroke only
+        // for the trace head below, so the flat line does not double the 3D rim.
+        if (!Stroke.Parent)
+            continue;
         if (Stroke.Parent && Stroke.Start >= Reveal)
             continue;
         const FVector2D End = Stroke.Parent && Stroke.End > Reveal
             ? FMath::Lerp(Stroke.A, Stroke.B, (Reveal - Stroke.Start) / (Stroke.End - Stroke.Start))
             : Stroke.B;
         const FLinearColor Edge = Stroke.Parent ? TownEdge : VillageEdge;
-        const FLinearColor Context = ContextEdge.CopyWithNewOpacity(Stroke.Parent ? .53f : .48f);
-        const FLinearColor Color = FMath::Lerp(Context, Edge.CopyWithNewOpacity(.78f), float(Stroke.Accent));
-        AddStroke(Stroke.A, End, FMath::Lerp(1.2f, 1.7f, float(Stroke.Accent)) * Scale, Color, Color);
+        const FLinearColor Context = Stroke.Parent ? ContextEdge.CopyWithNewOpacity(.55f) : VillageEdge.CopyWithNewOpacity(.55f);
+        FLinearColor Color = FMath::Lerp(Context, Edge.CopyWithNewOpacity(Stroke.Parent ? .85f : .98f), float(Stroke.Accent));
+        if (!Stroke.Parent)
+            Color.A *= ChildReveal;
+        const double BaseWidth = (Stroke.Parent
+            ? FMath::Lerp(2.0f, 2.6f, float(Stroke.Accent))
+            : FMath::Lerp(3.0f, 4.0f, float(Stroke.Accent))) * Scale;
+        const double UnderlayAlpha = .40 * (Stroke.Parent ? 1.0 : ChildReveal);
+        AddStroke(Stroke.A, End, BaseWidth + 2.2 * Scale, DarkEdge.CopyWithNewOpacity(UnderlayAlpha),
+                  DarkEdge.CopyWithNewOpacity(UnderlayAlpha));
+        AddStroke(Stroke.A, End, BaseWidth, Color, Color);
     }
     const double Head = N(Trace, TEXT("progress")), TraceAlpha = N(Trace, TEXT("alpha"));
     if (TraceAlpha > .01)
@@ -1027,6 +1257,28 @@ void AGeoHUD::DrawHUD()
         FCanvasTriangleItem Lines(BoundaryTriangles, GWhiteTexture);
         Lines.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Lines);
+    }
+    const double ContextLabelAlpha = ContextAlpha * FMath::SmoothStep(.82, 1., ContextReveal);
+    if (ContextLabelAlpha > .05 && !Map->ContextLabel.Name.IsEmpty())
+    {
+        FVector2D Point;
+        if (PlayerOwner->ProjectWorldLocationToScreen(Map->ContextLabel.Position, Point))
+        {
+            float W, H;
+            Canvas->StrLen(LabelFont, Map->ContextLabel.Name, W, H);
+            const float TextScale = 42 * Scale / FMath::Max(1.f, H);
+            const FLinearColor ContextColor(.72, .90, 1, .85 * ContextLabelAlpha);
+            FCanvasTextItem Text(Point, FText::FromString(Map->ContextLabel.Name), LabelFont, ContextColor);
+            Text.bCentreX = true;
+            Text.bCentreY = true;
+            Text.Scale = FVector2D(TextScale);
+            const FLinearColor Outline = DarkEdge.CopyWithNewOpacity(.90 * ContextLabelAlpha);
+            Text.SetColor(Outline);
+            for (const FVector2D Offset : {FVector2D(-1.5, 0), FVector2D(1.5, 0), FVector2D(0, -1.5), FVector2D(0, 1.5)})
+                Canvas->DrawItem(Text, Point + Offset);
+            Text.SetColor(ContextColor);
+            Canvas->DrawItem(Text, Point);
+        }
     }
     struct FLabelDraw
     {
