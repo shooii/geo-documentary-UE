@@ -67,6 +67,8 @@ class AGeoMap : public AActor
     TArray<int32> BoundaryPaths;
     /** Rings of the focused child, drawn as a second block on top of the slab. */
     TArray<int32> FocusPaths;
+    /** Children already toured; their plates stay painted behind the current one. */
+    TArray<FString> BoundaryVisited;
     double BoundaryHeight = 0, BoundaryLift = 0, BoundaryWidth = 0;
     double BoundaryFocusHeight = 0, BoundaryFocusWidth = 0;
     bool HasRaisedBoundary() const { return BoundaryLift > 0; }
@@ -120,8 +122,10 @@ class AGeoMap : public AActor
     /**
      * @param BaseFocus 0..1 strength of the parent slab, which never goes away once raised.
      * @param Focus     0..1 strength of the focused child's block on top of it.
+     * @param Visited   Children whose tour already started. They keep a paler green
+     *                  plate so the map accumulates relief instead of erasing it.
      */
-    void UpdateBoundaryEffects(const FString &FocusId, double BaseFocus, double Focus, double Time);
+    void UpdateBoundaryEffects(const FString &FocusId, const TArray<FString> &Visited, double BaseFocus, double Focus, double Time);
     void StartTile(const FIntVector &Key);
     void TileFailed(const FIntVector &Key);
     void TrimTileCache();

@@ -244,6 +244,9 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
     parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity, contextErasing,
     labels, accents, labelReferenceDistance, focusId, focus, labelsReveal,
+    // Villages the tour has already reached. UE keeps their plate painted, so the
+    // map accumulates colour the way the reference reel does.
+    visitedIds: stops.filter(item => mapTime >= Number(item.start)).map(item => String(item.id)),
     clouds: cloudStateAt(time, opening, pose.height),
     trace: boundaryAnimation(mapTime, traceStart, current)
   };

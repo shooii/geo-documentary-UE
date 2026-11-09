@@ -359,7 +359,7 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         VisibleTiles.Reset();
         RequiredTiles.Reset();
         Frame.Reset();
-        UpdateBoundaryEffects(TEXT(""), 0, 0, 0);
+        UpdateBoundaryEffects(TEXT(""), TArray<FString>(), 0, 0, 0);
         BoundaryGeneration = -1;
         for (auto &X : Resources)
             if (auto *C = Cast<UProceduralMeshComponent>(X))
@@ -837,7 +837,18 @@ void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
     const double Rise = FocusId == S(Trace, TEXT("target"))
         ? FMath::SmoothStep(0., .25, N(Trace, TEXT("progress")))
         : 1.;
-    UpdateBoundaryEffects(FocusId, BaseFocus, .16 * N(Data, TEXT("focus")) * Rise, N(Data, TEXT("mapTime")));
+    // Villages whose shot has already started keep their plate, so the map gains
+    // colour as the tour advances instead of erasing the previous village.
+    TArray<FString> Visited;
+    const TArray<TSharedPtr<FJsonValue>> *VisitedIds;
+    if (Data->TryGetArrayField(TEXT("visitedIds"), VisitedIds))
+        for (const auto &Value : *VisitedIds)
+        {
+            const FString Id = Value->AsString();
+            if (!Id.IsEmpty() && Id != FocusId)
+                Visited.Add(Id);
+        }
+    UpdateBoundaryEffects(FocusId, Visited, BaseFocus, .16 * N(Data, TEXT("focus")) * Rise, N(Data, TEXT("mapTime")));
     if (Sky)
     {
         // Pierce factor: where the camera physically sits inside the 1.5-3.5 km deck,
@@ -1354,8 +1365,10 @@ void AGeoHUD::DrawHUD()
     }
     if (FocusTriangles.Num())
     {
-        const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.15, .55, .10, .38 * Focus)
-                                                   : FLinearColor(.12, .45, .58, .30 * Focus);
+        // Saturated green, like the reference reel: the region reads as filled land,
+        // not as a translucent blue selection.
+        const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.18, .60, .18, .45 * Focus)
+                                                    : FLinearColor(.20, .62, .20, .55 * Focus);
         for (auto &Triangle : FocusTriangles)
             Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
         FCanvasTriangleItem Fill(FocusTriangles, GWhiteTexture);
@@ -1419,10 +1432,22 @@ void AGeoHUD::DrawHUD()
     }
     for (const auto &Stroke : Strokes)
     {
-        // The focused child already has the raised 3D boundary. Keep its stroke only
-        // for the trace head below, so the flat line does not double the 3D rim.
         if (!Stroke.Parent)
+        {
+            // Villages already toured keep only their plate; the village being toured
+            // carries the thick white rim of the reference reel — a soft halo plus a
+            // solid core, so the boundary reads even over bright imagery.
+            // Fade with the accent instead of cutting: at a hand-off the old village
+            // dims out while the new one lights up, so the rim never snaps away.
+            if (Stroke.Accent < .02)
+                continue;
+            const FLinearColor Rim(.93, 1., .90);
+            const float A = float(FMath::Clamp(Stroke.Accent, 0., 1.));
+            AddStroke(Stroke.A, Stroke.B, 13. * Scale, Rim.CopyWithNewOpacity(.12 * A), Rim.CopyWithNewOpacity(.12 * A));
+            AddStroke(Stroke.A, Stroke.B, 6.5 * Scale, Rim.CopyWithNewOpacity(.32 * A), Rim.CopyWithNewOpacity(.32 * A));
+            AddStroke(Stroke.A, Stroke.B, 3.0 * Scale, Rim.CopyWithNewOpacity(.96 * A), Rim.CopyWithNewOpacity(.96 * A));
             continue;
+        }
         // While the county flood layer is up it already outlines the county rim;
         // stroking the same rim again doubled it into a heavy band.
         if (ContextAlpha > .01 && ContextReveal > .0005 && Map->ContextRings.Num())
