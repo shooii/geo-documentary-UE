@@ -9,7 +9,7 @@ test("premium typography and mix tokens are enforced by the compositor", async (
   const source = await readFile(resolve(root, ".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts"), "utf8");
   assert.match(source, /Noto Sans SC/);
   assert.match(source, /Roboto Flex/);
-  assert.match(source, /isPortrait \? 45 : isSquare \? 40 : 42/);
+  assert.match(source, /isPortrait \? 50 : isSquare \? 44 : 46/);
   assert.match(source, /isPortrait \? 42 : isSquare \? 30 : 25/);
   // Subtitles sit 25% of the frame height above the bottom edge in every profile — the
   // distance is counted from that edge upward, and it names the line's own distance above
@@ -18,7 +18,11 @@ test("premium typography and mix tokens are enforced by the compositor", async (
   assert.match(source, /const subtitleBottomPercent = 25;/);
   assert.match(source, /const subtitleBottomPx = Math\.round\(profile\.height \* \(subtitleBottomPercent \/ 100\)\)/);
   assert.match(source, /\.subtitle\{[^}]*bottom:\$\{subtitleBottomPx\}px[^}]*transform:translate\(-50%,50%\)/);
-  assert.match(source, /border-radius:10px/);
+  // 字幕不再有底纹药丸：Medium 字重 + 无边距底色 + 允许换行，靠字影压住底图。
+  assert.match(source, /font-weight:500/);
+  assert.match(source, /\.subtitle-inner\{display:block;padding:0;border-radius:0;background:none\}/);
+  assert.doesNotMatch(source, /background:rgba\(4,10,15,\.72\)/);
+  assert.match(source, /GeoSubtitle/);
   assert.match(source, /data-volume="0\.2"/);
   assert.doesNotMatch(source, /<img class="brand-mark"/);
   assert.doesNotMatch(source, /id="topbar"/);

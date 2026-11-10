@@ -109,14 +109,14 @@ test("Studio preview typography scales from the same pixel sizes as final compos
     readFile(resolve(root, "apps/studio/public/studio.css"), "utf8"),
     readFile(resolve(root, ".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts"), "utf8")
   ]);
-  assert.match(clientSource, /portrait: \{ subtitlePx: 45, assetCaptionPx: 42 \}/);
+  assert.match(clientSource, /portrait: \{ subtitlePx: 50, assetCaptionPx: 42 \}/);
   assert.match(clientSource, /const scale = previewWidth \/ outputWidth/);
   assert.match(clientSource, /--preview-subtitle-font-size/);
   assert.match(clientSource, /--preview-asset-caption-font-size/);
   assert.match(clientSource, /profile=\$\{encodeURIComponent\(project\.output\.profile\)\}/);
   assert.match(styles, /font-size:var\(--preview-subtitle-font-size,12px\)/);
   assert.match(styles, /font-size:var\(--preview-asset-caption-font-size,12px\)/);
-  assert.match(compositor, /isPortrait \? 45 : isSquare \? 40 : 42/);
+  assert.match(compositor, /isPortrait \? 50 : isSquare \? 44 : 46/);
   assert.match(compositor, /isPortrait \? 42 : isSquare \? 30 : 25/);
 });
 
@@ -752,7 +752,12 @@ test("Studio keeps one task-first export history with explicit output actions", 
   assert.match(clientSource, /function splitPreviewSubtitle/);
   assert.match(clientSource, /function syncPreviewSubtitlesToAudio\(scene, audio\)/);
   assert.match(clientSource, /const audioTime = Number\(audio\.currentTime \|\| 0\)/);
-  assert.match(css, /\.preview-copy\.subtitle-only p[^}]*white-space:nowrap/);
+  // 预览字幕与成片一致：思源黑体 Medium、无底纹、允许换行并留出左右边距，
+  // 所以这里断言的是「会换行 + 有 86% 宽度上限」，而不是旧的 nowrap。
+  assert.match(css, /\.preview-copy\.subtitle-only p[^}]*white-space:normal/);
+  assert.match(css, /\.preview-copy\.subtitle-only p[^}]*max-width:86%/);
+  assert.match(css, /font:500[^;]*GeoSubtitle/);
+  assert.doesNotMatch(css, /\.preview-copy\.subtitle-only p[^}]*background:#041018c7/);
   // 预览素材现在分两条通道（图片 <img> / 视频 <video>），「加载好了没」收进了
   // previewMediaReady()；见 tests/studio-preview-video.test.ts。
   assert.match(clientSource, /media\.complete && media\.naturalWidth > 0/);

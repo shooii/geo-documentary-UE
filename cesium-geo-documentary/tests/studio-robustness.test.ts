@@ -237,9 +237,12 @@ test("immutable asset roots stop re-downloading, the UI shell stays fresh", asyn
      The UI shell must NOT be cached -- a stale Studio is a bug report. */
   assert.match(source, /const IMMUTABLE_ASSET_CACHE = "public, max-age=31536000, immutable"/, "要有 immutable 常量");
   assert.match(stream, /cacheControl = "no-store, max-age=0"/, "streamFile 的默认必须仍是 no-store");
-  // Both asset roots opt in; nothing else may.
+  // 三个根可以 opt in：两个素材根，加上字幕用的思源黑体（文件名带字重，换字重就换文件名）。
+  // 其它任何路径都不许 immutable。
   const immutable = serve.match(/streamFile\(file, response, undefined, IMMUTABLE_ASSET_CACHE\)/g) ?? [];
-  assert.equal(immutable.length, 2, "只有 workspace-assets 与 project-assets 两个素材根可以 immutable");
+  assert.equal(immutable.length, 3, "只有 workspace-assets / project-assets / fonts 三个根可以 immutable");
+  assert.match(serve, /pathname\.startsWith\("\/fonts\/"\)/, "字体根要显式声明");
+  assert.doesNotMatch(serve, /\/fonts\/[\s\S]{0,400}index\.html/, "字体根只能读 assets/fonts");
   assert.doesNotMatch(serve, /serveStatic[\s\S]*?index\.html[\s\S]*?IMMUTABLE_ASSET_CACHE/, "UI 外壳不得 immutable");
   // `existsSync` already answered "is it there" -- the extra `stat` was a second
   // syscall for the same answer on a path the editor hits hundreds of times.

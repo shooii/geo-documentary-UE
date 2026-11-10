@@ -121,6 +121,7 @@ const compositionDir = resolve(compositor, "compositions");
 await Promise.all([
   mkdir(resolve(mediaDir, "maps"), { recursive: true }),
   mkdir(resolve(mediaDir, "audio"), { recursive: true }),
+  mkdir(resolve(mediaDir, "fonts"), { recursive: true }),
   mkdir(resolve(mediaDir, "images"), { recursive: true }),
   mkdir(resolve(mediaDir, "music"), { recursive: true }),
   mkdir(compositionDir, { recursive: true })
@@ -206,11 +207,11 @@ async function writeMapFallbackStub(target: string, profile: RenderProfile, dura
   });
 }
 
-function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], audioDuration: number, timelineDuration: number, narrationStartSeconds: number, visuals: ResolvedVisualClip[], cover: ResolvedCover): string {
+function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], audioDuration: number, timelineDuration: number, narrationStartSeconds: number, openingGateSeconds: number, visuals: ResolvedVisualClip[], cover: ResolvedCover): string {
   const content = master[regionId];
   if (!content) throw new Error(`Unknown region ${regionId}`);
   const offset = cover.introSeconds;
-  const narrationOffset = offset + narrationStartSeconds;
+  const narrationOffset = offset + narrationStartSeconds + openingGateSeconds;
   const subtitleLeadSeconds = Math.max(-0.35, Math.min(0.2, Number(content.subtitleLeadSeconds ?? 0)));
   const compositionDuration = timelineDuration + offset;
   const coverFadeSeconds = Math.min(0.46, Math.max(0.28, offset * 0.22));
@@ -324,14 +325,13 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
   <style>
     *{box-sizing:border-box}html,body{margin:0;background:#081017;overflow:hidden;font-family:"GeoSans",sans-serif;color:#f4f7f9}
     #root{position:relative;width:${profile.width}px;height:${profile.height}px;overflow:hidden;background:#081017}
-    @font-face{font-family:"GeoSans";src:local("Noto Sans SC"),local("Source Han Sans SC"),local("Microsoft YaHei")}@font-face{font-family:"GeoNumber";src:local("Roboto Flex"),local("Roboto"),local("Arial")}@font-face{font-family:"STZhongsong";src:local("STZhongsong"),local("华文中宋"),local("Source Han Serif SC"),local("SimSun")} .clip{position:absolute}.map{z-index:0;inset:0;width:100%;height:100%;object-fit:cover}.shade{z-index:1;inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}.cover{z-index:100;inset:0;width:100%;height:100%;object-fit:cover;background:#06101a}
+    @font-face{font-family:"GeoSans";src:local("Noto Sans SC"),local("Source Han Sans SC"),local("Microsoft YaHei")}@font-face{font-family:"GeoNumber";src:local("Roboto Flex"),local("Roboto"),local("Arial")}@font-face{font-family:"STZhongsong";src:local("STZhongsong"),local("华文中宋"),local("Source Han Serif SC"),local("SimSun")} @font-face{font-family:"GeoSubtitle";src:url('media/fonts/NotoSansSC-Medium.woff2') format('woff2');font-weight:500;font-display:block} .clip{position:absolute}.map{z-index:0;inset:0;width:100%;height:100%;object-fit:cover}.shade{z-index:1;inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}.cover{z-index:100;inset:0;width:100%;height:100%;object-fit:cover;background:#06101a}
     .visual{z-index:20;left:${isPortrait ? profile.safe_margin : Math.round(profile.width * .52)}px;top:${isPortrait ? 278 : 156}px;width:${isPortrait ? profile.width - profile.safe_margin * 2 : Math.round(profile.width * .43)}px;height:${isPortrait ? 780 : 560}px;margin:0;overflow:hidden;border:1px solid rgba(215,235,237,.32);border-radius:${isPortrait ? 28 : 24}px;background:#07151d;box-shadow:0 24px 80px rgba(0,0,0,.46);isolation:isolate}.visual-bg,.visual-main{position:absolute;inset:0;width:100%;height:100%}.visual-bg{z-index:0;background-size:cover;background-position:center;filter:blur(34px) saturate(.82) brightness(.56);transform:scale(1.13)}.visual-main{z-index:1}.visual-main.fit-cover{object-fit:cover}.visual-main.fit-contain{object-fit:contain;padding:${isPortrait ? 18 : 14}px}.visual-main.fit-fill{object-fit:fill}.visual:after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(2,9,14,.76) 100%);pointer-events:none}.visual figcaption{position:absolute;z-index:3;left:${isPortrait ? 20 : 18}px;right:${isPortrait ? 20 : 18}px;bottom:${isPortrait ? 16 : 14}px;font-size:${isPortrait ? 30 : 25}px;font-weight:650;line-height:1.25;letter-spacing:.03em;color:#f4f7f9;text-shadow:0 2px 10px rgba(0,0,0,.9)}
-    .subtitle{z-index:40;left:50%;bottom:${subtitleBottomPx}px;transform:translate(-50%,50%);max-width:${isPortrait ? 900 : isSquare ? 920 : 1180}px;font-size:${isPortrait ? 44 : isSquare ? 40 : 42}px;line-height:1.38;text-align:center;font-weight:650;letter-spacing:0;text-shadow:0 2px 8px rgba(0,0,0,.96);white-space:nowrap}.subtitle-inner{display:block;padding:10px 22px;border-radius:10px;background:rgba(4,10,15,.72)}
+    .subtitle{z-index:40;left:50%;bottom:${subtitleBottomPx}px;transform:translate(-50%,50%);width:86%;max-width:${isPortrait ? 900 : isSquare ? 920 : 1180}px;font-family:"GeoSubtitle","Source Han Sans SC","Noto Sans SC","Microsoft YaHei",sans-serif;font-size:${isPortrait ? 50 : isSquare ? 44 : 46}px;line-height:1.36;text-align:center;font-weight:500;letter-spacing:.01em;text-shadow:0 2px 10px rgba(0,0,0,.92),0 0 2px rgba(0,0,0,.7);white-space:normal;word-break:break-word}.subtitle-inner{display:block;padding:0;border-radius:0;background:none}
     .visual figcaption{font-size:${isPortrait ? 42 : isSquare ? 30 : 25}px}
     .visual.visual-fullscreen{left:0;top:0;width:${profile.width}px;height:${profile.height}px;border:0;border-radius:0;box-shadow:none}
     .visual.visual-fullscreen figcaption{bottom:${fullscreenCaptionBottomPx}px}
     .visual-main.fit-fullscreen{object-fit:cover}
-    .subtitle{font-size:${isPortrait ? 45 : isSquare ? 40 : 42}px}
     .provider-credit{z-index:60;right:${Math.max(18, Math.round(profile.safe_margin / 3))}px;bottom:18px;padding:5px 9px;border-radius:6px;background:rgba(4,10,15,.58);font-size:${isPortrait ? 15 : 13}px;letter-spacing:.02em;color:rgba(244,247,249,.78);text-shadow:0 1px 4px #000;white-space:nowrap}
   </style>
 </head>
@@ -623,10 +623,11 @@ for (const id of ids) {
     introSeconds: coverDefinition.coverIntroSeconds,
     hierarchicalTitle: coverDefinition.hierarchicalTitle
   };
-  const timelineData = JSON.parse(await readFile(resolve(root, `data/regions/${id}.timeline.json`), "utf8")) as { duration: number; narrationStartSeconds?: number };
+  const timelineData = JSON.parse(await readFile(resolve(root, `data/regions/${id}.timeline.json`), "utf8")) as { duration: number; narrationStartSeconds?: number; openingGateSeconds?: number };
   await Promise.all([
     ...(mapRecorded ? [copyFile(mapSource, mapTarget)] : []),
     copyFile(audioSource, resolve(mediaDir, `audio/${id}-narration.wav`)),
+    copyFile(resolve(root, "assets/fonts/NotoSansSC-Medium.woff2"), resolve(mediaDir, "fonts/NotoSansSC-Medium.woff2")),
     copyFile(musicSource, resolve(mediaDir, "music/ambient-map-bed.wav")),
     copyFile(boundaryPenSource, resolve(mediaDir, "music/boundary-pen.wav")),
     copyFile(logoSource, resolve(mediaDir, "images/geo-documentary-mark.png")),
@@ -642,6 +643,8 @@ for (const id of ids) {
   const captionData = JSON.parse(await readFile(resolve(compositor, `captions/${id}.json`), "utf8")) as { cues: Cue[]; protectedPhrases?: string[] };
   const durationData = JSON.parse(await readFile(resolve(root, `assets/audio/${id}/duration.json`), "utf8")) as { durationSeconds: number };
   const narrationStartSeconds = Math.max(0, Number(timelineData.narrationStartSeconds ?? 0));
+  // 开场闸门：穿云没结束、金色光束还没落笔之前不出字幕，也不起旁白。一个数同时平移人声、字幕和落笔音，三者不会互相错位。
+  const openingGateSeconds = Math.max(0, Number(timelineData.openingGateSeconds ?? 0));
   const visualManifestPath = resolve(root, `content/visuals/${id}.json`);
   const visualManifest = existsSync(visualManifestPath)
     ? JSON.parse(await readFile(visualManifestPath, "utf8")) as { timingMode?: "narration-cue-required" | "legacy-seconds"; clips?: VisualClip[] }
@@ -677,11 +680,11 @@ for (const id of ids) {
     protectedPhrases,
     overrideData.cues ?? []
   );
-  const html = compositionHtml(id, "media", displayCues, durationData.durationSeconds, timelineData.duration, narrationStartSeconds, visuals, cover);
+  const html = compositionHtml(id, "media", displayCues, durationData.durationSeconds, timelineData.duration, narrationStartSeconds, openingGateSeconds, visuals, cover);
   await writeVisualSyncReport(id, visuals, cover.introSeconds, narrationStartSeconds);
   await Promise.all([
     writeFile(resolve(compositionDir, `${id}-${profileName}.html`), html, "utf8"),
-    writeOffsetCaptions(id, displayCues, cover.introSeconds, narrationStartSeconds, cover.hierarchicalTitle, Math.max(-0.35, Math.min(0.2, Number(master[id]?.subtitleLeadSeconds ?? 0)))),
+    writeOffsetCaptions(id, displayCues, cover.introSeconds, narrationStartSeconds + openingGateSeconds, cover.hierarchicalTitle, Math.max(-0.35, Math.min(0.2, Number(master[id]?.subtitleLeadSeconds ?? 0)))),
     writeFile(resolve(compositionDir, `${id}-${profileName}.json`), JSON.stringify({
       regionId: id,
       profile: profileName,

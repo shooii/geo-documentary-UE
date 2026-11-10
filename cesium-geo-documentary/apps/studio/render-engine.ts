@@ -257,6 +257,21 @@ async function prepareSandbox(root: string, jobRoot: string, project: VideoProje
   const region = JSON.parse(await readFile(regionSource, "utf8")) as { geometryPath?: string; childGeometryPath?: string };
   await copyFile(regionSource, join(sandbox, regionRelative));
   await copyIfExists(await boundarySource(`data/regions/${project.regionId}.timeline.json`), join(sandbox, "data", "regions", `${project.regionId}.timeline.json`));
+  // 开场闸门：UE 的开场下降走完、金色光束（parent-outline）落笔之后才起旁白与字幕，
+  // 否则穿云那几秒画面还在云里，字幕已经念到第二句了。合成器把这个数同时加到人声、
+  // 字幕和落笔音上，三者仍然对齐；0 表示模板没开开场镜头。
+  {
+    const timelinePath = join(sandbox, "data", "regions", `${project.regionId}.timeline.json`);
+    if (existsSync(timelinePath)) {
+      const timeline = JSON.parse(await readFile(timelinePath, "utf8")) as {
+        actions?: { id?: string; time?: number }[];
+      } & Record<string, unknown>;
+      const descent = Math.max(0, Number(project.template.openingDescentSeconds ?? 0));
+      const beam = Number(timeline.actions?.find((action) => action.id === "parent-outline")?.time ?? 0.35) || 0;
+      timeline.openingGateSeconds = descent > 0 ? descent + Math.max(0, beam) : 0;
+      await writeFile(timelinePath, JSON.stringify(timeline, null, 2), "utf8");
+    }
+  }
   for (const path of [region.geometryPath, region.childGeometryPath].filter((value): value is string => Boolean(value))) await copyIfExists(await boundarySource(path), join(sandbox, path));
   // The scene endpoint also reads the parent county (its outline carries the
   // establishing shot's context layer) and the parent of that. Staging only the town

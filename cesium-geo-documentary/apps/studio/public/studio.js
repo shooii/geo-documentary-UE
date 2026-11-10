@@ -42,9 +42,9 @@ const state = {
 
 const LAST_PROJECT_STORAGE_KEY = "geo-video-studio:last-project-id";
 const RENDER_TYPOGRAPHY = Object.freeze({
-  portrait: { subtitlePx: 45, assetCaptionPx: 42 },
-  square: { subtitlePx: 40, assetCaptionPx: 30 },
-  landscape: { subtitlePx: 42, assetCaptionPx: 25 }
+  portrait: { subtitlePx: 50, assetCaptionPx: 42 },
+  square: { subtitlePx: 44, assetCaptionPx: 30 },
+  landscape: { subtitlePx: 46, assetCaptionPx: 25 }
 });
 
 // Must stay equal to subtitleBottomPercent in compose-hyperframes.ts: the preview and the
@@ -99,7 +99,7 @@ function syncPreviewTypography() {
 // descend through cloud, then start the boundary trace, narration, and
 // subtitles together.
 const STUDIO_OPENING_PREVIEW_TIMING = Object.freeze({
-  revealDelaySeconds: 0.08,
+  revealDelaySeconds: 0.35,
   revealSeconds: 1.4,
   settleSeconds: 0.22,
   labelHoldSeconds: 0.12,

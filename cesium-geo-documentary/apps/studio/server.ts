@@ -1789,6 +1789,17 @@ async function streamSeekableMedia(path: string, request: IncomingMessage, respo
 }
 
 async function serveStatic(pathname: string, response: ServerResponse): Promise<void> {
+  // Subtitle webfont. 思源黑体 isn't installed on this machine and the CSS asks for it
+  // by name, so the studio has to serve the file itself or every preview silently
+  // falls back to YaHei. One copy lives in assets/fonts and the export composition
+  // references the same bytes.
+  if (pathname.startsWith("/fonts/")) {
+    const name = decodeURIComponent(pathname.slice("/fonts/".length));
+    if (!/^[\w.-]+\.(woff2|ttf|otf)$/i.test(name)) return sendJson(response, 400, { error: "Invalid font path" });
+    const file = join(root, "assets", "fonts", name);
+    if (!existsSync(file)) return sendJson(response, 404, { error: "Font not found" });
+    return streamFile(file, response, undefined, IMMUTABLE_ASSET_CACHE);
+  }
   if (pathname.startsWith("/workspace-assets/")) {
     const name = pathname.slice("/workspace-assets/".length);
     if (!isWorkspaceAssetFileName(name)) return sendJson(response, 400, { error: "Invalid asset path" });
