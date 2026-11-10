@@ -73,3 +73,10 @@ cesium-geo-documentary/content/coverage-manifest-*.json
 
 # Agent working memory (local, never tracked)
 .workbuddy/
+
+# One-off helpers left over from earlier debug sessions. The edits they applied are
+# already in the tree, and the frame probes they duplicate live in
+# scripts/frame-probe.mjs / scripts/ue-stream-perf.ts (they also hardcode a dead port).
+# Kept on disk, deliberately not tracked.
+cesium-geo-documentary/patch*.py
+cesium-geo-documentary/probe_*.ts
