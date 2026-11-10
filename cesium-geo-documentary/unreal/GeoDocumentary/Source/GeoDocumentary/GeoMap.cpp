@@ -1271,7 +1271,70 @@ void AGeoHUD::DrawHUD()
             double X, Step;
             int End;
         };
-        const int Band = 2, Rows = MaskRings.IsEmpty() ? 0 : FMath::CeilToInt(double(Size.Y) / Band);
+        // ---- frames taken from inside the township -------------------------------
+        // The hole in the dim sheet is the township rim, so a village close-up has to show
+        // no dimming at all: the camera is standing inside the hole. Clipping that rim to
+        // the frustum used to fail once it fell behind the camera, which left the sweep
+        // with no boundary — every scanline counted as exterior and the frame went as dark
+        // inside 迈陈镇 as outside it. Two checks prevent that: if all four screen corners
+        // read inside the projected rim, the frame is all township; and if the rim was
+        // clipped away entirely, the camera's own ground point decides.
+        const auto InsideRim = [&MaskRings](const FVector2D &Pixel) {
+            bool In = false;
+            for (const auto &Ring : MaskRings)
+                for (int32 I = 0, J = Ring.Num() - 1; I < Ring.Num(); J = I++)
+                    if (((Ring[I].Y > Pixel.Y) != (Ring[J].Y > Pixel.Y)) &&
+                        Pixel.X < (Ring[J].X - Ring[I].X) * (Pixel.Y - Ring[I].Y) / (Ring[J].Y - Ring[I].Y) + Ring[I].X)
+                        In = !In;
+            return In;
+        };
+        // `ProjectFocusRing` returns an EMPTY ARRAY, not nothing, when the rim is clipped
+        // away — so the list is never empty and a naive check would still sweep a frame
+        // with no boundary at all. Only rings with real points count as a usable rim.
+        bool HasRim = false;
+        for (const auto &Ring : MaskRings)
+            if (Ring.Num() >= 3)
+            {
+                HasRim = true;
+                break;
+            }
+        // 相机脚下的地面点是否落在镇内：洞失效时的最后一道判据。
+        bool CameraOverTown = false;
+        {
+            const FVector Eye = Map->Camera->GetComponentLocation(), Fwd = Map->Camera->GetForwardVector();
+            if (Fwd.Z < -.01)
+            {
+                const FVector Ground = Eye - Fwd * (Eye.Z / Fwd.Z);
+                for (const auto &Ring : Map->Rings)
+                {
+                    if (!Ring.Parent || Ring.Points.Num() < 4)
+                        continue;
+                    const int32 Stride = FMath::Max(1, Ring.Points.Num() / 400);
+                    for (int32 I = 0; I < Ring.Points.Num(); I += Stride)
+                    {
+                        const FVector &A = Ring.Points[I];
+                        const FVector &B = Ring.Points[(I + Stride) % Ring.Points.Num()];
+                        if (((A.Y > Ground.Y) != (B.Y > Ground.Y)) &&
+                            Ground.X < (B.X - A.X) * (Ground.Y - A.Y) / (B.Y - A.Y) + A.X)
+                            CameraOverTown = !CameraOverTown;
+                    }
+                }
+            }
+        }
+        bool TownFillsView = false;
+        if (HasRim)
+        {
+            int32 Inside = 0;
+            for (const FVector2D &Corner :
+                 {FVector2D(0, 0), FVector2D(Size.X, 0), FVector2D(0, Size.Y), FVector2D(Size.X, Size.Y)})
+                Inside += InsideRim(Corner) ? 1 : 0;
+            TownFillsView = Inside == 4;
+        }
+        else
+        {
+            TownFillsView = CameraOverTown;
+        }
+        const int Band = 2, Rows = (TownFillsView || !HasRim) ? 0 : FMath::CeilToInt(double(Size.Y) / Band);
         TArray<TArray<Edge>> Starts;
         Starts.SetNum(Rows);
         using FSpans = TArray<FVector2D, TInlineAllocator<4>>;
@@ -1352,6 +1415,25 @@ void AGeoHUD::DrawHUD()
                         End = Right;
                     }
                 }
+            }
+        }
+        // Last line of defence: the camera is inside the township yet the sheet covers
+        // almost the whole frame, so the hole did not take (rim clipped away, or entirely
+        // off screen). Dimming the whole picture is the one outcome that must never ship —
+        // a village shot has to read as normal imagery.
+        if (CameraOverTown && Rows > 0)
+        {
+            double DimArea = 0;
+            for (const auto &Rect : DimRects)
+                DimArea += double(Rect.Z) * double(Rect.W);
+            // 97 %, not 85 %: a village shot legitimately darkens the strip of neighbouring
+            // townships along the top and bottom, and that is the effect being kept. Only a
+            // sheet that covers essentially everything means the hole failed.
+            if (DimArea > .97 * double(Size.X) * double(Size.Y))
+            {
+                DimRects.Reset();
+                for (auto &Layer : ShadowRects)
+                    Layer.Reset();
             }
         }
     }
