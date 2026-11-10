@@ -1387,115 +1387,194 @@ void AGeoHUD::DrawHUD()
     // which way the front is travelling, which only tints the cut.
     const double Wipe = FMath::Clamp(ContextReveal, 0., 1.);
     const double Erasing = FMath::Clamp(N(F, TEXT("contextErasing"), 0), 0., 1.);
-    struct FProjectedFill
-    {
-        TArray<FVector2D> Points;
-        TArray<bool> Valid;
-    };
-    TArray<FProjectedFill> Projected;
-    double CountyLeft = 0, CountyRight = 0, FrontX = 0;
+    // ---- county flood ---------------------------------------------------------
+    // The county no longer arrives as a straight wipe. A distance field is measured
+    // from the township centre (that is where the shot is aimed and where the story
+    // starts) and the fill is drawn only where that distance is still under a radius
+    // that grows with `contextReveal`. The radius carries three slow sine lobes and a
+    // fine jitter per scanline, faded out as the flood finishes, so the front creeps
+    // and nibbles at the county instead of sliding across it as one edge. Everything
+    // is a pure function of the frame time, so the offline capture stays deterministic.
+    TArray<TArray<FVector2D>> CountyScreen;
     bool CountyFramed = false;
-    // Sutherland-Hodgman against the single axis the wipe moves along: keeps the
-    // blade dead straight instead of letting the triangulation show through.
-    const auto ClipTriangle = [](const FVector2D &A, const FVector2D &B, const FVector2D &C, double X,
-                                 const FLinearColor &Color, TArray<FCanvasUVTri> &Out) {
-        FVector2D Poly[4];
-        int Count = 0;
-        const FVector2D In[3] = {A, B, C};
-        for (int I = 0; I < 3; ++I)
-        {
-            const FVector2D From = In[I], To = In[(I + 1) % 3];
-            const bool FromIn = From.X <= X, ToIn = To.X <= X;
-            if (FromIn)
-                Poly[Count++] = From;
-            if (FromIn != ToIn)
-                Poly[Count++] = FMath::Lerp(From, To, (X - From.X) / (To.X - From.X));
-        }
-        for (int I = 1; I + 1 < Count; ++I)
-        {
-            FCanvasUVTri Triangle;
-            Triangle.V0_Pos = Poly[0];
-            Triangle.V1_Pos = Poly[I];
-            Triangle.V2_Pos = Poly[I + 1];
-            Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
-            Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Color;
-            Out.Add(Triangle);
-        }
-    };
-    if (ContextAlpha > .01 && Wipe > .0005 && Map->ContextFills.Num())
+    FVector2D Seed(Size.X * .5, Size.Y * .5);
+    for (const auto &Ring : Map->ContextRings)
     {
-        Projected.SetNum(Map->ContextFills.Num());
-        for (int Filled = 0; Filled < Map->ContextFills.Num(); ++Filled)
+        TArray<FVector2D> Screen;
+        bool WholeRing = Ring.Points.Num() >= 3;
+        for (const FVector &Point : Ring.Points)
         {
-            for (const auto &Vertex : Map->ContextFills[Filled].Vertices)
+            FVector2D Pixel;
+            if (!ToScreen(Point, Pixel))
             {
-                FVector2D Pixel = FVector2D::ZeroVector;
-                const bool OnScreen = ToScreen(Vertex, Pixel);
-                Projected[Filled].Valid.Add(OnScreen);
-                Projected[Filled].Points.Add(Pixel);
-                if (!OnScreen)
-                    continue;
-                if (!CountyFramed)
-                {
-                    CountyLeft = CountyRight = Pixel.X;
-                    CountyFramed = true;
-                }
-                CountyLeft = FMath::Min(CountyLeft, Pixel.X);
-                CountyRight = FMath::Max(CountyRight, Pixel.X);
+                WholeRing = false;
+                break;
             }
+            Screen.Add(Pixel);
         }
-        FrontX = FMath::Lerp(CountyLeft, CountyRight, Wipe);
+        if (WholeRing)
+            CountyScreen.Add(MoveTemp(Screen));
+    }
+    {
+        // The township label is the anchor: the flood has to start where the viewer is
+        // already looking. The county label is only a fallback for frames where the
+        // township is off screen.
+        bool Anchored = false;
+        for (const auto &Label : Map->Labels)
+            if (Label.Parent)
+            {
+                FVector2D Pixel;
+                if (ToScreen(Label.Position, Pixel))
+                {
+                    Seed = Pixel;
+                    Anchored = true;
+                }
+            }
+        if (!Anchored)
+        {
+            FVector2D Pixel;
+            if (ToScreen(Map->ContextLabel.Position, Pixel))
+                Seed = Pixel;
+        }
+        CountyFramed = !CountyScreen.IsEmpty();
+    }
+    double Reach = 1.;
+    for (const auto &Ring : CountyScreen)
+        for (const FVector2D &Pixel : Ring)
+            Reach = FMath::Max(Reach, double(FVector2D::Distance(Pixel, Seed)));
+    const double MapTime = N(F, TEXT("mapTime"));
+    // Lobes on the order of tens of pixels, jitter on the order of one: that ragged
+    // edge is what stops the front reading as a circle. Faded at the very end so the
+    // county closes clean and the crest does not linger on a finished shape.
+    const double LobeFade = 1. - FMath::SmoothStep(.86, 1., Wipe);
+    const double Jitter = 32. * Scale;
+    // Radius at Wipe 1 lands exactly on Reach so nothing is left uncovered; at Wipe 0 it
+    // is negative and the county is empty. Slightly slower than linear so the flood
+    // leaves the seed deliberately instead of snapping out to half the county.
+    const double BaseRadius = (Reach + Jitter) * FMath::Pow(Wipe, 1.1) - Jitter;
+    // Lobes are measured around the seed, not per scanline: that is what makes the front
+    // push out in tongues and leave the straight-edge look behind. Three harmonics at
+    // incommensurate frequencies, drifting slowly, so no two frames repeat the same edge.
+    const auto Angular = [&](double Angle) {
+        return 1. + LobeFade * (.10 * FMath::Sin(3. * Angle + MapTime * .8)
+                                + .055 * FMath::Sin(5. * Angle - MapTime * 1.15)
+                                + .025 * FMath::Sin(11. * Angle + MapTime * 1.9));
+    };
+    // A fine per-scanline tremor on top of the lobes: the torn edge of something that is
+    // eating its way across the imagery rather than a clean circle.
+    const auto RowJitter = [&](double RowY) {
+        return Scale * LobeFade *
+            (2.6 * FMath::Sin(RowY * .37 - MapTime * 2.7) + 1.2 * FMath::Sin(RowY * .91 + MapTime * 4.1));
+    };
+    const auto FrontAt = [&](const FVector2D &Pixel) {
+        const FVector2D Delta = Pixel - Seed;
+        return BaseRadius * Angular(FMath::Atan2(Delta.Y, Delta.X)) + RowJitter(Pixel.Y);
+    };
+    const auto Reached = [&](const FVector2D &Pixel) {
+        return FVector2D::Distance(Pixel, Seed) <= FrontAt(Pixel);
+    };
+    const auto CutAtFront = [&](const FVector2D &Inside, const FVector2D &Outside) {
+        FVector2D Near = Inside, Far = Outside;
+        for (int Step = 0; Step < 7; ++Step)
+        {
+            const FVector2D Middle = (Near + Far) * .5;
+            if (Reached(Middle))
+                Near = Middle;
+            else
+                Far = Middle;
+        }
+        return Near;
+    };
+    if (ContextAlpha > .01 && Wipe > .0005 && CountyFramed)
+    {
+        // Scanline fill of the projected county, clipped to the distance field. The
+        // even/odd parity pass is the same one the dim mask uses, so holes and islands
+        // come out right without going through earcut again.
         const FLinearColor FloodBody(.05, .28, .66, .30 * ContextAlpha);
-        TArray<FCanvasUVTri> ContextTriangles;
-        for (int Filled = 0; Filled < Projected.Num(); ++Filled)
+        const FLinearColor WetLip(.44, .74, .98, (Erasing > .01 ? .09 : .17) * ContextAlpha);
+        const int Band = 2, Rows = FMath::CeilToInt(double(Size.Y) / Band);
+        struct FFloodSpan
         {
-            const auto &Fill = Map->ContextFills[Filled];
-            const auto &Entry = Projected[Filled];
-            for (int I = 0; I + 2 < Fill.Indices.Num(); I += 3)
+            double X, Step;
+            int End;
+        };
+        TArray<TArray<FFloodSpan>> Starts;
+        Starts.SetNum(Rows);
+        for (const auto &Ring : CountyScreen)
+        {
+            for (int I = 0; I < Ring.Num(); I++)
             {
-                const int A = Fill.Indices[I], B = Fill.Indices[I + 1], C = Fill.Indices[I + 2];
-                if (!Entry.Valid[A] || !Entry.Valid[B] || !Entry.Valid[C])
+                FVector2D A = Ring[I], B = Ring[(I + 1) % Ring.Num()];
+                if (FMath::Abs(A.Y - B.Y) < .001)
                     continue;
-                ClipTriangle(Entry.Points[A], Entry.Points[B], Entry.Points[C], FrontX, FloodBody, ContextTriangles);
+                if (A.Y > B.Y)
+                    Swap(A, B);
+                const int First = FMath::Clamp(FMath::CeilToInt((A.Y - Band * .5) / Band), 0, Rows),
+                          Last = FMath::Clamp(FMath::CeilToInt((B.Y - Band * .5) / Band), 0, Rows);
+                if (First >= Last)
+                    continue;
+                const double DX = (B.X - A.X) / (B.Y - A.Y);
+                Starts[First].Add({A.X + (First * Band + Band * .5 - A.Y) * DX, DX * Band, Last});
             }
         }
-        if (ContextTriangles.Num())
+        TArray<FFloodSpan> Active;
+        const double LipWidth = FMath::Max(3.0, 7.0 * Scale);
+        for (int Row = 0; Row < Rows; Row++)
         {
-            FCanvasTriangleItem Fill(ContextTriangles, GWhiteTexture);
-            Fill.BlendMode = SE_BLEND_Translucent;
-            Canvas->DrawItem(Fill);
-        }
-        // The blade itself: one hot hairline sitting exactly on the cut. No trail —
-        // a soft gradient behind it read as a translucent panel floating over the
-        // terrain, and a PPT wipe is a clean edge anyway.
-        const double BladeGain = FMath::Clamp(FMath::Min(Wipe, 1. - Wipe) / .05, 0., 1.) * ContextAlpha;
-        if (BladeGain > .002 && Map->ContextRings.Num())
-        {
-            TArray<double> Cuts;
-            for (const auto &Ring : Map->ContextRings)
-                for (int I = 0; I + 1 < Ring.Points.Num(); I++)
+            Active.RemoveAll([Row](const FFloodSpan &Span) { return Span.End <= Row; });
+            Active.Append(Starts[Row]);
+            Active.Sort([](const FFloodSpan &A, const FFloodSpan &B) { return A.X < B.X; });
+            const double RowY = Row * Band + Band * .5;
+            const double Height = FMath::Min(double(Band), double(Size.Y - Row * Band));
+            const double Dy = RowY - Seed.Y;
+            // The field is polar, so each side of a row has its own crossing: solve for
+            // the half width, re-read the angle at the crossing, and settle. Two passes
+            // are enough — the lobes are smooth and this is a HUD, not a raytracer.
+            const auto HalfWidth = [&](double Direction) {
+                double Radius = BaseRadius * Angular(FMath::Atan2(Dy, Direction)) + RowJitter(RowY);
+                double Square = Radius * Radius - Dy * Dy;
+                for (int Step = 0; Step < 2 && Square > 0.; ++Step)
                 {
-                    FVector2D A, B;
-                    if (!ToScreen(Ring.Points[I], A) ||
-                        !ToScreen(Ring.Points[I + 1], B))
-                        continue;
-                    if ((A.X - FrontX) * (B.X - FrontX) > 0)
-                        continue;
-                    const double Span = B.X - A.X;
-                    Cuts.Add(FMath::Abs(Span) < .001 ? A.Y : FMath::Lerp(A.Y, B.Y, (FrontX - A.X) / Span));
+                    const double Try = FMath::Sqrt(Square);
+                    Radius = BaseRadius * Angular(FMath::Atan2(Dy, Direction * Try)) + RowJitter(RowY);
+                    Square = Radius * Radius - Dy * Dy;
                 }
-            Cuts.Sort();
-            const double BladeWidth = FMath::Max(1.5, 2.2 * Scale);
-            for (int I = 0; I + 1 < Cuts.Num(); I += 2)
+                return Square > 0. ? FMath::Sqrt(Square) : 0.;
+            };
+            const double HalfL = HalfWidth(-1.), HalfR = HalfWidth(1.);
+            if (HalfL + HalfR > .5)
             {
-                const double Top = Cuts[I], Height = Cuts[I + 1] - Cuts[I];
-                if (Height < 1)
-                    continue;
-                FCanvasTileItem Blade(FVector2D(FrontX - BladeWidth * .5, Top), FVector2D(BladeWidth, Height),
-                                      FLinearColor(.76, .95, 1, float((.52 + .14 * Erasing) * BladeGain)));
-                Blade.BlendMode = SE_BLEND_Translucent;
-                Canvas->DrawItem(Blade);
+                for (int I = 0; I + 1 < Active.Num(); I += 2)
+                {
+                    const double Left = FMath::Max(Active[I].X, Seed.X - HalfL);
+                    const double Right = FMath::Min(Active[I + 1].X, Seed.X + HalfR);
+                    if (Right <= Left)
+                        continue;
+                    FCanvasTileItem Body(FVector2D(Left, Row * Band), FVector2D(Right - Left, Height), FloodBody);
+                    Body.BlendMode = SE_BLEND_Translucent;
+                    Canvas->DrawItem(Body);
+                    // A thin brighter band right on the front: the flood's own leading
+                    // edge, so the moving boundary still has something to read now that
+                    // the straight blade is gone. Only where the field actually cuts —
+                    // once the county is fully flooded the lip disappears with it.
+                    if (Right < Active[I + 1].X - .5)
+                    {
+                        const double Cut = FMath::Max(Left, Right - LipWidth);
+                        FCanvasTileItem Lip(FVector2D(Cut, Row * Band), FVector2D(Right - Cut, Height), WetLip);
+                        Lip.BlendMode = SE_BLEND_Translucent;
+                        Canvas->DrawItem(Lip);
+                    }
+                    if (Left > Active[I].X + .5)
+                    {
+                        const double Cut = FMath::Min(Right, Left + LipWidth);
+                        FCanvasTileItem Lip(FVector2D(Left, Row * Band), FVector2D(Cut - Left, Height), WetLip);
+                        Lip.BlendMode = SE_BLEND_Translucent;
+                        Canvas->DrawItem(Lip);
+                    }
+                }
             }
+            for (auto &Span : Active)
+                Span.X += Span.Step;
         }
     }
     if (ContextAlpha > .01 && Focus < .05 && Map->Fills.Num())
@@ -1592,36 +1671,39 @@ void AGeoHUD::DrawHUD()
                                                               const FLinearColor &ColorA, const FLinearColor &ColorB) {
         AddStrokeTo(BeamTriangles, A, B, Width, ColorA, ColorB);
     };
-    if (CountyFramed && Map->ContextRings.Num())
+    if (CountyFramed && ContextAlpha > .01 && Wipe > .0005)
     {
-        // The county rim follows the same blade: segments ahead of the front are
-        // not drawn, and the couple of centimetres of rim right under the blade
-        // brighten so the edge reads as a hot cut rather than a hard clip.
+        // The rim arrives with the flood: only the part already reached is stroked, and
+        // the segment that crosses the front is cut by bisection so the line never runs
+        // ahead of the fill. The crest now follows the distance field instead of a
+        // straight blade, which is what makes the leading edge read as a moving wet
+        // boundary rather than a scanning bar.
         const FLinearColor ParentLine(.36, .70, .96), CrestLine(.62, .92, 1);
-        for (const auto &Ring : Map->ContextRings)
+        for (const auto &Ring : CountyScreen)
         {
-            for (int I = 0; I + 1 < Ring.Points.Num(); I++)
+            for (int I = 0; I + 1 < Ring.Num(); I++)
             {
-                FVector2D A, B;
-                if (!ToScreen(Ring.Points[I], A) ||
-                    !ToScreen(Ring.Points[I + 1], B))
-                    continue;
+                FVector2D A = Ring[I], B = Ring[I + 1];
                 if ((A.X < -100 && B.X < -100) || (A.X > Size.X + 100 && B.X > Size.X + 100) ||
                     (A.Y < -100 && B.Y < -100) || (A.Y > Size.Y + 100 && B.Y > Size.Y + 100))
                     continue;
-                if (A.X > FrontX && B.X > FrontX)
+                const bool NearA = Reached(A), NearB = Reached(B);
+                if (!NearA && !NearB)
                     continue;
-                if (A.X > FrontX)
-                    A = FMath::Lerp(A, B, (FrontX - A.X) / (B.X - A.X));
-                else if (B.X > FrontX)
-                    B = FMath::Lerp(B, A, (FrontX - B.X) / (A.X - B.X));
-                const double Crest = FMath::Clamp(1. - FMath::Abs((A.X + B.X) * .5 - FrontX) / (42. * Scale), 0., 1.);
+                if (!NearA)
+                    A = CutAtFront(B, A);
+                else if (!NearB)
+                    B = CutAtFront(A, B);
+                if (FVector2D::Distance(A, B) < .25)
+                    continue;
+                const FVector2D Middle = (A + B) * .5;
+                const double Crest = FMath::Clamp(
+                    1. - FMath::Abs(FVector2D::Distance(Middle, Seed) - FrontAt(Middle)) / (42. * Scale), 0., 1.);
                 const FLinearColor Line = ParentLine + (CrestLine - ParentLine) * float(Crest);
-                const double LineAlpha = ContextAlpha;
                 // Keep the county rim at the same hairline weight as the town outline
                 // (pre-4fcd4ef look). A wide dark underlay read as a grey wall.
-                AddStroke(A, B, 1.6 * Scale, FLinearColor(Line.R, Line.G, Line.B, .78 * LineAlpha),
-                          FLinearColor(Line.R, Line.G, Line.B, .78 * LineAlpha));
+                AddStroke(A, B, 1.6 * Scale, FLinearColor(Line.R, Line.G, Line.B, .78 * ContextAlpha),
+                          FLinearColor(Line.R, Line.G, Line.B, .78 * ContextAlpha));
             }
         }
     }
