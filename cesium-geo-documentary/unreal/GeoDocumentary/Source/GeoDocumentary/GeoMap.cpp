@@ -2225,6 +2225,12 @@ void AGeoHUD::DrawHUD()
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
+        // The authored scale the runtime hands over already carries both halves of
+        // Cesium's sizing: tourLabelPresentationAt's 0.9 (visited) .. 1.0 (current) and
+        // the closing pull-back's RETURN_LABEL_SCALE = 0.68. Cesium multiplies exactly
+        // these into the label scale property, so reading it back is what keeps the
+        // tour, the hand-off and the closing overview identical between the two builds.
+        const float StyleScale = Label.Parent ? 1.f : float(N(*Style, TEXT("scale"), 1.));
         // The township name is drawn at twice the size it used to be: at the wide framing
         // the town is a shape on a satellite photo and the name was reading as a caption
         // rather than as the title of the shot.
@@ -2235,16 +2241,30 @@ void AGeoHUD::DrawHUD()
         // knobs move together: nominal size, the circle the name may occupy, and the floor
         // that keeps it readable when fitting would otherwise shrink it to a smear.
         constexpr float TownNameScale = 2.f;
-        // A village that has already had its shot keeps the size it had in the Cesium build
-        // (CHILD_LABEL_FONT_SIZE = 56): there, every child name was one size, emphasis and
-        // all. Here the name that is still being toured is carried by its plaque, so it is
-        // the *retired* ones that needed the old body size — at 52.5 x 0.82 they were
-        // reading as faint specks next to the village currently on screen. The distance
-        // falloff stays (Cesium had scaleByDistance too); 64 x .88 lands back on 56.
-        constexpr float RestVillagePx = 64.f;
-        const float VillagePx = CurrentVillage ? FMath::Lerp(52.5f, 64.f, Emphasis) * 1.06f : RestVillagePx;
-        const float SizePx = (Label.Parent ? 120.f * TownNameScale : VillagePx)
-                             * Scale * FMath::Lerp(1.f, Primary ? .90f : .88f, Ramp(.5, 3));
+        // Child names are pixel-for-pixel the Cesium build's now: one body size for every
+        // village (CHILD_LABEL_FONT_SIZE = 56), the same NearFarScalar
+        // (reference*0.5 -> 1.1, reference*3 -> 0.68) and the same authored scale —
+        // 0.9 once a village has had its shot, 1.0 while it is the subject. The tour's
+        // own village is still carried by its plaque and pin, so its icon and nameplate
+        // are untouched; only the map text follows Cesium.
+        //
+        // The calibration below is not cosmetic. Cesium's 56 is an *em* size, while
+        // Canvas sizes text by the font's line box: measured on this machine at 1080
+        // wide, Bold YaHei puts 0.719 px of ink into every Canvas px, and Cesium's
+        // 56 px font carries 0.982 em of ink (ctx.measureText at 56 px). Matching only
+        // the number left the UE names 36 % smaller than Cesium's, which is exactly
+        // what the two builds looked like side by side. 0.982 / 0.719 keeps the
+        // silhouettes equal; both ratios are properties of the face, not of this shot.
+        constexpr float ChildLabelPx = 56.f;
+        constexpr float CesiumInkPerCanvasPx = .982f / .719f;
+        // czm_nearFarScalar is linear in range. The old squared/fifth-root ramp was an
+        // approximation of it and drifted off Cesium's curve between the two anchors.
+        const auto NearFarScale = [](double Ratio) {
+            return float(FMath::Lerp(1.1, .68, FMath::Clamp((Ratio - .5) / 2.5, 0., 1.)));
+        };
+        const float SizePx = Label.Parent
+            ? 120.f * TownNameScale * Scale * FMath::Lerp(1.f, Primary ? .90f : .88f, Ramp(.5, 3))
+            : ChildLabelPx * CesiumInkPerCanvasPx * StyleScale * Scale * NearFarScale(FMath::Sqrt(DistanceRatioSq));
         float Width, Height;
         Canvas->StrLen(LabelFont, Label.Name, Width, Height);
         // The town name is drawn one character at a time with half a glyph of tracking in
