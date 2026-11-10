@@ -2215,10 +2215,17 @@ void AGeoHUD::DrawHUD()
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
-        // The town name holds the frame at 120 px while it is the only label on screen.
-        // Village names went up by half once their shot is over: on the closing overview
-        // they pile up over the whole town and 35 px was too small to read.
-        const float SizePx = (Label.Parent ? 120.f : FMath::Lerp(52.5f, 64.f, Emphasis) * (Primary ? 1.06f : 1.f))
+        // The township name is drawn at twice the size it used to be: at the wide framing
+        // the town is a shape on a satellite photo and the name was reading as a caption
+        // rather than as the title of the shot.
+        //
+        // Doubling the nominal size alone would do nothing there. Measured on the 龙门镇
+        // overview: sizePx 112.9 but final scale 0.607, i.e. 68 px of glyph — the size is
+        // capped by the inscribed circle at the label point, not by SizePx. So all three
+        // knobs move together: nominal size, the circle the name may occupy, and the floor
+        // that keeps it readable when fitting would otherwise shrink it to a smear.
+        constexpr float TownNameScale = 2.f;
+        const float SizePx = (Label.Parent ? 120.f * TownNameScale : FMath::Lerp(52.5f, 64.f, Emphasis) * (Primary ? 1.06f : 1.f))
                              * Scale * FMath::Lerp(1.f, Primary ? .90f : .82f, Ramp(.5, 3));
         float Width, Height;
         Canvas->StrLen(LabelFont, Label.Name, Width, Height);
@@ -2240,7 +2247,10 @@ void AGeoHUD::DrawHUD()
             // county shot zooms out until the town is a thumbnail. Everything scales
             // linearly, so the largest box that still fits is the one whose half-diagonal
             // fits the circle inscribed at the label point.
-            const double Room = TownRoom(Point);
+            // Room is a radius, so doubling it lets the name take twice the circle. This is
+            // the knob that actually decides the on-screen size on the wide shots; the
+            // nominal size above only binds once the town fills more of the frame.
+            const double Room = TownRoom(Point) * TownNameScale;
             if (Room > 4)
             {
                 const float Diagonal = FMath::Sqrt(FMath::Square(Width + TrackingTotal) + FMath::Square(Height));
@@ -2248,8 +2258,12 @@ void AGeoHUD::DrawHUD()
                 // A floor: honouring the boundary at county zoom would make the name
                 // unreadable. Below this it is allowed to spill rather than disappear.
                 // Floor raised from 16 px: at the county framing the township is a
-                // thumbnail, and 16 px on a phone is a smear. 24 keeps it clearly
-                // subordinate to the county name while still readable.
+                // thumbnail, and 16 px on a phone is a smear.
+                // It deliberately does NOT follow TownNameScale. At the county framing the
+                // township is a thumbnail and the name has to stay subordinate to the
+                // county name (52 px): a doubled floor put it at 48 px, i.e. the same size
+                // as 雷州市, which flattened the hierarchy. Doubling the circle above is
+                // already enough to lift this shot from 24 px to ~42 px.
                 TextScale = FMath::Max(TextScale, 24.f / FMath::Max(1.f, GlyphHeight));
                 if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_METRICS")).Len())
                 {
