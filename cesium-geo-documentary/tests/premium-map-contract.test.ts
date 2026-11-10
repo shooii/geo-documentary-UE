@@ -29,6 +29,8 @@ test("premium typography and mix tokens are enforced by the compositor", async (
   assert.match(source, /<span id="caption-wash-\$\{index\}" class="subtitle-wash" aria-hidden="true">/);
   // 金色层必须压在白字之上：两层文字重叠，wash 若没有 z-index 会被不透明的白字完全盖住，
   // 进度就永远看不见（实测 40% 进度整句仍是纯白）。
+  // 墨层必须显式声明纯白：早期靠从 body 继承，漏一处就是黑字（实测踩过）。
+  assert.match(source, /\.subtitle-ink\{[^}]*color:#fff\}/);
   assert.match(source, /\.subtitle-wash\{position:absolute;z-index:1;[^}]*clip-path:inset\(0 100% 0 0\)/);
   assert.match(source, /"#caption-wash-\$\{index\}",\{clipPath:"inset\(0 100% 0 0\)"\}/);
   assert.doesNotMatch(source, /background:rgba\(4,10,15,\.72\)/);
