@@ -247,6 +247,12 @@ async function prepareSandbox(root: string, jobRoot: string, project: VideoProje
   for (const file of ["index.html", "package.json", "meta.json"]) await copyIfExists(join(root, "apps", "video-compositor", file), join(compositor, file));
   await copyIfExists(join(root, "assets", "music", "ambient-map-bed.wav"), join(sandbox, "assets", "music", "ambient-map-bed.wav"));
   await copyIfExists(join(root, "assets", "music", "boundary-pen.wav"), join(sandbox, "assets", "music", "boundary-pen.wav"));
+  /* 合成器要把思源黑体 Medium 抄进 video-compositor/media/fonts 才会给字幕上字体，
+     但沙箱只搬了 assets/music 与 assets/audio，字体目录一直没进来：导出在
+     「录制前预检」这一步就 ENOENT（copyfile assets/fonts/NotoSansSC-Medium.woff2），
+     每 40 分钟的录制都能白等一场。字体是只读的构建输入，整目录搬过去。 */
+  const sourceFonts = join(root, "assets", "fonts");
+  if (existsSync(sourceFonts)) await cp(sourceFonts, join(sandbox, "assets", "fonts"), { recursive: true, force: true });
   const sourceAudio = join(root, "assets", "audio", project.regionId);
   if (existsSync(sourceAudio)) await cp(sourceAudio, join(sandbox, "assets", "audio", project.regionId), { recursive: true, force: true });
   // The sandbox is the export's whole world, so this is where the scheme's

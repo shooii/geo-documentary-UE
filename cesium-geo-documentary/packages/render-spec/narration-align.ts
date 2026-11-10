@@ -9,13 +9,34 @@
  * 停顿中点传进来；可以单独测试。
  */
 
+/** 收在句末、却会被标点切到下一句开头的成对符号。 */
+const TRAILING_CLOSERS = /^[”’」』）】》]+/u;
+
 /** 把一段旁白切成"朗读员会换气"的句子。 */
 export function splitNarrationSentences(text: string): string[] {
-  return text
+  const parts = text
     .split(/\n+/)
     .flatMap((line) => line.split(/(?<=[。！？；;…])/u))
     .map((part) => part.trim())
     .filter((part) => part.length > 0);
+  // 稿子里的「…脊梁！」是带引号的，按感叹号切完，引号会落到下一句开头——
+  // 那会变成一条只有「”」的空字幕（440882112 第一场实测停 2.7 秒），或者让
+  // 下一句以引号开头。收尾符号并回上一句，剩下没有可念字的碎片也并回去。
+  const sentences: string[] = [];
+  for (const part of parts) {
+    let current = part;
+    if (sentences.length > 0) {
+      const closers = current.match(TRAILING_CLOSERS);
+      if (closers) {
+        sentences[sentences.length - 1] += closers[0];
+        current = current.slice(closers[0].length);
+      }
+    }
+    if (!current) continue;
+    if (sentences.length > 0 && !/[\p{L}\p{N}]/u.test(current)) sentences[sentences.length - 1] += current;
+    else sentences.push(current);
+  }
+  return sentences;
 }
 
 export interface CueBoundaryOptions {

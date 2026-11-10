@@ -94,6 +94,14 @@ test("旁白按朗读换气点切句，不按段落", () => {
   assert.deepEqual(splitNarrationSentences("  \n\n "), []);
 });
 
+test("句末引号不会被切成一条只有标点的空字幕", () => {
+  // 稿子里「脊梁！」收在引号里，按标点切完会剩下一个只有「”」的碎片：它会成为
+  // 一条在屏幕上停 2.7 秒的空字幕（440882112 第一场实测）。
+  assert.deepEqual(splitNarrationSentences("摸到脊梁！”"), ["摸到脊梁！”"]);
+  assert.deepEqual(splitNarrationSentences("甲。乙！”丙。"), ["甲。", "乙！”", "丙。"]);
+  assert.deepEqual(splitNarrationSentences("（一）。丁"), ["（一）。", "丁"]);
+});
+
 test("阶段看门狗超时是可以重试的失败，冒充成功的退出码不是", () => {
   // A deadlocked stage restarts from the cached narration/map clip; a project error
   // must not be retried three times.

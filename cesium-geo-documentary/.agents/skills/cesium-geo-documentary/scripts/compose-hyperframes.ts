@@ -247,10 +247,12 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
   const captionClips = displayCues.map((cue, index) => {
     const timeline = timelineValues(Math.max(offset, cue.start + narrationOffset + subtitleLeadSeconds), Math.max(offset + 0.08, cue.end + narrationOffset + subtitleLeadSeconds));
     // 两层同一段文字：ink 是白的（还没讲到的部分），wash 是高亮色（已经讲到的部分）。
+    // 两层必然完全重合，是歌词式逐字点亮的实现方式，用 data-layout-allow-overlap
+    // 明确告诉 layout 审计这是有意的叠字（否则它会报 80 条 content_overlap）。
     // 两层排版完全一致，靠 clip-path 从左向右擦除 wash，读起来才像歌词逐字点亮，
     // 而不是整句在结尾"啪"地变色。aria-hidden 让读屏只念一遍。
     const html = escapeHtml(cue.text);
-    return `<div id="caption-${index}" class="clip subtitle" data-start="${timeline.start}" data-duration="${timeline.duration}" data-track-index="${COMPOSITION_TRACKS.subtitle}"><span id="caption-inner-${index}" class="subtitle-inner"><span id="caption-wash-${index}" class="subtitle-wash" aria-hidden="true">${html}</span><span class="subtitle-ink">${html}</span></span></div>`;
+    return `<div id="caption-${index}" class="clip subtitle" data-start="${timeline.start}" data-duration="${timeline.duration}" data-track-index="${COMPOSITION_TRACKS.subtitle}"><span id="caption-inner-${index}" class="subtitle-inner" data-layout-allow-overlap><span id="caption-wash-${index}" class="subtitle-wash" aria-hidden="true">${html}</span><span class="subtitle-ink">${html}</span></span></div>`;
   }).join("\n");
   const visualClips = visuals.map((visual, index) => {
     const clipDuration = Math.max(0.1, visual.end - visual.start);
@@ -337,7 +339,7 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
     #root{position:relative;width:${profile.width}px;height:${profile.height}px;overflow:hidden;background:#081017}
     @font-face{font-family:"GeoSans";src:local("Noto Sans SC"),local("Source Han Sans SC"),local("Microsoft YaHei")}@font-face{font-family:"GeoNumber";src:local("Roboto Flex"),local("Roboto"),local("Arial")}@font-face{font-family:"STZhongsong";src:local("STZhongsong"),local("华文中宋"),local("Source Han Serif SC"),local("SimSun")} @font-face{font-family:"GeoSubtitle";src:url('media/fonts/NotoSansSC-Medium.woff2') format('woff2');font-weight:500;font-display:block} .clip{position:absolute}.map{z-index:0;inset:0;width:100%;height:100%;object-fit:cover}.shade{z-index:1;inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}.cover{z-index:100;inset:0;width:100%;height:100%;object-fit:cover;background:#06101a}
     .visual{z-index:20;left:${isPortrait ? profile.safe_margin : Math.round(profile.width * .52)}px;top:${isPortrait ? 278 : 156}px;width:${isPortrait ? profile.width - profile.safe_margin * 2 : Math.round(profile.width * .43)}px;height:${isPortrait ? 780 : 560}px;margin:0;overflow:hidden;border:1px solid rgba(215,235,237,.32);border-radius:${isPortrait ? 28 : 24}px;background:#07151d;box-shadow:0 24px 80px rgba(0,0,0,.46);isolation:isolate}.visual-bg,.visual-main{position:absolute;inset:0;width:100%;height:100%}.visual-bg{z-index:0;background-size:cover;background-position:center;filter:blur(34px) saturate(.82) brightness(.56);transform:scale(1.13)}.visual-main{z-index:1}.visual-main.fit-cover{object-fit:cover}.visual-main.fit-contain{object-fit:contain;padding:${isPortrait ? 18 : 14}px}.visual-main.fit-fill{object-fit:fill}.visual:after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(2,9,14,.76) 100%);pointer-events:none}.visual figcaption{position:absolute;z-index:3;left:${isPortrait ? 20 : 18}px;right:${isPortrait ? 20 : 18}px;bottom:${isPortrait ? 16 : 14}px;font-size:${isPortrait ? 30 : 25}px;font-weight:650;line-height:1.25;letter-spacing:.03em;color:#f4f7f9;text-shadow:0 2px 10px rgba(0,0,0,.9)}
-.subtitle{z-index:40;left:50%;bottom:${subtitleBottomPx}px;transform:translate(-50%,50%);width:86%;max-width:${isPortrait ? 900 : isSquare ? 920 : 1180}px;font-family:"GeoSubtitle","Source Han Sans SC","Noto Sans SC","Microsoft YaHei",sans-serif;font-size:${isPortrait ? 50 : isSquare ? 44 : 46}px;line-height:1.36;text-align:center;font-weight:500;letter-spacing:.01em;text-shadow:0 2px 5px rgba(0,0,0,.5),0 1px 2px rgba(0,0,0,.6);white-space:nowrap}.subtitle-inner{position:relative;display:inline-block;padding:0;border-radius:0;background:none;white-space:nowrap}.subtitle-ink{position:relative;display:inline-block;white-space:nowrap;color:#fff}.subtitle-wash{position:absolute;z-index:1;left:0;top:0;display:inline-block;white-space:nowrap;color:#ffd166;clip-path:inset(0 100% 0 0)}
+.subtitle{z-index:40;left:50%;bottom:${subtitleBottomPx}px;transform:translate(-50%,50%);width:86%;max-width:${isPortrait ? 900 : isSquare ? 920 : 1180}px;font-family:"GeoSubtitle",sans-serif;font-size:${isPortrait ? 50 : isSquare ? 44 : 46}px;line-height:1.36;text-align:center;font-weight:500;letter-spacing:.01em;text-shadow:0 2px 5px rgba(0,0,0,.5),0 1px 2px rgba(0,0,0,.6);white-space:nowrap}.subtitle-inner{position:relative;display:inline-block;padding:0;border-radius:0;background:none;white-space:nowrap}.subtitle-ink{position:relative;display:inline-block;white-space:nowrap;color:#fff}.subtitle-wash{position:absolute;z-index:1;left:0;top:0;display:inline-block;white-space:nowrap;color:#ffd166;clip-path:inset(0 100% 0 0)}
     .visual figcaption{font-size:${isPortrait ? 42 : isSquare ? 30 : 25}px}
     .visual.visual-fullscreen{left:0;top:0;width:${profile.width}px;height:${profile.height}px;border:0;border-radius:0;box-shadow:none}
     .visual.visual-fullscreen figcaption{bottom:${fullscreenCaptionBottomPx}px}
@@ -379,8 +381,11 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
       }
     });
   };
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => requestAnimationFrame(fitSubtitles));
-  else requestAnimationFrame(fitSubtitles);
+  // 一次性的排版测量，必须在帧时钟里同步完成：hyperframes 的 lint 把
+  // requestAnimationFrame 判成"走墙钟时间、不跟时间轴同步"，会掉帧/闪烁。
+  const runFit = () => { try { fitSubtitles(); } catch { /* 布局未就绪时留到下一帧由渲染器决定 */ } };
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(runFit);
+  else runFit();
   const tl=gsap.timeline({paused:true});
   gsap.set([".subtitle-inner",".visual",".visual figcaption"],{opacity:0});
   tl.fromTo("#cover",{opacity:1},{opacity:0,duration:${coverFadeSeconds.toFixed(3)},ease:"power2.inOut"},${coverFadeStart.toFixed(3)}).set("#cover",{opacity:0},${offset.toFixed(3)});
@@ -494,6 +499,17 @@ function resolveVisualTiming(
       }
     }
     const cueText = selected.map((cue) => cue.text).join("");
+    // 自愈的窗口不能搬到本场旁白之外。关键字过期（例如「潭边村」的旁白里只写了
+    // 「覃边」）时，±3 条 cue 的容错可能落在下一场，接着就撞上 hardEnd <= start
+    // 抛错，让整条导出在 68% 处死掉。越界就退回清单记录的 cue，只在诊断里留警告：
+    // 画面晚一点可以接受，一张图的关键字不该决定成片能不能出。
+    const sceneNarrationEnd = Number(visual.notAfterNarrationSeconds ?? Number.POSITIVE_INFINITY);
+    if ((adjustedFirst !== first || adjustedLast !== last) && selected[0]!.start >= sceneNarrationEnd) {
+      keywordWarnings.push(`keyword drift could only be healed outside the scene (cue ${adjustedFirst}-${adjustedLast}); keeping declared cue ${first}-${last}`);
+      adjustedFirst = first;
+      adjustedLast = last;
+      selected = narrationCues.slice(first, last + 1);
+    }
     const leadSeconds = visual.leadSeconds ?? 0.3;
     const tailSeconds = visual.tailSeconds ?? 0.24;
     if (leadSeconds < 0 || leadSeconds > 0.75 || tailSeconds < 0 || tailSeconds > 0.75) {

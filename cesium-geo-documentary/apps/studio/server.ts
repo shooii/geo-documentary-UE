@@ -79,6 +79,15 @@ async function identifyPreview(host: string, previewPort: number): Promise<"free
 }
 
 function startCesiumPreview(): void {
+  // 编辑预览背后是另一个 UnrealEditor（720×1280）。导出录制自己也会拉起一个
+  // 1080×1920 的 UE，两个实例同抢显存时录制实例会直接退出（实测录到第 410 帧
+  // 就 `UE renderer exited (4294967295)`，日志里什么都没有）。导出期间用
+  // `STUDIO_PREVIEW=off` 起服务，把显存让给录制。
+  if (process.env.STUDIO_PREVIEW === "off") {
+    process.stdout.write("CESIUM_PREVIEW_OFF STUDIO_PREVIEW=off（导出期间不启动预览渲染器）\n");
+    previewReady = Promise.resolve();
+    return;
+  }
   previewReady = (async () => {
     if (!existsSync(cesiumPreviewScript)) {
       process.stdout.write(`CESIUM_PREVIEW_SKIP missing ${cesiumPreviewScript}\n`);
