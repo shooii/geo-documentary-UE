@@ -761,7 +761,10 @@ test("Studio keeps one task-first export history with explicit output actions", 
   assert.match(css, /\.preview-copy\.subtitle-only p[^}]*white-space:nowrap/);
   assert.match(css, /\.preview-copy\.subtitle-only p[^}]*max-width:100%/);
   // 墨层显式纯白 + 金色层压在其上：缺 color 会继承成黑字，缺 z-index 金色会被白字盖掉。
-  assert.match(css, /\.preview-subtitle-ink\{[^}]*color:#fff\}/);
+  assert.match(css, /\.preview-copy \.preview-subtitle-ink\{[^}]*color:#fff\}/);
+  // `.preview-copy span` 那条 teal/12px/.18em 是给已删除的 kicker 留的，权重却高于
+  // `.preview-subtitle-*`，会把字幕两层一起染成青绿——不能再出现。
+  assert.doesNotMatch(css, /\.preview-copy span\{/);
   assert.match(css, /\.preview-subtitle-wash\{position:absolute;z-index:1;[^}]*clip-path:inset\(0 var\(--subtitle-cut,100%\) 0 0\)/);
   assert.match(clientSource, /function fitPreviewSubtitle\(preview\)/);
   assert.match(css, /font:500[^;]*GeoSubtitle/);
