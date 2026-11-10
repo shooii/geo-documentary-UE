@@ -13,7 +13,7 @@ test('boundary light head makes one timed lap, then keeps orbiting a toured vill
  assert.equal(boundaryAnimation(5.625,5,'child').progress,.5);
  // The sweep is over, but the village is still being toured: the beam keeps circling its
  // rim for the rest of the shot instead of leaving the boundary dead.
- assert.equal(boundaryAnimation(6.5,5,'child').alpha,.62);
+ assert.equal(boundaryAnimation(6.5,5,'child').alpha,.85);
  assert.ok(boundaryAnimation(8,5,'child').progress>0);
  // The parent rim gets exactly one lap and then goes dark: there is no child to circle.
  assert.equal(boundaryAnimation(6.5,5,'').alpha,0);

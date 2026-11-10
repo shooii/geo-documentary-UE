@@ -1435,8 +1435,13 @@ void AGeoHUD::DrawHUD()
     const FLinearColor TownEdge(.031, .070, .026), VillageEdge(.070, .480, .540);
     const FLinearColor ContextEdge(.35, .43, .41), DarkEdge(.009, .018, .021);
     TArray<FCanvasUVTri> BoundaryTriangles;
-    const auto AddStroke = [&BoundaryTriangles](const FVector2D &A, const FVector2D &B, double Width,
-                                                const FLinearColor &ColorA, const FLinearColor &ColorB) {
+    // The beam is lifted out of the rim batch. Both used to share one triangle array, and
+    // the village rim's 13 px halo plus its 3 px core swallowed the 4.2 px golden trail
+    // whole — the triangles were built (the log counted them) and never seen. Drawn as a
+    // second item it is guaranteed to sit on top of the white rim.
+    TArray<FCanvasUVTri> BeamTriangles;
+    const auto AddStrokeTo = [](TArray<FCanvasUVTri> &Into, const FVector2D &A, const FVector2D &B, double Width,
+                                const FLinearColor &ColorA, const FLinearColor &ColorB) {
         const FVector2D Direction = (B - A).GetSafeNormal();
         if (Direction.IsNearlyZero())
             return;
@@ -1448,11 +1453,19 @@ void AGeoHUD::DrawHUD()
         Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
         Triangle.V0_Color = Triangle.V1_Color = ColorA;
         Triangle.V2_Color = ColorB;
-        BoundaryTriangles.Add(Triangle);
+        Into.Add(Triangle);
         Triangle.V1_Pos = Triangle.V2_Pos;
         Triangle.V2_Pos = B - Offset;
         Triangle.V1_Color = ColorB;
-        BoundaryTriangles.Add(Triangle);
+        Into.Add(Triangle);
+    };
+    const auto AddStroke = [&BoundaryTriangles, &AddStrokeTo](const FVector2D &A, const FVector2D &B, double Width,
+                                                              const FLinearColor &ColorA, const FLinearColor &ColorB) {
+        AddStrokeTo(BoundaryTriangles, A, B, Width, ColorA, ColorB);
+    };
+    const auto AddBeamStroke = [&BeamTriangles, &AddStrokeTo](const FVector2D &A, const FVector2D &B, double Width,
+                                                              const FLinearColor &ColorA, const FLinearColor &ColorB) {
+        AddStrokeTo(BeamTriangles, A, B, Width, ColorA, ColorB);
     };
     if (CountyFramed && Map->ContextRings.Num())
     {
@@ -1554,19 +1567,30 @@ void AGeoHUD::DrawHUD()
                     // The head itself, so the eye catches the front of the sweep.
                     if (Head - End > .022)
                         continue;
-                    AddStroke(A, B, 7. * Scale, Trail.CopyWithNewOpacity(.30 * TraceAlpha), Trail.CopyWithNewOpacity(.62 * TraceAlpha));
+                    AddBeamStroke(A, B, 9. * Scale, Trail.CopyWithNewOpacity(.45 * TraceAlpha),
+                                  Trail.CopyWithNewOpacity(.95 * TraceAlpha));
                     continue;
                 }
-                const double Opacity = TraceAlpha * (Pass == 0 ? .16 : .96);
-                AddStroke(A, B, (Pass == 0 ? 11.5 : 4.2) * Scale,
-                          Trail.CopyWithNewOpacity((1 - (Head - Start) / TraceTail) * Opacity),
-                          Trail.CopyWithNewOpacity((1 - (Head - End) / TraceTail) * Opacity));
+                // A comet whose tail decays linearly is invisible for most of its length:
+                // two thirds of it sits under 30% and the white rim simply eats it. The
+                // tail now keeps most of its strength and only the very end thins out.
+                const double Opacity = TraceAlpha * (Pass == 0 ? .30 : 1.);
+                const double FadeStart = FMath::Pow(FMath::Clamp(1. - (Head - Start) / TraceTail, 0., 1.), .45);
+                const double FadeEnd = FMath::Pow(FMath::Clamp(1. - (Head - End) / TraceTail, 0., 1.), .45);
+                AddBeamStroke(A, B, (Pass == 0 ? 13. : 5.4) * Scale, Trail.CopyWithNewOpacity(FadeStart * Opacity),
+                              Trail.CopyWithNewOpacity(FadeEnd * Opacity));
             }
     if (BoundaryTriangles.Num())
     {
         FCanvasTriangleItem Lines(BoundaryTriangles, GWhiteTexture);
         Lines.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Lines);
+    }
+    if (BeamTriangles.Num())
+    {
+        FCanvasTriangleItem Beam(BeamTriangles, GWhiteTexture);
+        Beam.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Beam);
     }
     const double ContextLabelAlpha = ContextAlpha * FMath::SmoothStep(.82, 1., ContextReveal) * LabelsReveal;
     if (ContextLabelAlpha > .05 && !Map->ContextLabel.Name.IsEmpty())

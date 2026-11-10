@@ -179,7 +179,7 @@ export function interiorLabelPoint(input: any, preferred?: unknown): Point | und
 // shot then holds for several seconds, and with a single pass the rim went dead for
 // the rest of it. After the sweep the same beam keeps orbiting the same rim, dimmer
 // and slower, so the boundary of the village being toured is always alive.
-const ORBIT_PERIOD=3.4;
+const ORBIT_PERIOD=2.8;
 export function boundaryAnimation(mapTime:number,start:number,current:string) {
   const elapsed=mapTime-start;
   const progress=Math.max(0,Math.min(1,elapsed/1.25));
@@ -191,5 +191,5 @@ export function boundaryAnimation(mapTime:number,start:number,current:string) {
   if(!current||orbit<0) return {target:current,progress,alpha:sweep};
   // The ring is closed, so wrapping 1 -> 0 puts the head back where it started and the
   // orbit reads as continuous.
-  return {target:current,progress:(orbit%ORBIT_PERIOD)/ORBIT_PERIOD,alpha:.62};
+  return {target:current,progress:(orbit%ORBIT_PERIOD)/ORBIT_PERIOD,alpha:.85};
 }
