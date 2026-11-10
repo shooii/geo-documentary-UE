@@ -1736,14 +1736,40 @@ function previewSubtitleEntries(scene) {
   return chunks.map((text, index) => ({ text, start: index, end: index + 1 }));
 }
 
+function escapePreviewText(text) {
+  return String(text).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+}
+
+// 字幕只显示一行：nowrap 之后如果还超出，就按比例缩字号。
+// 量的是 .preview-subtitle-ink 的实际宽度，不能量 p —— 块级元素永远等于容器宽。
+function fitPreviewSubtitle(preview) {
+  preview.style.fontSize = "";
+  const ink = preview.querySelector(".preview-subtitle-ink");
+  if (!ink) return;
+  const max = preview.clientWidth;
+  if (!max) return;
+  let size = parseFloat(getComputedStyle(preview).fontSize) || 12;
+  const minimum = size * .55;
+  for (let guard = 0; guard < 8; guard += 1) {
+    const width = ink.getBoundingClientRect().width;
+    if (width <= max || size <= minimum) break;
+    size = Math.max(minimum, size * Math.min(.98, max / width));
+    preview.style.fontSize = size + "px";
+  }
+}
+
 function showPreviewSubtitle(scene, index = 0) {
   const entries = previewSubtitleEntries(scene);
   const text = entries[Math.min(index, Math.max(0, entries.length - 1))]?.text || "";
   const preview = $("previewSubtitle");
   const safeArea = $("safeAreaSubtitle");
-  preview.textContent = text;
+  // 两层文字：底层白色（还没讲到的部分），上层金色按旁白进度从左向右擦出来。
+  const html = escapePreviewText(text);
+  preview.innerHTML = text ? `<span class="preview-subtitle-wash" aria-hidden="true">${html}</span><span class="preview-subtitle-ink">${html}</span>` : "";
+  preview.style.setProperty("--subtitle-cut", "100%");
   preview.hidden = !text;
   preview.setAttribute("aria-hidden", String(!text));
+  fitPreviewSubtitle(preview);
   safeArea.textContent = text;
   safeArea.hidden = !text;
   safeArea.setAttribute("aria-hidden", String(!text));
@@ -1760,7 +1786,7 @@ function syncPreviewSubtitlesToAudio(scene, audio) {
   if (!entries.length) return showPreviewSubtitle(scene);
   const preview = $("previewSubtitle");
   const safeArea = $("safeAreaSubtitle");
-  preview.textContent = "";
+  preview.innerHTML = "";
   preview.hidden = true;
   preview.setAttribute("aria-hidden", "true");
   safeArea.textContent = "";
@@ -1771,11 +1797,18 @@ function syncPreviewSubtitlesToAudio(scene, audio) {
     if (selectedScene()?.id !== scene.id || !state.playTimer || audio !== state.previewAudio) return;
     const audioTime = Number(audio.currentTime || 0);
     const activeIndex = entries.findIndex((entry) => audioTime + 0.015 >= entry.start && audioTime < entry.end);
+    if (activeIndex >= 0) {
+      // 正在讲这一句：把已讲比例写进 --subtitle-cut（右侧被裁掉的那部分）。
+      const entry = entries[activeIndex];
+      const span = Math.max(0.08, Number(entry.end) - Number(entry.start));
+      const progress = Math.max(0, Math.min(1, (audioTime - Number(entry.start)) / span));
+      preview.style.setProperty("--subtitle-cut", `${((1 - progress) * 100).toFixed(2)}%`);
+    }
     if (activeIndex !== displayedIndex) {
       displayedIndex = activeIndex;
       if (activeIndex >= 0) showPreviewSubtitle(scene, activeIndex);
       else {
-        preview.textContent = "";
+        preview.innerHTML = "";
         preview.hidden = true;
         preview.setAttribute("aria-hidden", "true");
         safeArea.textContent = "";

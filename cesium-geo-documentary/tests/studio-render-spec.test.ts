@@ -99,7 +99,11 @@ test("Studio does not render an empty subtitle pill", async () => {
   assert.match(clientSource, /function cleanPreviewSubtitle\(value\)[\s\S]*?String\(value \|\| ""\)\.replace\(\/\\s\+\/g, ""\)\.trim\(\)/);
   assert.match(clientSource, /function splitPreviewSubtitle\(value, maximum = 14\)[\s\S]*?if \(!source\) return \[\];/);
   assert.match(clientSource, /function syncPreviewSubtitlesToAudio\(scene, audio\)[\s\S]*?if \(!entries\.length\) return showPreviewSubtitle\(scene\);/);
-  assert.match(clientSource, /function showPreviewSubtitle\(scene, index = 0\)[\s\S]*?preview\.textContent = text;[\s\S]*?preview\.hidden = !text;/);
+  // 预览字幕同样是两层：wash 按旁白进度擦出金色，ink 是还没讲到的白字。
+  assert.match(clientSource, /function showPreviewSubtitle\(scene, index = 0\)[\s\S]*?preview-subtitle-wash[\s\S]*?preview-subtitle-ink[\s\S]*?preview\.hidden = !text;/);
+  // 关掉字幕必须清空两层文字，否则空 span 会撑出一个空药丸。
+  assert.doesNotMatch(clientSource, /preview\.textContent = text;/);
+  assert.match(clientSource, /preview\.innerHTML = "";/);
   assert.match(clientSource, /safeArea\.textContent = text;[\s\S]*?safeArea\.hidden = !text;/);
 });
 
@@ -752,10 +756,12 @@ test("Studio keeps one task-first export history with explicit output actions", 
   assert.match(clientSource, /function splitPreviewSubtitle/);
   assert.match(clientSource, /function syncPreviewSubtitlesToAudio\(scene, audio\)/);
   assert.match(clientSource, /const audioTime = Number\(audio\.currentTime \|\| 0\)/);
-  // 预览字幕与成片一致：思源黑体 Medium、无底纹、允许换行并留出左右边距，
-  // 所以这里断言的是「会换行 + 有 86% 宽度上限」，而不是旧的 nowrap。
-  assert.match(css, /\.preview-copy\.subtitle-only p[^}]*white-space:normal/);
-  assert.match(css, /\.preview-copy\.subtitle-only p[^}]*max-width:86%/);
+  // 预览字幕与成片一致：思源黑体 Medium、无底纹、单行不折行（折行会切断逐字着色），
+  // 放不下时按比例缩字号，而不是换成两行。
+  assert.match(css, /\.preview-copy\.subtitle-only p[^}]*white-space:nowrap/);
+  assert.match(css, /\.preview-copy\.subtitle-only p[^}]*max-width:100%/);
+  assert.match(css, /\.preview-subtitle-wash\{[^}]*clip-path:inset\(0 var\(--subtitle-cut,100%\) 0 0\)/);
+  assert.match(clientSource, /function fitPreviewSubtitle\(preview\)/);
   assert.match(css, /font:500[^;]*GeoSubtitle/);
   assert.doesNotMatch(css, /\.preview-copy\.subtitle-only p[^}]*background:#041018c7/);
   // 预览素材现在分两条通道（图片 <img> / 视频 <video>），「加载好了没」收进了

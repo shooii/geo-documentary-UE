@@ -18,9 +18,17 @@ test("premium typography and mix tokens are enforced by the compositor", async (
   assert.match(source, /const subtitleBottomPercent = 25;/);
   assert.match(source, /const subtitleBottomPx = Math\.round\(profile\.height \* \(subtitleBottomPercent \/ 100\)\)/);
   assert.match(source, /\.subtitle\{[^}]*bottom:\$\{subtitleBottomPx\}px[^}]*transform:translate\(-50%,50%\)/);
-  // 字幕不再有底纹药丸：Medium 字重 + 无边距底色 + 允许换行，靠字影压住底图。
+  // 字幕不再有底纹药丸：Medium 字重 + 无边距底色，靠字影压住底图。
   assert.match(source, /font-weight:500/);
-  assert.match(source, /\.subtitle-inner\{display:block;padding:0;border-radius:0;background:none\}/);
+  assert.match(source, /\.subtitle-inner\{position:relative;display:inline-block;padding:0;border-radius:0;background:none;white-space:nowrap\}/);
+  // 单行是硬约束：折行会让歌词式着色在换行处断开，所以 nowrap + 量宽缩字号兜底。
+  assert.match(source, /;white-space:nowrap\}\.subtitle-inner\{/);
+  assert.match(source, /const fitSubtitles = \(\) =>/);
+  assert.match(source, /if \(document\.fonts && document\.fonts\.ready\)/);
+  // 逐字点亮：同一句铺两层，wash 用 clip-path 从左往右擦出来，aria-hidden 防重复朗读。
+  assert.match(source, /<span id="caption-wash-\$\{index\}" class="subtitle-wash" aria-hidden="true">/);
+  assert.match(source, /\.subtitle-wash\{[^}]*clip-path:inset\(0 100% 0 0\)/);
+  assert.match(source, /"#caption-wash-\$\{index\}",\{clipPath:"inset\(0 100% 0 0\)"\}/);
   assert.doesNotMatch(source, /background:rgba\(4,10,15,\.72\)/);
   assert.match(source, /GeoSubtitle/);
   assert.match(source, /data-volume="0\.2"/);

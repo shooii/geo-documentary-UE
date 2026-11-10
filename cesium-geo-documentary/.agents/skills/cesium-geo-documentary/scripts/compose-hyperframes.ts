@@ -246,7 +246,11 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
   const fullscreenCaptionBottomPx = imageryAttribution ? creditTopPx + 12 : (isPortrait ? 16 : 14);
   const captionClips = displayCues.map((cue, index) => {
     const timeline = timelineValues(Math.max(offset, cue.start + narrationOffset + subtitleLeadSeconds), Math.max(offset + 0.08, cue.end + narrationOffset + subtitleLeadSeconds));
-    return `<div id="caption-${index}" class="clip subtitle" data-start="${timeline.start}" data-duration="${timeline.duration}" data-track-index="${COMPOSITION_TRACKS.subtitle}"><span id="caption-inner-${index}" class="subtitle-inner">${escapeHtml(cue.text)}</span></div>`;
+    // 两层同一段文字：ink 是白的（还没讲到的部分），wash 是高亮色（已经讲到的部分）。
+    // 两层排版完全一致，靠 clip-path 从左向右擦除 wash，读起来才像歌词逐字点亮，
+    // 而不是整句在结尾"啪"地变色。aria-hidden 让读屏只念一遍。
+    const html = escapeHtml(cue.text);
+    return `<div id="caption-${index}" class="clip subtitle" data-start="${timeline.start}" data-duration="${timeline.duration}" data-track-index="${COMPOSITION_TRACKS.subtitle}"><span id="caption-inner-${index}" class="subtitle-inner"><span id="caption-wash-${index}" class="subtitle-wash" aria-hidden="true">${html}</span><span class="subtitle-ink">${html}</span></span></div>`;
   }).join("\n");
   const visualClips = visuals.map((visual, index) => {
     const clipDuration = Math.max(0.1, visual.end - visual.start);
@@ -327,7 +331,7 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
     #root{position:relative;width:${profile.width}px;height:${profile.height}px;overflow:hidden;background:#081017}
     @font-face{font-family:"GeoSans";src:local("Noto Sans SC"),local("Source Han Sans SC"),local("Microsoft YaHei")}@font-face{font-family:"GeoNumber";src:local("Roboto Flex"),local("Roboto"),local("Arial")}@font-face{font-family:"STZhongsong";src:local("STZhongsong"),local("华文中宋"),local("Source Han Serif SC"),local("SimSun")} @font-face{font-family:"GeoSubtitle";src:url('media/fonts/NotoSansSC-Medium.woff2') format('woff2');font-weight:500;font-display:block} .clip{position:absolute}.map{z-index:0;inset:0;width:100%;height:100%;object-fit:cover}.shade{z-index:1;inset:0;background:linear-gradient(180deg,rgba(4,10,15,.12),transparent 24%,rgba(4,10,15,.16))}.cover{z-index:100;inset:0;width:100%;height:100%;object-fit:cover;background:#06101a}
     .visual{z-index:20;left:${isPortrait ? profile.safe_margin : Math.round(profile.width * .52)}px;top:${isPortrait ? 278 : 156}px;width:${isPortrait ? profile.width - profile.safe_margin * 2 : Math.round(profile.width * .43)}px;height:${isPortrait ? 780 : 560}px;margin:0;overflow:hidden;border:1px solid rgba(215,235,237,.32);border-radius:${isPortrait ? 28 : 24}px;background:#07151d;box-shadow:0 24px 80px rgba(0,0,0,.46);isolation:isolate}.visual-bg,.visual-main{position:absolute;inset:0;width:100%;height:100%}.visual-bg{z-index:0;background-size:cover;background-position:center;filter:blur(34px) saturate(.82) brightness(.56);transform:scale(1.13)}.visual-main{z-index:1}.visual-main.fit-cover{object-fit:cover}.visual-main.fit-contain{object-fit:contain;padding:${isPortrait ? 18 : 14}px}.visual-main.fit-fill{object-fit:fill}.visual:after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(2,9,14,.76) 100%);pointer-events:none}.visual figcaption{position:absolute;z-index:3;left:${isPortrait ? 20 : 18}px;right:${isPortrait ? 20 : 18}px;bottom:${isPortrait ? 16 : 14}px;font-size:${isPortrait ? 30 : 25}px;font-weight:650;line-height:1.25;letter-spacing:.03em;color:#f4f7f9;text-shadow:0 2px 10px rgba(0,0,0,.9)}
-    .subtitle{z-index:40;left:50%;bottom:${subtitleBottomPx}px;transform:translate(-50%,50%);width:86%;max-width:${isPortrait ? 900 : isSquare ? 920 : 1180}px;font-family:"GeoSubtitle","Source Han Sans SC","Noto Sans SC","Microsoft YaHei",sans-serif;font-size:${isPortrait ? 50 : isSquare ? 44 : 46}px;line-height:1.36;text-align:center;font-weight:500;letter-spacing:.01em;text-shadow:0 2px 10px rgba(0,0,0,.92),0 0 2px rgba(0,0,0,.7);white-space:normal;word-break:break-word}.subtitle-inner{display:block;padding:0;border-radius:0;background:none}
+.subtitle{z-index:40;left:50%;bottom:${subtitleBottomPx}px;transform:translate(-50%,50%);width:86%;max-width:${isPortrait ? 900 : isSquare ? 920 : 1180}px;font-family:"GeoSubtitle","Source Han Sans SC","Noto Sans SC","Microsoft YaHei",sans-serif;font-size:${isPortrait ? 50 : isSquare ? 44 : 46}px;line-height:1.36;text-align:center;font-weight:500;letter-spacing:.01em;text-shadow:0 2px 10px rgba(0,0,0,.92),0 0 2px rgba(0,0,0,.7);white-space:nowrap}.subtitle-inner{position:relative;display:inline-block;padding:0;border-radius:0;background:none;white-space:nowrap}.subtitle-ink{position:relative;display:inline-block;white-space:nowrap}.subtitle-wash{position:absolute;left:0;top:0;display:inline-block;white-space:nowrap;color:#ffd166;clip-path:inset(0 100% 0 0)}
     .visual figcaption{font-size:${isPortrait ? 42 : isSquare ? 30 : 25}px}
     .visual.visual-fullscreen{left:0;top:0;width:${profile.width}px;height:${profile.height}px;border:0;border-radius:0;box-shadow:none}
     .visual.visual-fullscreen figcaption{bottom:${fullscreenCaptionBottomPx}px}
@@ -348,6 +352,28 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
   <img id="cover" class="clip cover" src="${prefix}/images/${cover.src}" alt="${escapeHtml(cover.hierarchicalTitle)}视频封面" data-start="0" data-duration="${offset.toFixed(3)}" data-track-index="${COMPOSITION_TRACKS.cover}">
 </main>
 <script>
+  // 字幕只允许一行：量出这一句的实际宽度，放不下就等比缩字号，绝不允许折行。
+  // 必须在字体加载完之后量 —— 回退字体（雅黑）和思源黑体的同字宽度不一样，
+  // 早量的结果会让长句在成片里又折一次。
+  const fitSubtitles = () => {
+    document.querySelectorAll(".subtitle").forEach((box) => {
+      const inner = box.querySelector(".subtitle-inner");
+      if (!inner) return;
+      inner.style.fontSize = "";
+      const max = box.clientWidth || parseFloat(getComputedStyle(box).width) || 0;
+      if (!max) return;
+      let size = parseFloat(getComputedStyle(inner).fontSize) || 16;
+      const minimum = size * .55;
+      for (let guard = 0; guard < 10; guard += 1) {
+        const width = inner.getBoundingClientRect().width;
+        if (width <= max || size <= minimum) break;
+        size = Math.max(minimum, size * Math.min(.98, max / width));
+        inner.style.fontSize = size + "px";
+      }
+    });
+  };
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => requestAnimationFrame(fitSubtitles));
+  else requestAnimationFrame(fitSubtitles);
   const tl=gsap.timeline({paused:true});
   gsap.set([".subtitle-inner",".visual",".visual figcaption"],{opacity:0});
   tl.fromTo("#cover",{opacity:1},{opacity:0,duration:${coverFadeSeconds.toFixed(3)},ease:"power2.inOut"},${coverFadeStart.toFixed(3)}).set("#cover",{opacity:0},${offset.toFixed(3)});
@@ -368,7 +394,7 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
     return `tl.fromTo("#visual-main-${index}",{scale:${fromScale.toFixed(3)},x:${fromX.toFixed(1)},y:${y.toFixed(1)}},{scale:${toScale.toFixed(3)},x:${toX.toFixed(1)},y:${y.toFixed(1)},duration:${duration.toFixed(3)},ease:"none"},${start.toFixed(3)});`;
   }).join("\n")}
   ${visuals.map((visual, index) => { const cueStart = visual.cueStart === undefined ? visual.start + offset : narrationOffset + visual.cueStart; const cueEnd = visual.cueEnd === undefined ? visual.end + offset : narrationOffset + visual.cueEnd; const fadeOutAt = Math.max(cueStart + 0.08, cueEnd - 0.12); return `tl.fromTo("#visual-caption-${index}",{opacity:0},{opacity:1,duration:.1},${cueStart.toFixed(3)}).to("#visual-caption-${index}",{opacity:0,duration:.1},${fadeOutAt.toFixed(3)}).set("#visual-caption-${index}",{opacity:0},${cueEnd.toFixed(3)});`; }).join("\n")}
-  ${displayCues.map((cue, index) => { const timing = timelineValues(Math.max(offset, cue.start + narrationOffset + subtitleLeadSeconds), Math.max(offset + 0.08, cue.end + narrationOffset + subtitleLeadSeconds)); const cueEnd = Number(timing.start) + Number(timing.duration); const fadeOutAt = Math.max(Number(timing.start) + 0.08, cueEnd - 0.1); const hardKillAt = Math.min(cueEnd, fadeOutAt + 0.08); return `tl.fromTo("#caption-inner-${index}",{opacity:0,y:8},{opacity:1,y:0,duration:.08},${timing.start}).to("#caption-inner-${index}",{opacity:0,duration:.08},${fadeOutAt.toFixed(3)}).set("#caption-inner-${index}",{opacity:0},${hardKillAt.toFixed(3)});`; }).join("\n")}
+  ${displayCues.map((cue, index) => { const timing = timelineValues(Math.max(offset, cue.start + narrationOffset + subtitleLeadSeconds), Math.max(offset + 0.08, cue.end + narrationOffset + subtitleLeadSeconds)); const cueEnd = Number(timing.start) + Number(timing.duration); const fadeOutAt = Math.max(Number(timing.start) + 0.08, cueEnd - 0.1); const hardKillAt = Math.min(cueEnd, fadeOutAt + 0.08); const washSeconds = Math.max(.12, fadeOutAt - Number(timing.start) - .04); return `tl.fromTo("#caption-inner-${index}",{opacity:0,y:8},{opacity:1,y:0,duration:.08},${timing.start}).fromTo("#caption-wash-${index}",{clipPath:"inset(0 100% 0 0)"},{clipPath:"inset(0 0% 0 0)",duration:${washSeconds.toFixed(3)},ease:"none"},${(Number(timing.start) + .06).toFixed(3)}).to("#caption-inner-${index}",{opacity:0,duration:.08},${fadeOutAt.toFixed(3)}).set("#caption-inner-${index}",{opacity:0},${hardKillAt.toFixed(3)});`; }).join("\n")}
   window.__timelines=window.__timelines||{};window.__timelines["${regionId}-${profileName}"]=tl;
 </script>
 </body></html>`;
