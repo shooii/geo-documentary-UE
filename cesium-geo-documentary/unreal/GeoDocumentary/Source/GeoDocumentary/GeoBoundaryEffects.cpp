@@ -48,7 +48,12 @@ uint8 ParseBoundaryOff()
 double BlockHeight(const FBox &Bounds)
 {
     // FBox::IsValid is a flag on the struct, not a predicate.
-    return Bounds.IsValid ? FMath::Clamp(Bounds.GetSize().Size2D() * .104, 4800., 500000.) : 0.;
+    // The slab has to read as a slab, not a bevel: the visible height is this number
+    // times the parent strength in GeoMap (0.16 focus -> ~0.09), so a factor of .104
+    // left a 26 km township only ~230 m thick. .135 puts it near 300 m, which is the
+    // first step that reads as relief at the overview framing without turning the
+    // block into a wall in the village shots.
+    return Bounds.IsValid ? FMath::Clamp(Bounds.GetSize().Size2D() * .135, 4800., 500000.) : 0.;
 }
 double BlockWidth(const FBox &Bounds)
 {
