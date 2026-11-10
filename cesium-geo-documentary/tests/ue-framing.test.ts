@@ -72,3 +72,28 @@ test('cloud envelope timing matches the reference renderer at every opening beat
   assert.ok(Math.abs(actual.volume-reference.openingCloudAlpha(time,100000))<1e-12);
  }
 });
+test('closing pull-back shrinks village names whichever path drives the ending',()=>{
+ const preset={longitude:110,latitude:20,height:12000,heading:0,pitch:-64};
+ const region={cameraPreset:preset};
+ const stops=[
+  {id:'a',start:0,end:10,flightDuration:4,cameraPreset:preset},
+  {id:'b',start:10,end:20,flightDuration:4,cameraPreset:preset}
+ ];
+ const scene={region};
+ const touring=frameAt(scene,stops,15,'portrait',4.4);
+ // The tour's own return: camera pulling back after the last stop.
+ const returned=frameAt(scene,stops,30,'portrait',4.4);
+ // The outro scene: same pull-back, expressed as `overviewProgress` instead of a return.
+ const origin={camera:{lon:110,lat:20,height:12000,heading:0,pitch:-64},parentLabel:0,parentAccent:1,labels:{a:{alpha:1,scale:.9,emphasis:0},b:{alpha:1,scale:.9,emphasis:0}},accents:{}};
+ const outro=frameAt(scene,stops,25,'portrait',4.4,false,origin,1);
+ const mid=frameAt(scene,stops,25,'portrait',4.4,false,origin,.45);
+ // The narrated village keeps Cesium's 1.0 .. 1.0 while it is the subject.
+ assert.ok(touring.labels.b.scale>.95,`touring ${touring.labels.b.scale}`);
+ // Both endings land on RETURN_LABEL_SCALE = 0.68 of the touring size.
+ assert.ok(Math.abs(returned.labels.a.scale-.9*.68)<1e-6,`return ${returned.labels.a.scale}`);
+ assert.ok(Math.abs(outro.labels.a.scale-.9*.68)<1e-6,`outro ${outro.labels.a.scale}`);
+ assert.ok(mid.labels.a.scale>outro.labels.a.scale && mid.labels.a.scale<.9,`mid ${mid.labels.a.scale}`);
+ // Rank is the tour order, so the map's declutter pass can keep the narrated place.
+ assert.equal(outro.labels.a.rank,0);
+ assert.equal(outro.labels.b.rank,1);
+});

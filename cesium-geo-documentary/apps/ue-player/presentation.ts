@@ -15,7 +15,7 @@ export function camera(p: any) {
 }
 
 type Camera = ReturnType<typeof camera>;
-type LabelStyle = { alpha: number; scale: number; emphasis: number };
+type LabelStyle = { alpha: number; scale: number; emphasis: number; rank?: number | undefined };
 export type PreviewFlightOrigin = {
   camera: Camera;
   parentLabel: number;
@@ -208,11 +208,25 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     });
   }
   if (!openingOnly) {
+    // RETURN_LABEL_SCALE, on both ways the film can end. Cesium pulls the names down to
+    // 0.68 while the camera returns to the overview; the film can reach that ending two
+    // ways — the tour's own `returnState`, or an outro scene that drives `overviewProgress`
+    // — and only the first one used to carry the factor. When the closing was an outro,
+    // twenty-three village names stayed at their touring size over a city-sized map,
+    // which is why the ending read as crowded no matter how the layout was tuned.
+    const closingProgress = Math.max(
+      returning?.progress ?? 0,
+      overviewProgress === undefined ? 0 : smooth(overviewProgress)
+    );
+    const closingScale = lerp(1, .68, clamp(closingProgress));
     stops.forEach((item, stopIndex) => {
       const id = String(item.id);
       const label = tourLabelPresentationAt(mapTime, tour, returning, item, stopIndex);
       if (label.visible) labels[id] = {
-        alpha: label.alpha * labelsReveal, scale: label.scale * lerp(1, .68, returning?.progress ?? 0), emphasis: label.emphasis
+        alpha: label.alpha * labelsReveal, scale: label.scale * closingScale, emphasis: label.emphasis,
+        // Tour order, so the map's own declutter pass can rank a village the way Cesium
+        // does: the place that was narrated first keeps its name when two collide.
+        rank: stopIndex
       };
       const accent = tourHighlightStrength(tour, returning, id);
       if (accent > 0) accents[id] = accent;
@@ -245,7 +259,8 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
       labels[id] = {
         alpha: lerp(start?.alpha ?? 0, end?.alpha ?? 0, transition),
         scale: lerp(start?.scale ?? end!.scale, end?.scale ?? start!.scale, transition),
-        emphasis: lerp(start?.emphasis ?? 0, end?.emphasis ?? 0, transition)
+        emphasis: lerp(start?.emphasis ?? 0, end?.emphasis ?? 0, transition),
+        rank: end?.rank ?? start?.rank
       };
     }
     for (const id of new Set([...Object.keys(origin.accents), ...Object.keys(accents)])) {

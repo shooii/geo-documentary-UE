@@ -67,11 +67,12 @@ static UTexture2D *LoadCloudTexture(const FString &File)
     return Texture;
 }
 // How much ink a font puts into the height UCanvas::StrLen reports for it. Canvas sizes
-// text by that height, and the two faces in this film disagree about it badly: measured
-// in the engine at raster 72, Noto reports a 139 px line box for a 64.8 px glyph (0.466),
-// while YaHei Bold reported 0.719. Every label size below is therefore expressed as a
-// target ink height and divided by this number.
-static constexpr float NotoInkPerLineBox = .466f;
+// text by that height, so this is the only number that turns "55 px of letter" into a
+// TextScale. Measured off the rendered film rather than derived: a village name at a
+// 74 px line box lands 48 px of ink on screen (0.65), a township name at 136 px lands
+// ~95 px. 0.70 is the middle of those and matches the value the YaHei build had been
+// tuned against, which is why swapping to Noto no longer changes the size at all.
+static constexpr float NotoInkPerLineBox = .70f;
 static constexpr float YaheiInkPerLineBox = .719f;
 // Every on-screen string in the film is Noto Sans SC Bold — the subtitle track in the
 // compositor, the village plaques, and the map labels. The HUD used to hard-code
@@ -1783,7 +1784,7 @@ void AGeoHUD::DrawHUD()
         Fill.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Fill);
     }
-    const FLinearColor TownEdge(.031, .070, .026), VillageEdge(.070, .480, .540);
+    const FLinearColor TownEdge(.031, .070, .026);
     const FLinearColor ContextEdge(.35, .43, .41), DarkEdge(.009, .018, .021);
     TArray<FCanvasUVTri> BoundaryTriangles;
     // The beam is lifted out of the rim batch. Both used to share one triangle array, and
@@ -2443,6 +2444,8 @@ void AGeoHUD::DrawHUD()
         // villages from a 72 px one.
         UFont *Font = nullptr;
         bool Community = false;
+        // Tour order. Lower wins a contested slot, so the narrated place keeps its name.
+        int32 Rank = 999999;
         // On-screen line-box height of the name, in pixels: the outline width is derived
         // from it so that it stays proportional at every zoom.
         float Ink = 0;
@@ -2517,6 +2520,10 @@ void AGeoHUD::DrawHUD()
         // these into the label scale property, so reading it back is what keeps the
         // tour, the hand-off and the closing overview identical between the two builds.
         const float StyleScale = Label.Parent ? 1.f : float(N(*Style, TEXT("scale"), 1.));
+        // Position in the tour. The child labels are decluttered by rank the way Cesium's
+        // `declutterChildLabels` does it: the place the narration reached first keeps its
+        // name when two collide, and the frame does not reshuffle itself between shots.
+        const int32 Rank = Label.Parent ? -1 : int32(N(*Style, TEXT("rank"), 999999.));
         // The township name is drawn at twice the size it used to be: at the wide framing
         // the town is a shape on a satellite photo and the name was reading as a caption
         // rather than as the title of the shot.
@@ -2542,11 +2549,9 @@ void AGeoHUD::DrawHUD()
         // what the two builds looked like side by side. 0.982 / 0.719 keeps the
         // silhouettes equal; both ratios are properties of the face, not of this shot.
         // The target is 55 px of *ink* (Cesium's 56 px font carries 0.982 em of ink), and
-        // Canvas sizes text by the line box UFont reports for the face. Noto puts 0.466 of
-        // that line box into ink, so the line box has to be 55 / 0.466 = 118 px. Feeding
-        // the old YaHei-derived 1.366 straight into the new face shrank every village name
-        // by a third — the two faces disagree about their line box, not just their
-        // skeleton.
+        // Canvas sizes text by the line box UFont reports for the face, so the line box has
+        // to be 55 / 0.70 = 78.6 px. Sizing this off a guessed raster factor instead of off
+        // the rendered frame is what made one round of labels 40 % too large.
         constexpr float CesiumInkPx = 56.f * .982f;
         constexpr float FaceInkPerLineBox = NotoInkPerLineBox;
         constexpr float ChildLabelPx = CesiumInkPx / FaceInkPerLineBox;
@@ -2669,7 +2674,7 @@ void AGeoHUD::DrawHUD()
         DrawLabels.Add({Label.Id, Label.Name, Label.PlatePath, Point, Extent, Color, TextScale, Emphasis,
                         IconSize, PlateHeight, PlateTexture, CurrentVillage ? 2 : Label.Parent ? 1 : 0,
                         CharCount, Tracking * TextScale, (Width + TrackingTotal) * TextScale, Label.Parent, Font,
-                        Community, Height * TextScale});
+                        Community, Rank, Height * TextScale});
     }
     DrawLabels.Sort([this](const FLabelDraw &A, const FLabelDraw &B) {
         if (A.Priority != B.Priority)
@@ -2680,6 +2685,11 @@ void AGeoHUD::DrawHUD()
         // villages get the good slots and the 社区 chip finds room where it can.
         if (A.Community != B.Community)
             return !A.Community;
+        // Then tour order — Cesium's `declutterChildLabels` ranks by stop index for the
+        // same reason: when two names fight over one slot the narration decided which
+        // place matters, and that decision must not change from frame to frame.
+        if (A.Rank != B.Rank)
+            return A.Rank < B.Rank;
         const bool WasVisible = LabelPlacements.Contains(A.Id), OtherWasVisible = LabelPlacements.Contains(B.Id);
         if (WasVisible != OtherWasVisible)
             return WasVisible;
@@ -2712,22 +2722,16 @@ void AGeoHUD::DrawHUD()
                        FVector2D(-X, BaseY), FVector2D(X, BaseY - Y), FVector2D(-X, BaseY - Y),
                        FVector2D(0, BaseY - 2 * Y)};
         else
-            // Wider set of candidates: the overview carries a dozen names inside one town,
-            // and a name is worth more where it is than not drawn at all.
-            //
-            // The second ring is what deals with the two knots in the closing overview
-            // (后埗 / 横山 / 竹桥 / 排楼 up north, the three 社区 in the centre): the old
-            // candidate set only reached 2.6 label heights, so four names fighting over one
-            // cluster had nowhere to go and the fallback stacked them on top of each other.
-            // A leader line now carries the name back to its anchor, which is how a printed
-            // atlas resolves the same argument.
+            // Small nudges only. A name is allowed to step aside by up to two of its own
+            // heights to clear an outline or the caption band; anything further and it
+            // stops being a label on a place. What does not fit is dropped by the
+            // declutter pass below — ArcGIS calls this label overflow, and the alternative
+            // (push it three heights away and draw a line back) gave the closing overview
+            // a dozen stray hairlines that read as terrain, not as annotation.
             Offsets = {{0, 0}, {0, -Y}, {X, 0}, {-X, 0}, {0, Y},
                        {X, -Y}, {-X, -Y}, {X, Y}, {-X, Y},
                        {0, -Y - 40 * Scale}, {0, Y + 40 * Scale},
-                       {X * 1.35, 0}, {-X * 1.35, 0}, {0, -2 * Y}, {0, 2 * Y},
-                       {X * 2.1, -Y * 1.4}, {-X * 2.1, -Y * 1.4}, {X * 2.1, Y * 1.4}, {-X * 2.1, Y * 1.4},
-                       {X * 1.5, -Y * 2.8}, {-X * 1.5, -Y * 2.8}, {X * 1.5, Y * 2.8}, {-X * 1.5, Y * 2.8},
-                       {0, -Y * 3.4}, {0, Y * 3.4}};
+                       {X * 1.35, 0}, {-X * 1.35, 0}, {0, -2 * Y}, {0, 2 * Y}};
         const int32 OffsetCount = Offsets.Num();
         if (Pinned && LabelPin)
         {
@@ -2743,7 +2747,9 @@ void AGeoHUD::DrawHUD()
                              .ExpandBy(2 * Scale));
         }
         const int32 *PreviousRaw = LabelPlacements.Find(Label.Id);
-        const int32 *Previous = PreviousRaw && *PreviousRaw < OffsetCount ? PreviousRaw : nullptr;
+        // INDEX_NONE is stored for a name the declutter pass dropped; it must never be
+        // used as an offset index.
+        const int32 *Previous = PreviousRaw && *PreviousRaw >= 0 && *PreviousRaw < OffsetCount ? PreviousRaw : nullptr;
         int32 Selected = INDEX_NONE;
         FBox2D Bounds;
         if (Pinned || Label.Animated)
@@ -2799,9 +2805,18 @@ void AGeoHUD::DrawHUD()
                 }
             if (Selected == INDEX_NONE)
             {
-                // Nothing fit. A name on the map is worth more than a perfect layout, so it
-                // goes on its own anchor, pulled back inside the frame — the halo keeps it
-                // legible even where it brushes a neighbour.
+                // Label overflow, the ArcGIS way: a name that cannot be placed without
+                // covering a neighbour is not drawn at all. Stacking it where it fell is
+                // what made the closing overview read as two lumps of ink, and tying it off
+                // with a leader just replaced the lump with a thicket of hairlines.
+                // The current village and the township are exempt — they are what the shot
+                // is about, so they are admitted first and always placed.
+                if (Label.Priority == 0)
+                {
+                    if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_DEBUG")).Len() > 0)
+                        UE_LOG(LogTemp, Display, TEXT("LABEL_DROPPED %s rank=%d"), *Label.Id, Label.Rank);
+                    continue;
+                }
                 FVector2D Center = Label.Anchor;
                 const FVector2D Span = Label.Extent * 2;
                 if (Span.X <= SafeFrame.GetSize().X && Span.Y <= SafeFrame.GetSize().Y)
@@ -2819,26 +2834,6 @@ void AGeoHUD::DrawHUD()
         Occupied.Add(Bounds.ExpandBy(3 * Scale));
         Placements.Add(Label.Id, Selected);
         const FVector2D Position = Bounds.GetCenter();
-        // A name that had to move gets a leader: the second offset ring lets a crowded
-        // cluster spread out, but only a line back to the anchor keeps it attached to the
-        // right village. The pinned village never needs one — its plaque is welded to the
-        // pin. Neither does a name that only stepped aside by a few pixels: at that
-        // distance the line is a stray tick next to the first character, not a pointer.
-        const double Drift = FVector2D::Distance(Label.Anchor, Position);
-        if (Selected != 0 && !Pinned && Drift > FMath::Max(42. * Scale, double(Label.Extent.Y) * 1.6))
-        {
-            const FVector2D Tip(FMath::Clamp(Label.Anchor.X, Bounds.Min.X, Bounds.Max.X),
-                                FMath::Clamp(Label.Anchor.Y, Bounds.Min.Y, Bounds.Max.Y));
-            const bool Strong = Label.Priority == 2;
-            FCanvasLineItem Leader(Label.Anchor, Tip);
-            Leader.BlendMode = SE_BLEND_Translucent;
-            Leader.LineThickness = (Strong ? 3.5f : 1.9f) * Scale;
-            Leader.SetColor(DarkEdge.CopyWithNewOpacity((Strong ? .82 : .30) * Label.Color.A));
-            Canvas->DrawItem(Leader);
-            Leader.LineThickness = (Strong ? 1.5f : .9f) * Scale;
-            Leader.SetColor((Strong ? VillageEdge : FLinearColor::White).CopyWithNewOpacity((Strong ? .90 : .34) * Label.Color.A));
-            Canvas->DrawItem(Leader);
-        }
         if (Label.Priority == 2 && Selected != 0 && !Label.PlateTexture)
         {
             FCanvasTileItem Backdrop(Bounds.Min, Bounds.GetSize(), DarkEdge.CopyWithNewOpacity(.66 * Label.Color.A));
