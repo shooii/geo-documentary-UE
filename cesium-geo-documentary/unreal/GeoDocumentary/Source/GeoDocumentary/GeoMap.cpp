@@ -1457,7 +1457,12 @@ void AGeoHUD::DrawHUD()
     };
     // Keyed off the township's own reveal, not the shot's focus strength: the periphery
     // stays dimmed from the opening to the outro instead of breathing with each cut.
-    DrawRects(DimRects, FLinearColor(.018, .024, .022, (FocusId.IsEmpty() ? .48 : .22) * Reveal));
+    // One sheet for every shot: the brief is the periphery reads 70 % darker than the
+    // township itself, in a village close-up as much as in the overview. The old split
+    // (.48 overview / .22 focused) left the periphery at half strength whenever a village
+    // had the frame, which read as "no dimming at all" next to the undimmed township.
+    const double DimOpacity = .72;
+    DrawRects(DimRects, FLinearColor(.018, .024, .022, DimOpacity * Reveal));
     const double ShadowOpacity[] = {.08, .15, .33};
     for (int Layer = 0; Layer < UE_ARRAY_COUNT(ShadowRects); ++Layer)
         DrawRects(ShadowRects[Layer], FLinearColor(.006, .010, .010, ShadowOpacity[Layer] * Reveal));
