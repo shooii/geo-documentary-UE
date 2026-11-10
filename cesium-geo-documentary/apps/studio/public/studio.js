@@ -691,16 +691,22 @@ function sceneNarrationRange(scene) {
 }
 
 // Render-spec cue ranges are measured from the start of the *narration*, and the
-// compositor places that narration after two lead-ins: the cover still, then the
-// region's opening descent (written out as `narrationStartSeconds` in the
-// composition manifest, e.g. 3 s for 乌石镇 and 10 s for 和安镇). The map timeline
-// is `ceil(narration + descent)` and `totalDurationSeconds` adds the cover on top
-// of that, so the printed total already carries both lead-ins while the cue clock
-// carries neither — the playhead has to add both, or every scene reads one
-// descent earlier than the frame the export puts it on.
+// compositor places that narration after two lead-ins: the cover still, then a
+// silent gap at the head of the map timeline. That gap is written out as
+// `narrationStartSeconds` in `data/regions/<id>.timeline.json` and the render spec
+// now carries the same number as `opening.narrationLeadSeconds`; the playhead has
+// to add both, or every scene reads its position one gap earlier than the frame the
+// export puts it on.
+//
+// It used to guess the gap from `openingDescentSeconds`, which is 0.35 s short of
+// what the child-tour builder writes (it starts speech on the parent boundary pen
+// draw, not at the end of the descent). The fallback stays for specs fetched from
+// an older server build.
 function timelineOffsetSeconds() {
   if (!state.project) return 0;
   const cover = Number(state.renderSpec?.cover?.introSeconds ?? state.project.cover?.introSeconds ?? 0);
+  const lead = state.renderSpec?.opening?.narrationLeadSeconds;
+  if (typeof lead === "number" && Number.isFinite(lead)) return cover + lead;
   const descent = Number(state.renderSpec?.opening?.descentSeconds ?? state.project.template?.openingDescentSeconds ?? 0);
   return cover + descent;
 }

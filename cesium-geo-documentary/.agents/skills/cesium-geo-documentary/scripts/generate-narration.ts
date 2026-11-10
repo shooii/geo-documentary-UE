@@ -412,7 +412,8 @@ for (const id of ids) {
   if (shouldGenerate) {
     fallbackReason = null;
     if (isXfyunVoice(requestedVoiceId)) {
-      // 讯飞在线合成只返回音频，不返回句级时间戳，字幕按段落字数比例铺开。
+      // 讯飞在线合成只返回音频，不返回句级时间戳：字幕按句子切开后，用 silencedetect
+      // 测到的真实停顿把每条边界吸附过去（见 writeProportionalSrt / narration-align）。
       // 音色与音质由讯飞云端决定，和 Edge 一样可以直接进成片（不再降级）。
       provider = "xfyun-tts";
       actualVoiceId = requestedVoiceId;
@@ -479,7 +480,10 @@ for (const id of ids) {
     sampleRate: 48000,
     generatedAt,
     edgeTtsFallbackReason: fallbackReason,
-    timingMode: provider === "edge-tts" ? "provider-sentence-boundaries" : "paragraph-proportional",
+    // Edge hands back real sentence boundaries. 讯飞 doesn't, so its timeline is
+    // estimated per sentence and then snapped to measured pauses — recording it as
+    // "paragraph-proportional" would describe an algorithm that no longer runs.
+    timingMode: provider === "edge-tts" ? "provider-sentence-boundaries" : "sentence-pause-snapped",
     xfyunVoice: provider === "xfyun-tts" ? actualVoiceId.replace(/^xfyun:/, "") : null,
     pauseProfile: outroPause
       ? "sentence punctuation with blank-line paragraph pauses and parent-return silence"

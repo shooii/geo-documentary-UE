@@ -116,7 +116,12 @@ test("narration and child-tour scripts keep raw TTS assets separate and expose a
   assert.match(tourSource, /tourClosingNarrationPolicy = "after-exact-opening-camera-lock"/);
   assert.match(tourSource, /cameraLockTarget: "exact-opening-parent-camera"/);
   assert.match(tourSource, /narrationCueIndex/);
-  assert.match(tourSource, /PARENT_BOUNDARY_REVEAL_START_SECONDS = 0\.35/);
+  // The lead lives in the shared package because the editor preview has to add the
+  // same number to its timecode; the builder may only read it.
+  const openingTimingSource = await readFile(resolve(root, "packages/render-spec/opening-timing.ts"), "utf8");
+  assert.match(openingTimingSource, /PARENT_BOUNDARY_REVEAL_START_SECONDS = 0\.35/);
+  assert.match(tourSource, /import \{ PARENT_BOUNDARY_REVEAL_START_SECONDS \} from/);
+  assert.doesNotMatch(tourSource, /PARENT_BOUNDARY_REVEAL_START_SECONDS = 0\.35/);
   assert.match(tourSource, /narrationSyncOffsetSeconds = PARENT_BOUNDARY_REVEAL_START_SECONDS/);
   assert.match(tourSource, /narrationStartSeconds: openingSeconds \+ narrationSyncOffsetSeconds/);
   assert.match(tourSource, /firstCueIndex|start: cueStart \+ narrationSyncOffsetSeconds|start: cue\.start \+ narrationSyncOffsetSeconds/);

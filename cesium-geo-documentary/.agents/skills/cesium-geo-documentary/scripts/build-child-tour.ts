@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { SceneTimelineSchema } from "../../../../packages/timeline-schema/index.js";
 import { normalizeTourReturnSeconds, parseSrt } from "./narration-timing.js";
 import { portraitChildCameraPreset, type GeoBounds } from "../../../../packages/geo-camera/index.js";
+import { PARENT_BOUNDARY_REVEAL_START_SECONDS } from "../../../../packages/render-spec/opening-timing.js";
 
 interface ChildRegion {
   id: string;
@@ -115,7 +116,8 @@ const durationData = JSON.parse(await readFile(durationPath, "utf8")) as {
 // draw. The descent remains silent, but the overview must not wait for the
 // outline and label to finish before speech begins. Cue-driven camera actions
 // use this same offset so audio, captions, and map motion stay synchronized.
-const PARENT_BOUNDARY_REVEAL_START_SECONDS = 0.35;
+// The number lives in `packages/render-spec/opening-timing.ts` because the editor
+// preview has to add the very same lead to its timecode.
 const narrationSyncOffsetSeconds = PARENT_BOUNDARY_REVEAL_START_SECONDS;
 const openingSeconds = region.openingDescent?.enabled === false
   ? 0

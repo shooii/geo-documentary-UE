@@ -478,6 +478,24 @@ export async function normalizeProject(root: string, input: VideoProject | Recor
   };
 }
 
+/**
+ * The measured narration lead from the region timeline, when the skill scripts have
+ * written one. Absent on regions whose timeline predates that field, on regions with
+ * no child tour, and on every region before the first export — the caller falls back
+ * to the rule in `opening-timing.ts`.
+ */
+async function readTimelineNarrationStart(root: string, regionId: string): Promise<number | undefined> {
+  const path = join(root, "data", "regions", `${regionId}.timeline.json`);
+  if (!existsSync(path)) return undefined;
+  try {
+    const timeline = JSON.parse(await readFileResilient(path, "utf8")) as { narrationStartSeconds?: number };
+    const value = Number(timeline.narrationStartSeconds);
+    return Number.isFinite(value) && value > 0 ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function buildProjectRenderSpec(root: string, project: VideoProject, cues?: TimedCue[], timing?: { narrationDurationSeconds?: number; timelineDurationSeconds?: number }): Promise<RenderSpec> {
   // Explicit measured cues (including export) stay strict. Estimates are only
   // used when the caller asks for an editor preview without measured audio.
@@ -487,6 +505,10 @@ export async function buildProjectRenderSpec(root: string, project: VideoProject
     cues: resolvedCues,
     geometrySignature: await geometrySignature(root, project.regionId, project.id),
     rendererSignature: await mapRendererSignature(root),
+    // The editor's timecode has to start the narration where the export does; the
+    // 0.35 s the child-tour builder waits for the parent boundary pen draw used to be
+    // missing here, so every preview ran one pen draw early.
+    timelineNarrationStartSeconds: await readTimelineNarrationStart(root, project.regionId),
     ...timing
   });
 }

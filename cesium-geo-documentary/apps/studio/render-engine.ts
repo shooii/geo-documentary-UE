@@ -897,8 +897,18 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   generatedCues = timingResult.cues;
   await runTsx(".agents/skills/cesium-geo-documentary/scripts/build-child-tour.ts", ["--region", project.regionId], "synthesizing", "生成实际 cue 时间轴与行政区巡游", 27);
   const duration = JSON.parse(await readFile(join(sandbox, "assets", "audio", project.regionId, "duration.json"), "utf8")) as { durationSeconds: number; timelineDurationSeconds: number };
-  const timeline = JSON.parse(await readFile(join(sandbox, "data", "regions", `${project.regionId}.timeline.json`), "utf8")) as { duration: number };
-  spec = buildRenderSpec({ project, cues: generatedCues, geometrySignature: await geometrySignature(root, project.regionId, project.id), rendererSignature: await mapRendererSignature(root), narrationDurationSeconds: duration.durationSeconds, timelineDurationSeconds: timeline.duration });
+  const timeline = JSON.parse(await readFile(join(sandbox, "data", "regions", `${project.regionId}.timeline.json`), "utf8")) as { duration: number; narrationStartSeconds?: number };
+  spec = buildRenderSpec({
+    project,
+    cues: generatedCues,
+    geometrySignature: await geometrySignature(root, project.regionId, project.id),
+    rendererSignature: await mapRendererSignature(root),
+    narrationDurationSeconds: duration.durationSeconds,
+    timelineDurationSeconds: timeline.duration,
+    // build-child-tour just rewrote this; the composition reads the same field, so
+    // the spec the editor shows and the file ffmpeg renders can never disagree.
+    timelineNarrationStartSeconds: Number(timeline.narrationStartSeconds ?? NaN)
+  });
   await writeRegionAnnotationWindows(sandbox, project.regionId, spec);
   updateProjectMeasuredDurations(project, spec);
   await writeSubtitleOverrides(sandbox, project, spec);

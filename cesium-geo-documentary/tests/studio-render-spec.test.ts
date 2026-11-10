@@ -1473,3 +1473,39 @@ test("a request for a project that does not exist is a 404, not a bad request", 
 });
 
 
+
+test("编辑器预览的旁白起拍点与成片读同一个数", async () => {
+  /* The compositor offsets narration, captions and every cue-driven camera move by
+     `cover + narrationStartSeconds` from `data/regions/<id>.timeline.json`. The
+     preview used to rebuild that gap from `openingDescentSeconds`, which is 0.35 s
+     short of what build-child-tour writes — so the printed timecode and the scene
+     chip ran one pen draw early on every tour scheme, and the operator went looking
+     for a drift in the export that was never there. */
+  const project = await makeProject(root, "440825112");
+  const cues = await readCanonicalCues(root, project.regionId);
+  const geometry = await geometrySignature(root, project.regionId);
+  const timeline = JSON.parse(await readFile(resolve(root, `data/regions/${project.regionId}.timeline.json`), "utf8")) as { narrationStartSeconds?: number };
+  const measured = Number(timeline.narrationStartSeconds);
+  assert.ok(Number.isFinite(measured) && measured > 0, "fixture region has to carry a measured lead");
+
+  const preview = await buildProjectRenderSpec(root, project);
+  assert.equal(preview.opening.narrationLeadSeconds, measured, "the preview must read the timeline, not guess");
+
+  const guessed = buildRenderSpec({ project, cues, geometrySignature: geometry });
+  assert.equal(guessed.opening.narrationLeadSeconds, project.template.openingDescentSeconds + 0.35,
+    "without a timeline the fallback is the child-tour rule");
+  const explicit = buildRenderSpec({ project, cues, geometrySignature: geometry, timelineNarrationStartSeconds: measured });
+  assert.equal(explicit.opening.narrationLeadSeconds, measured);
+  assert.equal(explicit.cacheSignature, guessed.cacheSignature,
+    "the preview lead must not invalidate a cached map render");
+
+  // One number, three readers: the builder writes it, the spec carries it, the
+  // preview adds it. Any of these drifting apart re-opens the same bug.
+  const [builder, client] = await Promise.all([
+    readFile(resolve(root, ".agents/skills/cesium-geo-documentary/scripts/build-child-tour.ts"), "utf8"),
+    readFile(resolve(root, "apps/studio/public/studio.js"), "utf8")
+  ]);
+  assert.match(builder, /import \{ PARENT_BOUNDARY_REVEAL_START_SECONDS \} from "\.\.\/\.\.\/\.\.\/\.\.\/packages\/render-spec\/opening-timing\.js";/);
+  assert.doesNotMatch(builder, /const PARENT_BOUNDARY_REVEAL_START_SECONDS = /, "the constant may only live in the shared module");
+  assert.match(client, /state\.renderSpec\?\.opening\?\.narrationLeadSeconds/);
+});

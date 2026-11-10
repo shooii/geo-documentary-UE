@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { buildSingleLineCues, normalizeSubtitleSemantics, splitSingleLineText, type SingleLineCueOverride } from "../content-engine/subtitles.js";
 import { normalizeSemanticText, type AssetPlacement, type MapView, type StudioScene, type VideoProject } from "../project-schema/index.js";
 import { MINIMUM_RENDERED_VISUAL_SECONDS, planVisualClip, resolveVisualClipWindow } from "./visual-timeline.js";
+import { compositionNarrationLeadSeconds } from "./opening-timing.js";
 
 export interface TimedCue {
   index: number;
@@ -51,6 +52,12 @@ export interface RenderSpec {
   cover: VideoProject["cover"];
   opening: {
     descentSeconds: number;
+    /**
+     * 地图时间线开头到第一句旁白的秒数——成片把旁白、字幕和所有跟随旁白的镜头
+     * 都放在这个偏移之后。编辑器用它算时间码，必须与合成器同源，见
+     * `opening-timing.ts`。
+     */
+    narrationLeadSeconds: number;
     startHeightMeters: number;
     startPitchDegrees: number;
     cloudDeckHeightMeters: number;
@@ -266,6 +273,11 @@ export function buildRenderSpec(input: {
    * configuration.
    */
   rendererSignature?: string;
+  /**
+   * 区域 timeline.json 里实测的旁白起拍偏移。成片用它定位旁白与字幕，预览也用它
+   * 算时间码；不传就按"巡游方案 = 下降 + 0.35 s，其它方案 = 0"推算。
+   */
+  timelineNarrationStartSeconds?: number | undefined;
 }): RenderSpec {
   const { project, cues } = input;
   const ranges = mapScenesToCues(project.scenes, cues);
@@ -339,6 +351,11 @@ export function buildRenderSpec(input: {
     cover: project.cover,
     opening: {
       descentSeconds: project.template.openingDescentSeconds,
+      narrationLeadSeconds: compositionNarrationLeadSeconds({
+        descentSeconds: project.template.openingDescentSeconds,
+        hasChildTour: project.scenes.some((scene) => scene.section === "child"),
+        timelineNarrationStartSeconds: input.timelineNarrationStartSeconds
+      }),
       startHeightMeters: project.template.openingStartHeightMeters,
       startPitchDegrees: project.template.openingStartPitchDegrees,
       cloudDeckHeightMeters: project.template.cloudDeckHeightMeters,
