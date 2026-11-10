@@ -14,6 +14,7 @@ import {
   type TourOutroPausePlan
 } from "./narration-timing.js";
 import { isXfyunVoice, synthesizeXfyun, xfyunCredentialsFromEnvFile } from "../../../../packages/xfyun-tts/index.js";
+import { alignCueBoundaries, splitNarrationSentences } from "../../../../packages/render-spec/narration-align.js";
 
 interface PronunciationRecord { term: string; pinyin: string; spokenForm?: string }
 interface RegionContent {
@@ -195,15 +196,6 @@ function loudnessNormalize(input: string, output: string): Record<string, string
   return report;
 }
 
-/** Split a paragraph into the sentences a narrator actually breathes between. */
-function splitNarrationSentences(text: string): string[] {
-  return text
-    .split(/\n+/)
-    .flatMap((line) => line.split(/(?<=[。！？；;…])/u))
-    .map((part) => part.trim())
-    .filter((part) => part.length > 0);
-}
-
 /**
  * Midpoints of the pauses in a synthesised track.
  *
@@ -238,46 +230,9 @@ async function writeProportionalSrt(path: string, narration: string[], duration:
   // stretch of speech share a single subtitle window, and it is also what the
   // sentence-count based cue indices downstream (tourIntroSentences) already assume.
   const sentences = narration.flatMap(splitNarrationSentences);
-  const weights = sentences.map((text) => Math.max(1, [...text].length));
-  const totalWeight = weights.reduce((sum, value) => sum + value, 0);
-  const startPadding = 0.1;
-  const endPadding = 0.15;
-  const usable = Math.max(1, duration - startPadding - endPadding);
-  const ends: number[] = [];
-  let cursor = startPadding;
-  for (const weight of weights) {
-    cursor += usable * weight / totalWeight;
-    ends.push(cursor);
-  }
-  ends[ends.length - 1] = Math.max(startPadding + 0.25, duration - endPadding);
-  // Snap the guesses onto measured pauses, in order, never reusing one. Boundaries
-  // without a nearby pause keep their estimated position instead of jumping.
-  if (audioPath && existsSync(audioPath)) {
-    const pauses = speechPauses(audioPath);
-    let used = 0;
-    let previous = startPadding;
-    for (let index = 0; index < ends.length - 1; index += 1) {
-      const target = ends[index]!;
-      let best = -1;
-      let bestDistance = Infinity;
-      for (let candidate = used; candidate < pauses.length; candidate += 1) {
-        const at = pauses[candidate]!;
-        if (at > target + 2.5) break;
-        if (at < previous + 0.35) continue;
-        const distance = Math.abs(at - target);
-        if (distance < bestDistance) { best = candidate; bestDistance = distance; }
-      }
-      if (best >= 0 && bestDistance <= 2.5) {
-        previous = pauses[best]!;
-        used = best + 1;
-        ends[index] = previous;
-      } else {
-        previous = Math.max(previous + 0.25, target);
-        ends[index] = previous;
-      }
-    }
-  }
-  let previous = startPadding;
+  const pauses = audioPath && existsSync(audioPath) ? speechPauses(audioPath) : [];
+  const ends = alignCueBoundaries(sentences.map((text) => [...text].length), duration, pauses);
+  let previous = 0.1;
   const blocks = sentences.map((text, index) => {
     const end = Math.max(previous + 0.2, ends[index]!);
     const block = `${index + 1}\n${formatSrtTimestamp(previous)} --> ${formatSrtTimestamp(end)}\n${text}`;
