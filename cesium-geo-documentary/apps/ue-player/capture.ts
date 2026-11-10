@@ -35,7 +35,14 @@ const signallingPort = port + 1, streamerPort = port + 2;
 if (port !== Number(option('port', '4674'))) console.log(`UE_CAPTURE_PORTS ${port}-${streamerPort} (requested ${option('port','4674')})`);
 const preview=process.argv.includes('--preview') && process.argv.includes('--qa'),scale=preview?2/3:1;
 const width=(profile==='landscape'?1920:1080)*scale,height=(profile==='landscape'?1080:profile==='square'?1080:1920)*scale;
-const frames=join(root,'renders','ue-frames',`${region}-${profile}`);
+const qa=process.argv.includes('--qa');
+// QA runs are one-frame probes of a timeline, and they used to be written into
+// the same `renders/ue-frames` and `renders/intermediate` paths as a real
+// capture. A `--qa --frames 1` run therefore replaced a finished 50 s map clip
+// with a single frame, and every later composition played a blank white board
+// with only the subtitles left on it. Keep the probe output in its own lane.
+const slot=qa?`${region}-${profile}-qa`:`${region}-${profile}`;
+const frames=join(root,'renders','ue-frames',slot);
 const unrealLog=join(frames,`unreal-${Date.now()}.log`);
 const timeline=JSON.parse(await readFile(join(root,'data/regions',`${region}.timeline.json`),'utf8'));
 const regionData=JSON.parse(await readFile(join(root,'data/regions',`${region}.json`),'utf8'));
@@ -75,7 +82,6 @@ try{
    console.log('UE_PAGE_OVERLAY',JSON.stringify(status));
    throw error;
  }
-const qa=process.argv.includes('--qa');
 const requestedTimes=process.env.GEO_QA_TIMES?process.env.GEO_QA_TIMES.split(',').map(Number):undefined;
 const sampleTimes=requestedTimes ?? (qa?[0,2.1,8]:undefined);
  if(qa){await page.evaluate(()=>(window as any).geoVideo.playOpeningPreview({descentSeconds:3}));}
@@ -98,7 +104,7 @@ const sampleTimes=requestedTimes ?? (qa?[0,2.1,8]:undefined);
    });
    qualityReport={settled,motion};
  }
- const output=join(root,'renders/intermediate',`${region}-map-${profile}.mp4`);await mkdir(resolve(output,'..'),{recursive:true});
+ const output=join(root,'renders/intermediate',`${region}-map-${profile}${qa?'-qa':''}.mp4`);await mkdir(resolve(output,'..'),{recursive:true});
  const ffmpeg=join(root,'node_modules/ffmpeg-static',process.platform==='win32'?'ffmpeg.exe':'ffmpeg');
  const encoder=start(ffmpeg,['-y','-framerate',String(fps),'-start_number','0','-i',join(frames,'frame-%06d.png'),'-frames:v',String(total),'-c:v','libx264','-crf','16','-pix_fmt','yuv420p',output]);
  await new Promise<void>((ok,no)=>{encoder.once('error',no);encoder.once('exit',code=>code===0?ok():no(new Error(`FFmpeg exited ${code}`)));});

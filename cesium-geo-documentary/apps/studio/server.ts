@@ -40,6 +40,13 @@ const port = Number(process.env.STUDIO_PORT ?? 4180);
 const cesiumPreviewPort = Number(process.env.CESIUM_PREVIEW_PORT ?? 4174);
 const cesiumPreviewScript = join(root, "apps", "ue-player", "server.ts");
 let cesiumPreviewChild: ChildProcess | null = null;
+/** Port the preview iframe is actually pointed at; differs from the default when
+ *  something else already owns it (see `identifyPreview`). */
+let activePreviewPort = cesiumPreviewPort;
+/** Resolves once the preview service is known to be a UE player. Routes that
+ *  hand the origin to the browser wait on this so an iframe never loads a stale
+ *  service just because the identification round-trip was still in flight. */
+let previewReady: Promise<void> = Promise.resolve();
 function probePort(host: string, probePort: number, timeoutMs = 400): Promise<boolean> {
   return new Promise((resolve) => {
     const socket = createConnection({ host, port: probePort });
@@ -49,12 +56,30 @@ function probePort(host: string, probePort: number, timeoutMs = 400): Promise<bo
   });
 }
 
+/**
+ * What is answering on this port?
+ *
+ * `free` and `unreal` are both fine. `stale` is the interesting one: the old
+ * Cesium player (`apps/cesium-player`) answers HTTP on the same path shape but
+ * never renders the UE stream, so reusing it leaves the preview iframe as a
+ * blank white box with nothing but the subtitle overlay on top — the exact
+ * symptom of a "白屏" report. Any service that cannot identify itself as a UE
+ * player is treated as stale rather than reused.
+ */
+async function identifyPreview(host: string, previewPort: number): Promise<"free" | "unreal" | "stale"> {
+  if (!(await probePort(host, previewPort))) return "free";
+  try {
+    const response = await fetch(`http://${host}:${previewPort}/runtime-config.json`, { signal: AbortSignal.timeout(1500) });
+    if (!response.ok) return "stale";
+    const config = (await response.json()) as { engine?: string };
+    return config.engine === "unreal" ? "unreal" : "stale";
+  } catch {
+    return "stale";
+  }
+}
+
 function startCesiumPreview(): void {
-  void probePort("127.0.0.1", cesiumPreviewPort).then((busy) => {
-    if (busy) {
-      process.stdout.write(`CESIUM_PREVIEW_REUSE http://127.0.0.1:${cesiumPreviewPort} (already running, skipped auto-start)\n`);
-      return;
-    }
+  previewReady = (async () => {
     if (!existsSync(cesiumPreviewScript)) {
       process.stdout.write(`CESIUM_PREVIEW_SKIP missing ${cesiumPreviewScript}\n`);
       return;
@@ -64,24 +89,42 @@ function startCesiumPreview(): void {
       process.stdout.write(`CESIUM_PREVIEW_SKIP missing ${tsxCli} — run \`pnpm install\`\n`);
       return;
     }
-    const child = spawn(process.execPath, [tsxCli, cesiumPreviewScript, `--port=${cesiumPreviewPort}`], {
-      cwd: root,
-      stdio: ["ignore", "pipe", "pipe"],
-      windowsHide: true
-    });
-    cesiumPreviewChild = child;
-    const forward = (prefix: string) => (chunk: Buffer) => {
-      const text = chunk.toString("utf8").trim();
-      if (text) process.stdout.write(`[cesium-preview ${prefix}] ${text}\n`);
-    };
-    child.stdout?.on("data", forward("out"));
-    child.stderr?.on("data", forward("err"));
-    child.once("exit", (code) => {
-      cesiumPreviewChild = null;
-      process.stdout.write(`[cesium-preview] exited with ${code ?? "null"}\n`);
-    });
-    process.stdout.write(`CESIUM_PREVIEW_STARTED http://127.0.0.1:${cesiumPreviewPort} pid=${child.pid ?? "?"}\n`);
-  }).catch((error) => {
+    // Walk forward from the preferred port: a stale listener is skipped, not
+    // hijacked, so the workbench never points the iframe at a dead renderer.
+    for (let offset = 0; offset < 12; offset++) {
+      const candidate = cesiumPreviewPort + offset;
+      const state = await identifyPreview("127.0.0.1", candidate);
+      if (state === "unreal") {
+        activePreviewPort = candidate;
+        process.stdout.write(`CESIUM_PREVIEW_REUSE http://127.0.0.1:${candidate} (already running, skipped auto-start)\n`);
+        return;
+      }
+      if (state === "stale") {
+        process.stdout.write(`CESIUM_PREVIEW_STALE http://127.0.0.1:${candidate} is not a UE player, skipping\n`);
+        continue;
+      }
+      const child = spawn(process.execPath, [tsxCli, cesiumPreviewScript, `--port=${candidate}`], {
+        cwd: root,
+        stdio: ["ignore", "pipe", "pipe"],
+        windowsHide: true
+      });
+      cesiumPreviewChild = child;
+      activePreviewPort = candidate;
+      const forward = (prefix: string) => (chunk: Buffer) => {
+        const text = chunk.toString("utf8").trim();
+        if (text) process.stdout.write(`[cesium-preview ${prefix}] ${text}\n`);
+      };
+      child.stdout?.on("data", forward("out"));
+      child.stderr?.on("data", forward("err"));
+      child.once("exit", (code) => {
+        cesiumPreviewChild = null;
+        process.stdout.write(`[cesium-preview] exited with ${code ?? "null"}\n`);
+      });
+      process.stdout.write(`CESIUM_PREVIEW_STARTED http://127.0.0.1:${candidate} pid=${child.pid ?? "?"}\n`);
+      return;
+    }
+    process.stdout.write(`CESIUM_PREVIEW_SKIP no free port in ${cesiumPreviewPort}…${cesiumPreviewPort + 11}\n`);
+  })().catch((error) => {
     // A failed probe must not become an unhandled rejection: the preview is a
     // convenience, and the workbench still serves with it missing.
     process.stdout.write(`CESIUM_PREVIEW_PROBE_FAILED ${error instanceof Error ? error.message : String(error)}\n`);
@@ -1789,7 +1832,10 @@ const server = createServer(async (request, response) => {
     queuedAt = Date.now();
     const url = new URL(request.url ?? "/", `http://${request.headers.host ?? `127.0.0.1:${port}`}`);
     if (request.method === "GET" && url.pathname === "/studio-config.js") {
-      const previewOrigin = `http://127.0.0.1:${cesiumPreviewPort}`;
+      // Wait for the preview identification: handing the browser an origin that
+      // is still being probed would load the iframe against the wrong service.
+      await previewReady;
+      const previewOrigin = `http://127.0.0.1:${activePreviewPort}`;
       return sendBuffer(response, 200, Buffer.from(`export const previewOrigin = ${JSON.stringify(previewOrigin)};\n`), "text/javascript; charset=utf-8");
     }
     const projectMatch = url.pathname.match(/^\/api\/projects\/([a-zA-Z0-9_-]+)$/);
