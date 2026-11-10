@@ -2173,8 +2173,15 @@ void AGeoHUD::DrawHUD()
                                                Primary ? 1.f : Emphasis).CopyWithNewOpacity(Opacity);
         // The town's name is plain text on the map, like the Cesium build: no pin and no
         // plaque. Villages keep the pin because they are the subject of their own shot.
-        const float IconSize = CurrentVillage
-            ? 150.f * Scale * FMath::Lerp(1.f, .90f, Ramp(.5, 3))
+        // 225 = 150 x 1.5. The pin artwork is the cube-over-rings icon
+        // (Content/Geo/label-pin.png, 512 px, same 75 %-of-canvas framing as before), so
+        // the on-screen artwork grows by exactly the same factor as this number.
+        // GEO_PIN_PROBE draws the pin at the township as well, because the preview film
+        // only shows the pin during a village shot — this is how the artwork and its
+        // on-screen size get checked without waiting for the tour.
+        const bool PinProbe = !FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_PIN_PROBE")).IsEmpty();
+        const float IconSize = (CurrentVillage || PinProbe)
+            ? 225.f * Scale * FMath::Lerp(1.f, .90f, Ramp(.5, 3))
             : 0.f;
         float PlateHeight = 0;
         UTexture2D *PlateTexture = nullptr;
