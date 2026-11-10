@@ -2,17 +2,20 @@ profiles:
   landscape:
     width: 1920
     height: 1080
-    subtitle_chars_per_line: 26
+    # 52px Bold 实测一行 21 字 ≈ 1153px，仍在 1180px 最大宽度内（46px 时是 26 字）。
+    subtitle_chars_per_line: 21
     safe_margin: 72
   portrait:
     width: 1080
     height: 1920
-    # 44px × 18 = 792px + 22px 内边距仍在 900px 最大宽度内；
-    # 14 字会把「这个镇」「下辖」这类 2 字词切到两行，18 字才容得下整句。
-    subtitle_chars_per_line: 18
+    # 56px Bold 实测 16 字 = 905px，超出 900px 最大宽度，所以收到 15 字（848px）。
+    # 字幕是 nowrap，行宽算错会直接顶出画面：字号、字重、每行字数必须一起改
+    # （50px Medium 时是 18 字）。
+    subtitle_chars_per_line: 15
     safe_margin: 64
   square:
     width: 1080
     height: 1080
+    # 50px Bold × 16 字 = 858px，最大宽度 920px。
     subtitle_chars_per_line: 16
     safe_margin: 64

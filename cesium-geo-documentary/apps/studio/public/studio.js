@@ -42,9 +42,9 @@ const state = {
 
 const LAST_PROJECT_STORAGE_KEY = "geo-video-studio:last-project-id";
 const RENDER_TYPOGRAPHY = Object.freeze({
-  portrait: { subtitlePx: 50, assetCaptionPx: 42 },
-  square: { subtitlePx: 44, assetCaptionPx: 30 },
-  landscape: { subtitlePx: 46, assetCaptionPx: 25 }
+  portrait: { subtitlePx: 56, assetCaptionPx: 42 },
+  square: { subtitlePx: 50, assetCaptionPx: 30 },
+  landscape: { subtitlePx: 52, assetCaptionPx: 25 }
 });
 
 // Must stay equal to subtitleBottomPercent in compose-hyperframes.ts: the preview and the
