@@ -628,7 +628,9 @@ void AGeoMap::TileFailed(const FIntVector &Key)
 {
     if (!VisibleTiles.Contains(Key))
         return;
-    if (TileAttempts.FindRef(Key) < 2)
+    // Two attempts was too tight for a flaky CDN: the tile went into the permanent
+    // failure set, and a single one of those used to abort the whole capture.
+    if (TileAttempts.FindRef(Key) < 4)
         TileQueue.Insert({Key, DBL_MAX}, 0);
     else
         TileFailures.Add(Key);
@@ -1008,9 +1010,14 @@ void AGeoMap::Tick(float Delta)
         return;
     FString Id = CaptureId;
     CaptureId.Empty();
-    if (FailedTiles > 0)
+    // One dead tile used to refuse the frame — and with it the whole take. Across a
+    // 20-minute capture the chance of a single 404 is close to one, and the hole is
+    // covered by the coarser level anyway. Refuse only a frame that is mostly holes;
+    // a handful of missing tiles is worth a complete recording.
+    const int32 FailedLimit = FMath::Max(8, RequiredTiles.Num() / 4);
+    if (FailedTiles > FailedLimit)
     {
-        Respond(Id, TEXT("Imagery tile errors; frame capture refused"));
+        Respond(Id, FString::Printf(TEXT("Imagery tile errors (%d of %d); frame capture refused"), FailedTiles, RequiredTiles.Num()));
         return;
     }
     FString File = FPaths::Combine(CaptureRoot, FString::Printf(TEXT("frame-%06d.png"), CaptureIndex++));
@@ -1026,7 +1033,10 @@ void AGeoMap::Tick(float Delta)
             Respond(Id, Saved ? TEXT("") : TEXT("Unable to save PNG frame"));
             UGameViewportClient::OnScreenshotCaptured().RemoveAll(this);
         });
-    FScreenshotRequest::RequestScreenshot(File, false, false);
+    // No filename: the callback above owns the write. Passing one made the engine write
+    // the same PNG a second time while the callback was still saving it, which is how a
+    // truncated frame (and an ffmpeg exit 1 that "went away on retry") happened.
+    FScreenshotRequest::RequestScreenshot(false);
 }
 // Clip a region to the near plane and the output rectangle before masking.
 // This keeps a close village shot valid even when most parent vertices are behind the camera.

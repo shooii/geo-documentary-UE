@@ -13,7 +13,7 @@ import { parseSrt, planVisualTimeline, type TimedCue } from "../../packages/rend
 import { findVisualAnchorIssues } from "../../packages/content-engine/visual-anchoring.js";
 import { buildProjectRenderSpec, makeProject, normalizeProject, readRegions } from "./project-service.js";
 import { captureBoundarySnapshot, deleteBoundarySnapshot, listBoundarySnapshotProjects, readBoundarySnapshotManifest } from "./boundary-snapshot.js";
-import { collectJobDiagnostics, executeRender, isRetryableRenderFailure, newRenderJob, pruneJobIntermediates, type RenderJobRecord, type RenderJobStatus } from "./render-engine.js";
+import { collectJobDiagnostics, executeRender, isRetryableRenderFailure, killProcessTree, newRenderJob, pruneJobIntermediates, type RenderJobRecord, type RenderJobStatus } from "./render-engine.js";
 import { listAdminDivisions, locateAdminDivision, searchAdminDivisions, type AdminLevel } from "./admin-catalog.js";
 import { ensureTownPlan, warnIfSourceDataMovedOn } from "./town-bootstrap.js";
 import { suggestTourRoute } from "./tour-route.js";
@@ -140,6 +140,13 @@ function stopCesiumPreview(): void {
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
     stopCesiumPreview();
+    // Ctrl+C used to leave every running export's UE renderer alive, still rendering at
+    // 1080x1920 and holding its three capture ports. The next launch then fought those
+    // orphans for the stream. Take the trees down with the workbench.
+    for (const child of activeProcesses.values()) {
+      try { killProcessTree(child); } catch { /* already gone */ }
+    }
+    activeProcesses.clear();
     process.exit(0);
   });
 }
@@ -2241,7 +2248,10 @@ const server = createServer(async (request, response) => {
       cancelledJobs.add(job.id);
       const queuedIndex = queuedRenders.findIndex((item) => item.job.id === job.id);
       if (queuedIndex >= 0) queuedRenders.splice(queuedIndex, 1);
-      activeProcesses.get(job.id)?.kill();
+      // Killing the tsx wrapper left the UE renderer, signalling server and chromium
+      // alive, holding the GPU and the capture ports. Cancel takes the whole tree down.
+      const running = activeProcesses.get(job.id);
+      if (running) killProcessTree(running);
       delete job.queuePosition;
       updateJob(job, { status: "cancelled", stage: queuedIndex >= 0 ? "已从队列取消" : "正在取消" });
       refreshQueuePositions();

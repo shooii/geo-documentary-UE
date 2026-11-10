@@ -100,6 +100,7 @@ if (!Number.isInteger(introCount) || introCount < 0) {
 // ranges, the outro begins right after the final child's last cue; otherwise
 // fall back to intro sentence count + one cue per child.
 const lastMappedChild = (content.tourChildCueRanges ?? []).slice().sort((a, b) => a.cueStartIndex - b.cueStartIndex).at(-1);
+const firstMappedChild = (content.tourChildCueRanges ?? []).slice().sort((a, b) => a.cueStartIndex - b.cueStartIndex)[0];
 const outroCueIndex = lastMappedChild ? lastMappedChild.cueEndIndex + 1 : introCount + content.tourOrder.length;
 if (rawCues.length < outroCueIndex) {
   throw new Error(`Narration has ${rawCues.length} sentence cues; expected at least ${outroCueIndex} cues for the introduction and complete child tour`);
@@ -203,9 +204,17 @@ if (closingNarrationStart !== null && closingNarrationStart + 0.001 < openingCam
 }
 
 region.presentationMode = "parent-child-tour";
-region.tourIntroEnd = introCount > 0
-  ? (rawCues[introCount - 1]?.end ?? 0) + narrationSyncOffsetSeconds
-  : tourStops[0]?.start ?? narrationSyncOffsetSeconds;
+// `introCount` counts narration *sentences*, but `rawCues` is not always one cue per
+// sentence: the 讯飞 voice returns one cue per scene paragraph, so `rawCues[introCount-1]`
+// pointed at the wrong cue and the overview camera stayed parked until the third village
+// (measured: tourIntroEnd 74.9 s against a first stop at 50.2 s). When the exact
+// scene→cue map exists, the introduction ends at the cue just before the first child.
+const firstChildCueIndex = firstMappedChild?.cueStartIndex;
+region.tourIntroEnd = firstChildCueIndex !== undefined
+  ? (firstChildCueIndex > 0 ? (rawCues[firstChildCueIndex - 1]?.end ?? 0) : 0) + narrationSyncOffsetSeconds
+  : introCount > 0
+    ? (rawCues[introCount - 1]?.end ?? 0) + narrationSyncOffsetSeconds
+    : tourStops[0]?.start ?? narrationSyncOffsetSeconds;
 region.tourReturnStart = finalChildEnd;
 region.tourReturnDuration = returnFlightSeconds;
 region.tourReturnWindowSeconds = returnWindowSeconds;
@@ -242,7 +251,11 @@ const actions = [
 ];
 const timeline = {
   duration: timelineDuration,
+  // Already carries the descent + the pen-draw offset; the compositor must not add an
+  // opening gate on top of it (that double-count put narration and captions one whole
+  // opening behind the picture). Kept explicit so the field cannot drift back in.
   narrationStartSeconds: openingSeconds + narrationSyncOffsetSeconds,
+  openingGateSeconds: 0,
   actions
 };
 SceneTimelineSchema.parse(timeline);

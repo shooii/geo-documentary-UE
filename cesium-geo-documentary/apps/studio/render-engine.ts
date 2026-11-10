@@ -95,6 +95,9 @@ export interface RenderCallbacks {
  */
 export function isRetryableRenderFailure(message: string): boolean {
   if (/exited with (?!0\b)\S+/.test(message)) return true;
+  // A stage watchdog firing means the pipeline deadlocked, not that the project is
+  // wrong — the retry restarts from the cached narration / map clip.
+  if (/timed out after \d+s/.test(message)) return true;
   return /(EPIPE|ECONNRESET|ECONNREFUSED|ECONNABORTED|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|socket hang up|net::ERR_|Target closed|Navigation failed|Protocol error|failed to launch|Timeout \d+ ?ms exceeded)/i.test(message);
 }
 
@@ -303,6 +306,39 @@ async function prepareSandbox(root: string, jobRoot: string, project: VideoProje
   return sandbox;
 }
 
+/**
+ * Windows `child.kill()` terminates the node wrapper only. The real work — the UE
+ * renderer, the signalling server, chromium, ffmpeg — keeps running as orphans, holding
+ * the GPU and the capture ports. That is what made the *next* attempt flakier than the
+ * one that had just failed, so every teardown path goes through taskkill /t.
+ */
+export function killProcessTree(child: ChildProcess): void {
+  if (child.exitCode !== null) return;
+  child.kill();
+  if (process.platform === "win32" && child.pid) {
+    spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], { windowsHide: true, stdio: "ignore" }).once("exit", () => undefined);
+  }
+}
+
+/**
+ * A stage that never returns used to hang the job forever: `command()` only settled on
+ * `close`, and there was no watchdog anywhere above it. Limits are deliberately loose —
+ * they exist to break a deadlock, not to police a slow machine.
+ */
+function commandTimeoutMs(status: RenderJobStatus): number {
+  const override = Number(process.env.STUDIO_STAGE_TIMEOUT_MS ?? 0);
+  if (override > 0) return override;
+  switch (status) {
+    case "synthesizing": return 45 * 60_000;
+    // 400 s of portrait film has taken 34 minutes here; a 20-minute film on a loaded
+    // machine is the reason this is hours, not minutes.
+    case "capturing": return 5 * 60 * 60_000;
+    case "composing": return 3 * 60 * 60_000;
+    case "validating": return 45 * 60_000;
+    default: return 30 * 60_000;
+  }
+}
+
 function command(callbacks: RenderCallbacks, cwd: string, executable: string, args: string[], status: RenderJobStatus, stage: string, progress: number, envOverrides: Record<string, string> = {}): Promise<void> {
   if (callbacks.cancelled()) throw new Error("Render cancelled");
   callbacks.update({ status, stage, progress });
@@ -311,10 +347,19 @@ function command(callbacks: RenderCallbacks, cwd: string, executable: string, ar
     callbacks.registerProcess(child);
     const append = (chunk: unknown) => callbacks.update({ logs: [String(chunk).trim()] });
     child.stdout.on("data", append); child.stderr.on("data", append);
-    child.once("error", reject);
+    const timeoutMs = commandTimeoutMs(status);
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      callbacks.update({ logs: [`${stage} 超过 ${Math.round(timeoutMs / 60_000)} 分钟没有结束，已终止并清理进程树`] });
+      killProcessTree(child);
+    }, timeoutMs);
+    const settle = () => { clearTimeout(timer); callbacks.registerProcess(null); };
+    child.once("error", (error) => { settle(); reject(error); });
     child.once("close", (code) => {
-      callbacks.registerProcess(null);
+      settle();
       if (callbacks.cancelled()) reject(new Error("Render cancelled"));
+      else if (timedOut) reject(new Error(`${stage} timed out after ${Math.round(timeoutMs / 1000)}s`));
       else if (code === 0) resolve();
       else reject(new Error(`${stage} exited with ${code}`));
     });
@@ -604,22 +649,31 @@ function mapVideoSeconds(root: string, file: string): Promise<number> {
     });
   });
 }
-async function usableMapClip(root: string, file: string): Promise<boolean> {
-  return (await mapVideoSeconds(root, file)) >= MIN_USABLE_MAP_SECONDS;
+async function usableMapClip(root: string, file: string, expectedSeconds = 0): Promise<boolean> {
+  const seconds = await mapVideoSeconds(root, file);
+  if (seconds < MIN_USABLE_MAP_SECONDS) return false;
+  // A clip shorter than the timeline it has to cover is not usable: the map track ends
+  // early, the last frames freeze while the narration keeps going, and the export still
+  // reports success because the composition's own duration is written from the timeline.
+  // The old 2 s threshold called a 5 s take "fine" for a 400 s film and cached it.
+  if (expectedSeconds > 0 && seconds < expectedSeconds * 0.98) return false;
+  return true;
 }
 
 async function cacheMap(root: string, sandbox: string, project: VideoProject, spec: RenderSpec): Promise<boolean> {
   const cacheDir = join(root, "workspace", "render-cache", spec.cacheSignature.replace("sha256:", ""));
   const cached = join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`);
   const target = join(sandbox, "renders", "intermediate", `${project.regionId}-map-${project.output.profile}.mp4`);
-  if (existsSync(cached) && await usableMapClip(root, cached)) { await copyFile(cached, target); return true; }
+  const expected = Number(spec.timelineDurationSeconds) || 0;
+  if (existsSync(cached) && await usableMapClip(root, cached, expected)) { await copyFile(cached, target); return true; }
   // A cache entry too short to be a real capture is a leftover from a probe;
   // leaving it in place would keep seeding every later render with it.
   if (existsSync(cached)) await rm(cached, { force: true }).catch(() => { /* Re-captured below either way. */ });
   const baseline = await makeProject(root, project.regionId, { projectId: project.id });
   const baselineSpec = await buildProjectRenderSpec(root, baseline);
   const legacy = join(root, "renders", "intermediate", `${project.regionId}-map-${project.output.profile}.mp4`);
-  if (baselineSpec.cacheSignature === spec.cacheSignature && existsSync(legacy) && await usableMapClip(root, legacy)) {
+  const baselineExpected = Number(baselineSpec.timelineDurationSeconds) || 0;
+  if (baselineSpec.cacheSignature === spec.cacheSignature && existsSync(legacy) && await usableMapClip(root, legacy, baselineExpected)) {
     await mkdir(cacheDir, { recursive: true });
     await copyFile(legacy, cached); await copyFile(cached, target);
     await writeFile(join(cacheDir, "cache.json"), JSON.stringify({ signature: spec.cacheSignature, seededFrom: legacy, createdAt: new Date().toISOString() }, null, 2), "utf8");
@@ -877,9 +931,20 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   else {
     const port = 4600 + Number.parseInt(job.id.replaceAll("-", "").slice(0, 4), 16) % 1000;
     await runTsx("apps/ue-player/capture.ts", ["--region", project.regionId, "--profile", project.output.profile, "--port", String(port), "--imagery", project.imagery.provider], "capturing", "录制 UE 地图、行政区巡游和返回镜头", 42);
+    // Verify the take before it becomes the cache: a short capture used to be written to
+    // the cache unconditionally, so one bad take poisoned every later export of this
+    // signature. capture.ts already checks frame count and encoded duration; this is the
+    // second pair of eyes that catches a truncated copy or a stale file.
+    const capturedFile = join(sandbox, "renders", "intermediate", `${project.regionId}-map-${project.output.profile}.mp4`);
+    const capturedSeconds = await mapVideoSeconds(root, capturedFile);
+    const expectedMapSeconds = Number(spec.timelineDurationSeconds) || 0;
+    if (capturedSeconds <= 0) throw new Error("地图录制没有产出可用的视频文件");
+    if (expectedMapSeconds > 0 && capturedSeconds < expectedMapSeconds * 0.98) {
+      throw new Error(`地图录制只有 ${capturedSeconds.toFixed(1)}s，时间轴需要 ${expectedMapSeconds.toFixed(1)}s`);
+    }
     const cacheDir = join(root, "workspace", "render-cache", spec.cacheSignature.replace("sha256:", ""));
     await mkdir(cacheDir, { recursive: true });
-    await copyFile(join(sandbox, "renders", "intermediate", `${project.regionId}-map-${project.output.profile}.mp4`), join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`));
+    await copyFile(capturedFile, join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`));
     await pruneSupersededMapCache(root, project.regionId, project.output.profile, spec.cacheSignature);
   }
   const mapEndedAt = Date.now();
@@ -980,8 +1045,17 @@ export async function collectJobDiagnostics(
   job: Pick<RenderJobRecord, "jobRoot" | "regionId" | "profile">
 ): Promise<JobDiagnostics | null> {
   if (!job.regionId || !job.profile) return null;
-  const source = join(job.jobRoot, "sandbox", "renders", "diagnostics", `${job.regionId}-${job.profile}`);
-  if (!existsSync(source)) return null;
+  // The capture writes to `renders/ue-frames/<region>-<profile>` (frame PNGs, the UE
+  // log, capture-report.json). Only the old Cesium pipeline used
+  // `renders/diagnostics/<region>-<profile>`, so a failed export kept looking for a
+  // directory that no longer exists and saved nothing — the user got a one-line error
+  // and "这次导出没有留下诊断文件" while the evidence sat right there in the sandbox.
+  const candidates = [
+    join(job.jobRoot, "sandbox", "renders", "ue-frames", `${job.regionId}-${job.profile}`),
+    join(job.jobRoot, "sandbox", "renders", "diagnostics", `${job.regionId}-${job.profile}`)
+  ];
+  const source = candidates.find((candidate) => existsSync(candidate));
+  if (!source) return null;
   const entries = (await readdir(source, { withFileTypes: true }).catch(() => [])).filter((entry) => entry.isFile());
   // The report first: if the byte budget only fits a few files, they are the ones
   // that explain the failure, not the hundredth `failed-frame-*.png`.

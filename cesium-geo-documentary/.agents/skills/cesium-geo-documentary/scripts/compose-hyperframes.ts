@@ -670,7 +670,9 @@ for (const id of ids) {
   const durationData = JSON.parse(await readFile(resolve(root, `assets/audio/${id}/duration.json`), "utf8")) as { durationSeconds: number };
   const narrationStartSeconds = Math.max(0, Number(timelineData.narrationStartSeconds ?? 0));
   // 开场闸门：穿云没结束、金色光束还没落笔之前不出字幕，也不起旁白。一个数同时平移人声、字幕和落笔音，三者不会互相错位。
-  const openingGateSeconds = Math.max(0, Number(timelineData.openingGateSeconds ?? 0));
+  // 但 `narrationStartSeconds` 一旦存在，就已经含了开场（子巡游重写 timeline 时写的是
+  // `openingSeconds + 0.35`）。两个都加 = 人声和字幕整体晚一个开场，而画面不动。
+  const openingGateSeconds = narrationStartSeconds > 0 ? 0 : Math.max(0, Number(timelineData.openingGateSeconds ?? 0));
   const visualManifestPath = resolve(root, `content/visuals/${id}.json`);
   const visualManifest = existsSync(visualManifestPath)
     ? JSON.parse(await readFile(visualManifestPath, "utf8")) as { timingMode?: "narration-cue-required" | "legacy-seconds"; clips?: VisualClip[] }

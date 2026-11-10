@@ -195,19 +195,93 @@ function loudnessNormalize(input: string, output: string): Record<string, string
   return report;
 }
 
-async function writeProportionalSrt(path: string, narration: string[], duration: number): Promise<void> {
-  const weights = narration.map((text) => Math.max(1, [...text].length));
+/** Split a paragraph into the sentences a narrator actually breathes between. */
+function splitNarrationSentences(text: string): string[] {
+  return text
+    .split(/\n+/)
+    .flatMap((line) => line.split(/(?<=[。！？；;…])/u))
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+}
+
+/**
+ * Midpoints of the pauses in a synthesised track.
+ *
+ * 讯飞 returns audio only — no per-sentence timestamps — so the subtitle timeline used
+ * to be pure character counts. Chinese narration pauses at every full stop, so those
+ * pauses are the ground truth the counts were guessing at: measuring them with
+ * `silencedetect` and snapping each estimated boundary to the nearest one removed the
+ * 1–2 s of drift that accumulated inside every paragraph (measured on 城月镇: 110 chars
+ * spread over 25 s, six real pauses of 0.5–0.75 s each, all of them mis-timed).
+ */
+function speechPauses(path: string): number[] {
+  const nullTarget = process.platform === "win32" ? "NUL" : "/dev/null";
+  const result = spawnSync(ffmpeg, [
+    "-hide_banner", "-i", path, "-af", "silencedetect=noise=-32dB:d=0.18", "-f", "null", nullTarget
+  ], { cwd: root, encoding: "utf8", windowsHide: true, stdio: CAPTURE_STDIO });
+  const text = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+  const events: Array<{ at: number; open: boolean }> = [];
+  for (const match of text.matchAll(/silence_(start|end):\s*(-?\d+(?:\.\d+)?)/g)) {
+    events.push({ at: Number(match[2]), open: match[1] === "start" });
+  }
+  const pauses: number[] = [];
+  let opened: number | null = null;
+  for (const event of events) {
+    if (event.open) opened = Math.max(0, event.at);
+    else if (opened !== null) { pauses.push((opened + event.at) / 2); opened = null; }
+  }
+  return pauses;
+}
+
+async function writeProportionalSrt(path: string, narration: string[], duration: number, audioPath?: string): Promise<void> {
+  // One cue per sentence, not per paragraph: the paragraph cue is what made a 25 s
+  // stretch of speech share a single subtitle window, and it is also what the
+  // sentence-count based cue indices downstream (tourIntroSentences) already assume.
+  const sentences = narration.flatMap(splitNarrationSentences);
+  const weights = sentences.map((text) => Math.max(1, [...text].length));
   const totalWeight = weights.reduce((sum, value) => sum + value, 0);
   const startPadding = 0.1;
   const endPadding = 0.15;
   const usable = Math.max(1, duration - startPadding - endPadding);
+  const ends: number[] = [];
   let cursor = startPadding;
-  const blocks = narration.map((text, index) => {
-    const end = index === narration.length - 1
-      ? Math.max(cursor + 0.25, duration - endPadding)
-      : cursor + usable * weights[index]! / totalWeight;
-    const block = `${index + 1}\n${formatSrtTimestamp(cursor)} --> ${formatSrtTimestamp(end)}\n${text}`;
-    cursor = end;
+  for (const weight of weights) {
+    cursor += usable * weight / totalWeight;
+    ends.push(cursor);
+  }
+  ends[ends.length - 1] = Math.max(startPadding + 0.25, duration - endPadding);
+  // Snap the guesses onto measured pauses, in order, never reusing one. Boundaries
+  // without a nearby pause keep their estimated position instead of jumping.
+  if (audioPath && existsSync(audioPath)) {
+    const pauses = speechPauses(audioPath);
+    let used = 0;
+    let previous = startPadding;
+    for (let index = 0; index < ends.length - 1; index += 1) {
+      const target = ends[index]!;
+      let best = -1;
+      let bestDistance = Infinity;
+      for (let candidate = used; candidate < pauses.length; candidate += 1) {
+        const at = pauses[candidate]!;
+        if (at > target + 2.5) break;
+        if (at < previous + 0.35) continue;
+        const distance = Math.abs(at - target);
+        if (distance < bestDistance) { best = candidate; bestDistance = distance; }
+      }
+      if (best >= 0 && bestDistance <= 2.5) {
+        previous = pauses[best]!;
+        used = best + 1;
+        ends[index] = previous;
+      } else {
+        previous = Math.max(previous + 0.25, target);
+        ends[index] = previous;
+      }
+    }
+  }
+  let previous = startPadding;
+  const blocks = sentences.map((text, index) => {
+    const end = Math.max(previous + 0.2, ends[index]!);
+    const block = `${index + 1}\n${formatSrtTimestamp(previous)} --> ${formatSrtTimestamp(end)}\n${text}`;
+    previous = end;
     return block;
   });
   await writeFile(path, `${blocks.join("\n\n")}\n`, "utf8");
@@ -400,7 +474,7 @@ for (const id of ids) {
         speed: xfyunSpeed
       });
       await writeFile(sourceMp3, audio);
-      await writeProportionalSrt(sourceEdgeSrt, content.narration, durationFromFfmpeg(sourceMp3));
+      await writeProportionalSrt(sourceEdgeSrt, content.narration, durationFromFfmpeg(sourceMp3), sourceMp3);
     } else {
       provider = "edge-tts";
       actualVoiceId = requestedVoiceId;
@@ -426,7 +500,7 @@ for (const id of ids) {
         ]);
         run(ffmpeg, ["-y", "-i", sapiWav, "-c:a", "libmp3lame", "-b:a", "192k", sourceMp3]);
         const fallbackDuration = durationFromFfmpeg(sourceMp3);
-        await writeProportionalSrt(sourceEdgeSrt, content.narration, fallbackDuration);
+        await writeProportionalSrt(sourceEdgeSrt, content.narration, fallbackDuration, sourceMp3);
     }
     }
   }

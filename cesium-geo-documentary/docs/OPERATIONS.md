@@ -41,7 +41,10 @@ pnpm workspace:prune -- --apply # 真正删除
 
 ## 日志与诊断
 
-- Cesium 采集：`renders/diagnostics/<region>-<profile>/capture-report-full.json`
+- UE 录制（当前管线）：`renders/ue-frames/<region>-<profile>/`（`frame-%06d.png`、`unreal-*.log`、
+  `capture-report.json`，内含 `framesWritten` 与实际编码时长）。导出失败时这些文件会被复制到
+  `workspace/jobs/<jobId>/diagnostics/`。
+- Cesium 采集（旧管线）：`renders/diagnostics/<region>-<profile>/capture-report-full.json`
 - HyperFrames 队列：`renders/diagnostics/render-<quality>-<profile>.*.log`
 - 草稿验证：`renders/diagnostics/draft-delivery-validation.json`
 - 正式验证：`renders/diagnostics/final-delivery-validation.json`

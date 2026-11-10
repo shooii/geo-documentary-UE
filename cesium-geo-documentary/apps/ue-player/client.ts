@@ -229,6 +229,32 @@ function teardown() {
 // subscription raises no event here, so without this the overlay sits on "正在连接" forever.
 let joinTimer: ReturnType<typeof setTimeout> | undefined;
 let joinAttempts = 0;
+// `capture=1` is set by the offline frame grabber. It has no UI and no user, so it gets
+// a different contract from the studio preview: the stream is expected to blip (a UE
+// restart, a dropped WebRTC track) and the page must survive it, not report it and die.
+const captureMode = query.has('capture');
+let streamDownAt = 0;
+let captureReconnectTimer: ReturnType<typeof setTimeout> | undefined;
+function stopCaptureReconnect() { clearTimeout(captureReconnectTimer); captureReconnectTimer = undefined; }
+function armCaptureReconnect() {
+  clearTimeout(captureReconnectTimer);
+  captureReconnectTimer = setTimeout(() => {
+    if (channelReady) return;
+    joinAttempts = 0;
+    try { stream.reconnect(); } catch { /* the next tick tries again */ }
+    armCaptureReconnect();
+  }, 2000);
+}
+// Events are the only signal the library gives us, and a half-open socket can fail to
+// raise one. A cheap heartbeat makes the recovery path independent of that.
+if (captureMode) {
+  setInterval(() => {
+    if (!channelReady && !captureReconnectTimer) {
+      if (!streamDownAt) streamDownAt = performance.now();
+      armCaptureReconnect();
+    }
+  }, 5000);
+}
 function stopJoining() { clearTimeout(joinTimer); joinTimer = undefined; }
 function armJoining() {
   stopJoining();
@@ -243,6 +269,17 @@ function armJoining() {
 function standDown(message: string) {
   stopJoining();
   teardown();
+  // A capture page has nobody to press "重新连接". Cutting the stream here killed the
+  // whole recording at the first hiccup — the headless page then answers every
+  // capture-frame with "UE data channel unavailable". In capture mode the stream is
+  // allowed to come back on its own; the frame loop waits instead of failing.
+  if (captureMode) {
+    if (!streamDownAt) streamDownAt = performance.now();
+    status.textContent = `${message}（正在自动重连）`;
+    overlay.hidden = true;
+    armCaptureReconnect();
+    return;
+  }
   stream.disconnect();
   status.textContent = message;
   retryButton.hidden = false;
@@ -250,7 +287,7 @@ function standDown(message: string) {
   overlay.hidden = false;
 }
 document.addEventListener('loadedmetadata',maybeLoad,true);
-stream.addEventListener('dataChannelOpen',() => { channelReady=true; clearTimeout(slotGuard); stopJoining(); maybeLoad(); });
+stream.addEventListener('dataChannelOpen',() => { channelReady=true; clearTimeout(slotGuard); stopJoining(); stopCaptureReconnect(); streamDownAt=0; maybeLoad(); });
 stream.addEventListener('dataChannelClose',() => standDown('视频流已断开'));
 stream.addEventListener('webRtcDisconnected',() => standDown('视频流已断开'));
 stream.addEventListener('playStreamRejected',() => { status.textContent = '点击播放 UE 地图视频流'; overlay.hidden = false; });
@@ -271,6 +308,24 @@ Object.assign(window,{ geoVideo: {
   prepareStudioTour: (preview:any) => handle({action:'prepare-tour',preview}),
   renderFrame: async (t: number) => { stop(); time=t; openingOnly=false; if (!ready) throw new Error('UE renderer not ready'); return send('capture-frame',{ frame:frameAt(scene,stops ?? [],t,profile,duration,false) }); },
   seek: async (t: number) => { stop(); flightOrigin=undefined; time=t; draw(true); },
+  getStreamHealth: () => ({
+    ready,
+    channelReady,
+    captureMode,
+    downSeconds: streamDownAt ? Math.round((performance.now() - streamDownAt) / 100) / 10 : 0,
+    sceneLoaded: Boolean(scene)
+  }),
+  // The grabber waits on this instead of polling the DOM: `ready` only turns true once
+  // the reconnected stream has re-applied the scene, which is the moment a frame is
+  // safe to request again.
+  waitForStream: async (timeoutMs = 120000) => {
+    const deadline = Date.now() + timeoutMs;
+    while (!(channelReady && ready)) {
+      if (Date.now() > deadline) throw new Error(`UE stream did not recover (${Math.round((Date.now() - (deadline - timeoutMs)) / 1000)}s)`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    return true;
+  },
   getFrameStatus: () => ({ initialized:ready, renderStable:ready, time, engine:'unreal' })
 } });
 // --- single-viewer lease -------------------------------------------------
@@ -278,7 +333,7 @@ Object.assign(window,{ geoVideo: {
 // The first window to arrive holds the slot; every later window is told the instance
 // is busy and keeps polling, so it joins by itself the moment the holder goes away.
 const viewerId = crypto.randomUUID();
-const slotEnabled = query.get('slot') !== 'off';
+const slotEnabled = query.get('slot') !== 'off' && !captureMode;
 let slotHeartbeat: ReturnType<typeof setInterval> | undefined;
 let slotPoll: ReturnType<typeof setTimeout> | undefined;
 let slotGuard: ReturnType<typeof setTimeout> | undefined;

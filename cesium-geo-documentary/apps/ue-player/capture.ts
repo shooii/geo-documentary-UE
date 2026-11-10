@@ -1,6 +1,6 @@
-import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { readFile, mkdir, writeFile, readdir, rm } from 'node:fs/promises';
 import { dirname, resolve, join } from 'node:path';
-import { spawn, type ChildProcess } from 'node:child_process';
+import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { chromium } from 'playwright';
 import { DEFAULT_IMAGERY_PROVIDER } from '../../packages/project-schema/index.js';
@@ -50,6 +50,21 @@ const seconds=Number(timeline.duration)+(regionData.openingDescent?.enabled===fa
 const fps=30,total=Number(option('frames',String(Math.ceil(seconds*fps)))),startTime=Number(option('start-time','0'));
 if (!Number.isSafeInteger(total) || total<1 || !Number.isFinite(startTime) || startTime<0) throw new Error('Invalid capture frame range');
 await mkdir(frames,{recursive:true});
+// A job reuses its sandbox and UE restarts its frame counter at zero, so frames left by
+// an earlier attempt sit at exactly the numbers this run is about to write. ffmpeg
+// globs `frame-%06d.png` from 0, which means a stale tail silently padded a short take
+// (or a partial PNG from a killed run broke the encode). Clear the lane first.
+for (const name of await readdir(frames).catch(() => [] as string[])) {
+  if (/^frame-\d{6}\.png$/.test(name)) await rm(join(frames, name), { force: true });
+}
+const ffmpeg=join(root,'node_modules/ffmpeg-static',process.platform==='win32'?'ffmpeg.exe':'ffmpeg');
+const probeSeconds=async(file:string)=>{
+  const result=spawnSync(ffmpeg,['-hide_banner','-i',file],{encoding:'utf8',windowsHide:true,stdio:['ignore','pipe','pipe']});
+  const text=`${result.stdout??''}\n${result.stderr??''}`;
+  const match=text.match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
+  if(!match) return null;
+  return Number(match[1])*3600+Number(match[2])*60+Number(match[3]);
+};
 const children:ChildProcess[]=[];
 const start=(exe:string,args:string[],env={})=>{const p=spawn(exe,args,{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe'],env:{...process.env,...env}});children.push(p);p.stdout?.on('data',x=>process.stdout.write(x));p.stderr?.on('data',x=>process.stderr.write(x));return p;};
 const tsx=join(root,'node_modules/tsx/dist/cli.mjs');
@@ -59,9 +74,14 @@ try{
  start(process.execPath,[tsx,join(root,'apps/ue-player/server.ts'),`--port=${port}`],{UE_SIGNALLING_URL:`ws://127.0.0.1:${signallingPort}`, ...(token ? { CESIUM_ION_TOKEN: token } : {})});
  const deadline=Date.now()+30000;
  while(true){try{const r=await fetch(`http://127.0.0.1:${port}/runtime-config.json`);if(r.ok)break;}catch{}if(Date.now()>deadline)throw new Error('UE player startup timeout');await new Promise(r=>setTimeout(r,200));}
- start(join(runtime.engineRoot,'Engine/Binaries/Win64/UnrealEditor.exe'),[runtime.project,'/Engine/Maps/Entry','-game','-RenderOffscreen','-Unattended','-NoSplash','-AudioMixer',`-PixelStreamingURL=ws://127.0.0.1:${streamerPort}`,`-GeoCaptureRoot=${frames}`,`-ResX=${width}`,`-ResY=${height}`,'-ForceRes',`-abslog=${unrealLog}`]);
+ const unreal=start(join(runtime.engineRoot,'Engine/Binaries/Win64/UnrealEditor.exe'),[runtime.project,'/Engine/Maps/Entry','-game','-RenderOffscreen','-Unattended','-NoSplash','-AudioMixer',`-PixelStreamingURL=ws://127.0.0.1:${streamerPort}`,`-GeoCaptureRoot=${frames}`,`-ResX=${width}`,`-ResY=${height}`,'-ForceRes',`-abslog=${unrealLog}`]);
+ // Without this the grabber kept asking a dead renderer for frames and only found out
+ // minutes later, as a generic command timeout — with no hint that UE had crashed.
+ let unrealExit:string|undefined;
+ unreal.once('exit',(code,signal)=>{unrealExit=`UE renderer exited (code ${code ?? '?'}${signal?`, ${signal}`:''})`;});
  const unrealDeadline=Date.now()+180000;
  while(true){
+   if(unrealExit)throw new Error(`${unrealExit} before the stream was ready`);
    const log=await readFile(unrealLog,'utf8').catch(()=>'');
    if(log.includes(`Websocket connection made to: ws://127.0.0.1:${streamerPort}`))break;
    if(Date.now()>unrealDeadline)throw new Error('UE streamer startup timeout');
@@ -74,7 +94,9 @@ try{
  page.on('console',m=>{ if(m.type()==='error') console.log('UE_PAGE_CONSOLE',m.text()); });
  page.on('pageerror',e=>console.log('UE_PAGE_ERROR',e.message));
  page.on('response',r=>{ if(r.status()>=400) console.log('UE_PAGE_HTTP',r.status(),r.url()); });
- await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=${profile}&imagery=${encodeURIComponent(imagery)}`);
+ // `capture=1` puts the page in headless mode: no viewer lease, and a dropped stream
+ // reconnects by itself instead of waiting for a click that will never come.
+ await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=${profile}&imagery=${encodeURIComponent(imagery)}&capture=1`);
  try {
    await page.waitForFunction(()=>Boolean((window as any).geoVideo?.getDiagnostics().ready),{},{timeout:180000});
  } catch (error) {
@@ -82,11 +104,34 @@ try{
    console.log('UE_PAGE_OVERLAY',JSON.stringify(status));
    throw error;
  }
-const requestedTimes=process.env.GEO_QA_TIMES?process.env.GEO_QA_TIMES.split(',').map(Number):undefined;
+ const health=await page.evaluate(()=>(window as any).geoVideo?.getStreamHealth?.()).catch(()=>null);
+ // If `captureMode` is not true here the page will wait for a click after a dropped
+ // stream and the whole recovery path is dead code — worth one line in the log.
+ console.log('UE_STREAM_HEALTH',JSON.stringify(health));
+ const requestedTimes=process.env.GEO_QA_TIMES?process.env.GEO_QA_TIMES.split(',').map(Number):undefined;
 const sampleTimes=requestedTimes ?? (qa?[0,2.1,8]:undefined);
  if(qa){await page.evaluate(()=>(window as any).geoVideo.playOpeningPreview({descentSeconds:3}));}
+ // One frame, with the stream allowed to come back. A WebRTC hiccup mid-take used to
+ // abort the whole export; in capture mode the page reconnects and re-applies the scene,
+ // so the only thing the grabber has to do is wait and ask again.
+ const renderFrame=async(t:number)=>{
+   for(let attempt=1;;attempt++){
+     if(unrealExit)throw new Error(unrealExit);
+     try{
+       await page.evaluate(t=>(window as any).geoVideo.renderFrame(t),t);
+       if(attempt>1)console.log(`UE_FRAME_RECOVERED t=${t.toFixed(2)} after ${attempt-1} retries`);
+       return;
+     }catch(error){
+       const message=error instanceof Error?error.message:String(error);
+       if(attempt>=8)throw error;
+       console.log(`UE_FRAME_RETRY ${attempt} t=${t.toFixed(2)}: ${message}`);
+       await page.evaluate(()=>(window as any).geoVideo?.waitForStream?.(60000)).catch(()=>undefined);
+       await new Promise(r=>setTimeout(r,1000));
+     }
+   }
+ };
  for(let i=0;i<total;i++){
-   await page.evaluate(t=>(window as any).geoVideo.renderFrame(t),sampleTimes?.[i] ?? startTime+i/fps);
+   await renderFrame(sampleTimes?.[i] ?? startTime+i/fps);
    if(i%30===0)console.log(`UE_CAPTURE ${i}/${total}`);
  }
  let qualityReport:unknown;
@@ -105,8 +150,26 @@ const sampleTimes=requestedTimes ?? (qa?[0,2.1,8]:undefined);
    qualityReport={settled,motion};
  }
  const output=join(root,'renders/intermediate',`${region}-map-${profile}${qa?'-qa':''}.mp4`);await mkdir(resolve(output,'..'),{recursive:true});
- const ffmpeg=join(root,'node_modules/ffmpeg-static',process.platform==='win32'?'ffmpeg.exe':'ffmpeg');
+ // Count what actually landed on disk before encoding. The old report claimed
+ // `capturedDurationSeconds = total / fps` no matter what happened, so a take that died
+ // at frame 900 of 4000 looked exactly like a complete one and was cached as such.
+ const written=(await readdir(frames).catch(()=>[] as string[])).filter(name=>/^frame-\d{6}\.png$/.test(name)).length;
+ if(unrealExit)throw new Error(`${unrealExit} after ${written}/${total} frames`);
+ if(written!==total)throw new Error(`Captured ${written}/${total} frames; the UE stream stopped early`);
  const encoder=start(ffmpeg,['-y','-framerate',String(fps),'-start_number','0','-i',join(frames,'frame-%06d.png'),'-frames:v',String(total),'-c:v','libx264','-crf','16','-pix_fmt','yuv420p',output]);
  await new Promise<void>((ok,no)=>{encoder.once('error',no);encoder.once('exit',code=>code===0?ok():no(new Error(`FFmpeg exited ${code}`)));});
- await writeFile(join(frames,'capture-report.json'),JSON.stringify({engine:'unreal',region,profile,imagery,fps,total,sourceDurationSeconds:seconds,capturedDurationSeconds:total/fps,startTime,sampleTimes,qualityReport,output},null,2));
-}finally{await browser?.close();for(const child of children)if(child.exitCode===null)child.kill();}
+ const encodedSeconds=await probeSeconds(output);
+ const expectedSeconds=total/fps;
+ if(encodedSeconds===null||encodedSeconds<expectedSeconds-0.1)throw new Error(`Encoded ${encodedSeconds ?? 0}s, expected ${expectedSeconds.toFixed(2)}s`);
+ await writeFile(join(frames,'capture-report.json'),JSON.stringify({engine:'unreal',region,profile,imagery,fps,total,framesWritten:written,expectedDurationSeconds:expectedSeconds,encodedDurationSeconds:encodedSeconds,sourceDurationSeconds:seconds,capturedDurationSeconds:encodedSeconds,startTime,sampleTimes,qualityReport,output},null,2));
+}finally{
+ await browser?.close();
+ // `child.kill()` on Windows terminates the node wrapper only: the UE renderer, the
+ // signalling server and chromium survive it, hold the GPU and the ports, and make the
+ // next take flakier than the one that just failed. Kill the whole tree.
+ for(const child of children){
+   if(child.exitCode!==null)continue;
+   child.kill();
+   if(process.platform==='win32'&&child.pid)spawn('taskkill',['/pid',String(child.pid),'/t','/f'],{windowsHide:true,stdio:'ignore'});
+ }
+}
