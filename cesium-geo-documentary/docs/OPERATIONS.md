@@ -50,6 +50,26 @@ pnpm workspace:prune -- --apply # 真正删除
 - 正式验证：`renders/diagnostics/final-delivery-validation.json`
 - 总构建报告：`renders/diagnostics/build-report.json` 和 `.md`
 
+## 配音与字幕同步自检
+
+成片里"字幕跟着声音走"由三件事共同保证，任何一件单独看都发现不了错位，怀疑错位时按顺序查：
+
+1. **起拍点**：`data/regions/<id>.timeline.json` 的 `narrationStartSeconds` 是旁白在
+   地图时间线里的起点，合成器、字幕、跟随旁白的镜头全都按它平移。编辑器预览读同一个
+   字段（`RenderSpec.opening.narrationLeadSeconds`）。两者不一致时，先看导出的
+   `render-spec.json` 与沙箱里那份 timeline，再怀疑成片。
+2. **每条字幕的时间**：Edge TTS 有句级时间戳；讯飞没有，按句子切分后把每条边界吸附到
+   `silencedetect` 测到的真实停顿中点（`packages/render-spec/narration-align.ts`）。
+   吸附半径 2.5 s，超出就保留比例估算。
+3. **场景与 cue 的映射**：一句一条 cue，一场可以占 1–3 条。`mapScenesToCues` 用拼接文本
+   严格相等做映射，对不上会直接报错而不是错位——旁白改过而没重新配音时就是这条先报。
+
+判据（2026-11 实测 440882112，334.48 s 音频、96 个停顿）：在每条边界 ±60 ms 内取 RMS，
+正确落点应落在停顿里（≈ −120 dBFS）。段落级旧字幕 25 条边界只有 16% 落在静音里
+（中位 −15.5 dBFS，等于在词中间换字幕）；按句切分并吸附后 33 条边界 100% 落在静音里，
+边界偏差中位 0.2–0.5 s、最大 1.94 s。现场复核时用同一方法（`silencedetect` + 边界 RMS）即可，
+不要用字幕自己的时间轴判自己（那是自证）。
+
 ## 发布前检查
 
 运行 `pnpm typecheck`、`pnpm test`、HyperFrames check 和最终交付验证。确认报告为 27/27 或符合当前配置的完整数量后再发布。
