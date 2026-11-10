@@ -66,6 +66,56 @@ static UTexture2D *LoadCloudTexture(const FString &File)
     Texture->UpdateResource();
     return Texture;
 }
+// How much ink a font puts into the height UCanvas::StrLen reports for it. Canvas sizes
+// text by that height, and the two faces in this film disagree about it badly: measured
+// in the engine at raster 72, Noto reports a 139 px line box for a 64.8 px glyph (0.466),
+// while YaHei Bold reported 0.719. Every label size below is therefore expressed as a
+// target ink height and divided by this number.
+static constexpr float NotoInkPerLineBox = .466f;
+static constexpr float YaheiInkPerLineBox = .719f;
+// Every on-screen string in the film is Noto Sans SC Bold — the subtitle track in the
+// compositor, the village plaques, and the map labels. The HUD used to hard-code
+// msyhbd.ttc, which is a different face: its skeleton and its counters do not match the
+// type the audience reads the narration in, so a frame carried two "same" bold Chinese
+// fonts that visibly disagreed. The TTF ships in Content/Fonts (FreeType cannot read the
+// woff2 the browser side uses); YaHei stays on as the fallback for glyphs Noto lacks.
+//
+// Rasterising happens at `Raster` px and everything else is a downscale. That is the
+// other half of the fix: the labels used to be measured against a 64 px atlas while the
+// township name needed 136 px on a 1080-wide frame, i.e. every big name was a 2x upscale
+// of a small bitmap — the soft edge nobody could name.
+static UFont *MakeLabelFont(UObject *Outer, int32 Raster)
+{
+    UFont *Font = DuplicateObject<UFont>(GEngine->GetLargeFont(), Outer);
+    Font->FontCacheType = EFontCacheType::Runtime;
+    Font->RuntimeFontSource = ERuntimeFontSource::Asset;
+    Font->LegacyFontSize = Raster;
+    auto &Composite = Font->GetMutableInternalCompositeFont();
+    if (const auto *DefaultFont = Font->GetCompositeFont(); DefaultFont && DefaultFont != &Composite)
+        Composite.FallbackTypeface = DefaultFont->FallbackTypeface;
+    Composite.DefaultTypeface.Fonts.Reset();
+    const FString Noto = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Fonts/NotoSansSC-Bold.ttf"));
+#if PLATFORM_WINDOWS
+    const FString WindowsDir = FPlatformMisc::GetEnvironmentVariable(TEXT("WINDIR"));
+    const FString Yahei = FPaths::Combine(WindowsDir, TEXT("Fonts/msyhbd.ttc"));
+#else
+    const FString Yahei;
+#endif
+    // The subtitle face first; the system bold only if the TTF did not ship. The
+    // fallback typeface inherited from the engine font still covers everything else
+    // (punctuation, digits, Latin) so a missing glyph cannot punch a hole in a name.
+    if (FPaths::FileExists(Noto))
+    {
+        Composite.DefaultTypeface.AppendFont(TEXT("Bold"), Noto, EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
+        UE_LOG(LogTemp, Display, TEXT("GEO_FONT raster=%d face=%s"), Raster, *Noto);
+    }
+    else if (!Yahei.IsEmpty() && FPaths::FileExists(Yahei))
+    {
+        Composite.DefaultTypeface.AppendFont(TEXT("Bold"), Yahei, EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
+        UE_LOG(LogTemp, Warning, TEXT("GEO_FONT raster=%d fallback=%s"), Raster, *Yahei);
+    }
+    return Font;
+}
 static FVector Ecef(double Lon, double Lat, double H)
 {
     const double L = FMath::DegreesToRadians(Lon), P = FMath::DegreesToRadians(Lat), A = 6378137.0,
@@ -1798,6 +1848,98 @@ void AGeoHUD::DrawHUD()
                                                               const FLinearColor &ColorA, const FLinearColor &ColorB) {
         AddStrokeTo(BeamTriangles, A, B, Width, ColorA, ColorB);
     };
+    // One ring is one strip. The segment renderer above is kept for the county flood —
+    // that one really is a set of unconnected spans — but every ring is now stroked as a
+    // continuous mitred strip, and that is the difference between a boundary and a bead
+    // necklace.
+    //
+    // The two artefacts it removes:
+    //   * the notch. Each segment was extended by min(W/2, 2.5) px, and the village halo
+    //     is 13 px wide, so at every one of the thousands of vertices the outer side of
+    //     the bend was left open by 4 px — the serration along every near-vertical run.
+    //   * the beads. Those same extensions made neighbouring segments overlap by 5 px,
+    //     where the 12 % halo and the 32 % mid band were composited on top of themselves
+    //     (0.12 -> 0.226, 0.32 -> 0.538): a bright dot at every vertex.
+    // With shared offset points neither can happen: alpha is blended exactly once per
+    // span, and the join is a real miter.
+    //
+    // The miter is capped at 2.4x half-width (clamping the bisector length); past that a
+    // cartographic renderer would bevel, which at 3 px is indistinguishable.
+    const auto EmitRim = [](TArray<FCanvasUVTri> &Into, const TArray<FVector2D> &Pts, const TArray<FLinearColor> &Cols,
+                            double Width, double Feather, float AlphaMul) {
+        const int32 Count = Pts.Num();
+        if (Count < 2 || Cols.Num() != Count)
+            return;
+        const double Half = Width * .5;
+        const double Edge = FMath::Clamp(Feather, 0., Half * .9);
+        // A closed ring's first and last point are the same vertex: its offsets have to be
+        // built from both neighbours, or the seam keeps a notch half a line wide.
+        const bool Closed = FVector2D::Distance(Pts[0], Pts[Count - 1]) < .75;
+        TArray<FVector2D> Offset;
+        Offset.SetNum(Count);
+        for (int32 I = 0; I < Count; ++I)
+        {
+            const int32 Prev = Closed ? (I + Count - 2) % (Count - 1) : FMath::Max(0, I - 1);
+            const int32 Next = Closed ? (I + 1) % (Count - 1) : FMath::Min(Count - 1, I + 1);
+            FVector2D D0 = Pts[I] - Pts[Prev], D1 = Pts[Next] - Pts[I];
+            if (D0.SizeSquared() < .0001)
+                D0 = D1;
+            if (D1.SizeSquared() < .0001)
+                D1 = D0;
+            D0.Normalize();
+            D1.Normalize();
+            const FVector2D N0(-D0.Y, D0.X), N1(-D1.Y, D1.X);
+            FVector2D Bisector = N0 + N1;
+            const double Length = Bisector.Size();
+            if (Length < .0001)
+            {
+                Offset[I] = N0 * Half;
+                continue;
+            }
+            Bisector /= Length;
+            Offset[I] = Bisector * (Half / FMath::Max(.42, FVector2D::DotProduct(Bisector, N0)));
+        }
+        // Four rails — outer feather, core edge, core edge, outer feather — carry the
+        // 1 px alpha shoulder that stands in for antialiasing on a flat triangle. It is
+        // applied once per ring now instead of once per segment.
+        const double Inner = Half > .001 ? FMath::Max(0., 1. - Edge / Half) : 1.;
+        const double Rails[4] = {-1., -Inner, Inner, 1.};
+        const float Alphas[4] = {0.f, 1.f, 1.f, 0.f};
+        const int32 Spans = Closed ? Count : Count - 1;
+        for (int32 I = 0; I < Spans; ++I)
+        {
+            const int32 J = (I + 1) % Count;
+            for (int Band = 0; Band < 3; ++Band)
+            {
+                const FVector2D A0 = Pts[I] + Offset[I] * Rails[Band];
+                const FVector2D A1 = Pts[I] + Offset[I] * Rails[Band + 1];
+                const FVector2D B0 = Pts[J] + Offset[J] * Rails[Band];
+                const FVector2D B1 = Pts[J] + Offset[J] * Rails[Band + 1];
+                const FLinearColor C0 = Cols[I].CopyWithNewOpacity(Cols[I].A * Alphas[Band] * AlphaMul);
+                const FLinearColor C1 = Cols[I].CopyWithNewOpacity(Cols[I].A * Alphas[Band + 1] * AlphaMul);
+                const FLinearColor C2 = Cols[J].CopyWithNewOpacity(Cols[J].A * Alphas[Band + 1] * AlphaMul);
+                const FLinearColor C3 = Cols[J].CopyWithNewOpacity(Cols[J].A * Alphas[Band] * AlphaMul);
+                FCanvasUVTri T;
+                T.V0_UV = T.V1_UV = T.V2_UV = FVector2D::ZeroVector;
+                T.V0_Pos = A0;
+                T.V1_Pos = A1;
+                T.V2_Pos = B1;
+                T.V0_Color = C0;
+                T.V1_Color = C1;
+                T.V2_Color = C2;
+                Into.Add(T);
+                FCanvasUVTri T2;
+                T2.V0_UV = T2.V1_UV = T2.V2_UV = FVector2D::ZeroVector;
+                T2.V0_Pos = A0;
+                T2.V1_Pos = B1;
+                T2.V2_Pos = B0;
+                T2.V0_Color = C0;
+                T2.V1_Color = C2;
+                T2.V2_Color = C3;
+                Into.Add(T2);
+            }
+        }
+    };
     if (CountyFramed && ContextAlpha > .01 && Wipe > .0005)
     {
         // The rim arrives with the flood: only the part already reached is stroked, and
@@ -1834,8 +1976,66 @@ void AGeoHUD::DrawHUD()
             }
         }
     }
+    // Village rims are three stacked widths — halo, mid, core. At the closing overview a
+    // dozen 13 px halos around a dozen thumbnails merge into one glowing blob, so the
+    // halo is pulled in as the camera widens, while the core thickens a little up close,
+    // where 3 px on a 1080-wide frame reads as a thread. This is the one thing the
+    // segment renderer could never do: its width had no idea where the camera was.
+    const double ZoomT = FMath::Clamp((CameraHeight - 800.) / 6500., 0., 1.);
+    const double RimHalo = FMath::Lerp(1., .62, ZoomT);
+    const double RimMid = FMath::Lerp(1., .74, ZoomT);
+    const double RimCore = FMath::Lerp(1.10, .94, ZoomT);
+    struct FStrokeRun
+    {
+        TArray<FVector2D> Points;
+        TArray<FLinearColor> Colors;
+        int32 Style = 0; // 1 village rim, 2 township rim, 3 hairline
+        double Width = 0;
+    };
+    FStrokeRun Run;
+    const auto FlushRun = [&]() {
+        if (Run.Points.Num() >= 2)
+        {
+            if (Run.Style == 1)
+            {
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 13. * Scale * RimHalo, 1.2 * Scale, .12f);
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 6.5 * Scale * RimMid, 1.1 * Scale, .32f);
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 3.0 * Scale * RimCore, 1.05 * Scale, .96f);
+            }
+            else if (Run.Style == 2)
+            {
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 7. * Scale * RimHalo, 1.1 * Scale, .16f);
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 2.4 * Scale * RimCore, 1.0 * Scale, .90f);
+            }
+            else if (Run.Style == 3)
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, Run.Width, FMath::Min(1.0 * Scale, Run.Width * .45), 1.f);
+        }
+        Run.Points.Reset();
+        Run.Colors.Reset();
+        Run.Style = 0;
+        Run.Width = 0;
+    };
+    // Two villages that touch stroke the same edge twice. The 3 px cores are opaque, so
+    // that was invisible — but the 13 px and 6.5 px halos were composited twice and every
+    // seam inside the township came out a stop brighter than the rim around it. The first
+    // ring to claim an edge keeps it.
+    TSet<uint64> ClaimedEdges;
+    const auto EdgeKey = [](const FVector2D &A, const FVector2D &B) {
+        const auto Q = [](const FVector2D &P) {
+            const uint64 X = uint64(FMath::Clamp(FMath::RoundToInt(P.X * 2.), 0, (1 << 22) - 1));
+            const uint64 Y = uint64(FMath::Clamp(FMath::RoundToInt(P.Y * 2.), 0, (1 << 22) - 1));
+            return (X << 22) | Y;
+        };
+        const uint64 KA = Q(A), KB = Q(B);
+        return KA < KB ? KA ^ (KB * 0x9E3779B97F4A7C15ull) : KB ^ (KA * 0x9E3779B97F4A7C15ull);
+    };
+    double LastStart = -1;
     for (const auto &Stroke : Strokes)
     {
+        int32 Style = 0;
+        FLinearColor Tint = FLinearColor::White;
+        FVector2D End = Stroke.B;
+        double Width = 0;
         if (!Stroke.Parent)
         {
             // The village being toured carries the thick white rim of the reference reel:
@@ -1845,54 +2045,93 @@ void AGeoHUD::DrawHUD()
             // ramps its rim in; every other one was already lit and stays lit.
             const float A = Stroke.Touring ? float(FMath::Clamp(Stroke.Accent, 0., 1.)) : 1.f;
             if (A < .02)
+            {
+                FlushRun();
                 continue;
-            const FLinearColor Rim(.93, 1., .90);
-            AddStroke(Stroke.A, Stroke.B, 13. * Scale, Rim.CopyWithNewOpacity(.12 * A), Rim.CopyWithNewOpacity(.12 * A));
-            AddStroke(Stroke.A, Stroke.B, 6.5 * Scale, Rim.CopyWithNewOpacity(.32 * A), Rim.CopyWithNewOpacity(.32 * A));
-            AddStroke(Stroke.A, Stroke.B, 3.0 * Scale, Rim.CopyWithNewOpacity(.96 * A), Rim.CopyWithNewOpacity(.96 * A));
-            continue;
+            }
+            Style = 1;
+            Tint = FLinearColor(.93, 1., .90).CopyWithNewOpacity(A);
         }
         // While the county flood layer is up it already outlines the county rim;
         // stroking the same rim again doubled it into a heavy band.
-        if (ContextAlpha > .01 && ContextReveal > .0005 && Map->ContextRings.Num())
-            continue;
-        if (Stroke.Parent && Stroke.Start >= Reveal)
-            continue;
-        const FVector2D End = Stroke.Parent && Stroke.End > Reveal
-            ? FMath::Lerp(Stroke.A, Stroke.B, (Reveal - Stroke.Start) / (Stroke.End - Stroke.Start))
-            : Stroke.B;
-        // Once the camera drops into the villages the township outline has to stay on
-        // screen: at village zoom the dark hairline below is no darker than the fields and
-        // simply vanished, so the film lost the frame that says which township all these
-        // villages belong to. It comes back as the same white rim language the villages
-        // use, one weight lighter — village 13/3 px, township 7/2.4 px.
-        const float VillageRim = FMath::Clamp(float(ChildReveal), 0.f, 1.f);
-        if (Stroke.Parent && VillageRim > .01)
+        else if (ContextAlpha > .01 && ContextReveal > .0005 && Map->ContextRings.Num())
         {
-            const FLinearColor Rim(.93, 1., .90);
-            AddStroke(Stroke.A, End, 7. * Scale, Rim.CopyWithNewOpacity(.16f * VillageRim),
-                      Rim.CopyWithNewOpacity(.16f * VillageRim));
-            AddStroke(Stroke.A, End, 2.4 * Scale, Rim.CopyWithNewOpacity(.90f * VillageRim),
-                      Rim.CopyWithNewOpacity(.90f * VillageRim));
+            FlushRun();
             continue;
         }
-        const FLinearColor Edge = Stroke.Parent ? TownEdge : VillageEdge;
-        const FLinearColor Context = Stroke.Parent ? ContextEdge.CopyWithNewOpacity(.53f) : VillageEdge.CopyWithNewOpacity(.48f);
-        FLinearColor Color = FMath::Lerp(Context, Edge.CopyWithNewOpacity(.78f), float(Stroke.Accent));
-        if (!Stroke.Parent)
-            Color.A *= ChildReveal;
-        // Everything below is a parent stroke, and the town outline only belongs to the
-        // town's own shots. Its accent dies the moment the tour drops into a village, but
-        // the hairline kept its 53–78% grey and went on drawing the town boundary across
-        // open water long after the town had left the frame — that stray thread is the
-        // faint line over the bay. Riding the accent takes it away with the shot and
-        // brings it back for the closing overview.
-        if (Stroke.Parent)
-            Color.A *= FMath::Clamp(float(Stroke.Accent) * 1.15f, 0.f, 1.f);
-        // Single hairline, no dark underlay: the raised 3D rim already frames the town.
-        const double BaseWidth = FMath::Lerp(1.2f, 1.7f, float(Stroke.Accent)) * Scale;
-        AddStroke(Stroke.A, End, BaseWidth, Color, Color);
+        else if (Stroke.Start >= Reveal)
+        {
+            FlushRun();
+            continue;
+        }
+        else
+        {
+            End = Stroke.End > Reveal ? FMath::Lerp(Stroke.A, Stroke.B, (Reveal - Stroke.Start) / (Stroke.End - Stroke.Start))
+                                      : Stroke.B;
+            // Once the camera drops into the villages the township outline has to stay on
+            // screen: at village zoom the dark hairline below is no darker than the fields
+            // and simply vanished, so the film lost the frame that says which township all
+            // these villages belong to. It comes back as the same white rim language the
+            // villages use, one weight lighter — village 13/3 px, township 7/2.4 px.
+            const float VillageRim = FMath::Clamp(float(ChildReveal), 0.f, 1.f);
+            if (VillageRim > .01)
+            {
+                Style = 2;
+                Tint = FLinearColor(.93, 1., .90).CopyWithNewOpacity(VillageRim);
+            }
+            else
+            {
+                const FLinearColor Context = ContextEdge.CopyWithNewOpacity(.53f);
+                FLinearColor Color = FMath::Lerp(Context, TownEdge.CopyWithNewOpacity(.78f), float(Stroke.Accent));
+                // Everything here is a parent stroke, and the town outline only belongs to
+                // the town's own shots. Its accent dies the moment the tour drops into a
+                // village, but the hairline kept its 53–78% grey and went on drawing the
+                // town boundary across open water long after the town had left the frame —
+                // that stray thread is the faint line over the bay. Riding the accent takes
+                // it away with the shot and brings it back for the closing overview.
+                Color.A *= FMath::Clamp(float(Stroke.Accent) * 1.15f, 0.f, 1.f);
+                if (Color.A <= .01)
+                {
+                    FlushRun();
+                    continue;
+                }
+                // Single hairline, no dark underlay: the raised 3D rim already frames the
+                // town. One fixed width, so the whole ring stays one strip.
+                Style = 3;
+                Tint = Color;
+                Width = 1.5 * Scale;
+            }
+        }
+        if (Style == 1)
+        {
+            // TSet::Add hands back an id, not a bool: test first, then claim.
+            const uint64 Key = EdgeKey(Stroke.A, End);
+            if (ClaimedEdges.Contains(Key))
+            {
+                FlushRun();
+                continue;
+            }
+            ClaimedEdges.Add(Key);
+        }
+        // A run ends wherever the style changes or the ring does. `Start` is the distance
+        // along a ring and restarts at zero for the next one, which is the cheapest way to
+        // tell that the polyline just ended.
+        if (Run.Style != Style || Run.Width != Width || Stroke.Start < LastStart)
+            FlushRun();
+        LastStart = Stroke.Start;
+        if (Run.Points.Num() && FVector2D::Distance(Run.Points.Last(), Stroke.A) > .75)
+            FlushRun();
+        if (Run.Points.IsEmpty())
+        {
+            Run.Style = Style;
+            Run.Width = Width;
+            Run.Points.Add(Stroke.A);
+            Run.Colors.Add(Tint);
+        }
+        Run.Points.Add(End);
+        Run.Colors.Add(Tint);
     }
+    FlushRun();
     const double Head = N(Trace, TEXT("progress")), TraceAlpha = N(Trace, TEXT("alpha"));
     // The comet that traces the rim. A 6% tail on a village outline disappears into the
     // little zig-zags of a real boundary, so the tail is a sixth of the perimeter and the
@@ -2175,8 +2414,14 @@ void AGeoHUD::DrawHUD()
         Text.Scale = FVector2D(ContextTextScale);
         const FLinearColor Outline = DarkEdge.CopyWithNewOpacity(.90 * ContextLabelAlpha);
         Text.SetColor(Outline);
-        const double Halo = FMath::Max(1.5, 2.2 * Scale);
-        for (const FVector2D Offset : {FVector2D(-Halo, 0), FVector2D(Halo, 0), FVector2D(0, -Halo), FVector2D(0, Halo)})
+        // Same eight-direction ring as the village names, and likewise tied to the glyph:
+        // the county name is the largest text on screen and a fixed 2.2 px rim around it
+        // reads as a shadow rather than as an outline.
+        const double Halo = FMath::Max(1.3, double(ContextBox.GetSize().Y) * NotoInkPerLineBox * .05);
+        const double Diagonal = Halo * .70710678;
+        for (const FVector2D Offset : {FVector2D(-Halo, 0), FVector2D(Halo, 0), FVector2D(0, -Halo), FVector2D(0, Halo),
+                                       FVector2D(-Diagonal, -Diagonal), FVector2D(Diagonal, -Diagonal),
+                                       FVector2D(-Diagonal, Diagonal), FVector2D(Diagonal, Diagonal)})
             Canvas->DrawItem(Text, ContextPoint + Offset);
         Text.SetColor(ContextColor);
         Canvas->DrawItem(Text);
@@ -2194,36 +2439,29 @@ void AGeoHUD::DrawHUD()
         int32 CharCount = 0;
         float Tracking = 0, UnitWidth = 0;
         bool Animated = false;
+        // The atlas this name is rasterised from: township names come from a 160 px font,
+        // villages from a 72 px one.
+        UFont *Font = nullptr;
+        bool Community = false;
+        // On-screen line-box height of the name, in pixels: the outline width is derived
+        // from it so that it stays proportional at every zoom.
+        float Ink = 0;
     };
     TArray<FLabelDraw> DrawLabels;
     if (!LabelFont)
-    {
-        LabelFont = DuplicateObject<UFont>(GEngine->GetLargeFont(), this);
-#if PLATFORM_WINDOWS
-        // Use the bold face Chromium resolves for the Cesium labels on this Windows setup.
-        const FString WindowsDir = FPlatformMisc::GetEnvironmentVariable(TEXT("WINDIR"));
-        const FString FontPath = FPaths::Combine(WindowsDir, TEXT("Fonts/msyhbd.ttc"));
-        if (!WindowsDir.IsEmpty() && FPaths::FileExists(FontPath))
-        {
-            auto &Composite = LabelFont->GetMutableInternalCompositeFont();
-            if (const auto *DefaultFont = LabelFont->GetCompositeFont(); DefaultFont && DefaultFont != &Composite)
-                Composite.FallbackTypeface = DefaultFont->FallbackTypeface;
-            Composite.DefaultTypeface.Fonts.Reset();
-            Composite.DefaultTypeface.AppendFont(TEXT("Bold"), FontPath, EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
-            LabelFont->FontCacheType = EFontCacheType::Runtime;
-            LabelFont->RuntimeFontSource = ERuntimeFontSource::Asset;
-            LabelFont->LegacyFontName = TEXT("Bold");
-        }
-#endif
-        // Rasterize Chinese glyphs near their display size instead of
-        // enlarging the low-resolution legacy Canvas glyph atlas.
-        if (LabelFont->FontCacheType == EFontCacheType::Runtime)
-            LabelFont->LegacyFontSize = 64;
-    }
+        // 72 px sits just above the largest a village name ever gets (56 x 1.366 x 1.1
+        // ≈ 84 px at the near end of the range), so village labels are a downscale now
+        // instead of the 1.4x upscale of a 64 px atlas they used to be.
+        LabelFont = MakeLabelFont(this, 72);
+    if (!TownFont)
+        // The township name measures 136 px on the 1080 frame; 160 keeps it sharp.
+        TownFont = MakeLabelFont(this, 160);
     if (!LabelPin)
         LabelPin = LoadCloudTexture(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Geo/label-pin.png")));
     float GlyphWidth, GlyphHeight;
     Canvas->StrLen(LabelFont, TEXT("国"), GlyphWidth, GlyphHeight);
+    float TownGlyphWidth, TownGlyphHeight;
+    Canvas->StrLen(TownFont, TEXT("国"), TownGlyphWidth, TownGlyphHeight);
     const double Reference = FMath::Max(1., N(F, TEXT("labelReferenceDistance"), 38000));
     const FVector Eye = Map->Camera->GetComponentLocation();
     // Room around a point inside the town, in pixels: the distance to the nearest point of
@@ -2266,7 +2504,10 @@ void AGeoHUD::DrawHUD()
         };
         const bool CurrentVillage = !Label.Parent && Label.Id == Current;
         const bool Primary = Label.Parent || CurrentVillage;
-        const float Opacity = float(Alpha * LabelsReveal * (1 - Ramp(1, 2.8) * (Primary ? .40 : 1.)));
+        // Cesium fades a name to nothing as it leaves its NearFarScalar range. On a
+        // satellite photo under a black rim that also fades, the far names turned grey
+        // rather than quiet — 0.85 keeps the hierarchy without emptying the glyph.
+        const float Opacity = float(Alpha * LabelsReveal * (1 - Ramp(1, 2.8) * (Primary ? .40 : .85)));
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
@@ -2300,18 +2541,39 @@ void AGeoHUD::DrawHUD()
         // the number left the UE names 36 % smaller than Cesium's, which is exactly
         // what the two builds looked like side by side. 0.982 / 0.719 keeps the
         // silhouettes equal; both ratios are properties of the face, not of this shot.
-        constexpr float ChildLabelPx = 56.f;
-        constexpr float CesiumInkPerCanvasPx = .982f / .719f;
+        // The target is 55 px of *ink* (Cesium's 56 px font carries 0.982 em of ink), and
+        // Canvas sizes text by the line box UFont reports for the face. Noto puts 0.466 of
+        // that line box into ink, so the line box has to be 55 / 0.466 = 118 px. Feeding
+        // the old YaHei-derived 1.366 straight into the new face shrank every village name
+        // by a third — the two faces disagree about their line box, not just their
+        // skeleton.
+        constexpr float CesiumInkPx = 56.f * .982f;
+        constexpr float FaceInkPerLineBox = NotoInkPerLineBox;
+        constexpr float ChildLabelPx = CesiumInkPx / FaceInkPerLineBox;
+        // Keep the township name where it was tuned against YaHei: everything expressed in
+        // line-box pixels has to grow by the ratio of the two faces' ink coverage.
+        constexpr float FaceInkCompensation = YaheiInkPerLineBox / FaceInkPerLineBox;
         // czm_nearFarScalar is linear in range. The old squared/fifth-root ramp was an
         // approximation of it and drifted off Cesium's curve between the two anchors.
         const auto NearFarScale = [](double Ratio) {
             return float(FMath::Lerp(1.1, .68, FMath::Clamp((Ratio - .5) / 2.5, 0., 1.)));
         };
         const float SizePx = Label.Parent
-            ? 120.f * TownNameScale * Scale * FMath::Lerp(1.f, Primary ? .90f : .88f, Ramp(.5, 3))
-            : ChildLabelPx * CesiumInkPerCanvasPx * StyleScale * Scale * NearFarScale(FMath::Sqrt(DistanceRatioSq));
+            ? 120.f * TownNameScale * FaceInkCompensation * Scale * FMath::Lerp(1.f, Primary ? .90f : .88f, Ramp(.5, 3))
+            : ChildLabelPx * StyleScale * Scale * NearFarScale(FMath::Sqrt(DistanceRatioSq));
+        // Two atlases: the township name and the village names never overlap in size, and
+        // rasterising both from one 64 px bitmap is what made the big ones soft.
+        UFont *Font = (Label.Parent && TownFont) ? TownFont : LabelFont;
+        const float GlyphH = Label.Parent ? TownGlyphHeight : GlyphHeight;
+        const float GlyphW = Label.Parent ? TownGlyphWidth : GlyphWidth;
+        // 社区 / 居委会 are urban communities, not administrative villages. At the closing
+        // overview they sit in the town centre at the same size and weight as the villages
+        // around them and the eye reads twenty-three equals; one notch down, and the two
+        // levels separate without a legend.
+        const bool Community = !Label.Parent && (Label.Name.EndsWith(TEXT("社区")) || Label.Name.EndsWith(TEXT("居委会")));
+        const float NominalPx = Community ? SizePx * .86f : SizePx;
         float Width, Height;
-        Canvas->StrLen(LabelFont, Label.Name, Width, Height);
+        Canvas->StrLen(Font, Label.Name, Width, Height);
         // The town name is drawn one character at a time with half a glyph of tracking in
         // between — about one Latin character. The HUD knows the exact advance that way, so
         // the on-screen width is known before placement and can be fitted to the shape.
@@ -2321,9 +2583,16 @@ void AGeoHUD::DrawHUD()
         // by (CharCount - 1) halves, so a three-character name read as 迈 陈 镇 with a whole
         // Chinese character of air in it instead of a Latin one.
         const int32 CharCount = Label.Parent ? Label.Name.Len() : 0;
-        const float Tracking = CharCount > 1 ? GlyphHeight * .5f : 0.f;
+        const float Tracking = CharCount > 1 ? GlyphH * .5f : 0.f;
         const float TrackingTotal = Tracking * FMath::Max(0, CharCount - 1);
-        float TextScale = FMath::Min(SizePx / FMath::Max(1.f, GlyphHeight), Size.X * .80f / FMath::Max(1.f, Width + TrackingTotal));
+        float TextScale = FMath::Min(NominalPx / FMath::Max(1.f, GlyphH), Size.X * .80f / FMath::Max(1.f, Width + TrackingTotal));
+        if (!Label.Parent && FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_METRICS")).Len())
+        {
+            static int32 ChildReports = 0;
+            if (++ChildReports % 40 == 0)
+                UE_LOG(LogTemp, Display, TEXT("GEO_LABEL child=%s nominal=%.1f glyphH=%.1f scale=%.3f lineBox=%.1f ink=%.1f"),
+                       *Label.Name, NominalPx, GlyphH, TextScale, GlyphH * TextScale, GlyphH * TextScale * NotoInkPerLineBox);
+        }
         if (Label.Parent)
         {
             // A name that spills over the boundary is worse than a small name — and the
@@ -2333,7 +2602,7 @@ void AGeoHUD::DrawHUD()
             // Room is a radius, so doubling it lets the name take twice the circle. This is
             // the knob that actually decides the on-screen size on the wide shots; the
             // nominal size above only binds once the town fills more of the frame.
-            const double Room = TownRoom(Point) * TownNameScale;
+            const double Room = TownRoom(Point) * TownNameScale * FaceInkCompensation;
             if (Room > 4)
             {
                 const float Diagonal = FMath::Sqrt(FMath::Square(Width + TrackingTotal) + FMath::Square(Height));
@@ -2347,13 +2616,13 @@ void AGeoHUD::DrawHUD()
                 // county name (52 px): a doubled floor put it at 48 px, i.e. the same size
                 // as 雷州市, which flattened the hierarchy. Doubling the circle above is
                 // already enough to lift this shot from 24 px to ~42 px.
-                TextScale = FMath::Max(TextScale, 24.f / FMath::Max(1.f, GlyphHeight));
+                TextScale = FMath::Max(TextScale, 24.f * FaceInkCompensation / FMath::Max(1.f, GlyphH));
                 if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_METRICS")).Len())
                 {
                     static int32 TownReports = 0;
                     if (++TownReports % 45 == 0)
                         UE_LOG(LogTemp, Display, TEXT("GEO_LABEL town=%s sizePx=%.1f glyphH=%.1f glyphW=%.1f room=%.1f finalScale=%.3f glyph=%.1f"),
-                               *Label.Name, SizePx, GlyphHeight, GlyphWidth, Room, TextScale, GlyphHeight * TextScale);
+                               *Label.Name, SizePx, GlyphH, GlyphW, Room, TextScale, GlyphH * TextScale);
                 }
             }
         }
@@ -2399,13 +2668,18 @@ void AGeoHUD::DrawHUD()
         }
         DrawLabels.Add({Label.Id, Label.Name, Label.PlatePath, Point, Extent, Color, TextScale, Emphasis,
                         IconSize, PlateHeight, PlateTexture, CurrentVillage ? 2 : Label.Parent ? 1 : 0,
-                        CharCount, Tracking * TextScale, (Width + TrackingTotal) * TextScale, Label.Parent});
+                        CharCount, Tracking * TextScale, (Width + TrackingTotal) * TextScale, Label.Parent, Font,
+                        Community, Height * TextScale});
     }
     DrawLabels.Sort([this](const FLabelDraw &A, const FLabelDraw &B) {
         if (A.Priority != B.Priority)
             return A.Priority > B.Priority;
         if (A.Emphasis != B.Emphasis)
             return A.Emphasis > B.Emphasis;
+        // Communities are laid out after the villages: in a crowd the administrative
+        // villages get the good slots and the 社区 chip finds room where it can.
+        if (A.Community != B.Community)
+            return !A.Community;
         const bool WasVisible = LabelPlacements.Contains(A.Id), OtherWasVisible = LabelPlacements.Contains(B.Id);
         if (WasVisible != OtherWasVisible)
             return WasVisible;
@@ -2440,10 +2714,20 @@ void AGeoHUD::DrawHUD()
         else
             // Wider set of candidates: the overview carries a dozen names inside one town,
             // and a name is worth more where it is than not drawn at all.
+            //
+            // The second ring is what deals with the two knots in the closing overview
+            // (后埗 / 横山 / 竹桥 / 排楼 up north, the three 社区 in the centre): the old
+            // candidate set only reached 2.6 label heights, so four names fighting over one
+            // cluster had nowhere to go and the fallback stacked them on top of each other.
+            // A leader line now carries the name back to its anchor, which is how a printed
+            // atlas resolves the same argument.
             Offsets = {{0, 0}, {0, -Y}, {X, 0}, {-X, 0}, {0, Y},
                        {X, -Y}, {-X, -Y}, {X, Y}, {-X, Y},
                        {0, -Y - 40 * Scale}, {0, Y + 40 * Scale},
-                       {X * 1.35, 0}, {-X * 1.35, 0}, {0, -2 * Y}, {0, 2 * Y}};
+                       {X * 1.35, 0}, {-X * 1.35, 0}, {0, -2 * Y}, {0, 2 * Y},
+                       {X * 2.1, -Y * 1.4}, {-X * 2.1, -Y * 1.4}, {X * 2.1, Y * 1.4}, {-X * 2.1, Y * 1.4},
+                       {X * 1.5, -Y * 2.8}, {-X * 1.5, -Y * 2.8}, {X * 1.5, Y * 2.8}, {-X * 1.5, Y * 2.8},
+                       {0, -Y * 3.4}, {0, Y * 3.4}};
         const int32 OffsetCount = Offsets.Num();
         if (Pinned && LabelPin)
         {
@@ -2532,23 +2816,27 @@ void AGeoHUD::DrawHUD()
                            *Label.Id, Label.Anchor.X, Label.Anchor.Y, Label.Extent.X, Label.Extent.Y);
             }
         }
-        Occupied.Add(Bounds.ExpandBy(2 * Scale));
+        Occupied.Add(Bounds.ExpandBy(3 * Scale));
         Placements.Add(Label.Id, Selected);
         const FVector2D Position = Bounds.GetCenter();
-        if (Label.Priority == 2 && Selected != 0 && !Pinned)
+        // A name that had to move gets a leader: the second offset ring lets a crowded
+        // cluster spread out, but only a line back to the anchor keeps it attached to the
+        // right village. The pinned village never needs one — its plaque is welded to the
+        // pin. Neither does a name that only stepped aside by a few pixels: at that
+        // distance the line is a stray tick next to the first character, not a pointer.
+        const double Drift = FVector2D::Distance(Label.Anchor, Position);
+        if (Selected != 0 && !Pinned && Drift > FMath::Max(42. * Scale, double(Label.Extent.Y) * 1.6))
         {
             const FVector2D Tip(FMath::Clamp(Label.Anchor.X, Bounds.Min.X, Bounds.Max.X),
                                 FMath::Clamp(Label.Anchor.Y, Bounds.Min.Y, Bounds.Max.Y));
-            FVector2D LeaderStart = Label.Anchor;
-            if (Pinned)
-                LeaderStart.Y -= Label.IconSize * .92f;
-            FCanvasLineItem Leader(LeaderStart, Tip);
+            const bool Strong = Label.Priority == 2;
+            FCanvasLineItem Leader(Label.Anchor, Tip);
             Leader.BlendMode = SE_BLEND_Translucent;
-            Leader.LineThickness = 3.5f * Scale;
-            Leader.SetColor(DarkEdge.CopyWithNewOpacity(.82 * Label.Color.A));
+            Leader.LineThickness = (Strong ? 3.5f : 1.9f) * Scale;
+            Leader.SetColor(DarkEdge.CopyWithNewOpacity((Strong ? .82 : .30) * Label.Color.A));
             Canvas->DrawItem(Leader);
-            Leader.LineThickness = 1.5f * Scale;
-            Leader.SetColor((Label.Priority == 2 ? VillageEdge : TownEdge).CopyWithNewOpacity(.90 * Label.Color.A));
+            Leader.LineThickness = (Strong ? 1.5f : .9f) * Scale;
+            Leader.SetColor((Strong ? VillageEdge : FLinearColor::White).CopyWithNewOpacity((Strong ? .90 : .34) * Label.Color.A));
             Canvas->DrawItem(Leader);
         }
         if (Label.Priority == 2 && Selected != 0 && !Label.PlateTexture)
@@ -2567,22 +2855,34 @@ void AGeoHUD::DrawHUD()
         }
         else
         {
-        // The retired village name gets the Cesium outline: pure black, fully opaque, 3.4 px
-        // (CHILD_LABEL_OUTLINE / CHILD_LABEL_OUTLINE_WIDTH, alpha = fill * 1.05). The old
-        // 1.9 px translucent DarkEdge halo — fine while the name sat under a plaque — left
-        // it dissolving into the dimmed imagery once the shot had moved on.
+        // The retired village name gets the Cesium outline: pure black, fully opaque.
         // Priority 0 is exactly "a village that is neither the subject nor the township".
+        //
+        // Two things were wrong with the old rim. It was four copies nudged up/down/
+        // left/right, so a diagonal was only 0.71 of the width and the corner of a 圆 came
+        // out thinner than its side — the "worn" look on 德 / 墩 / 楼. And the width was a
+        // fixed 3.4 px whatever the glyph size: at the closing overview, where names sit at
+        // 0.68 scale, that is 8 % of the letter on every side and the counters filled in.
+        // It is now an eight-direction ring whose width rides the glyph: `Ink` is the
+        // Canvas line box and Noto puts 0.466 of it into ink, so 0.062 of the ink is 3.4 px
+        // at a 55 px name — the ratio Cesium's 3.4 / 56 implies.
         const bool RestName = Label.Priority == 0;
-        const double Halo = FMath::Max(1.25, (RestName ? 3.4 : Label.Priority ? 2.65 : 1.9) * Scale);
+        const double InkPx = Label.Ink * NotoInkPerLineBox;
+        const double Halo = FMath::Max(1.15 * Scale, InkPx * (RestName ? .062 : .045));
         const FLinearColor Outline = (RestName ? FLinearColor::Black : DarkEdge)
                                          .CopyWithNewOpacity((RestName ? 1.f : .93f) * Label.Color.A);
+        UFont *DrawFont = Label.Font ? Label.Font : LabelFont.Get();
         const auto DrawGlyph = [&](const FString &Glyph, const FVector2D &At, float GlyphScale) {
-            FCanvasTextItem Text(At, FText::FromString(Glyph), LabelFont, Label.Color);
+            FCanvasTextItem Text(At, FText::FromString(Glyph), DrawFont, Label.Color);
             Text.bCentreX = true;
             Text.bCentreY = true;
             Text.Scale = FVector2D(GlyphScale);
             Text.SetColor(Outline);
-            for (const FVector2D Offset : {FVector2D(-Halo, 0), FVector2D(Halo, 0), FVector2D(0, -Halo), FVector2D(0, Halo)})
+            const double Diagonal = Halo * .70710678;
+            const FVector2D Ring[] = {{-Halo, 0}, {Halo, 0}, {0, -Halo}, {0, Halo},
+                                      {-Diagonal, -Diagonal}, {Diagonal, -Diagonal},
+                                      {-Diagonal, Diagonal}, {Diagonal, Diagonal}};
+            for (const FVector2D &Offset : Ring)
                 Canvas->DrawItem(Text, At + Offset);
             Text.SetColor(Label.Color);
             Text.bOutlined = true;
@@ -2598,9 +2898,9 @@ void AGeoHUD::DrawHUD()
             for (int32 Index = 0; Index < Label.CharCount; ++Index)
             {
                 const FString Glyph = Label.Name.Mid(Index, 1);
-                float GlyphW, GlyphH;
-                Canvas->StrLen(LabelFont, Glyph, GlyphW, GlyphH);
-                const double Bob = FMath::Sin(Clock * 1.15 + Index * .9) * GlyphH * .05 * Label.TextScale;
+                float GlyphW, CharH;
+                Canvas->StrLen(DrawFont, Glyph, GlyphW, CharH);
+                const double Bob = FMath::Sin(Clock * 1.15 + Index * .9) * CharH * .05 * Label.TextScale;
                 DrawGlyph(Glyph, FVector2D(Cursor + GlyphW * Label.TextScale * .5, Position.Y + Bob), Label.TextScale);
                 Cursor += GlyphW * Label.TextScale + Label.Tracking;
             }

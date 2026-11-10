@@ -3,14 +3,18 @@ import { access, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createCanvas, GlobalFonts } from '@napi-rs/canvas';
 
-const STYLE_VERSION = 'v5';
+const STYLE_VERSION = 'v6';
 const PIXELS = 2;
 const PLATE_HEIGHT = 150 * PIXELS;
-const BASE_FONT = 80 * PIXELS;
+const BASE_FONT = 78 * PIXELS;
 const SIDE_PADDING = 50 * PIXELS;
 const MAX_WIDTH = 1280 * PIXELS;
-const FONT_NAME = 'YouSheBiaoTiHei';
-const fontFile = (root: string) => join(root, 'assets', 'fonts', `${FONT_NAME}.ttf`);
+// One family for the whole film. The plaque used to be set in 优设标题黑 while the map
+// labels were YaHei Bold and the subtitles were Noto Sans SC Bold, so the most prominent
+// word on screen — a village's own name — was a third typeface again. It is Noto now,
+// the same file the HUD rasterises and the same face the narration is subtitled in.
+const FONT_NAME = 'NotoSansSC-Bold';
+const fontFile = (root: string) => join(root, 'assets', 'fonts', 'NotoSansSC-Bold.ttf');
 let fontRegistered = false;
 
 function registerFont(root: string) {
@@ -98,6 +102,9 @@ export async function labelPlate(root: string, name: string) {
   ctx.save();
   ctx.translate(cx, cy);
   ctx.font = `${fontSize}px ${FONT_NAME}`;
+  // Noto is tighter than the display face it replaces; a breath of tracking keeps the
+  // three or four characters of a village name from reading as one block.
+  (ctx as unknown as { letterSpacing?: string }).letterSpacing = '0.045em';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = '#ffffff';

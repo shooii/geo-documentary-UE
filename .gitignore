@@ -81,3 +81,7 @@ cesium-geo-documentary/content/coverage-manifest-*.json
 cesium-geo-documentary/patch*.py
 cesium-geo-documentary/probe_*.ts
 cesium-geo-documentary/tmp-*.cjs
+
+# The HUD font is staged from assets/fonts by ue-build.ps1 (FreeType cannot read the
+# woff2 the compositor uses), so the copy inside the UE project is generated.
+cesium-geo-documentary/unreal/GeoDocumentary/Content/Fonts/

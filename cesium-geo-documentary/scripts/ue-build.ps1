@@ -14,6 +14,10 @@ $stage=Join-Path $env:LOCALAPPDATA "Temp\GeoDocumentary-$hash"
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
 New-Item -ItemType Directory -Force -Path "$stage\Content\Geo" | Out-Null
 Copy-Item -Path "$projectRoot\unreal\assets\*.png" -Destination "$stage\Content\Geo" -Force
+# The HUD labels are rasterised from a real TTF: FreeType cannot read the woff2 the
+# compositor uses, so the film's Noto Sans SC Bold ships as a .ttf beside it.
+New-Item -ItemType Directory -Force -Path "$stage\Content\Fonts" | Out-Null
+Copy-Item -Path "$projectRoot\assets\fonts\*.ttf" -Destination "$stage\Content\Fonts" -Force
 Copy-Item -LiteralPath "$source\Source","$source\Config","$source\GeoDocumentary.uproject" -Destination $stage -Recurse -Force
 $uproject=Join-Path $stage 'GeoDocumentary.uproject'
 & "$EngineRoot\Engine\Build\BatchFiles\Build.bat" GeoDocumentaryEditor Win64 Development "-Project=$uproject" -WaitMutex -NoHotReloadFromIDE -NoUBA

@@ -185,6 +185,9 @@ class AGeoHUD : public AHUD
     TArray<FVector4> DimRects;
     TArray<FVector4> ShadowRects[3];
     UPROPERTY() TObjectPtr<UFont> LabelFont;
+    /** Township names. A second atlas, rasterised large: one 64 px font made every big
+     *  name a 2x upscale of a small bitmap. */
+    UPROPERTY() TObjectPtr<UFont> TownFont;
     UPROPERTY() TObjectPtr<UTexture2D> LabelPin;
     UPROPERTY() TMap<FString, TObjectPtr<UTexture2D>> LabelPlates;
     TMap<FString, int32> LabelPlacements;
