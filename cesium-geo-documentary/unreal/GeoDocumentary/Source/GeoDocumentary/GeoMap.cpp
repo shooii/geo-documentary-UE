@@ -1151,6 +1151,29 @@ void AGeoHUD::DrawHUD()
     const auto F = Map->Frame;
     const FString Current = S(F, TEXT("current"));
     const FString FocusId = S(F, TEXT("focusId"));
+    // The plaque hand-off. `current` is the village the shot belongs to; the moment the
+    // closing pull-back starts the runtime clears it, so the plaque and the pin used to
+    // disappear between one frame and the next — the only hard cut in the whole closing.
+    // The last village to hold the plaque keeps it for another 0.45 s and fades out.
+    const double FrameTime = N(F, TEXT("time"));
+    if (!Current.IsEmpty())
+    {
+        FadingPlateId = Current;
+        FadingPlateSince = -1;
+    }
+    else if (!FadingPlateId.IsEmpty() && FadingPlateSince < 0)
+        FadingPlateSince = FrameTime;
+    float PlateFade = 1.f;
+    if (FadingPlateSince >= 0)
+    {
+        PlateFade = FMath::Clamp(1.f - float((FrameTime - FadingPlateSince) / .45), 0.f, 1.f);
+        if (PlateFade <= 0.f)
+        {
+            FadingPlateId.Reset();
+            FadingPlateSince = -1;
+        }
+    }
+    const FString CurrentId = Current.IsEmpty() ? FadingPlateId : Current;
     const float Scale = Canvas->SizeX / (Map->RenderProfile == TEXT("landscape") ? 1920.f : 1080.f);
     const FIntPoint Size(Canvas->SizeX, Canvas->SizeY);
     // The HUD costs a projection per boundary vertex, every frame: 12.5k points for the
@@ -2449,6 +2472,8 @@ void AGeoHUD::DrawHUD()
         // On-screen line-box height of the name, in pixels: the outline width is derived
         // from it so that it stays proportional at every zoom.
         float Ink = 0;
+        /** Plaque and pin only: the closing hand-off fades them out instead of cutting. */
+        float Fade = 1;
     };
     TArray<FLabelDraw> DrawLabels;
     if (!LabelFont)
@@ -2505,7 +2530,7 @@ void AGeoHUD::DrawHUD()
         const auto Ramp = [DistanceRatioSq](double Near, double Far) {
             return FMath::Pow(FMath::Clamp((DistanceRatioSq - Near * Near) / (Far * Far - Near * Near), 0., 1.), .2);
         };
-        const bool CurrentVillage = !Label.Parent && Label.Id == Current;
+        const bool CurrentVillage = !Label.Parent && Label.Id == CurrentId;
         const bool Primary = Label.Parent || CurrentVillage;
         // Cesium fades a name to nothing as it leaves its NearFarScalar range. On a
         // satellite photo under a black rim that also fades, the far names turned grey
@@ -2674,7 +2699,7 @@ void AGeoHUD::DrawHUD()
         DrawLabels.Add({Label.Id, Label.Name, Label.PlatePath, Point, Extent, Color, TextScale, Emphasis,
                         IconSize, PlateHeight, PlateTexture, CurrentVillage ? 2 : Label.Parent ? 1 : 0,
                         CharCount, Tracking * TextScale, (Width + TrackingTotal) * TextScale, Label.Parent, Font,
-                        Community, Rank, Height * TextScale});
+                        Community, Rank, Height * TextScale, CurrentVillage ? PlateFade : 1.f});
     }
     DrawLabels.Sort([this](const FLabelDraw &A, const FLabelDraw &B) {
         if (A.Priority != B.Priority)
@@ -2738,7 +2763,7 @@ void AGeoHUD::DrawHUD()
             const float IconSize = Label.IconSize;
             const FVector2D IconMin(Label.Anchor.X - IconSize * .5f, Label.Anchor.Y - IconSize);
             FCanvasTileItem Icon(IconMin, FVector2D(IconSize, IconSize),
-                                 FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.08f)));
+                                 FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.08f) * Label.Fade));
             Icon.Texture = LabelPin->GetResource();
             Icon.BlendMode = SE_BLEND_Translucent;
             Canvas->DrawItem(Icon);
@@ -2843,7 +2868,7 @@ void AGeoHUD::DrawHUD()
         if (Label.PlateTexture)
         {
             FCanvasTileItem Plate(Position - Label.Extent, Label.Extent * 2,
-                                  FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.05f)));
+                                  FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.05f) * Label.Fade));
             Plate.Texture = Label.PlateTexture->GetResource();
             Plate.BlendMode = SE_BLEND_Translucent;
             Canvas->DrawItem(Plate);

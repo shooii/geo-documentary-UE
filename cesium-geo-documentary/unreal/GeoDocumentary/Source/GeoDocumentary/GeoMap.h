@@ -188,6 +188,11 @@ class AGeoHUD : public AHUD
     /** Township names. A second atlas, rasterised large: one 64 px font made every big
      *  name a 2x upscale of a small bitmap. */
     UPROPERTY() TObjectPtr<UFont> TownFont;
+    /** The village whose plaque and pin were on screen last time the runtime still had
+     *  a `current`. The closing pull-back clears that field in one frame, and without
+     *  this the plaque would vanish between two frames mid-flight; it fades instead. */
+    FString FadingPlateId;
+    double FadingPlateSince = -1;
     UPROPERTY() TObjectPtr<UTexture2D> LabelPin;
     UPROPERTY() TMap<FString, TObjectPtr<UTexture2D>> LabelPlates;
     TMap<FString, int32> LabelPlacements;
