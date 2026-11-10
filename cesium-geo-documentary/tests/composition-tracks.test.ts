@@ -51,3 +51,13 @@ test("the compositor takes its track numbers from the shared bands", async () =>
   assert.doesNotMatch(source, /data-track-index="\$\{70 \+ index\}"/);
   assert.doesNotMatch(source, /data-track-index="100"/);
 });
+
+test("生成图在成片里自己标明是 AI 艺术化复原", async () => {
+  // assets/generated 的清单写着「成片必须标记 AI 艺术化复原」，而生成图自带的
+  // 水印会被竖屏裁切掉（9:16 从 2:3 里居中裁边），所以标签必须写在 DOM 上。
+  // 放在画面左上角：右下角是影像署名，下方 25% 高度是字幕安全区。
+  const source = await readFile(resolve(process.cwd(), ".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts"), "utf8");
+  assert.match(source, /sourceType === "generated-illustrative"[\s\S]{0,120}visual-credit/);
+  assert.match(source, /<span class="visual-credit">AI 艺术化复原<\/span>/);
+  assert.match(source, /\.visual-credit\{[\s\S]{0,80}left:[\s\S]{0,80}top:/, "标签只能占左上角，不能压住署名或字幕");
+});

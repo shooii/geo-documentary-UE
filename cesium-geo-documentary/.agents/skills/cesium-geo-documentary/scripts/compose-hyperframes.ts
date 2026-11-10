@@ -302,7 +302,13 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
       : `<img id="visual-main-${index}" class="visual-main fit-${visual.fit ?? "cover"}" style="${imageStyle}" src="${prefix}/images/${visual.src}" alt="${escapeHtml(visual.label)}">`;
     // 「全屏」适配撤掉卡片本身（见 .visual-fullscreen）：画面占满整帧，字幕与投影
     // 遮罩照旧，只有边框/圆角/内缩没有了。
-    return `<figure id="visual-${index}" class="clip visual ${sourceClass} visual-${kind}${layout}" data-visual-id="${visual.id}"${figureTiming}>${background}${main}<figcaption id="visual-caption-${index}">${escapeHtml(visual.label)}</figcaption></figure>`;
+    // 生成图必须自证身份：assets/generated 的清单要求成片标注「AI 艺术化复原」，
+    // 而图片自带的生成水印会被竖屏裁切掉，所以标签写在 DOM 上。放左上角，
+    // 避开右下角的影像署名和下方 25% 高度的字幕安全区。
+    const credit = visual.sourceType === "generated-illustrative"
+      ? `<span class="visual-credit">AI 艺术化复原</span>`
+      : "";
+    return `<figure id="visual-${index}" class="clip visual ${sourceClass} visual-${kind}${layout}" data-visual-id="${visual.id}"${figureTiming}>${background}${main}${credit}<figcaption id="visual-caption-${index}">${escapeHtml(visual.label)}</figcaption></figure>`;
   }).join("\n");
   const mapRefinement = regionId === "440904"
     ? `tl.to("#map",{scale:1.15,transformOrigin:"50% 0%",duration:.6,ease:"power2.out"},${(offset + 7.4).toFixed(3)});`
@@ -337,6 +343,7 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
     .visual.visual-fullscreen figcaption{bottom:${fullscreenCaptionBottomPx}px}
     .visual-main.fit-fullscreen{object-fit:cover}
     .provider-credit{z-index:60;right:${Math.max(18, Math.round(profile.safe_margin / 3))}px;bottom:18px;padding:5px 9px;border-radius:6px;background:rgba(4,10,15,.58);font-size:${isPortrait ? 15 : 13}px;letter-spacing:.02em;color:rgba(244,247,249,.78);text-shadow:0 1px 4px #000;white-space:nowrap}
+    .visual-credit{z-index:4;position:absolute;left:${isPortrait ? 18 : 14}px;top:${isPortrait ? 18 : 14}px;padding:4px 9px;border-radius:6px;background:rgba(4,10,15,.6);font-size:${isPortrait ? 22 : 16}px;letter-spacing:.04em;color:rgba(244,247,249,.82);text-shadow:0 1px 4px #000;white-space:nowrap}
   </style>
 </head>
 <body>
