@@ -565,15 +565,46 @@ async function pruneSupersededMapCache(root: string, regionId: string, profile: 
   }));
 }
 
+/**
+ * Length of a captured map clip, in seconds (0 when it cannot be measured).
+ *
+ * The map cache is keyed by the capture signature, which cannot see inside the
+ * file. A truncated clip — `capture.ts --qa --frames 1` used to overwrite the
+ * real capture — therefore looked like a finished asset and every export built
+ * on it played a blank white board with only the subtitles left on it. Reading
+ * the container duration is the cheapest way to notice that before it ships.
+ */
+const MIN_USABLE_MAP_SECONDS = 2;
+function mapVideoSeconds(root: string, file: string): Promise<number> {
+  return new Promise((resolveSeconds) => {
+    const ffmpeg = join(root, "node_modules", "ffmpeg-static", process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg");
+    if (!existsSync(ffmpeg)) { resolveSeconds(0); return; }
+    const probe = spawn(ffmpeg, ["-hide_banner", "-i", file], { windowsHide: true });
+    let text = "";
+    probe.stderr.on("data", (chunk: Buffer) => { text += chunk.toString("utf8"); });
+    probe.once("error", () => resolveSeconds(0));
+    probe.once("exit", () => {
+      const match = /Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/.exec(text);
+      resolveSeconds(match ? Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]) : 0);
+    });
+  });
+}
+async function usableMapClip(root: string, file: string): Promise<boolean> {
+  return (await mapVideoSeconds(root, file)) >= MIN_USABLE_MAP_SECONDS;
+}
+
 async function cacheMap(root: string, sandbox: string, project: VideoProject, spec: RenderSpec): Promise<boolean> {
   const cacheDir = join(root, "workspace", "render-cache", spec.cacheSignature.replace("sha256:", ""));
   const cached = join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`);
   const target = join(sandbox, "renders", "intermediate", `${project.regionId}-map-${project.output.profile}.mp4`);
-  if (existsSync(cached)) { await copyFile(cached, target); return true; }
+  if (existsSync(cached) && await usableMapClip(root, cached)) { await copyFile(cached, target); return true; }
+  // A cache entry too short to be a real capture is a leftover from a probe;
+  // leaving it in place would keep seeding every later render with it.
+  if (existsSync(cached)) await rm(cached, { force: true }).catch(() => { /* Re-captured below either way. */ });
   const baseline = await makeProject(root, project.regionId, { projectId: project.id });
   const baselineSpec = await buildProjectRenderSpec(root, baseline);
   const legacy = join(root, "renders", "intermediate", `${project.regionId}-map-${project.output.profile}.mp4`);
-  if (baselineSpec.cacheSignature === spec.cacheSignature && existsSync(legacy)) {
+  if (baselineSpec.cacheSignature === spec.cacheSignature && existsSync(legacy) && await usableMapClip(root, legacy)) {
     await mkdir(cacheDir, { recursive: true });
     await copyFile(legacy, cached); await copyFile(cached, target);
     await writeFile(join(cacheDir, "cache.json"), JSON.stringify({ signature: spec.cacheSignature, seededFrom: legacy, createdAt: new Date().toISOString() }, null, 2), "utf8");
