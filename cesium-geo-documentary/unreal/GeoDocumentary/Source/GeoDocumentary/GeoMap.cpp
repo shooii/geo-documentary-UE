@@ -984,9 +984,10 @@ void AGeoMap::Tick(float Delta)
     static int32 ProfileReport = 0;
     if (++ProfileReport % 90 == 0)
         UE_LOG(LogTemp, Display,
-               TEXT("GEO_PROFILE fps=%.1f frame=%.1fms apply=%.2fms refresh=%.2fms hud=%.2fms tiles=%d shown=%d "
+               TEXT("GEO_PROFILE fps=%.1f frame=%.1fms apply=%.2fms refresh=%.2fms hud=%.2fms (rings=%.2f mask=%.2f) tiles=%d shown=%d "
                     "queued=%d active=%d uploads=%d rects=%d ringPoints=%d"),
                1000. / FMath::Max(1e-3, AverageFrameMs), AverageFrameMs, ApplyMs, RefreshMs, HudMs,
+               HudRingsMs, HudMaskMs,
                TileMeshes.Num(), ShownTiles.Num(), TileQueue.Num(), ActiveTiles.Num(), TileImages.Num(),
                HudRects, BoundaryVertices);
     if (CaptureId.IsEmpty())
@@ -1105,6 +1106,8 @@ void AGeoHUD::DrawHUD()
         ~FHudTimer() { Map->HudMs = FMath::Lerp(Map->HudMs, (FPlatformTime::Seconds() - Started) * 1000., .1); }
     };
     const FHudTimer Timer{Map, FPlatformTime::Seconds()};
+    // Timestamp of the ring/fill half, used to split the HUD cost in GEO_PROFILE.
+    double RingsDone = Timer.Started;
     const auto ToScreen = [this, &ViewProjection, &Size, bCanvasProjection](const FVector &World, FVector2D &Pixel) {
         if (!bCanvasProjection)
             return PlayerOwner->ProjectWorldLocationToScreen(World, Pixel);
@@ -1254,6 +1257,7 @@ void AGeoHUD::DrawHUD()
             if (Painted.Triangles.Num())
                 VisitedFills.Add(MoveTemp(Painted));
         }
+        RingsDone = FPlatformTime::Seconds();
         // Active-edge sweep: mask outside all focused rings using even/odd parity,
         // including holes and islands. Cost scales with visible edges, not pixels.
         struct Edge
@@ -1345,16 +1349,42 @@ void AGeoHUD::DrawHUD()
             }
         }
     }
+    Map->HudRingsMs = FMath::Lerp(Map->HudRingsMs, (RingsDone - Timer.Started) * 1000., .1);
+    Map->HudMaskMs = FMath::Lerp(Map->HudMaskMs, (FPlatformTime::Seconds() - RingsDone) * 1000., .1);
     Map->HudRects = DimRects.Num();
     for (const auto &Layer : ShadowRects)
         Map->HudRects += Layer.Num();
+    // The dim sheet and its three shadow steps are built per scanline, so a shot with
+    // the county focused emits six thousand quads per frame. Submitted one FCanvasTileItem
+    // at a time that was 5.7 ms of the render thread — six thousand item constructions for
+    // what is one colour over one shape. Batch each layer into a single triangle item:
+    // same pixels, four draw calls instead of six thousand.
     const auto DrawRects = [this](const TArray<FVector4> &Rects, const FLinearColor &Color) {
+        if (Rects.IsEmpty() || Color.A <= .002f)
+            return;
+        TArray<FCanvasUVTri> Quads;
+        Quads.Reserve(Rects.Num() * 2);
         for (const auto &Rect : Rects)
         {
-            FCanvasTileItem Tile(FVector2D(Rect.X, Rect.Y), FVector2D(Rect.Z, Rect.W), Color);
-            Tile.BlendMode = SE_BLEND_Translucent;
-            Canvas->DrawItem(Tile);
+            if (Rect.Z <= 0 || Rect.W <= 0)
+                continue;
+            const FVector2D Min(Rect.X, Rect.Y), Max(Rect.X + Rect.Z, Rect.Y + Rect.W);
+            for (int32 Half = 0; Half < 2; ++Half)
+            {
+                FCanvasUVTri Triangle;
+                Triangle.V0_Pos = Min;
+                Triangle.V1_Pos = Half ? Max : FVector2D(Max.X, Min.Y);
+                Triangle.V2_Pos = Half ? FVector2D(Min.X, Max.Y) : Max;
+                Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
+                Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Color;
+                Quads.Add(Triangle);
+            }
         }
+        if (Quads.IsEmpty())
+            return;
+        FCanvasTriangleItem Item(Quads, GWhiteTexture);
+        Item.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Item);
     };
     DrawRects(DimRects, FLinearColor(.018, .024, .022, (FocusId.IsEmpty() ? .48 : .22) * Focus));
     const double ShadowOpacity[] = {.08, .15, .33};

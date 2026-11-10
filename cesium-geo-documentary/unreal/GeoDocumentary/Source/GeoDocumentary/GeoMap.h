@@ -129,6 +129,8 @@ class AGeoMap : public AActor
     double ApplyMs = 0, RefreshMs = 0, HudMs = 0;
     /** Canvas quads the HUD emitted last frame; the shadow pass dominates them. */
     int32 HudRects = 0;
+    /** HUD split: projecting rings vs. building the dim/shadow mask. */
+    double HudRingsMs = 0, HudMaskMs = 0;
     int32 BoundaryVertices = 0;
     FVector Geo(double Lon, double Lat, double Height = 0) const;
     void Respond(FString RequestId, FString Error = TEXT(""));
