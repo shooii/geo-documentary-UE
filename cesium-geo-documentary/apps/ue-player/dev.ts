@@ -40,7 +40,11 @@ function startRenderer() {
   start(join(runtime.engineRoot, 'Engine/Binaries/Win64/UnrealEditor.exe'), [
     runtime.project, '/Engine/Maps/Entry', '-game', '-RenderOffscreen', '-Unattended', '-NoSplash', '-AudioMixer',
     `-PixelStreamingURL=ws://127.0.0.1:${process.env.UE_STREAMER_PORT || 8889}`,
-    '-ResX=720', '-ResY=1280', '-ForceRes', `-abslog=${join(logDir, 'preview-renderer.log')}`
+    '-ResX=720', '-ResY=1280', '-ForceRes', `-abslog=${join(logDir, 'preview-renderer.log')}`,
+    // Offline frame capture: `renderFrame(t)` then renders the exact scene time and writes
+    // a PNG, with no dependence on the live stream or on who holds the single controller
+    // seat. Off unless asked for, because it changes how the viewport is sized.
+    ...(process.env.UE_CAPTURE_ROOT ? [`-GeoCaptureRoot=${process.env.UE_CAPTURE_ROOT}`] : [])
   ], reason => {
     console.warn(`UE preview renderer stopped (${reason}); restarting in 3 seconds.`);
     rendererRetry = setTimeout(startRenderer, 3000);

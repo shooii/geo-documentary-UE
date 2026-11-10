@@ -1799,27 +1799,245 @@ void AGeoHUD::DrawHUD()
         Beam.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Beam);
     }
-    const double ContextLabelAlpha = ContextAlpha * FMath::SmoothStep(.82, 1., ContextReveal) * LabelsReveal;
-    if (ContextLabelAlpha > .05 && !Map->ContextLabel.Name.IsEmpty())
+    // The name rides the flood instead of riding its last 18%: while it was tied to
+    // SmoothStep(.82, 1., ...) it only reached full opacity at the very end of the grow and
+    // was already fading during the erase, so on a 50 s film it never got a readable
+    // moment — which is why the county name read as "too small" on screen.
+    const double ContextLabelAlpha = ContextAlpha * FMath::SmoothStep(.45, .85, ContextReveal) * LabelsReveal;
+    if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_METRICS")).Len())
     {
-        FVector2D Point;
-        if (ToScreen(Map->ContextLabel.Position, Point))
+        static int32 AlphaReports = 0;
+        if (++AlphaReports % 45 == 0)
+            UE_LOG(LogTemp, Display, TEXT("GEO_LABEL alpha=%.3f ctxAlpha=%.3f reveal=%.2f camH=%.0f span=%.0f name=%s font=%d"),
+                   ContextLabelAlpha, ContextAlpha, ContextReveal, CameraHeight, ContextSpanMeters,
+                   *Map->ContextLabel.Name, LabelFont ? 1 : 0);
+    }
+    // ---- parent name ----------------------------------------------------------
+    // The county name is anchored to the county seat, and the seat is not always a free
+    // spot: 雷州市's seat sits a couple of kilometres from 龙门镇's northern rim, so at
+    // the county framing the parent name landed right on the child's boundary and the
+    // two read as one word — while the old "fit inside the township" rule shrank it to
+    // about 16 px trying to squeeze under that boundary. It now leaves the township
+    // along its nearest side and sits in the county's own band between the two outlines:
+    // parent outside, child inside, no overlap, and the type is large enough to read.
+    FVector2D ContextPoint = FVector2D::ZeroVector;
+    FBox2D ContextBox(FVector2D::ZeroVector, FVector2D::ZeroVector);
+    float ContextTextScale = 0;
+    int32 ContextPlacement = 0;
+    bool bContextName = false;
+    if (ContextLabelAlpha > .05 && LabelFont && !Map->ContextLabel.Name.IsEmpty())
+    {
+        FVector2D Seat;
+        if (ToScreen(Map->ContextLabel.Position, Seat))
         {
-            float W, H;
-            Canvas->StrLen(LabelFont, Map->ContextLabel.Name, W, H);
-            const float TextScale = 42 * Scale / FMath::Max(1.f, H);
-            const FLinearColor ContextColor(.72, .90, 1, .85 * ContextLabelAlpha);
-            FCanvasTextItem Text(Point, FText::FromString(Map->ContextLabel.Name), LabelFont, ContextColor);
-            Text.bCentreX = true;
-            Text.bCentreY = true;
-            Text.Scale = FVector2D(TextScale);
-            const FLinearColor Outline = DarkEdge.CopyWithNewOpacity(.90 * ContextLabelAlpha);
-            Text.SetColor(Outline);
-            for (const FVector2D Offset : {FVector2D(-1.5, 0), FVector2D(1.5, 0), FVector2D(0, -1.5), FVector2D(0, 1.5)})
-                Canvas->DrawItem(Text, Point + Offset);
-            Text.SetColor(ContextColor);
-            Canvas->DrawItem(Text, Point);
+            float NameW, NameH;
+            Canvas->StrLen(LabelFont, Map->ContextLabel.Name, NameW, NameH);
+            // 42 px was sized for a desk and then clamped further by the inscribed-circle
+            // rule; this is the only text on the county framing, so it gets a section
+            // title weight and a width cap instead of the clamp.
+            ContextTextScale = 52 * Scale / FMath::Max(1.f, NameH);
+            ContextTextScale = FMath::Min(ContextTextScale, Size.X * .30f / FMath::Max(1.f, NameW));
+            FVector2D Half(NameW * ContextTextScale * .5f, NameH * ContextTextScale * .5f);
+            const FVector2D Gap = FVector2D(10, 8) * Scale;
+
+            // Coarse screen polygon of the township, sampled from the parent rings. A few hundred points are enough to answer "which side is this box
+            // on"; projecting all twenty thousand again would cost more than the rest of
+            // the HUD put together.
+            TArray<TArray<FVector2D>> TownScreen;
+            for (const auto &Ring : Map->Rings)
+            {
+                if (!Ring.Parent || Ring.Points.Num() < 4)
+                    continue;
+                const int32 Stride = FMath::Max(1, Ring.Points.Num() / 320);
+                TArray<FVector2D> Coarse;
+                for (int32 I = 0; I < Ring.Points.Num(); I += Stride)
+                {
+                    FVector2D Pixel;
+                    if (ToScreen(Ring.Points[I], Pixel))
+                        Coarse.Add(Pixel);
+                }
+                if (Coarse.Num() >= 3)
+                    TownScreen.Add(MoveTemp(Coarse));
+            }
+            // Decimated county rings: enough for point-in-shape, cheap enough to run a
+            // handful of times per frame.
+            TArray<TArray<FVector2D>> CountyCoarse;
+            for (const auto &Ring : CountyScreen)
+            {
+                const int32 Stride = FMath::Max(1, Ring.Num() / 360);
+                TArray<FVector2D> Coarse;
+                for (int32 I = 0; I < Ring.Num(); I += Stride)
+                    Coarse.Add(Ring[I]);
+                if (Coarse.Num() >= 3)
+                    CountyCoarse.Add(MoveTemp(Coarse));
+            }
+            const auto RingHas = [](const TArray<FVector2D> &Ring, const FVector2D &Pixel) {
+                bool Inside = false;
+                for (int32 I = 0, J = Ring.Num() - 1; I < Ring.Num(); J = I++)
+                    if (((Ring[I].Y > Pixel.Y) != (Ring[J].Y > Pixel.Y)) &&
+                        Pixel.X < (Ring[J].X - Ring[I].X) * (Pixel.Y - Ring[I].Y) / (Ring[J].Y - Ring[I].Y) + Ring[I].X)
+                        Inside = !Inside;
+                return Inside;
+            };
+            const auto InCounty = [&](const FVector2D &Pixel) {
+                for (const auto &Ring : CountyCoarse)
+                    if (RingHas(Ring, Pixel))
+                        return true;
+                return false;
+            };
+            const double BandY = .75 * Size.Y;
+            const FBox2D Caption(FVector2D(.08 * Size.X, BandY - 56 * Scale),
+                                 FVector2D(.92 * Size.X, BandY + 56 * Scale));
+            const FBox2D Safe(FVector2D(20, 20) * Scale, FVector2D(Size.X, Size.Y) - FVector2D(20, 20) * Scale);
+            // Distance from the township outline, not from its screen box: the box is a
+            // superset and the seat of 雷州市 pokes out of the northern rim, so a bbox
+            // test would call that spot free while the name still sat on the line. The
+            // gap is enforced on the expanded box so the name keeps a breath of air.
+            const auto ClearsTown = [&](const FBox2D &Box) {
+                for (int32 Row = 0; Row < 3; ++Row)
+                    for (int32 Col = 0; Col < 4; ++Col)
+                    {
+                        const FVector2D Sample(FMath::Lerp(Box.Min.X, Box.Max.X, Col / 3.),
+                                               FMath::Lerp(Box.Min.Y, Box.Max.Y, Row / 2.));
+                        for (const auto &Ring : TownScreen)
+                            if (RingHas(Ring, Sample))
+                                return false;
+                    }
+                return true;
+            };
+            const auto Fits = [&](const FVector2D &At) {
+                const FBox2D Box(At - Half, At + Half);
+                if (!Safe.IsInside(Box))
+                    return 1;
+                if (Caption.Intersect(Box))
+                    return 2;
+                // Only a hairline of tolerance here: the exits below already step a whole
+                // Gap clear of the outline, and expanding again by Gap would make the two
+                // rules cancel out and reject the very spot they just chose.
+                if (!ClearsTown(Box.ExpandBy(1.5 * Scale)))
+                    return 3;
+                // The name has to stay on the county: centre plus corners, so a box that
+                // straddles the rim into open water is rejected too.
+                int32 Inside = InCounty(At) ? 1 : 0;
+                for (const FVector2D &Corner : {FVector2D(Box.Min.X, Box.Min.Y), FVector2D(Box.Max.X, Box.Min.Y),
+                                                FVector2D(Box.Min.X, Box.Max.Y), FVector2D(Box.Max.X, Box.Max.Y)})
+                    Inside += InCounty(Corner) ? 1 : 0;
+                return Inside >= 3 ? 0 : 4;
+            };
+            TArray<FVector2D> Candidates{Seat};
+            // The exits follow the outline across the whole band the name will occupy, not
+            // just the line through the seat: a 3-character name is 80 px wide, and a
+            // township rim that climbs 10 px inside that span still ends up under the text.
+            // `Envelope` is the nearest outline coordinate in that band.
+            const auto Envelope = [&](bool VerticalExtent, bool TowardsNegative) {
+                // VerticalExtent: sweep the horizontal band the text will occupy (its X
+                // span) and report the outline's nearest Y. Otherwise sweep the vertical
+                // band and report its nearest X.
+                const double Center = VerticalExtent ? Seat.X : Seat.Y;
+                const double Span = VerticalExtent ? Half.X + Gap.X : Half.Y + Gap.Y;
+                double Best = TowardsNegative ? 1e9 : -1e9;
+                bool Found = false;
+                for (const auto &Ring : TownScreen)
+                    for (const FVector2D &P : Ring)
+                    {
+                        const double Along = VerticalExtent ? P.X : P.Y;
+                        const double Across = VerticalExtent ? P.Y : P.X;
+                        if (FMath::Abs(Along - Center) > Span)
+                            continue;
+                        if (!Found || (TowardsNegative ? Across < Best : Across > Best))
+                        {
+                            Best = Across;
+                            Found = true;
+                        }
+                    }
+                return Found ? Best : (TowardsNegative ? -1e9 : 1e9);
+            };
+            if (TownScreen.Num())
+            {
+                Candidates.Add(FVector2D(Seat.X, Envelope(true, true) - Half.Y - Gap.Y));   // above
+                Candidates.Add(FVector2D(Seat.X, Envelope(true, false) + Half.Y + Gap.Y));  // below
+                Candidates.Add(FVector2D(Envelope(false, true) - Half.X - Gap.X, Seat.Y));  // left
+                Candidates.Add(FVector2D(Envelope(false, false) + Half.X + Gap.X, Seat.Y)); // right
+            }
+            Candidates.Sort([&Seat](const FVector2D &A, const FVector2D &B) {
+                return FVector2D::Distance(A, Seat) < FVector2D::Distance(B, Seat);
+            });
+            // Shortest move wins, so the name stays where the reader expects it; the
+            // previous choice is kept while it is still valid, so the solver does not
+            // hop between sides as the camera creeps.
+            const int32 *Previous = LabelPlacements.Find(TEXT("@parent"));
+            int32 Chosen = INDEX_NONE;
+            if (Previous && *Previous >= 0 && *Previous < Candidates.Num() && Fits(Candidates[*Previous]) == 0)
+                Chosen = *Previous;
+            for (int32 I = 0; Chosen == INDEX_NONE && I < Candidates.Num(); ++I)
+                if (Fits(Candidates[I]) == 0)
+                    Chosen = I;
+            if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_METRICS")).Len())
+            {
+                static int32 RejectReports = 0;
+                if (Chosen == INDEX_NONE && ++RejectReports % 45 == 0)
+                {
+                    FString Why;
+                    for (int32 I = 0; I < Candidates.Num(); ++I)
+                        Why += FString::Printf(TEXT("%.0f,%.0f:r%d "), Candidates[I].X, Candidates[I].Y, Fits(Candidates[I]));
+                    UE_LOG(LogTemp, Display, TEXT("GEO_LABEL ctx rejected seat=%.0f,%.0f rings=%d -> %s"),
+                           Seat.X, Seat.Y, TownScreen.Num(), *Why);
+                }
+            }
+            if (Chosen != INDEX_NONE)
+            {
+                ContextPoint = Candidates[Chosen];
+                ContextPlacement = Chosen;
+            }
+            else if (TownScreen.Num())
+            {
+                // No exit works — a village shot, or a county whose band is off screen.
+                // Fall back to the seat, fitted inside the township the way it used to
+                // be, but with a floor that is still readable.
+                double Room = 0;
+                for (const auto &Ring : TownScreen)
+                    for (const FVector2D &Vertex : Ring)
+                        Room = Room <= 0 ? double(FVector2D::Distance(Seat, Vertex))
+                                         : FMath::Min(Room, double(FVector2D::Distance(Seat, Vertex)));
+                if (Room > 4)
+                {
+                    const float Diagonal = FMath::Sqrt(FMath::Square(Half.X * 2.f) + FMath::Square(Half.Y * 2.f));
+                    ContextTextScale = FMath::Min(ContextTextScale, float(2. * Room / FMath::Max(1.f, Diagonal)));
+                    ContextTextScale = FMath::Max(ContextTextScale, 22.f / FMath::Max(1.f, NameH));
+                }
+                ContextPoint = Seat;
+            }
+            else
+            {
+                ContextPoint = Seat;
+            }
+            if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_METRICS")).Len())
+            {
+                static int32 ContextReports = 0;
+                if (++ContextReports % 45 == 0)
+                    UE_LOG(LogTemp, Display, TEXT("GEO_LABEL ctx=%s W=%.1f H=%.1f scale=%.3f glyph=%.1f at=%.0f,%.0f seat=%.0f,%.0f pick=%d"),
+                           *Map->ContextLabel.Name, NameW, NameH, ContextTextScale, NameH * ContextTextScale,
+                           ContextPoint.X, ContextPoint.Y, Seat.X, Seat.Y, ContextPlacement);
+            }
+            Half = FVector2D(NameW * ContextTextScale * .5f, NameH * ContextTextScale * .5f);
+            ContextBox = FBox2D(ContextPoint - Half, ContextPoint + Half).ExpandBy(2 * Scale);
+            bContextName = true;
         }
+    }
+    if (bContextName)
+    {
+        const FLinearColor ContextColor(.72, .90, 1, .85 * ContextLabelAlpha);
+        FCanvasTextItem Text(ContextPoint, FText::FromString(Map->ContextLabel.Name), LabelFont, ContextColor);
+        Text.bCentreX = true;
+        Text.bCentreY = true;
+        Text.Scale = FVector2D(ContextTextScale);
+        const FLinearColor Outline = DarkEdge.CopyWithNewOpacity(.90 * ContextLabelAlpha);
+        Text.SetColor(Outline);
+        const double Halo = FMath::Max(1.5, 2.2 * Scale);
+        for (const FVector2D Offset : {FVector2D(-Halo, 0), FVector2D(Halo, 0), FVector2D(0, -Halo), FVector2D(0, Halo)})
+            Canvas->DrawItem(Text, ContextPoint + Offset);
+        Text.SetColor(ContextColor);
+        Canvas->DrawItem(Text);
     }
     struct FLabelDraw
     {
@@ -1936,7 +2154,17 @@ void AGeoHUD::DrawHUD()
                 TextScale = FMath::Min(TextScale, float(2. * Room / FMath::Max(1.f, Diagonal)));
                 // A floor: honouring the boundary at county zoom would make the name
                 // unreadable. Below this it is allowed to spill rather than disappear.
-                TextScale = FMath::Max(TextScale, 16.f / FMath::Max(1.f, GlyphHeight));
+                // Floor raised from 16 px: at the county framing the township is a
+                // thumbnail, and 16 px on a phone is a smear. 24 keeps it clearly
+                // subordinate to the county name while still readable.
+                TextScale = FMath::Max(TextScale, 24.f / FMath::Max(1.f, GlyphHeight));
+                if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_METRICS")).Len())
+                {
+                    static int32 TownReports = 0;
+                    if (++TownReports % 45 == 0)
+                        UE_LOG(LogTemp, Display, TEXT("GEO_LABEL town=%s sizePx=%.1f glyphH=%.1f glyphW=%.1f room=%.1f finalScale=%.3f glyph=%.1f"),
+                               *Label.Name, SizePx, GlyphHeight, GlyphWidth, Room, TextScale, GlyphHeight * TextScale);
+                }
             }
         }
         FVector2D Extent = FVector2D(Label.Parent ? Width + Tracking : Width, Height) * TextScale * .5
@@ -1986,6 +2214,13 @@ void AGeoHUD::DrawHUD()
                                   FVector2D(.92 * Size.X, CaptionY + 56 * Scale))};
     const FBox2D SafeFrame(FVector2D(20, 20) * Scale, FVector2D(Size.X, Size.Y) - FVector2D(20, 20) * Scale);
     TMap<FString, int32> Placements;
+    if (bContextName)
+    {
+        // Reserve the parent name: a village label drawn on top of it made the county
+        // read as the village's name instead of its parent.
+        Occupied.Add(ContextBox);
+        Placements.Add(TEXT("@parent"), ContextPlacement);
+    }
     for (const auto &Label : DrawLabels)
     {
         const bool Pinned = Label.IconSize > 0;
