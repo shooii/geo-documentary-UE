@@ -1519,6 +1519,14 @@ void AGeoHUD::DrawHUD()
         FLinearColor Color = FMath::Lerp(Context, Edge.CopyWithNewOpacity(.78f), float(Stroke.Accent));
         if (!Stroke.Parent)
             Color.A *= ChildReveal;
+        // Everything below is a parent stroke, and the town outline only belongs to the
+        // town's own shots. Its accent dies the moment the tour drops into a village, but
+        // the hairline kept its 53–78% grey and went on drawing the town boundary across
+        // open water long after the town had left the frame — that stray thread is the
+        // faint line over the bay. Riding the accent takes it away with the shot and
+        // brings it back for the closing overview.
+        if (Stroke.Parent)
+            Color.A *= FMath::Clamp(float(Stroke.Accent) * 1.15f, 0.f, 1.f);
         // Single hairline, no dark underlay: the raised 3D rim already frames the town.
         const double BaseWidth = FMath::Lerp(1.2f, 1.7f, float(Stroke.Accent)) * Scale;
         AddStroke(Stroke.A, End, BaseWidth, Color, Color);
