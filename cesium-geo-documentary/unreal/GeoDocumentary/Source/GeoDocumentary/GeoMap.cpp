@@ -1155,7 +1155,14 @@ void AGeoHUD::DrawHUD()
         DimRects.Reset();
         for (auto &Layer : ShadowRects)
             Layer.Reset();
-        TArray<TArray<FVector2D>> FocusRings;
+        // The dim sheet and its contact shadow are cut out of the TOWNSHIP, not out of
+        // whichever child is currently on screen. Cutting the hole out of the focused
+        // village darkened the rest of 迈陈镇 during a village shot, so the township's
+        // own imagery went grey while its villages were being read. The hole is the
+        // township for the whole film; the village accent is drawn as fill and outline.
+        // `Reveal` (the township rim being traced) is what fades it in, so the descent
+        // still starts on a clean image.
+        TArray<TArray<FVector2D>> MaskRings;
         const FGeoRing *TraceRing = nullptr;
         if (N(Trace, TEXT("alpha")) > .01)
             for (const auto &Ring : Map->Rings)
@@ -1164,9 +1171,8 @@ void AGeoHUD::DrawHUD()
                     TraceRing = &Ring;
         for (const auto &Ring : Map->Rings)
         {
-            const bool Focused = FocusId.IsEmpty() ? Ring.Parent : Ring.Id == FocusId;
-            if (Focused && Focus > .001)
-                FocusRings.Add(ProjectFocusRing(Ring.Points, Map->Camera, Size.X, Size.Y));
+            if (Ring.Parent && Reveal > .001 && Ring.Points.Num() >= 4)
+                MaskRings.Add(ProjectFocusRing(Ring.Points, Map->Camera, Size.X, Size.Y));
             const double Accent = Ring.Parent ? N(F, TEXT("parentAccent")) : N(Accents, *Ring.Id);
             // Visited villages keep a thin outline for the rest of the film, so the
             // accumulated green still reads as separate places instead of one blob.
@@ -1265,7 +1271,7 @@ void AGeoHUD::DrawHUD()
             double X, Step;
             int End;
         };
-        const int Band = 2, Rows = FocusRings.IsEmpty() ? 0 : FMath::CeilToInt(double(Size.Y) / Band);
+        const int Band = 2, Rows = MaskRings.IsEmpty() ? 0 : FMath::CeilToInt(double(Size.Y) / Band);
         TArray<TArray<Edge>> Starts;
         Starts.SetNum(Rows);
         using FSpans = TArray<FVector2D, TInlineAllocator<4>>;
@@ -1273,7 +1279,7 @@ void AGeoHUD::DrawHUD()
         InsideRows.SetNum(Rows);
         OutsideRows.SetNum(Rows);
         TArray<Edge> Active;
-        for (const auto &Ring : FocusRings)
+        for (const auto &Ring : MaskRings)
             for (int I = 0; I < Ring.Num(); I++)
             {
                 FVector2D A = Ring[I], B = Ring[(I + 1) % Ring.Num()];
@@ -1360,36 +1366,19 @@ void AGeoHUD::DrawHUD()
     // what is one colour over one shape. Batch each layer into a single triangle item:
     // same pixels, four draw calls instead of six thousand.
     const auto DrawRects = [this](const TArray<FVector4> &Rects, const FLinearColor &Color) {
-        if (Rects.IsEmpty() || Color.A <= .002f)
-            return;
-        TArray<FCanvasUVTri> Quads;
-        Quads.Reserve(Rects.Num() * 2);
         for (const auto &Rect : Rects)
         {
-            if (Rect.Z <= 0 || Rect.W <= 0)
-                continue;
-            const FVector2D Min(Rect.X, Rect.Y), Max(Rect.X + Rect.Z, Rect.Y + Rect.W);
-            for (int32 Half = 0; Half < 2; ++Half)
-            {
-                FCanvasUVTri Triangle;
-                Triangle.V0_Pos = Min;
-                Triangle.V1_Pos = Half ? Max : FVector2D(Max.X, Min.Y);
-                Triangle.V2_Pos = Half ? FVector2D(Min.X, Max.Y) : Max;
-                Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
-                Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Color;
-                Quads.Add(Triangle);
-            }
+            FCanvasTileItem Tile(FVector2D(Rect.X, Rect.Y), FVector2D(Rect.Z, Rect.W), Color);
+            Tile.BlendMode = SE_BLEND_Translucent;
+            Canvas->DrawItem(Tile);
         }
-        if (Quads.IsEmpty())
-            return;
-        FCanvasTriangleItem Item(Quads, GWhiteTexture);
-        Item.BlendMode = SE_BLEND_Translucent;
-        Canvas->DrawItem(Item);
     };
-    DrawRects(DimRects, FLinearColor(.018, .024, .022, (FocusId.IsEmpty() ? .48 : .22) * Focus));
+    // Keyed off the township's own reveal, not the shot's focus strength: the periphery
+    // stays dimmed from the opening to the outro instead of breathing with each cut.
+    DrawRects(DimRects, FLinearColor(.018, .024, .022, (FocusId.IsEmpty() ? .48 : .22) * Reveal));
     const double ShadowOpacity[] = {.08, .15, .33};
     for (int Layer = 0; Layer < UE_ARRAY_COUNT(ShadowRects); ++Layer)
-        DrawRects(ShadowRects[Layer], FLinearColor(.006, .010, .010, ShadowOpacity[Layer] * Focus));
+        DrawRects(ShadowRects[Layer], FLinearColor(.006, .010, .010, ShadowOpacity[Layer] * Reveal));
     // The county arrives as a wipe: a straight front travels across the shape and
     // everything behind it is drawn, nothing ahead of it is. The front is placed on
     // the polygon's own projected extent — the world-space AABB projects far wider
