@@ -22,6 +22,7 @@ export type PreviewFlightOrigin = {
   parentAccent: number;
   labels: Record<string, LabelStyle>;
   accents: Record<string, number>;
+  fills?: Record<string, number>;
 };
 let lastLeg: { key: string; geodesic: EllipsoidGeodesic } | undefined;
 
@@ -195,6 +196,17 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   let parentAccent = returning?.progress ?? parentOverview;
   const labels: Record<string, LabelStyle> = {};
   const accents: Record<string, number> = {};
+  // Green that is permanent. `accents` is the highlight of the shot that is on screen
+  // right now and dies at every hand-off; this one ramps in as the camera flies over
+  // and then holds for the rest of the film, so a village keeps the fill it was given
+  // during its own shot instead of fading back to bare imagery.
+  const fills: Record<string, number> = {};
+  if (!openingOnly) {
+    stops.forEach((item) => {
+      const strength = smooth((mapTime - Number(item.start)) / 1.15);
+      if (strength > .01) fills[String(item.id)] = strength;
+    });
+  }
   if (!openingOnly) {
     stops.forEach((item, stopIndex) => {
       const id = String(item.id);
@@ -239,6 +251,13 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     for (const id of new Set([...Object.keys(origin.accents), ...Object.keys(accents)])) {
       accents[id] = lerp(origin.accents[id] ?? 0, accents[id] ?? 0, transition);
     }
+    if (origin.fills) {
+      for (const id of new Set([...Object.keys(origin.fills), ...Object.keys(fills)])) {
+        const blended = lerp(origin.fills[id] ?? 0, fills[id] ?? 0, transition);
+        if (blended > .01) fills[id] = blended;
+        else delete fills[id];
+      }
+    }
   }
 
   const focusId = Object.keys(accents).reduce((best, id) => accents[id]! > (accents[best] ?? parentAccent) ? id : best, '');
@@ -252,7 +271,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
     parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity, contextErasing,
-    labels, accents, labelReferenceDistance, focusId, focus, labelsReveal,
+    labels, accents, labelReferenceDistance, focusId, focus, labelsReveal, fills,
     // Villages the tour has already reached. UE keeps their plate painted, so the
     // map accumulates colour the way the reference reel does.
     visitedIds: stops.filter(item => mapTime >= Number(item.start)).map(item => String(item.id)),

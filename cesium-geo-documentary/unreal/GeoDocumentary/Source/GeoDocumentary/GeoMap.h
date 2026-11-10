@@ -135,8 +135,13 @@ class AGeoMap : public AActor
 struct FGeoStroke
 {
     FVector2D A, B;
-    bool Parent = false, Trace = false;
+    bool Parent = false, Trace = false, Touring = false;
     double Start = 0, End = 0, Accent = 0;
+};
+/** Screen-space triangles of a village whose tour already reached it. */
+struct FGeoVisitedFill
+{
+    TArray<FCanvasUVTri> Triangles;
 };
 UCLASS()
 class AGeoHUD : public AHUD
@@ -150,6 +155,7 @@ class AGeoHUD : public AHUD
     TSharedPtr<FJsonObject> CachedFrame;
     FIntPoint CachedSize;
     TArray<FCanvasUVTri> FocusTriangles;
+    TArray<FGeoVisitedFill> VisitedFills;
     TArray<FVector4> DimRects;
     TArray<FVector4> ShadowRects[3];
     UPROPERTY() TObjectPtr<UFont> LabelFont;

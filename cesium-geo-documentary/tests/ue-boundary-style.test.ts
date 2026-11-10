@@ -7,12 +7,17 @@ test('boundary fills preserve polygon holes and multipart islands',()=>{
  let area=0;for(const mesh of meshes)for(let i=0;i<mesh.indices.length;i+=3){const a=mesh.indices[i]!*2,b=mesh.indices[i+1]!*2,c=mesh.indices[i+2]!*2,p=mesh.vertices;area+=Math.abs((p[b]!-p[a]!)*(p[c+1]!-p[a+1]!)-(p[c]!-p[a]!)*(p[b+1]!-p[a+1]!))/2;}
  assert.equal(area,13);
 });
-test('boundary light head makes one timed lap and disappears after the reveal',()=>{
+test('boundary light head makes one timed lap, then keeps orbiting a toured village',()=>{
  assert.equal(boundaryAnimation(4,5,'child').alpha,0);
  assert.equal(boundaryAnimation(5,5,'child').progress,0);
  assert.equal(boundaryAnimation(5.625,5,'child').progress,.5);
- assert.equal(boundaryAnimation(6.5,5,'child').alpha,0);
- assert.equal(boundaryAnimation(8,5,'child').alpha,0);
+ // The sweep is over, but the village is still being toured: the beam keeps circling its
+ // rim for the rest of the shot instead of leaving the boundary dead.
+ assert.equal(boundaryAnimation(6.5,5,'child').alpha,.62);
+ assert.ok(boundaryAnimation(8,5,'child').progress>0);
+ // The parent rim gets exactly one lap and then goes dark: there is no child to circle.
+ assert.equal(boundaryAnimation(6.5,5,'').alpha,0);
+ assert.equal(boundaryAnimation(8,5,'').alpha,0);
 });
 
 test('label anchors use the interior center and never a point inside a hole', () => {

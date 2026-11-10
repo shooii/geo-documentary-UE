@@ -175,9 +175,21 @@ export function interiorLabelPoint(input: any, preferred?: unknown): Point | und
   return fallback ?? (point ? [point[0], point[1]] : undefined);
 }
 
+// The sweep is the entrance: one bright pass the moment the camera lands. A village
+// shot then holds for several seconds, and with a single pass the rim went dead for
+// the rest of it. After the sweep the same beam keeps orbiting the same rim, dimmer
+// and slower, so the boundary of the village being toured is always alive.
+const ORBIT_PERIOD=3.4;
 export function boundaryAnimation(mapTime:number,start:number,current:string) {
   const elapsed=mapTime-start;
   const progress=Math.max(0,Math.min(1,elapsed/1.25));
   const end=Math.max(0,Math.min(1,(elapsed-1.1)/.35));
-  return {target:current,progress,alpha:elapsed>=0 && elapsed<1.45?1-end*end*(3-2*end):0};
+  const sweep=elapsed>=0&&elapsed<1.45?1-end*end*(3-2*end):0;
+  const orbit=elapsed-1.45;
+  // Only a child has a rim worth circling: `current` is empty on the opening shot and
+  // once the tour is over, and the beam must not keep running around the town after it.
+  if(!current||orbit<0) return {target:current,progress,alpha:sweep};
+  // The ring is closed, so wrapping 1 -> 0 puts the head back where it started and the
+  // orbit reads as continuous.
+  return {target:current,progress:(orbit%ORBIT_PERIOD)/ORBIT_PERIOD,alpha:.62};
 }

@@ -387,19 +387,12 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         const TArray<TSharedPtr<FJsonValue>> *LabelPoint;
         if (Region->TryGetArrayField(TEXT("labelPoint"), LabelPoint) && LabelPoint->Num() >= 2)
         {
-            // The town's name is set with a full-width space between characters, the way
-            // the Cesium build tracked it out. Done here rather than in the HUD so label
-            // measuring, collision and the text itself all see the same string.
-            const FString Name = S(Region, TEXT("name"));
-            FString Spaced;
-            for (int32 Index = 0; Index < Name.Len(); ++Index)
-            {
-                if (Index > 0)
-                    Spaced.AppendChar(TEXT('\u3000'));
-                Spaced.AppendChar(Name[Index]);
-            }
+            // The tracking between the characters is the HUD's job now: it draws the town
+            // name one character at a time so it controls the exact advance, can fit the
+            // name inside the boundary and can float the characters. Baking spaces into
+            // the string here made all three impossible.
             Labels.Add({Geo((*LabelPoint)[0]->AsNumber(), (*LabelPoint)[1]->AsNumber(), 10), S(Region, TEXT("id")),
-                        Spaced, true, S(Region, TEXT("labelPlate"))});
+                        S(Region, TEXT("name")), true, S(Region, TEXT("labelPlate"))});
         }
         const TArray<TSharedPtr<FJsonValue>> *Layers;
         if (Scene->TryGetArrayField(TEXT("layers"), Layers))
@@ -1024,6 +1017,7 @@ void AGeoHUD::DrawHUD()
     const double ChildReveal = N(F, TEXT("childReveal"), 1);
     const auto Trace = O(F, TEXT("trace"));
     const auto Accents = O(F, TEXT("accents"));
+    const auto FillStrengths = O(F, TEXT("fills"));
     const auto Styles = O(F, TEXT("labels"));
     const auto ContextCamera = O(F, TEXT("camera"));
     const double CameraHeight = N(ContextCamera, TEXT("height"), 30000);
@@ -1051,6 +1045,7 @@ void AGeoHUD::DrawHUD()
         CachedSize = Size;
         Strokes.Reset();
         FocusTriangles.Reset();
+        VisitedFills.Reset();
         DimRects.Reset();
         for (auto &Layer : ShadowRects)
             Layer.Reset();
@@ -1084,7 +1079,7 @@ void AGeoHUD::DrawHUD()
                     !(FMath::Max(A.X, B.X) < -20 || FMath::Min(A.X, B.X) > Size.X + 20 || FMath::Max(A.Y, B.Y) < -20 ||
                       FMath::Min(A.Y, B.Y) > Size.Y + 20))
                     Strokes.Add(
-                        {A, B, Ring.Parent, &Ring == TraceRing, Ring.Lengths[I - 1] / Length,
+                        {A, B, Ring.Parent, &Ring == TraceRing, Ring.Id == Current, Ring.Lengths[I - 1] / Length,
                          Ring.Lengths[I] / Length, Accent});
                 A = B;
                 HasA = HasB;
@@ -1092,7 +1087,10 @@ void AGeoHUD::DrawHUD()
         }
         for (const auto &Fill : Map->Fills)
         {
-            if (Focus <= .001 || !(FocusId.IsEmpty() ? Fill.Parent : Fill.Id == FocusId))
+            // The fill of the town itself, on the opening shot. Village fill is no longer
+            // the focused fill: it lives in `fills`, ramps in on the flight over and then
+            // stays for the rest of the film, so it is handled below for every village.
+            if (Focus <= .001 || !FocusId.IsEmpty() || !Fill.Parent)
                 continue;
             TArray<FVector2D> Points;
             TArray<bool> Valid;
@@ -1115,6 +1113,43 @@ void AGeoHUD::DrawHUD()
                 Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = FLinearColor::White;
                 FocusTriangles.Add(Triangle);
             }
+        }
+        // Villages whose tour already started keep the same saturated fill they carried
+        // while they were the subject. It used to be the focused fill only, so the green
+        // dropped to the pale plate as soon as the tour moved on and the place looked
+        // switched off; now the paint is permanent and the map accumulates.
+        for (const auto &Fill : Map->Fills)
+        {
+            if (Fill.Parent)
+                continue;
+            const double Strength = N(FillStrengths, *Fill.Id);
+            if (Strength <= .01)
+                continue;
+            TArray<FVector2D> Points;
+            TArray<bool> Valid;
+            for (const auto &Vertex : Fill.Vertices)
+            {
+                FVector2D Pixel;
+                Valid.Add(PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel));
+                Points.Add(Pixel);
+            }
+            FGeoVisitedFill Painted;
+            const FLinearColor Tint(.20, .62, .20, .55 * Strength);
+            for (int I = 0; I + 2 < Fill.Indices.Num(); I += 3)
+            {
+                const int A = Fill.Indices[I], B = Fill.Indices[I + 1], C = Fill.Indices[I + 2];
+                if (!Valid[A] || !Valid[B] || !Valid[C])
+                    continue;
+                FCanvasUVTri Triangle;
+                Triangle.V0_Pos = Points[A];
+                Triangle.V1_Pos = Points[B];
+                Triangle.V2_Pos = Points[C];
+                Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
+                Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
+                Painted.Triangles.Add(Triangle);
+            }
+            if (Painted.Triangles.Num())
+                VisitedFills.Add(MoveTemp(Painted));
         }
         // Active-edge sweep: mask outside all focused rings using even/odd parity,
         // including holes and islands. Cost scales with visible edges, not pixels.
@@ -1391,6 +1426,12 @@ void AGeoHUD::DrawHUD()
         Fill.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Fill);
     }
+    for (const auto &Painted : VisitedFills)
+    {
+        FCanvasTriangleItem Fill(Painted.Triangles, GWhiteTexture);
+        Fill.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Fill);
+    }
     const FLinearColor TownEdge(.031, .070, .026), VillageEdge(.070, .480, .540);
     const FLinearColor ContextEdge(.35, .43, .41), DarkEdge(.009, .018, .021);
     TArray<FCanvasUVTri> BoundaryTriangles;
@@ -1450,20 +1491,15 @@ void AGeoHUD::DrawHUD()
     {
         if (!Stroke.Parent)
         {
-            // Villages already toured keep only their plate; the village being toured
-            // carries the thick white rim of the reference reel — a soft halo plus a
-            // solid core, so the boundary reads even over bright imagery.
-            // Fade with the accent instead of cutting: at a hand-off the old village
-            // dims out while the new one lights up, so the rim never snaps away.
-            if (Stroke.Accent < .02)
-            {
-                // Already toured: hairline that stays for the rest of the film.
-                const FLinearColor Ghost(.92, .99, .92);
-                AddStroke(Stroke.A, Stroke.B, 2.0 * Scale, Ghost.CopyWithNewOpacity(.40), Ghost.CopyWithNewOpacity(.40));
+            // The village being toured carries the thick white rim of the reference reel:
+            // a soft halo plus a solid core, so the boundary reads even over bright imagery.
+            // A village whose shot is over keeps that exact rim — nothing fades out, the
+            // accumulated state is the point. Only the village the camera is flying to
+            // ramps its rim in; every other one was already lit and stays lit.
+            const float A = Stroke.Touring ? float(FMath::Clamp(Stroke.Accent, 0., 1.)) : 1.f;
+            if (A < .02)
                 continue;
-            }
             const FLinearColor Rim(.93, 1., .90);
-            const float A = float(FMath::Clamp(Stroke.Accent, 0., 1.));
             AddStroke(Stroke.A, Stroke.B, 13. * Scale, Rim.CopyWithNewOpacity(.12 * A), Rim.CopyWithNewOpacity(.12 * A));
             AddStroke(Stroke.A, Stroke.B, 6.5 * Scale, Rim.CopyWithNewOpacity(.32 * A), Rim.CopyWithNewOpacity(.32 * A));
             AddStroke(Stroke.A, Stroke.B, 3.0 * Scale, Rim.CopyWithNewOpacity(.96 * A), Rim.CopyWithNewOpacity(.96 * A));
@@ -1488,23 +1524,35 @@ void AGeoHUD::DrawHUD()
         AddStroke(Stroke.A, End, BaseWidth, Color, Color);
     }
     const double Head = N(Trace, TEXT("progress")), TraceAlpha = N(Trace, TEXT("alpha"));
+    // The comet that traces the rim. A 6% tail on a village outline disappears into the
+    // little zig-zags of a real boundary, so the tail is a sixth of the perimeter and the
+    // head carries its own glow.
+    constexpr double TraceTail = .16;
     if (TraceAlpha > .01)
-        for (int Pass = 0; Pass < 2; ++Pass)
+        for (int Pass = 0; Pass < 3; ++Pass)
             for (const auto &Stroke : Strokes)
             {
                 if (!Stroke.Trace)
                     continue;
-                const double Start = FMath::Max(Head - .065, Stroke.Start), End = FMath::Min(Head, Stroke.End);
+                const double Start = FMath::Max(Head - TraceTail, Stroke.Start), End = FMath::Min(Head, Stroke.End);
                 if (End <= Start)
                     continue;
                 const double Span = Stroke.End - Stroke.Start;
                 const FVector2D A = FMath::Lerp(Stroke.A, Stroke.B, (Start - Stroke.Start) / Span);
                 const FVector2D B = FMath::Lerp(Stroke.A, Stroke.B, (End - Stroke.Start) / Span);
-                const double Opacity = TraceAlpha * (Pass == 0 ? .14 : .98);
-                const FLinearColor Trail(1, .79, .18);
-                AddStroke(A, B, (Pass == 0 ? 9.5 : 3.3) * Scale,
-                          Trail.CopyWithNewOpacity((1 - (Head - Start) / .065) * Opacity),
-                          Trail.CopyWithNewOpacity((1 - (Head - End) / .065) * Opacity));
+                const FLinearColor Trail(1, .82, .22);
+                if (Pass == 2)
+                {
+                    // The head itself, so the eye catches the front of the sweep.
+                    if (Head - End > .022)
+                        continue;
+                    AddStroke(A, B, 7. * Scale, Trail.CopyWithNewOpacity(.30 * TraceAlpha), Trail.CopyWithNewOpacity(.62 * TraceAlpha));
+                    continue;
+                }
+                const double Opacity = TraceAlpha * (Pass == 0 ? .16 : .96);
+                AddStroke(A, B, (Pass == 0 ? 11.5 : 4.2) * Scale,
+                          Trail.CopyWithNewOpacity((1 - (Head - Start) / TraceTail) * Opacity),
+                          Trail.CopyWithNewOpacity((1 - (Head - End) / TraceTail) * Opacity));
             }
     if (BoundaryTriangles.Num())
     {
@@ -1542,6 +1590,11 @@ void AGeoHUD::DrawHUD()
         float TextScale, Emphasis, IconSize, PlateHeight;
         UTexture2D *PlateTexture = nullptr;
         int32 Priority;
+        // The town name is laid out by hand: characters, tracking between them, and the
+        // float that keeps it moving. Villages still draw as one string.
+        int32 CharCount = 0;
+        float Tracking = 0, UnitWidth = 0;
+        bool Animated = false;
     };
     TArray<FLabelDraw> DrawLabels;
     if (!LabelFont)
@@ -1574,6 +1627,25 @@ void AGeoHUD::DrawHUD()
     Canvas->StrLen(LabelFont, TEXT("国"), GlyphWidth, GlyphHeight);
     const double Reference = FMath::Max(1., N(F, TEXT("labelReferenceDistance"), 38000));
     const FVector Eye = Map->Camera->GetComponentLocation();
+    // Room around a point inside the town, in pixels: the distance to the nearest point of
+    // the town outline. Only the parent name needs it, and only while it is on screen.
+    const auto TownRoom = [this, Map](const FVector2D &Center) {
+        double Room = 0;
+        for (const auto &Ring : Map->Rings)
+        {
+            if (!Ring.Parent)
+                continue;
+            for (const FVector &Vertex : Ring.Points)
+            {
+                FVector2D Pixel;
+                if (!PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel))
+                    continue;
+                const double Distance = FVector2D::Distance(Center, Pixel);
+                Room = Room <= 0 ? Distance : FMath::Min(Room, Distance);
+            }
+        }
+        return Room;
+    };
     for (const auto &Label : Map->Labels)
     {
         const TSharedPtr<FJsonObject> *Style = nullptr;
@@ -1599,14 +1671,36 @@ void AGeoHUD::DrawHUD()
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
-        // The town name sits 50% larger than it used to: it is the only label on screen at
-        // that moment and has to hold the frame while the boundary beam finishes.
-        const float SizePx = (Label.Parent ? 120.f : FMath::Lerp(35.f, 64.f, Emphasis) * (Primary ? 1.06f : 1.f))
+        // The town name holds the frame at 120 px while it is the only label on screen.
+        // Village names went up by half once their shot is over: on the closing overview
+        // they pile up over the whole town and 35 px was too small to read.
+        const float SizePx = (Label.Parent ? 120.f : FMath::Lerp(52.5f, 64.f, Emphasis) * (Primary ? 1.06f : 1.f))
                              * Scale * FMath::Lerp(1.f, Primary ? .90f : .82f, Ramp(.5, 3));
         float Width, Height;
         Canvas->StrLen(LabelFont, Label.Name, Width, Height);
-        const float TextScale = FMath::Min(SizePx / FMath::Max(1.f, GlyphHeight), Size.X * .80f / FMath::Max(1.f, Width));
-        FVector2D Extent = FVector2D(Width, Height) * TextScale * .5
+        // The town name is drawn one character at a time with half a glyph of tracking in
+        // between — about one Latin character. The HUD knows the exact advance that way, so
+        // the on-screen width is known before placement and can be fitted to the shape.
+        const int32 CharCount = Label.Parent ? Label.Name.Len() : 0;
+        const float Tracking = CharCount > 1 ? GlyphHeight * .5f * (CharCount - 1) : 0.f;
+        float TextScale = FMath::Min(SizePx / FMath::Max(1.f, GlyphHeight), Size.X * .80f / FMath::Max(1.f, Width + Tracking));
+        if (Label.Parent)
+        {
+            // A name that spills over the boundary is worse than a small name — and the
+            // county shot zooms out until the town is a thumbnail. Everything scales
+            // linearly, so the largest box that still fits is the one whose half-diagonal
+            // fits the circle inscribed at the label point.
+            const double Room = TownRoom(Point);
+            if (Room > 4)
+            {
+                const float Diagonal = FMath::Sqrt(FMath::Square(Width + Tracking) + FMath::Square(Height));
+                TextScale = FMath::Min(TextScale, float(2. * Room / FMath::Max(1.f, Diagonal)));
+                // A floor: honouring the boundary at county zoom would make the name
+                // unreadable. Below this it is allowed to spill rather than disappear.
+                TextScale = FMath::Max(TextScale, 16.f / FMath::Max(1.f, GlyphHeight));
+            }
+        }
+        FVector2D Extent = FVector2D(Label.Parent ? Width + Tracking : Width, Height) * TextScale * .5
                            + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
         const FLinearColor Color = FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
                                                Primary ? 1.f : Emphasis).CopyWithNewOpacity(Opacity);
@@ -1634,7 +1728,8 @@ void AGeoHUD::DrawHUD()
             }
         }
         DrawLabels.Add({Label.Id, Label.Name, Label.PlatePath, Point, Extent, Color, TextScale, Emphasis,
-                        IconSize, PlateHeight, PlateTexture, CurrentVillage ? 2 : Label.Parent ? 1 : 0});
+                        IconSize, PlateHeight, PlateTexture, CurrentVillage ? 2 : Label.Parent ? 1 : 0,
+                        CharCount, Tracking * TextScale, (Width + Tracking) * TextScale, Label.Parent});
     }
     DrawLabels.Sort([this](const FLabelDraw &A, const FLabelDraw &B) {
         if (A.Priority != B.Priority)
@@ -1655,7 +1750,9 @@ void AGeoHUD::DrawHUD()
     for (const auto &Label : DrawLabels)
     {
         const bool Pinned = Label.IconSize > 0;
-        const double Gap = (Pinned ? 20 : 12) * Scale;
+        // Village names grew by half, so the packing has to be tighter — at the old slack
+        // the closing overview started dropping four or five names instead of fitting them.
+        const double Gap = (Pinned ? 20 : 8) * Scale;
         const double X = Label.Extent.X + Gap, Y = Label.Extent.Y + Gap;
         const double BaseY = Pinned ? -(Label.IconSize + Gap + Label.Extent.Y) : 0;
         TArray<FVector2D> Offsets;
@@ -1664,8 +1761,12 @@ void AGeoHUD::DrawHUD()
                        FVector2D(-X, BaseY), FVector2D(X, BaseY - Y), FVector2D(-X, BaseY - Y),
                        FVector2D(0, BaseY - 2 * Y)};
         else
+            // Wider set of candidates: the overview carries a dozen names inside one town,
+            // and a name is worth more where it is than not drawn at all.
             Offsets = {{0, 0}, {0, -Y}, {X, 0}, {-X, 0}, {0, Y},
-                       {X, -Y}, {-X, -Y}, {0, -Y - 60 * Scale}, {0, Y + 60 * Scale}};
+                       {X, -Y}, {-X, -Y}, {X, Y}, {-X, Y},
+                       {0, -Y - 40 * Scale}, {0, Y + 40 * Scale},
+                       {X * 1.35, 0}, {-X * 1.35, 0}, {0, -2 * Y}, {0, 2 * Y}};
         const int32 OffsetCount = Offsets.Num();
         if (Pinned && LabelPin)
         {
@@ -1684,26 +1785,41 @@ void AGeoHUD::DrawHUD()
         const int32 *Previous = PreviousRaw && *PreviousRaw < OffsetCount ? PreviousRaw : nullptr;
         int32 Selected = INDEX_NONE;
         FBox2D Bounds;
-        if (Pinned)
+        if (Pinned || Label.Animated)
         {
             // The pin and its plaque are one unit: keep the plaque centered directly above
             // the pin and never draw a leader line to it.
+            // The town name is pinned to its label point for the same reason it is sized
+            // against the outline: any nudge would push it back outside the boundary.
             const FVector2D Point = Label.Anchor + FVector2D(0, BaseY);
             Bounds = FBox2D(Point - Label.Extent, Point + Label.Extent);
             Selected = 0;
         }
         else
         {
-            // Reuse a valid placement during motion. A primary name may fall back to
-            // covering a line if the remaining space is needed for captions or other names.
-            for (int32 Pass = 0; Pass < (Label.Priority ? 2 : 1) && Selected == INDEX_NONE; ++Pass)
+            // Reuse a valid placement during motion. The second pass drops the "do not sit
+            // on a boundary line" rule: a village name that crosses its own outline reads
+            // far better than a village with no name at all.
+            for (int32 Pass = 0; Pass < 2 && Selected == INDEX_NONE; ++Pass)
                 for (int32 Order = Previous ? -1 : 0; Order < OffsetCount; ++Order)
                 {
                     const int32 Candidate = Order < 0 ? *Previous : Order;
                     if (Order >= 0 && Previous && Candidate == *Previous)
                         continue;
                     const FVector2D Point = Label.Anchor + Offsets[Candidate];
-                    const FBox2D Box(Point - Label.Extent, Point + Label.Extent);
+                    FBox2D Box(Point - Label.Extent, Point + Label.Extent);
+                    // Villages on the edge of the town are only half in frame. Pulling a
+                    // candidate back inside is worth more than dropping the name: at the
+                    // closing overview those were the names that never showed up.
+                    if (!SafeFrame.IsInside(Box) && Box.GetSize().X <= SafeFrame.GetSize().X &&
+                        Box.GetSize().Y <= SafeFrame.GetSize().Y)
+                    {
+                        const FVector2D Span = Box.GetSize();
+                        FVector2D Center = Box.GetCenter();
+                        Center.X = FMath::Clamp(Center.X, SafeFrame.Min.X + Span.X * .5, SafeFrame.Max.X - Span.X * .5);
+                        Center.Y = FMath::Clamp(Center.Y, SafeFrame.Min.Y + Span.Y * .5, SafeFrame.Max.Y - Span.Y * .5);
+                        Box = FBox2D(Center - Span * .5, Center + Span * .5);
+                    }
                     if (!SafeFrame.IsInside(Box) || Occupied.ContainsByPredicate([&Box](const FBox2D &Other) {
                             return Other.Intersect(Box);
                         }))
@@ -1721,9 +1837,25 @@ void AGeoHUD::DrawHUD()
                     break;
                 }
             if (Selected == INDEX_NONE)
-                continue;
+            {
+                // Nothing fit. A name on the map is worth more than a perfect layout, so it
+                // goes on its own anchor, pulled back inside the frame — the halo keeps it
+                // legible even where it brushes a neighbour.
+                FVector2D Center = Label.Anchor;
+                const FVector2D Span = Label.Extent * 2;
+                if (Span.X <= SafeFrame.GetSize().X && Span.Y <= SafeFrame.GetSize().Y)
+                {
+                    Center.X = FMath::Clamp(Center.X, SafeFrame.Min.X + Label.Extent.X, SafeFrame.Max.X - Label.Extent.X);
+                    Center.Y = FMath::Clamp(Center.Y, SafeFrame.Min.Y + Label.Extent.Y, SafeFrame.Max.Y - Label.Extent.Y);
+                }
+                Bounds = FBox2D(Center - Label.Extent, Center + Label.Extent);
+                Selected = 0;
+                if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_DEBUG")).Len() > 0)
+                    UE_LOG(LogTemp, Warning, TEXT("LABEL_FALLBACK %s anchor %.0f,%.0f extent %.0fx%.0f"),
+                           *Label.Id, Label.Anchor.X, Label.Anchor.Y, Label.Extent.X, Label.Extent.Y);
+            }
         }
-        Occupied.Add(Bounds.ExpandBy(4 * Scale));
+        Occupied.Add(Bounds.ExpandBy(2 * Scale));
         Placements.Add(Label.Id, Selected);
         const FVector2D Position = Bounds.GetCenter();
         if (Label.Priority == 2 && Selected != 0 && !Pinned)
@@ -1758,19 +1890,39 @@ void AGeoHUD::DrawHUD()
         }
         else
         {
-        FCanvasTextItem Text(Position, FText::FromString(Label.Name), LabelFont, Label.Color);
-        Text.bCentreX = true;
-        Text.bCentreY = true;
-        Text.Scale = FVector2D(Label.TextScale);
         const double Halo = FMath::Max(1.25, (Label.Priority ? 2.65 : 1.9) * Scale);
         const FLinearColor Outline = DarkEdge.CopyWithNewOpacity(.93 * Label.Color.A);
-        Text.SetColor(Outline);
-        for (const FVector2D Offset : {FVector2D(-Halo, 0), FVector2D(Halo, 0), FVector2D(0, -Halo), FVector2D(0, Halo)})
-            Canvas->DrawItem(Text, Position + Offset);
-        Text.SetColor(Label.Color);
-        Text.bOutlined = true;
-        Text.OutlineColor = Outline;
-        Canvas->DrawItem(Text, Position);
+        const auto DrawGlyph = [&](const FString &Glyph, const FVector2D &At, float GlyphScale) {
+            FCanvasTextItem Text(At, FText::FromString(Glyph), LabelFont, Label.Color);
+            Text.bCentreX = true;
+            Text.bCentreY = true;
+            Text.Scale = FVector2D(GlyphScale);
+            Text.SetColor(Outline);
+            for (const FVector2D Offset : {FVector2D(-Halo, 0), FVector2D(Halo, 0), FVector2D(0, -Halo), FVector2D(0, Halo)})
+                Canvas->DrawItem(Text, At + Offset);
+            Text.SetColor(Label.Color);
+            Text.bOutlined = true;
+            Text.OutlineColor = Outline;
+            Canvas->DrawItem(Text, At);
+        };
+        if (Label.Animated)
+        {
+            // A slow, shallow drift — a twentieth of a glyph — with each character offset
+            // in phase from the next. Enough to feel alive, far from busy.
+            const double Clock = N(F, TEXT("time"));
+            float Cursor = Position.X - Label.UnitWidth * .5f;
+            for (int32 Index = 0; Index < Label.CharCount; ++Index)
+            {
+                const FString Glyph = Label.Name.Mid(Index, 1);
+                float GlyphW, GlyphH;
+                Canvas->StrLen(LabelFont, Glyph, GlyphW, GlyphH);
+                const double Bob = FMath::Sin(Clock * 1.15 + Index * .9) * GlyphH * .05 * Label.TextScale;
+                DrawGlyph(Glyph, FVector2D(Cursor + GlyphW * Label.TextScale * .5, Position.Y + Bob), Label.TextScale);
+                Cursor += GlyphW * Label.TextScale + Label.Tracking;
+            }
+        }
+        else
+            DrawGlyph(Label.Name, Position, Label.TextScale);
         }
     }
     LabelPlacements = MoveTemp(Placements);
