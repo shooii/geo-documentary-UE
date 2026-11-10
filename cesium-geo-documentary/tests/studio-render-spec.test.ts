@@ -760,7 +760,8 @@ test("Studio keeps one task-first export history with explicit output actions", 
   // 放不下时按比例缩字号，而不是换成两行。
   assert.match(css, /\.preview-copy\.subtitle-only p[^}]*white-space:nowrap/);
   assert.match(css, /\.preview-copy\.subtitle-only p[^}]*max-width:100%/);
-  assert.match(css, /\.preview-subtitle-wash\{[^}]*clip-path:inset\(0 var\(--subtitle-cut,100%\) 0 0\)/);
+  // 金色层要压在白色字之上，否则会被不透明的白字盖住、进度永远看不见。
+  assert.match(css, /\.preview-subtitle-wash\{position:absolute;z-index:1;[^}]*clip-path:inset\(0 var\(--subtitle-cut,100%\) 0 0\)/);
   assert.match(clientSource, /function fitPreviewSubtitle\(preview\)/);
   assert.match(css, /font:500[^;]*GeoSubtitle/);
   assert.doesNotMatch(css, /\.preview-copy\.subtitle-only p[^}]*background:#041018c7/);
