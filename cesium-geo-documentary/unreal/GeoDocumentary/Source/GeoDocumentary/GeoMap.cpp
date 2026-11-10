@@ -2220,9 +2220,15 @@ void AGeoHUD::DrawHUD()
         // The town name is drawn one character at a time with half a glyph of tracking in
         // between — about one Latin character. The HUD knows the exact advance that way, so
         // the on-screen width is known before placement and can be fitted to the shape.
+        // Tracking is the gap between two characters. The total is that times the number of
+        // gaps, and only the total belongs in width maths — the draw loop adds Tracking once
+        // per character. Adding the total there (as an earlier version did) opened each gap
+        // by (CharCount - 1) halves, so a three-character name read as 迈 陈 镇 with a whole
+        // Chinese character of air in it instead of a Latin one.
         const int32 CharCount = Label.Parent ? Label.Name.Len() : 0;
-        const float Tracking = CharCount > 1 ? GlyphHeight * .5f * (CharCount - 1) : 0.f;
-        float TextScale = FMath::Min(SizePx / FMath::Max(1.f, GlyphHeight), Size.X * .80f / FMath::Max(1.f, Width + Tracking));
+        const float Tracking = CharCount > 1 ? GlyphHeight * .5f : 0.f;
+        const float TrackingTotal = Tracking * FMath::Max(0, CharCount - 1);
+        float TextScale = FMath::Min(SizePx / FMath::Max(1.f, GlyphHeight), Size.X * .80f / FMath::Max(1.f, Width + TrackingTotal));
         if (Label.Parent)
         {
             // A name that spills over the boundary is worse than a small name — and the
@@ -2232,7 +2238,7 @@ void AGeoHUD::DrawHUD()
             const double Room = TownRoom(Point);
             if (Room > 4)
             {
-                const float Diagonal = FMath::Sqrt(FMath::Square(Width + Tracking) + FMath::Square(Height));
+                const float Diagonal = FMath::Sqrt(FMath::Square(Width + TrackingTotal) + FMath::Square(Height));
                 TextScale = FMath::Min(TextScale, float(2. * Room / FMath::Max(1.f, Diagonal)));
                 // A floor: honouring the boundary at county zoom would make the name
                 // unreadable. Below this it is allowed to spill rather than disappear.
@@ -2249,7 +2255,7 @@ void AGeoHUD::DrawHUD()
                 }
             }
         }
-        FVector2D Extent = FVector2D(Label.Parent ? Width + Tracking : Width, Height) * TextScale * .5
+        FVector2D Extent = FVector2D(Label.Parent ? Width + TrackingTotal : Width, Height) * TextScale * .5
                            + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
         const FLinearColor Color = FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
                                                Primary ? 1.f : Emphasis).CopyWithNewOpacity(Opacity);
@@ -2285,7 +2291,7 @@ void AGeoHUD::DrawHUD()
         }
         DrawLabels.Add({Label.Id, Label.Name, Label.PlatePath, Point, Extent, Color, TextScale, Emphasis,
                         IconSize, PlateHeight, PlateTexture, CurrentVillage ? 2 : Label.Parent ? 1 : 0,
-                        CharCount, Tracking * TextScale, (Width + Tracking) * TextScale, Label.Parent});
+                        CharCount, Tracking * TextScale, (Width + TrackingTotal) * TextScale, Label.Parent});
     }
     DrawLabels.Sort([this](const FLabelDraw &A, const FLabelDraw &B) {
         if (A.Priority != B.Priority)
