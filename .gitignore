@@ -80,3 +80,4 @@ cesium-geo-documentary/content/coverage-manifest-*.json
 # Kept on disk, deliberately not tracked.
 cesium-geo-documentary/patch*.py
 cesium-geo-documentary/probe_*.ts
+cesium-geo-documentary/tmp-*.cjs
