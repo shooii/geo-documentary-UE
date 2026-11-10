@@ -2225,8 +2225,16 @@ void AGeoHUD::DrawHUD()
         // knobs move together: nominal size, the circle the name may occupy, and the floor
         // that keeps it readable when fitting would otherwise shrink it to a smear.
         constexpr float TownNameScale = 2.f;
-        const float SizePx = (Label.Parent ? 120.f * TownNameScale : FMath::Lerp(52.5f, 64.f, Emphasis) * (Primary ? 1.06f : 1.f))
-                             * Scale * FMath::Lerp(1.f, Primary ? .90f : .82f, Ramp(.5, 3));
+        // A village that has already had its shot keeps the size it had in the Cesium build
+        // (CHILD_LABEL_FONT_SIZE = 56): there, every child name was one size, emphasis and
+        // all. Here the name that is still being toured is carried by its plaque, so it is
+        // the *retired* ones that needed the old body size — at 52.5 x 0.82 they were
+        // reading as faint specks next to the village currently on screen. The distance
+        // falloff stays (Cesium had scaleByDistance too); 64 x .88 lands back on 56.
+        constexpr float RestVillagePx = 64.f;
+        const float VillagePx = CurrentVillage ? FMath::Lerp(52.5f, 64.f, Emphasis) * 1.06f : RestVillagePx;
+        const float SizePx = (Label.Parent ? 120.f * TownNameScale : VillagePx)
+                             * Scale * FMath::Lerp(1.f, Primary ? .90f : .88f, Ramp(.5, 3));
         float Width, Height;
         Canvas->StrLen(LabelFont, Label.Name, Width, Height);
         // The town name is drawn one character at a time with half a glyph of tracking in
@@ -2274,10 +2282,16 @@ void AGeoHUD::DrawHUD()
                 }
             }
         }
+        // A village that has already been toured. Cesium painted these white and
+        // outlined them in black at any distance; a grey body under a black rim reads
+        // as a hole in the map rather than a label, so the body goes white here too.
+        const bool RetiredVillage = !Label.Parent && !CurrentVillage;
         FVector2D Extent = FVector2D(Label.Parent ? Width + TrackingTotal : Width, Height) * TextScale * .5
                            + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
-        const FLinearColor Color = FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
-                                               Primary ? 1.f : Emphasis).CopyWithNewOpacity(Opacity);
+        const FLinearColor Color = (RetiredVillage ? FLinearColor::White
+                                                  : FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
+                                                                Primary ? 1.f : Emphasis))
+                                       .CopyWithNewOpacity(Opacity);
         // The town's name is plain text on the map, like the Cesium build: no pin and no
         // plaque. Villages keep the pin because they are the subject of their own shot.
         // 225 = 150 x 1.5. The pin artwork is the cube-over-rings icon
@@ -2478,8 +2492,15 @@ void AGeoHUD::DrawHUD()
         }
         else
         {
-        const double Halo = FMath::Max(1.25, (Label.Priority ? 2.65 : 1.9) * Scale);
-        const FLinearColor Outline = DarkEdge.CopyWithNewOpacity(.93 * Label.Color.A);
+        // The retired village name gets the Cesium outline: pure black, fully opaque, 3.4 px
+        // (CHILD_LABEL_OUTLINE / CHILD_LABEL_OUTLINE_WIDTH, alpha = fill * 1.05). The old
+        // 1.9 px translucent DarkEdge halo — fine while the name sat under a plaque — left
+        // it dissolving into the dimmed imagery once the shot had moved on.
+        // Priority 0 is exactly "a village that is neither the subject nor the township".
+        const bool RestName = Label.Priority == 0;
+        const double Halo = FMath::Max(1.25, (RestName ? 3.4 : Label.Priority ? 2.65 : 1.9) * Scale);
+        const FLinearColor Outline = (RestName ? FLinearColor::Black : DarkEdge)
+                                         .CopyWithNewOpacity((RestName ? 1.f : .93f) * Label.Color.A);
         const auto DrawGlyph = [&](const FString &Glyph, const FVector2D &At, float GlyphScale) {
             FCanvasTextItem Text(At, FText::FromString(Glyph), LabelFont, Label.Color);
             Text.bCentreX = true;
