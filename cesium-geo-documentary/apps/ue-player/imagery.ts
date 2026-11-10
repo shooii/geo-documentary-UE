@@ -177,8 +177,12 @@ export class ImageryService {
       return url;
     }
     if (provider === 'mapbox-satellite') {
-      const token = this.env.MAPBOX_ACCESS_TOKEN ?? String(settings.mapbox_access_token || '');
-      if (!token.trim()) throw new ImageryError(503, 'Mapbox 尚未配置访问令牌，请设置 MAPBOX_ACCESS_TOKEN 或项目影像配置。');
+      // Every other provider goes through `secret()`, which falls back to .env.local; Mapbox
+      // read process.env alone, so a token that only lived in .env.local (where the project
+      // keeps its keys) still reported "not configured". Same lookup as the rest.
+      const token = (await secret(this.root, this.env, 'MAPBOX_ACCESS_TOKEN')).trim()
+        || String(settings.mapbox_access_token || '').trim();
+      if (!token) throw new ImageryError(503, 'Mapbox 尚未配置访问令牌，请设置 MAPBOX_ACCESS_TOKEN 或项目影像配置。');
       let style = String(settings.mapbox_map_id || 'mapbox/satellite-v9');
       if (style === 'mapbox.satellite') style = 'mapbox/satellite-v9';
       if (!style.includes('/')) style = `mapbox/${style}`;

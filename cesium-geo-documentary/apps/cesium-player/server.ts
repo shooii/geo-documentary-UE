@@ -1,9 +1,20 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { createReadStream, existsSync, readFileSync, readdirSync, statSync, type Stats } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
+import { parseEnv } from "node:util";
 
 const projectRoot = resolve(process.cwd());
 const publicRoot = join(projectRoot, "apps", "cesium-player", "public");
+// `.env.local` is where this machine keeps its keys. The server is usually started as a bare
+// `tsx`, with nothing exported, so a token that only lived in the file used to read as empty.
+const localEnv = (() => {
+  try {
+    return parseEnv(readFileSync(join(projectRoot, ".env.local"), "utf8")) as Record<string, string | undefined>;
+  } catch {
+    return {} as Record<string, string | undefined>;
+  }
+})();
+const env = (key: string) => process.env[key] || localEnv[key];
 const cesiumRoot = join(projectRoot, "node_modules", "cesium", "Build", "Cesium");
 const portArg = process.argv.find((argument) => argument.startsWith("--port="));
 const port = Number(portArg?.split("=")[1] ?? process.env.PORT ?? 4173);
@@ -151,13 +162,13 @@ function readCesiumRuntimeConfig(): Record<string, unknown> {
     ? JSON.parse(readFileSync(publicImageryConfigPath, "utf8")) as Record<string, unknown>
     : {};
   const source = existsSync(configPath) ? readFileSync(configPath, "utf8") : "";
-  const token = (process.env.CESIUM_ION_TOKEN ?? extractYamlScalar(source, "cesium_ion_token") ?? "").trim();
+  const token = (env("CESIUM_ION_TOKEN") ?? extractYamlScalar(source, "cesium_ion_token") ?? "").trim();
   const imageryProvider = extractYamlScalar(source, "imagery_provider") ?? String(publicImageryConfig.imageryProvider || "cesium-ion-world-imagery");
   const imageryIonAssetId = Number(extractYamlScalar(source, "imagery_ion_asset_id") ?? "2");
-  const mapboxAccessToken = process.env.MAPBOX_ACCESS_TOKEN ?? extractYamlScalar(source, "mapbox_access_token") ?? String(publicImageryConfig.mapboxAccessToken || "");
+  const mapboxAccessToken = env("MAPBOX_ACCESS_TOKEN") ?? extractYamlScalar(source, "mapbox_access_token") ?? String(publicImageryConfig.mapboxAccessToken || "");
   const mapboxMapId = extractYamlScalar(source, "mapbox_map_id") ?? String(publicImageryConfig.mapboxMapId || "mapbox.satellite");
-  const bingMapsKey = process.env.BING_MAPS_KEY ?? extractYamlScalar(source, "bing_maps_key") ?? String(publicImageryConfig.bingMapsKey || "");
-  const tiandituToken = (process.env.TIANDITU_TOKEN || extractYamlScalar(source, "tianditu_token") || String(publicImageryConfig.tiandituToken || "")).trim();
+  const bingMapsKey = env("BING_MAPS_KEY") ?? extractYamlScalar(source, "bing_maps_key") ?? String(publicImageryConfig.bingMapsKey || "");
+  const tiandituToken = (env("TIANDITU_TOKEN") || extractYamlScalar(source, "tianditu_token") || String(publicImageryConfig.tiandituToken || "")).trim();
   const esriWorldImageryUrl = extractYamlScalar(source, "esri_world_imagery_url") ?? String(publicImageryConfig.esriWorldImageryUrl || "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer");
   const visual = publicImageryConfig.visual && typeof publicImageryConfig.visual === "object"
     ? publicImageryConfig.visual
