@@ -1743,22 +1743,52 @@ void AGeoHUD::DrawHUD()
     TArray<FCanvasUVTri> BeamTriangles;
     const auto AddStrokeTo = [](TArray<FCanvasUVTri> &Into, const FVector2D &A, const FVector2D &B, double Width,
                                 const FLinearColor &ColorA, const FLinearColor &ColorB) {
-        const FVector2D Direction = (B - A).GetSafeNormal();
-        if (Direction.IsNearlyZero())
+        FVector2D Delta = B - A;
+        const double Length = Delta.Size();
+        if (Length < KINDA_SMALL_NUMBER)
             return;
-        const FVector2D Offset = FVector2D(-Direction.Y, Direction.X) * (Width * .5);
-        FCanvasUVTri Triangle;
-        Triangle.V0_Pos = A - Offset;
-        Triangle.V1_Pos = A + Offset;
-        Triangle.V2_Pos = B + Offset;
-        Triangle.V0_UV = Triangle.V1_UV = Triangle.V2_UV = FVector2D::ZeroVector;
-        Triangle.V0_Color = Triangle.V1_Color = ColorA;
-        Triangle.V2_Color = ColorB;
-        Into.Add(Triangle);
-        Triangle.V1_Pos = Triangle.V2_Pos;
-        Triangle.V2_Pos = B - Offset;
-        Triangle.V1_Color = ColorB;
-        Into.Add(Triangle);
+        const FVector2D Direction = Delta / Length;
+        const FVector2D Normal(-Direction.Y, Direction.X);
+        // Each segment used to be drawn as its own flat-ended quad. A boundary is thousands
+        // of short segments meeting at real corners, so every one of those square ends poked
+        // a little cross-shaped spur out of the rim — that is the fuzz in the close-up. The
+        // segment is now extended by half its width at both ends, so neighbouring quads
+        // overlap through the corner instead of meeting corner-to-corner.
+        const double Overlap = FMath::Min(Width * .5, 2.5);
+        const FVector2D Start = A - Direction * Overlap;
+        const FVector2D Finish = B + Direction * Overlap;
+        // Flat triangles have no antialiasing: at 3 px the rim rasterises into visible
+        // staircase blocks. Each edge therefore gets a 1.1 px alpha ramp, which is the
+        // cheapest honest AA available on a 2D Canvas batch.
+        const double Half = Width * .5;
+        const double Feather = FMath::Min(1.1, Half * .85);
+        const auto Band = [&Into](const FVector2D &P, const FVector2D &Q, const FVector2D &N, double From, double To,
+                                  const FLinearColor &StartColor, const FLinearColor &EndColor,
+                                  float StartAlpha, float EndAlpha) {
+            const FVector2D p0 = P + N * From, p1 = P + N * To;
+            const FVector2D q0 = Q + N * From, q1 = Q + N * To;
+            FCanvasUVTri T;
+            T.V0_UV = T.V1_UV = T.V2_UV = FVector2D::ZeroVector;
+            T.V0_Pos = p0;
+            T.V1_Pos = p1;
+            T.V2_Pos = q1;
+            T.V0_Color = StartColor.CopyWithNewOpacity(StartColor.A * StartAlpha);
+            T.V1_Color = StartColor.CopyWithNewOpacity(StartColor.A * EndAlpha);
+            T.V2_Color = EndColor.CopyWithNewOpacity(EndColor.A * EndAlpha);
+            Into.Add(T);
+            FCanvasUVTri T2;
+            T2.V0_UV = T2.V1_UV = T2.V2_UV = FVector2D::ZeroVector;
+            T2.V0_Pos = p0;
+            T2.V1_Pos = q1;
+            T2.V2_Pos = q0;
+            T2.V0_Color = T.V0_Color;
+            T2.V1_Color = T.V2_Color;
+            T2.V2_Color = EndColor.CopyWithNewOpacity(EndColor.A * StartAlpha);
+            Into.Add(T2);
+        };
+        Band(Start, Finish, Normal, -Half, -Half + Feather, ColorA, ColorB, 0.f, 1.f);
+        Band(Start, Finish, Normal, -Half + Feather, Half - Feather, ColorA, ColorB, 1.f, 1.f);
+        Band(Start, Finish, Normal, Half - Feather, Half, ColorA, ColorB, 1.f, 0.f);
     };
     const auto AddStroke = [&BoundaryTriangles, &AddStrokeTo](const FVector2D &A, const FVector2D &B, double Width,
                                                               const FLinearColor &ColorA, const FLinearColor &ColorB) {
@@ -1831,6 +1861,21 @@ void AGeoHUD::DrawHUD()
         const FVector2D End = Stroke.Parent && Stroke.End > Reveal
             ? FMath::Lerp(Stroke.A, Stroke.B, (Reveal - Stroke.Start) / (Stroke.End - Stroke.Start))
             : Stroke.B;
+        // Once the camera drops into the villages the township outline has to stay on
+        // screen: at village zoom the dark hairline below is no darker than the fields and
+        // simply vanished, so the film lost the frame that says which township all these
+        // villages belong to. It comes back as the same white rim language the villages
+        // use, one weight lighter — village 13/3 px, township 7/2.4 px.
+        const float VillageRim = FMath::Clamp(float(ChildReveal), 0.f, 1.f);
+        if (Stroke.Parent && VillageRim > .01)
+        {
+            const FLinearColor Rim(.93, 1., .90);
+            AddStroke(Stroke.A, End, 7. * Scale, Rim.CopyWithNewOpacity(.16f * VillageRim),
+                      Rim.CopyWithNewOpacity(.16f * VillageRim));
+            AddStroke(Stroke.A, End, 2.4 * Scale, Rim.CopyWithNewOpacity(.90f * VillageRim),
+                      Rim.CopyWithNewOpacity(.90f * VillageRim));
+            continue;
+        }
         const FLinearColor Edge = Stroke.Parent ? TownEdge : VillageEdge;
         const FLinearColor Context = Stroke.Parent ? ContextEdge.CopyWithNewOpacity(.53f) : VillageEdge.CopyWithNewOpacity(.48f);
         FLinearColor Color = FMath::Lerp(Context, Edge.CopyWithNewOpacity(.78f), float(Stroke.Accent));
