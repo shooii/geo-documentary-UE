@@ -9,7 +9,7 @@ test("premium typography and mix tokens are enforced by the compositor", async (
   const source = await readFile(resolve(root, ".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts"), "utf8");
   assert.match(source, /Noto Sans SC/);
   assert.match(source, /Roboto Flex/);
-  assert.match(source, /isPortrait \? 50 : isSquare \? 44 : 46/);
+  assert.match(source, /isPortrait \? 56 : isSquare \? 50 : 52/);
   assert.match(source, /isPortrait \? 42 : isSquare \? 30 : 25/);
   // Subtitles sit 25% of the frame height above the bottom edge in every profile — the
   // distance is counted from that edge upward, and it names the line's own distance above

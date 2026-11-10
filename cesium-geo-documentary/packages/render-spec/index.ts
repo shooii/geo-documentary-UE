@@ -159,13 +159,14 @@ function defaultTiming(scene: StudioScene): NonNullable<StudioScene["timing"]> {
   };
 }
 
-// Keep in step with config/render-profiles.yaml (portrait 18, square 16,
-// landscape 26) and validate-delivery.ts; three copies of this number is
-// already one too many.
+// 必须与 config/render-profiles.yaml 的 subtitle_chars_per_line 一致——合成器读
+// 那份 YAML，这里读这个函数。两边不一致时，按 18 字切好的手动断行会被合成器按
+// 15 字拒绝：「Subtitle override for cue 0 exceeds 15 characters」，整条导出在
+// 录制前就死掉（2026-11-10 龙门镇）。以 YAML 为准：竖屏 15 / 方形 16 / 横屏 21。
 function subtitleMaximum(project: VideoProject): number {
-  if (project.output.profile === "portrait") return 18;
+  if (project.output.profile === "portrait") return 15;
   if (project.output.profile === "square") return 16;
-  return 26;
+  return 21;
 }
 
 function subtitleProtectedPhrases(project: VideoProject): string[] {
