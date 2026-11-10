@@ -40,6 +40,9 @@ const notify = (event: string, details = {}) => parent.postMessage({ type: 'geo-
 const configResponse = await fetch('/runtime-config.json');
 if (!configResponse.ok) throw new Error('UE configuration unavailable');
 const settings = await configResponse.json();
+// Camera updates go out at the stream's frame rate, not at a hardcoded 30: at 60 the
+// old throttle halved the rate of the very motion it was meant to smooth.
+const frameInterval = 1000 / Math.max(15, Math.min(120, Number(settings.streamFps) || 30));
 const config = new Config({ useUrlParams: false, initialSettings: { ss: settings.signallingUrl, AutoConnect: false, AutoPlayVideo: true, StartVideoMuted: true, WaitForStreamer: true, MaxReconnectAttempts:600, StreamerAutoJoinInterval:2000, MatchViewportRes: false, KeyboardInput: false, MouseInput: false, TouchInput: false } });
 const stream = new PixelStreaming(config, { videoElementParent: document.getElementById('stream')! });
 function send(action: string, payload = {}): Promise<any> {
@@ -55,7 +58,7 @@ function send(action: string, payload = {}): Promise<any> {
 }
 function draw(force=false) {
   if (!ready || !scene) return;
-  const now=performance.now();if(!force && now-lastDrawAt<1000/30)return;lastDrawAt=now;
+  const now=performance.now();if(!force && now-lastDrawAt<frameInterval)return;lastDrawAt=now;
   const overviewProgress = flightOrigin?.overviewStart === undefined ? undefined : (time - flightOrigin.overviewStart) / duration;
   const frame = frameAt(scene, stops ?? [], time, profile, duration, openingOnly, flightOrigin, overviewProgress, previewView, contextIntro);
   if (stream.emitUIInteraction({ type: 'geo-video-ue', version: 1, action: 'apply-frame', frame })) displayedFrame = frame;

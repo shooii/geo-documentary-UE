@@ -38,7 +38,11 @@ createServer(async (req, res) => {
     const url = new URL(req.url || '/', `http://127.0.0.1:${port}`);
     if (url.pathname === '/runtime-config.json') {
       res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
-      res.end(JSON.stringify({ engine: 'unreal', version: '5.7', signallingUrl })); return;
+      // The page drives the camera, so it has to send frames at the same rate the
+      // renderer streams them; the cap lives in one env var (GEO_STREAM_FPS) and both
+      // ends read it, otherwise the two clocks fight and the motion judders.
+      const streamFps = Number(process.env.GEO_STREAM_FPS || 0) || 30;
+      res.end(JSON.stringify({ engine: 'unreal', version: '5.7', signallingUrl, streamFps })); return;
     }
     if (url.pathname === '/api/imagery-descriptor') {
       // Used when the basemap is switched from the studio: only the tile source is

@@ -4,7 +4,12 @@ $projectRoot=Split-Path $PSScriptRoot -Parent
 Push-Location $projectRoot
 try { & pnpm exec tsx scripts/ue-cloud-assets.ts; if($LASTEXITCODE -ne 0){throw 'Cloud texture generation failed'} } finally { Pop-Location }
 $source=Join-Path $projectRoot 'unreal\GeoDocumentary'
-$hash=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($projectRoot))).Substring(0,12)
+# SHA256::HashData / Convert::ToHexString are PowerShell 7 APIs. Windows PowerShell
+# 5.1 is what ships on this machine, so compute the same staging hash the long way —
+# it must stay byte-identical or every build would start from an empty stage.
+$sha=[Security.Cryptography.SHA256]::Create()
+$hash=(-join ($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($projectRoot)) | ForEach-Object { $_.ToString('X2') })).Substring(0,12)
+$sha.Dispose()
 $stage=Join-Path $env:LOCALAPPDATA "Temp\GeoDocumentary-$hash"
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
 New-Item -ItemType Directory -Force -Path "$stage\Content\Geo" | Out-Null

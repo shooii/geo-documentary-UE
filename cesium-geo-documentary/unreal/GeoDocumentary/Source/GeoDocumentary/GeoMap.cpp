@@ -100,10 +100,21 @@ void AGeoMap::BeginPlay()
 {
     Super::BeginPlay();
     GAreScreenMessagesEnabled = false;
+    // 30 fps reads as judder on a 60 Hz display when the camera is dollying over the map,
+    // so the preview cap is tunable: GEO_STREAM_FPS=60 halves the frame budget and only
+    // pays off while the renderer actually holds it. The default stays at the rate the
+    // volumetric shots were tuned against.
+    int32 StreamFps = 30;
+    {
+        const FString Requested = FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_STREAM_FPS"));
+        if (!Requested.IsEmpty())
+            StreamFps = FMath::Clamp(FCString::Atoi(*Requested), 15, 120);
+    }
+    UE_LOG(LogTemp, Display, TEXT("GEO_STREAM_FPS %d"), StreamFps);
     if (auto *Limit = IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS")))
-        Limit->Set(30.f, ECVF_SetByCode);
+        Limit->Set(float(StreamFps), ECVF_SetByCode);
     if (auto *Rate = IConsoleManager::Get().FindConsoleVariable(TEXT("PixelStreaming2.WebRTC.Fps")))
-        Rate->Set(30, ECVF_SetByCode);
+        Rate->Set(StreamFps, ECVF_SetByCode);
     FParse::Value(FCommandLine::Get(), TEXT("GeoCaptureRoot="), CaptureRoot);
     TileMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_Tile.M_Tile"));
     // Native UE5 sky: SkyAtmosphere + VolumetricCloud (1.5-3.5 km) + sun. The old
@@ -358,6 +369,8 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         TileFailures.Reset();
         VisibleTiles.Reset();
         RequiredTiles.Reset();
+        ShownTiles.Reset();
+        TileImages.Reset();
         Frame.Reset();
         UpdateBoundaryEffects(TEXT(""), TArray<FString>(), 0, 0, 0);
         BoundaryGeneration = -1;
@@ -602,6 +615,8 @@ void AGeoMap::SetImagery(const TSharedPtr<FJsonObject> &Data, FString Id)
     TileFailures.Reset();
     VisibleTiles.Reset();
     RequiredTiles.Reset();
+    ShownTiles.Reset();
+    TileImages.Reset();
     // RefreshTiles short-circuits when the tile window did not move, so the centre
     // has to be invalidated explicitly or the new provider would never be fetched.
     TileCenter = FIntVector(0, 0, -1);
@@ -632,7 +647,7 @@ void AGeoMap::StartTile(const FIntVector &Key)
     ++TileAttempts.FindOrAdd(Key);
     ActiveTiles.Add(Key, Request);
     Request->OnProcessRequestComplete().BindWeakLambda(
-        this, [this, X, Y, Z, Size, G, Key](FHttpRequestPtr, FHttpResponsePtr Response, bool Ok) {
+        this, [this, G, Key](FHttpRequestPtr, FHttpResponsePtr Response, bool Ok) {
             if (G != Generation || !ActiveTiles.Remove(Key) || !VisibleTiles.Contains(Key))
                 return;
             if (!Ok || !Response || Response->GetResponseCode() != 200)
@@ -655,49 +670,68 @@ void AGeoMap::StartTile(const FIntVector &Key)
                 TileFailed(Key);
                 return;
             }
-            auto *Texture = UTexture2D::CreateTransient(W->GetWidth(), W->GetHeight(), PF_B8G8R8A8);
-            void *Ptr = Texture->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-            FMemory::Memcpy(Ptr, Pixels.GetData(), Pixels.Num());
-            Texture->GetPlatformData()->Mips[0].BulkData.Unlock();
-            Texture->SRGB = true;
-            Texture->UpdateResource();
-            auto *Material = UMaterialInstanceDynamic::Create(TileMaterial, this);
-            Material->SetTextureParameterValue(TEXT("Imagery"), Texture);
-            auto *Mesh = NewObject<UProceduralMeshComponent>(this);
-            Mesh->SetupAttachment(RootComponent);
-            Mesh->RegisterComponent();
-            TArray<FVector> Vertices;
-            TArray<int32> Indices;
-            TArray<FVector2D> UV;
-            // Power-of-two subdivisions align the parent and child surfaces.
-            // Otherwise their triangles can intersect during the LOD handoff.
-            const int32 Steps = FMath::Max(4, 128 >> Z);
-            for (int32 J = 0; J <= Steps; J++)
-                for (int32 I = 0; I <= Steps; I++)
-                {
-                    double U = double(I) / Steps, V = double(J) / Steps, Lon = (X + U) / Size * 360 - 180,
-                           Lat = FMath::RadiansToDegrees(FMath::Atan(FMath::Sinh(PI * (1 - 2 * (Y + V) / Size))));
-                    Vertices.Add(Geo(Lon, Lat, Z == 2 ? 0.0 : 2.0 + Z * .2));
-                    UV.Add(FVector2D(U, V));
-                }
-            for (int32 J = 0; J < Steps; J++)
-                for (int32 I = 0; I < Steps; I++)
-                {
-                    int32 A = J * (Steps + 1) + I, B = A + 1, C = A + Steps + 1, D = C + 1;
-                    Indices.Append({A, C, B, B, C, D});
-                }
-            Mesh->CreateMeshSection(0, Vertices, Indices, TArray<FVector>(), UV, TArray<FColor>(),
-                                    TArray<FProcMeshTangent>(), false);
-            Mesh->SetMaterial(0, Material);
-            Mesh->SetCastShadow(false);
-            Resources.Append({Texture, Material, Mesh});
-            TileMeshes.Add(Key, Mesh);
-            TileCacheOrder.Add(Key);
             TileAttempts.Remove(Key);
-            TrimTileCache();
+            TileImages.Add({Key, int32(W->GetWidth()), int32(W->GetHeight()), Generation, MoveTemp(Pixels)});
         });
     if (!Request->ProcessRequest() && ActiveTiles.Remove(Key))
         TileFailed(Key);
+}
+
+/**
+ * The upload half of StartTile. Kept on the tick so a flight that lands thirty tiles in
+ * one frame spreads them over several frames instead of stalling on thirty texture
+ * creations at once — that stall is what made a moving shot drop to ~18 fps.
+ */
+void AGeoMap::CommitTile(FGeoTileImage &&Image)
+{
+    if (!TileMaterial || Image.Width <= 0 || Image.Height <= 0)
+        return;
+    const FIntVector Key = Image.Key;
+    auto *Texture = UTexture2D::CreateTransient(Image.Width, Image.Height, PF_B8G8R8A8);
+    void *Ptr = Texture->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+    FMemory::Memcpy(Ptr, Image.Pixels.GetData(), Image.Pixels.Num());
+    Texture->GetPlatformData()->Mips[0].BulkData.Unlock();
+    Texture->SRGB = true;
+    Texture->UpdateResource();
+    auto *Material = UMaterialInstanceDynamic::Create(TileMaterial, this);
+    Material->SetTextureParameterValue(TEXT("Imagery"), Texture);
+    auto *Mesh = NewObject<UProceduralMeshComponent>(this);
+    Mesh->SetupAttachment(RootComponent);
+    Mesh->RegisterComponent();
+    TArray<FVector> Vertices;
+    TArray<int32> Indices;
+    TArray<FVector2D> UV;
+    const int32 X = Key.X, Y = Key.Y, Z = Key.Z, Size = 1 << Z;
+    // Power-of-two subdivisions align the parent and child surfaces.
+    // Otherwise their triangles can intersect during the LOD handoff.
+    const int32 Steps = FMath::Max(4, 128 >> Z);
+    for (int32 J = 0; J <= Steps; J++)
+        for (int32 I = 0; I <= Steps; I++)
+        {
+            double U = double(I) / Steps, V = double(J) / Steps, Lon = (X + U) / Size * 360 - 180,
+                   Lat = FMath::RadiansToDegrees(FMath::Atan(FMath::Sinh(PI * (1 - 2 * (Y + V) / Size))));
+            Vertices.Add(Geo(Lon, Lat, Z == 2 ? 0.0 : 2.0 + Z * .2));
+            UV.Add(FVector2D(U, V));
+        }
+    for (int32 J = 0; J < Steps; J++)
+        for (int32 I = 0; I < Steps; I++)
+        {
+            int32 A = J * (Steps + 1) + I, B = A + 1, C = A + Steps + 1, D = C + 1;
+            Indices.Append({A, C, B, B, C, D});
+        }
+    Mesh->CreateMeshSection(0, Vertices, Indices, TArray<FVector>(), UV, TArray<FColor>(),
+                            TArray<FProcMeshTangent>(), false);
+    Mesh->SetMaterial(0, Material);
+    Mesh->SetCastShadow(false);
+    Resources.Append({Texture, Material, Mesh});
+    TileMeshes.Add(Key, Mesh);
+    TileCacheOrder.Add(Key);
+    // New meshes are visible on registration, so record what actually ended up on screen.
+    const bool Shown = VisibleTiles.Contains(Key) && !TileFailures.Contains(Key);
+    Mesh->SetVisibility(Shown);
+    if (Shown)
+        ShownTiles.Add(Key);
+    TrimTileCache();
 }
 
 void AGeoMap::TrimTileCache()
@@ -714,6 +748,7 @@ void AGeoMap::TrimTileCache()
         auto *Mesh = TileMeshes.FindRef(Key).Get();
         TileMeshes.Remove(Key);
         TileCacheOrder.RemoveAt(Index, EAllowShrinking::No);
+        ShownTiles.Remove(Key);
         if (!IsValid(Mesh))
             continue;
         auto *Material = Cast<UMaterialInstanceDynamic>(Mesh->GetMaterial(0));
@@ -807,9 +842,28 @@ void AGeoMap::RefreshTiles(double Lon, double Lat, double Range)
     for (auto It = TileAttempts.CreateIterator(); It; ++It)
         if (!VisibleTiles.Contains(It.Key()) && !ActiveTiles.Contains(It.Key()))
             It.RemoveCurrent();
-    for (auto &Entry : TileMeshes)
-        if (IsValid(Entry.Value.Get()))
-            Entry.Value->SetVisibility(VisibleTiles.Contains(Entry.Key));
+    // Only edge tiles cross the boundary of the window between two refreshes, yet the
+    // old loop re-asserted visibility on every cached mesh (a few hundred) on every
+    // frame the camera moved, and each of those walks the render thread. Diff the set
+    // and touch the handful that actually changed.
+    for (auto It = ShownTiles.CreateIterator(); It; ++It)
+    {
+        if (VisibleTiles.Contains(*It))
+            continue;
+        if (auto *Mesh = TileMeshes.FindRef(*It).Get(); IsValid(Mesh))
+            Mesh->SetVisibility(false);
+        It.RemoveCurrent();
+    }
+    for (const FIntVector &Key : VisibleTiles)
+    {
+        if (ShownTiles.Contains(Key))
+            continue;
+        if (auto *Mesh = TileMeshes.FindRef(Key).Get(); IsValid(Mesh))
+        {
+            Mesh->SetVisibility(true);
+            ShownTiles.Add(Key);
+        }
+    }
     for (const auto &Entry : Plan)
         if (!TileMeshes.Contains(Entry.Key) && !ActiveTiles.Contains(Entry.Key) && !TileFailures.Contains(Entry.Key))
             TileQueue.Add({Entry.Key, Entry.Value});
@@ -818,6 +872,7 @@ void AGeoMap::RefreshTiles(double Lon, double Lat, double Range)
 }
 void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
 {
+    const double Started = FPlatformTime::Seconds();
     Frame = Data;
     auto C = O(Data, TEXT("camera"));
     double Lon = N(C, TEXT("lon"), OriginLon), Lat = N(C, TEXT("lat"), OriginLat), Range = N(C, TEXT("height"), 30000),
@@ -889,7 +944,10 @@ void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
                    PostProcess ? PostProcess->Settings.AutoExposureBias : 0.f, TileMeshes.Num(),
                    VisibleTiles.Num());
     }
+    const double BeforeTiles = FPlatformTime::Seconds();
     RefreshTiles(Lon, Lat, Range);
+    RefreshMs = FMath::Lerp(RefreshMs, (FPlatformTime::Seconds() - BeforeTiles) * 1000., .1);
+    ApplyMs = FMath::Lerp(ApplyMs, (FPlatformTime::Seconds() - Started) * 1000., .1);
 }
 void AGeoMap::UpdateTileCounts()
 {
@@ -908,9 +966,29 @@ void AGeoMap::Tick(float Delta)
 {
     Super::Tick(Delta);
     AverageFrameMs = AverageFrameMs == 0 ? Delta * 1000 : FMath::Lerp(AverageFrameMs, double(Delta * 1000), .05);
-    constexpr int32 MaxActiveTiles = 18;
-    while (ActiveTiles.Num() < MaxActiveTiles && !TileQueue.IsEmpty())
+    // Both halves of the tile pipeline are rate-limited. A camera move opens a new
+    // window of tiles several times a second; letting it fire eighteen requests and
+    // eighteen texture uploads inside one frame is what dropped a moving shot to ~18
+    // fps. Four per frame carries the same throughput over a second without any burst.
+    constexpr int32 MaxActiveTiles = 12, SpawnsPerTick = 4, UploadsPerTick = 4;
+    for (int32 Spawned = 0; Spawned < SpawnsPerTick && ActiveTiles.Num() < MaxActiveTiles && !TileQueue.IsEmpty();
+         ++Spawned)
         StartTile(TileQueue.Pop(EAllowShrinking::No).Tile);
+    for (int32 Uploaded = 0; Uploaded < UploadsPerTick && !TileImages.IsEmpty(); ++Uploaded)
+    {
+        FGeoTileImage Image = MoveTemp(TileImages[0]);
+        TileImages.RemoveAt(0, EAllowShrinking::No);
+        if (Image.Generation == Generation && VisibleTiles.Contains(Image.Key))
+            CommitTile(MoveTemp(Image));
+    }
+    static int32 ProfileReport = 0;
+    if (++ProfileReport % 90 == 0)
+        UE_LOG(LogTemp, Display,
+               TEXT("GEO_PROFILE fps=%.1f frame=%.1fms apply=%.2fms refresh=%.2fms hud=%.2fms tiles=%d shown=%d "
+                    "queued=%d active=%d uploads=%d rects=%d ringPoints=%d"),
+               1000. / FMath::Max(1e-3, AverageFrameMs), AverageFrameMs, ApplyMs, RefreshMs, HudMs,
+               TileMeshes.Num(), ShownTiles.Num(), TileQueue.Num(), ActiveTiles.Num(), TileImages.Num(),
+               HudRects, BoundaryVertices);
     if (CaptureId.IsEmpty())
         return;
     UpdateTileCounts();
@@ -1013,6 +1091,31 @@ void AGeoHUD::DrawHUD()
     const FString FocusId = S(F, TEXT("focusId"));
     const float Scale = Canvas->SizeX / (Map->RenderProfile == TEXT("landscape") ? 1920.f : 1080.f);
     const FIntPoint Size(Canvas->SizeX, Canvas->SizeY);
+    // The HUD costs a projection per boundary vertex, every frame: 12.5k points for the
+    // county ring alone, 46k once the villages are toured. APlayerController's version
+    // re-resolves the view point and the viewport for every single call, which is what
+    // kept a moving shot at 18 fps while an idle one sat happily at the cap. One matrix,
+    // built once, and every point is a single multiply.
+    const FMatrix ViewProjection = Canvas->SceneView ? Canvas->SceneView->ViewMatrices.GetViewProjectionMatrix() : FMatrix::Identity;
+    const bool bCanvasProjection = Canvas->SceneView != nullptr;
+    struct FHudTimer
+    {
+        AGeoMap *Map;
+        double Started;
+        ~FHudTimer() { Map->HudMs = FMath::Lerp(Map->HudMs, (FPlatformTime::Seconds() - Started) * 1000., .1); }
+    };
+    const FHudTimer Timer{Map, FPlatformTime::Seconds()};
+    const auto ToScreen = [this, &ViewProjection, &Size, bCanvasProjection](const FVector &World, FVector2D &Pixel) {
+        if (!bCanvasProjection)
+            return PlayerOwner->ProjectWorldLocationToScreen(World, Pixel);
+        const FVector4 Clip = ViewProjection.TransformFVector4(FVector4(World, 1.0));
+        if (Clip.W <= KINDA_SMALL_NUMBER)
+            return false;
+        const double RHW = 1.0 / Clip.W;
+        Pixel.X = (Clip.X * RHW * .5 + .5) * Size.X;
+        Pixel.Y = (-Clip.Y * RHW * .5 + .5) * Size.Y;
+        return true;
+    };
     const double Focus = N(F, TEXT("focus")), Reveal = N(F, TEXT("parentReveal"));
     const double ChildReveal = N(F, TEXT("childReveal"), 1);
     const auto Trace = O(F, TEXT("trace"));
@@ -1069,12 +1172,12 @@ void AGeoHUD::DrawHUD()
             if (!Show || Ring.Points.Num() < 2)
                 continue;
             FVector2D A;
-            bool HasA = PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[0], A);
+            bool HasA = ToScreen(Ring.Points[0], A);
             const double Length = Ring.Lengths.IsEmpty() ? 1 : FMath::Max(1., Ring.Lengths.Last());
             for (int I = 1; I < Ring.Points.Num(); I++)
             {
                 FVector2D B;
-                const bool HasB = PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I], B);
+                const bool HasB = ToScreen(Ring.Points[I], B);
                 if (HasA && HasB &&
                     !(FMath::Max(A.X, B.X) < -20 || FMath::Min(A.X, B.X) > Size.X + 20 || FMath::Max(A.Y, B.Y) < -20 ||
                       FMath::Min(A.Y, B.Y) > Size.Y + 20))
@@ -1097,7 +1200,7 @@ void AGeoHUD::DrawHUD()
             for (const auto &Vertex : Fill.Vertices)
             {
                 FVector2D Pixel;
-                Valid.Add(PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel));
+                Valid.Add(ToScreen(Vertex, Pixel));
                 Points.Add(Pixel);
             }
             for (int I = 0; I + 2 < Fill.Indices.Num(); I += 3)
@@ -1130,7 +1233,7 @@ void AGeoHUD::DrawHUD()
             for (const auto &Vertex : Fill.Vertices)
             {
                 FVector2D Pixel;
-                Valid.Add(PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel));
+                Valid.Add(ToScreen(Vertex, Pixel));
                 Points.Add(Pixel);
             }
             FGeoVisitedFill Painted;
@@ -1242,6 +1345,9 @@ void AGeoHUD::DrawHUD()
             }
         }
     }
+    Map->HudRects = DimRects.Num();
+    for (const auto &Layer : ShadowRects)
+        Map->HudRects += Layer.Num();
     const auto DrawRects = [this](const TArray<FVector4> &Rects, const FLinearColor &Color) {
         for (const auto &Rect : Rects)
         {
@@ -1305,7 +1411,7 @@ void AGeoHUD::DrawHUD()
             for (const auto &Vertex : Map->ContextFills[Filled].Vertices)
             {
                 FVector2D Pixel = FVector2D::ZeroVector;
-                const bool OnScreen = PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel);
+                const bool OnScreen = ToScreen(Vertex, Pixel);
                 Projected[Filled].Valid.Add(OnScreen);
                 Projected[Filled].Points.Add(Pixel);
                 if (!OnScreen)
@@ -1351,8 +1457,8 @@ void AGeoHUD::DrawHUD()
                 for (int I = 0; I + 1 < Ring.Points.Num(); I++)
                 {
                     FVector2D A, B;
-                    if (!PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I], A) ||
-                        !PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I + 1], B))
+                    if (!ToScreen(Ring.Points[I], A) ||
+                        !ToScreen(Ring.Points[I + 1], B))
                         continue;
                     if ((A.X - FrontX) * (B.X - FrontX) > 0)
                         continue;
@@ -1385,7 +1491,7 @@ void AGeoHUD::DrawHUD()
             for (const auto &Vertex : Fill.Vertices)
             {
                 FVector2D Pixel;
-                Valid.Add(PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel));
+                Valid.Add(ToScreen(Vertex, Pixel));
                 Points.Add(Pixel);
             }
             for (int I = 0; I + 2 < Fill.Indices.Num(); I += 3)
@@ -1478,8 +1584,8 @@ void AGeoHUD::DrawHUD()
             for (int I = 0; I + 1 < Ring.Points.Num(); I++)
             {
                 FVector2D A, B;
-                if (!PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I], A) ||
-                    !PlayerOwner->ProjectWorldLocationToScreen(Ring.Points[I + 1], B))
+                if (!ToScreen(Ring.Points[I], A) ||
+                    !ToScreen(Ring.Points[I + 1], B))
                     continue;
                 if ((A.X < -100 && B.X < -100) || (A.X > Size.X + 100 && B.X > Size.X + 100) ||
                     (A.Y < -100 && B.Y < -100) || (A.Y > Size.Y + 100 && B.Y > Size.Y + 100))
@@ -1596,7 +1702,7 @@ void AGeoHUD::DrawHUD()
     if (ContextLabelAlpha > .05 && !Map->ContextLabel.Name.IsEmpty())
     {
         FVector2D Point;
-        if (PlayerOwner->ProjectWorldLocationToScreen(Map->ContextLabel.Position, Point))
+        if (ToScreen(Map->ContextLabel.Position, Point))
         {
             float W, H;
             Canvas->StrLen(LabelFont, Map->ContextLabel.Name, W, H);
@@ -1661,7 +1767,7 @@ void AGeoHUD::DrawHUD()
     const FVector Eye = Map->Camera->GetComponentLocation();
     // Room around a point inside the town, in pixels: the distance to the nearest point of
     // the town outline. Only the parent name needs it, and only while it is on screen.
-    const auto TownRoom = [this, Map](const FVector2D &Center) {
+    const auto TownRoom = [this, Map, &ToScreen](const FVector2D &Center) {
         double Room = 0;
         for (const auto &Ring : Map->Rings)
         {
@@ -1670,7 +1776,7 @@ void AGeoHUD::DrawHUD()
             for (const FVector &Vertex : Ring.Points)
             {
                 FVector2D Pixel;
-                if (!PlayerOwner->ProjectWorldLocationToScreen(Vertex, Pixel))
+                if (!ToScreen(Vertex, Pixel))
                     continue;
                 const double Distance = FVector2D::Distance(Center, Pixel);
                 Room = Room <= 0 ? Distance : FMath::Min(Room, Distance);
@@ -1687,7 +1793,7 @@ void AGeoHUD::DrawHUD()
         if (Alpha <= .01 || Label.Name.IsEmpty())
             continue;
         FVector2D Point;
-        if (!PlayerOwner->ProjectWorldLocationToScreen(Label.Position, Point))
+        if (!ToScreen(Label.Position, Point))
             continue;
         if (Point.X < 0 || Point.X > Size.X || Point.Y < 0 || Point.Y > Size.Y)
             continue;
