@@ -48,9 +48,13 @@ createServer(async (req, res) => {
       // Used when the basemap is switched from the studio: only the tile source is
       // resolved, the scene stays exactly as it is and no reconnect is needed.
       const session = url.searchParams.get('session') || randomUUID();
-      const source = await imagery.descriptor(url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER, `http://127.0.0.1:${port}`, session);
+      const requested = url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER;
+      const source = await imagery.descriptor(requested, `http://127.0.0.1:${port}`, session);
+      // The annotation grid rides on 天地图 imagery only; an empty template means the
+      // runtime keeps the layer down instead of guessing a source.
+      const annotationTemplate = await imagery.annotationTemplate(requested, `http://127.0.0.1:${port}`);
       res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
-      res.end(JSON.stringify(source)); return;
+      res.end(JSON.stringify({ ...source, annotationTemplate })); return;
     }
     if (url.pathname === '/api/viewer-slot' || url.pathname === '/api/viewer-slot/release') {
       const body = await readJsonBody(req);
@@ -87,13 +91,15 @@ createServer(async (req, res) => {
         if (name) layer.properties.labelPlate = await ensurePlate(name);
       }
       const session = url.searchParams.get('session') || randomUUID();
-      const source = await imagery.descriptor(url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER, `http://127.0.0.1:${port}`, session);
+      const requested = url.searchParams.get('imagery') || DEFAULT_IMAGERY_PROVIDER;
+      const source = await imagery.descriptor(requested, `http://127.0.0.1:${port}`, session);
+      const annotationTemplate = await imagery.annotationTemplate(requested, `http://127.0.0.1:${port}`);
       if (process.env.GEO_ACCESS_LOG) console.log(`GEO_SCENE ${url.search} -> ${source.provider} ${source.tileTemplate}`);
       if (url.searchParams.get('warm') === '1' && Array.isArray(scene.region.center)) {
         imagery.warmCenter(source.provider, session, Number(scene.region.center[0]), Number(scene.region.center[1]));
       }
       res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
-      res.end(JSON.stringify({ ...scene, imagery: source })); return;
+      res.end(JSON.stringify({ ...scene, imagery: { ...source, annotationTemplate } })); return;
     }
     const tile = /^\/api\/imagery\/([\w-]+)\/(\d+)\/(\d+)\/(\d+)$/.exec(url.pathname);
     if (tile) {

@@ -106,9 +106,29 @@ class AGeoMap : public AActor
     TSharedPtr<FJsonObject> Frame;
     double OriginLon = 110, OriginLat = 20;
     int32 SceneRequest = 0, Generation = 0, PendingTiles = 0, FailedTiles = 0;
-    /** Non-empty annotation windows received while the native annotation layer is
-     *  still unported; counted instead of failing the whole preview or export. */
+    /** Non-empty annotation windows received while the annotation layer has no tile
+     *  source (base map without 天地图); counted instead of failing the preview. */
     int32 AnnotationsUnsupported = 0;
+    /**
+     * 天地图 `cia` annotation layer: a second, translucent tile grid drawn a few metres
+     * above the imagery. Its keys are the PARENT (Z-1) of the base imagery keys — the
+     * same trick Cesium used by declaring 512 px tiles, which makes the 9–10 px bitmap
+     * place names readable in a 1080-wide frame instead of hairline-thin.
+     */
+    FString AnnotationTemplate;
+    bool AnnotationsVisible = false;
+    /** Scene-clock windows [start, end] during which the annotation layer is shown. */
+    TArray<TPair<double, double>> AnnotationWindows;
+    UPROPERTY() TObjectPtr<UMaterialInterface> AnnotationMaterial;
+    UPROPERTY() TMap<FIntVector, TObjectPtr<UProceduralMeshComponent>> AnnotationMeshes;
+    TArray<FIntVector> AnnotationOrder;
+    TSet<FIntVector> AnnotationVisible, AnnotationShown, AnnotationFailures;
+    TMap<FIntVector, uint8> AnnotationAttempts;
+    TMap<FIntVector, TSharedPtr<IHttpRequest, ESPMode::ThreadSafe>> ActiveAnnotations;
+    TArray<FGeoTileRequest> AnnotationQueue;
+    TArray<FGeoTileImage> AnnotationImages;
+    /** Base tile level the annotation keys were last derived from; -1 forces a rebuild. */
+    int32 AnnotationLevel = -1;
     UPROPERTY() TMap<FIntVector, TObjectPtr<UProceduralMeshComponent>> TileMeshes;
     TArray<FIntVector> TileCacheOrder;
     TSet<FIntVector> VisibleTiles, RequiredTiles, TileFailures;
@@ -160,6 +180,13 @@ class AGeoMap : public AActor
     void TrimTileCache();
     void UpdateTileCounts();
     void RefreshTiles(double Lon, double Lat, double Range);
+    /** Replaces the scene-clock windows during which the 天地图 annotation layer shows. */
+    void SetAnnotationWindows(const TSharedPtr<FJsonObject> &Data, FString RequestId);
+    /** Derives the parent-level annotation keys from the base imagery window. */
+    void RefreshAnnotations();
+    void StartAnnotation(const FIntVector &Key);
+    void CommitAnnotation(FGeoTileImage &&Image);
+    void TrimAnnotationCache();
 };
 struct FGeoStroke
 {

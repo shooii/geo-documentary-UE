@@ -168,6 +168,16 @@ void AGeoMap::BeginPlay()
         Rate->Set(StreamFps, ECVF_SetByCode);
     FParse::Value(FCommandLine::Get(), TEXT("GeoCaptureRoot="), CaptureRoot);
     TileMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_Tile.M_Tile"));
+    // The 天地图 annotation layer is transparent, so it needs its own material: M_Tile
+    // is opaque unlit and would paint every label tile as a grey card over the imagery.
+    // Falling back to TileMaterial keeps the layer usable (if ugly) on an old content
+    // build instead of drawing nothing at all.
+    AnnotationMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_TileOverlay.M_TileOverlay"));
+    if (!AnnotationMaterial)
+    {
+        AnnotationMaterial = TileMaterial;
+        UE_LOG(LogTemp, Warning, TEXT("GEO_ANNOTATION_MATERIAL missing /Game/Geo/M_TileOverlay; labels will be opaque"));
+    }
     // Native UE5 sky: SkyAtmosphere + VolumetricCloud (1.5-3.5 km) + sun. The old
     // canvas cloud overlay stands down as soon as this actor exists.
     // GEO_NO_SKY=1 keeps the pre-sky render path for A/B diagnosis.
@@ -219,7 +229,9 @@ void AGeoMap::BeginPlay()
 }
 void AGeoMap::Respond(FString Id, FString Error)
 {
-    if (!Input)
+    // Scene-loading paths answer their own request; a fire-and-forget update (annotation
+    // windows read out of the scene file) passes an empty id and must stay silent.
+    if (!Input || Id.IsEmpty())
         return;
     UpdateTileCounts();
     auto J = MakeShared<FJsonObject>();
@@ -230,6 +242,9 @@ void AGeoMap::Respond(FString Id, FString Error)
     J->SetNumberField(TEXT("pendingTiles"), PendingTiles);
     J->SetNumberField(TEXT("failedTiles"), FailedTiles);
     J->SetNumberField(TEXT("annotationsUnsupported"), AnnotationsUnsupported);
+    J->SetBoolField(TEXT("annotationsVisible"), AnnotationsVisible);
+    J->SetNumberField(TEXT("annotationTiles"), AnnotationMeshes.Num());
+    J->SetNumberField(TEXT("annotationWindowCount"), AnnotationWindows.Num());
     J->SetNumberField(TEXT("wantedDetailTiles"), RequiredTiles.Num());
     J->SetNumberField(TEXT("visibleDetailTiles"), RequiredTiles.Num() - PendingTiles - FailedTiles);
     J->SetStringField(TEXT("imagery"), ImageryProvider);
@@ -331,18 +346,7 @@ void AGeoMap::OnInput(const FString &Descriptor)
     }
     if (Action == TEXT("set-annotations"))
     {
-        // 原生注记图层尚未移植。旧实现直接返回错误，会把整块预览（以及走同一
-        // 信令链路的导出）变成一块错误板。改为容忍：记录被忽略的窗口数，
-        // 诊断走 Respond / get-status 里的 annotationsUnsupported 字段。
-        const TArray<TSharedPtr<FJsonValue>> *Windows;
-        if (J->TryGetArrayField(TEXT("annotationWindows"), Windows) && Windows->Num() > 0)
-        {
-            AnnotationsUnsupported = Windows->Num();
-            UE_LOG(LogTemp, Warning, TEXT("GEO_ANNOTATIONS_UNSUPPORTED %d annotation window(s) ignored: the native annotation layer is not ported yet"), Windows->Num());
-        }
-        else
-            AnnotationsUnsupported = 0;
-        Respond(Id);
+        SetAnnotationWindows(J, Id);
         return;
     }
     if (Action == TEXT("update-tour-labels"))
@@ -412,6 +416,10 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         TileTemplate = Template;
         ImageryProvider = S(Imagery, TEXT("provider"));
         ImageryAttribution = S(Imagery, TEXT("attribution"));
+        // The annotation grid rides on 天地图 imagery only: the descriptor carries an
+        // empty template for every other basemap, and that is what keeps the layer down
+        // instead of guessing a source with a different tile matrix.
+        AnnotationTemplate = S(Imagery, TEXT("annotationTemplate"));
         ++Generation;
         for (const auto &Entry : ActiveTiles)
         {
@@ -419,7 +427,23 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
             Entry.Value->CancelRequest();
         }
         ActiveTiles.Reset();
+        for (const auto &Entry : ActiveAnnotations)
+        {
+            Entry.Value->OnProcessRequestComplete().Unbind();
+            Entry.Value->CancelRequest();
+        }
+        ActiveAnnotations.Reset();
         TileMeshes.Reset();
+        AnnotationMeshes.Reset();
+        AnnotationOrder.Reset();
+        AnnotationQueue.Reset();
+        AnnotationImages.Reset();
+        AnnotationVisible.Reset();
+        AnnotationShown.Reset();
+        AnnotationFailures.Reset();
+        AnnotationAttempts.Reset();
+        AnnotationLevel = -1;
+        AnnotationsVisible = false;
         TileCacheOrder.Reset();
         TileQueue.Reset();
         TileAttempts.Reset();
@@ -448,6 +472,18 @@ void AGeoMap::LoadScene(const TSharedPtr<FJsonObject> &Data, FString Id)
         TileCenter.Z = -1;
         PendingTiles = FailedTiles = 0;
         const auto Region = O(Scene, TEXT("region"));
+        // Export runs write `annotationWindows` into the region file (render-engine's
+        // writeRegionAnnotationWindows) and never send them over the data channel, so
+        // the scene itself is the source of truth for a capture. A live preview sends
+        // them afterwards and overwrites this, which is the same order Cesium used.
+        {
+            auto RegionData = MakeShared<FJsonObject>();
+            RegionData->SetArrayField(TEXT("annotationWindows"), TArray<TSharedPtr<FJsonValue>>());
+            const TArray<TSharedPtr<FJsonValue>> *RegionWindows;
+            if (Region->TryGetArrayField(TEXT("annotationWindows"), RegionWindows))
+                RegionData->SetArrayField(TEXT("annotationWindows"), *RegionWindows);
+            SetAnnotationWindows(RegionData, TEXT(""));
+        }
         const TArray<TSharedPtr<FJsonValue>> *Center;
         if (Region->TryGetArrayField(TEXT("center"), Center) && Center->Num() >= 2)
         {
@@ -642,6 +678,34 @@ void AGeoMap::SetImagery(const TSharedPtr<FJsonObject> &Data, FString Id)
     TileTemplate = Template;
     ImageryProvider = S(Imagery, TEXT("provider"));
     ImageryAttribution = S(Imagery, TEXT("attribution"));
+    // Switching the basemap also switches whether it *can* carry annotation tiles: the
+    // descriptor answers an empty template for everything but 天地图. Drop the old grid
+    // here too, or labels from the previous imagery would keep floating over the new one.
+    const FString NextAnnotations = S(Imagery, TEXT("annotationTemplate"));
+    if (NextAnnotations != AnnotationTemplate)
+    {
+        AnnotationTemplate = NextAnnotations;
+        for (const auto &Entry : ActiveAnnotations)
+        {
+            Entry.Value->OnProcessRequestComplete().Unbind();
+            Entry.Value->CancelRequest();
+        }
+        ActiveAnnotations.Reset();
+        for (const auto &Entry : AnnotationMeshes)
+            if (auto *Mesh = Entry.Value.Get(); IsValid(Mesh))
+                Mesh->DestroyComponent();
+        AnnotationMeshes.Reset();
+        AnnotationOrder.Reset();
+        AnnotationQueue.Reset();
+        AnnotationImages.Reset();
+        AnnotationVisible.Reset();
+        AnnotationShown.Reset();
+        AnnotationFailures.Reset();
+        AnnotationAttempts.Reset();
+        AnnotationLevel = -1;
+        AnnotationsVisible = false;
+    }
+    AnnotationsUnsupported = AnnotationTemplate.IsEmpty() ? AnnotationWindows.Num() : 0;
     ++Generation;
     for (const auto &Entry : ActiveTiles)
     {
@@ -691,6 +755,39 @@ void AGeoMap::TileFailed(const FIntVector &Key)
         TileQueue.Insert({Key, DBL_MAX}, 0);
     else
         TileFailures.Add(Key);
+}
+
+/**
+ * Scene-clock windows for the 天地图 annotation layer.
+ *
+ * The studio sends the film's own `sceneCueRanges` during export and a single
+ * "always on while this scene is selected" window while editing, so the runtime does
+ * not have to know which of the two it is looking at: it just keeps the ranges and
+ * shows the grid inside them. When the basemap has no annotation source (anything but
+ * 天地图) the windows are still recorded — that is what makes the switch to 天地图
+ * instant later — but the layer stays down and the count is reported, so the studio can
+ * tell "asked for and drawn" from "asked for and unavailable".
+ */
+void AGeoMap::SetAnnotationWindows(const TSharedPtr<FJsonObject> &Data, FString Id)
+{
+    AnnotationWindows.Reset();
+    const TArray<TSharedPtr<FJsonValue>> *Windows;
+    if (Data->TryGetArrayField(TEXT("annotationWindows"), Windows))
+        for (const auto &Value : *Windows)
+        {
+            const auto Range = Value->AsObject();
+            const double Start = N(Range, TEXT("start"), -DBL_MAX), End = N(Range, TEXT("end"), -DBL_MAX);
+            if (End > Start)
+                AnnotationWindows.Add(TPair<double, double>(Start, End));
+        }
+    AnnotationsUnsupported = AnnotationTemplate.IsEmpty() ? AnnotationWindows.Num() : 0;
+    // Toggling a window is not a camera move, so nothing would repaint until the next
+    // frame of the tour. Re-evaluate against the last frame the studio sent.
+    if (!AnnotationWindows.IsEmpty() && AnnotationTemplate.IsEmpty())
+        UE_LOG(LogTemp, Warning,
+               TEXT("GEO_ANNOTATION_NO_SOURCE %d window(s) requested but the basemap has no annotation tiles"),
+               AnnotationWindows.Num());
+    Respond(Id);
 }
 
 void AGeoMap::StartTile(const FIntVector &Key)
@@ -929,6 +1026,223 @@ void AGeoMap::RefreshTiles(double Lon, double Lat, double Range)
     TileQueue.Sort([](const FGeoTileRequest &A, const FGeoTileRequest &B) { return A.Priority > B.Priority; });
     TrimTileCache();
 }
+/**
+ * The annotation grid, rebuilt from the base imagery window.
+ *
+ * Cesium read `cia` place names at twice the screen size by declaring 512 px tiles,
+ * which lowered every request level by one. UE has no such declaration, so the layer
+ * asks for the PARENT of each base tile instead: Z-1 has exactly half the tiles per
+ * axis, every one of them covers four base tiles' worth of ground, and the same 256 px
+ * bitmap therefore lands on twice the screen area. Two tiles of the parent level are
+ * invisible (they are the neighbours of the parent that the window already covers), so
+ * the loop walks the parent range rather than the child one.
+ */
+void AGeoMap::RefreshAnnotations()
+{
+    const bool Wanted = !AnnotationTemplate.IsEmpty() && AnnotationsVisible;
+    if (!Wanted)
+    {
+        // Cheap path: nothing to draw, so let go of the visible set without touching
+        // the cache — the next shot that needs labels reuses what is already downloaded.
+        for (auto It = AnnotationShown.CreateIterator(); It; ++It)
+        {
+            if (auto *Mesh = AnnotationMeshes.FindRef(*It).Get(); IsValid(Mesh))
+                Mesh->SetVisibility(false);
+            It.RemoveCurrent();
+        }
+        return;
+    }
+    const int32 Z = TileCenter.Z;
+    if (Z < 1)
+        return;
+    if (AnnotationLevel == Z && AnnotationVisible.Num() > 0 && AnnotationShown.Num() > 0)
+        return;
+    // `maximumLevel: 18` on the Cesium side becomes "never ask the parent of the
+    // coarsest usable level"; anything below 2 is just a continent-sized sheet.
+    const int32 AZ = FMath::Clamp(Z - 1, 1, 17);
+    const int32 Shift = Z - AZ;
+    AnnotationLevel = Z;
+    AnnotationVisible.Reset();
+    AnnotationQueue.Reset();
+    TMap<FIntVector, double> Plan;
+    const FIntVector Centre(TileCenter.X >> Shift, TileCenter.Y >> Shift, AZ);
+    for (const FIntVector &Key : RequiredTiles)
+    {
+        if (Key.Z != Z)
+            continue;
+        const FIntVector Parent(Key.X >> Shift, Key.Y >> Shift, AZ);
+        if (AnnotationVisible.Contains(Parent))
+            continue;
+        AnnotationVisible.Add(Parent);
+        const double Distance = (FMath::Square(Parent.X - Centre.X) + FMath::Square(Parent.Y - Centre.Y));
+        Plan.Add(Parent, Distance);
+    }
+    for (auto It = AnnotationShown.CreateIterator(); It; ++It)
+    {
+        if (AnnotationVisible.Contains(*It))
+            continue;
+        if (auto *Mesh = AnnotationMeshes.FindRef(*It).Get(); IsValid(Mesh))
+            Mesh->SetVisibility(false);
+        It.RemoveCurrent();
+    }
+    for (const FIntVector &Key : AnnotationVisible)
+    {
+        if (AnnotationShown.Contains(Key))
+            continue;
+        if (auto *Mesh = AnnotationMeshes.FindRef(Key).Get(); IsValid(Mesh))
+        {
+            Mesh->SetVisibility(true);
+            AnnotationShown.Add(Key);
+        }
+    }
+    for (const auto &Entry : Plan)
+        if (!AnnotationMeshes.Contains(Entry.Key) && !ActiveAnnotations.Contains(Entry.Key) &&
+            !AnnotationFailures.Contains(Entry.Key))
+            AnnotationQueue.Add({Entry.Key, Entry.Value});
+    // Nearest parent tiles first: the centre of the shot is where the labels are read.
+    AnnotationQueue.Sort([](const FGeoTileRequest &A, const FGeoTileRequest &B) { return A.Priority < B.Priority; });
+    TrimAnnotationCache();
+}
+
+/** Same transport as StartTile, one level up and with its own attempt counters. */
+void AGeoMap::StartAnnotation(const FIntVector &Key)
+{
+    if (AnnotationTemplate.IsEmpty())
+        return;
+    const int32 X = Key.X, Y = Key.Y, Z = Key.Z, G = Generation;
+    auto Request = FHttpModule::Get().CreateRequest();
+    FString Url = AnnotationTemplate;
+    Url.ReplaceInline(TEXT("{z}"), *FString::FromInt(Z));
+    Url.ReplaceInline(TEXT("{x}"), *FString::FromInt(X));
+    Url.ReplaceInline(TEXT("{y}"), *FString::FromInt(Y));
+    Request->SetURL(Url);
+    Request->SetTimeout(8.f);
+    ++AnnotationAttempts.FindOrAdd(Key);
+    ActiveAnnotations.Add(Key, Request);
+    Request->OnProcessRequestComplete().BindWeakLambda(
+        this, [this, G, Key](FHttpRequestPtr, FHttpResponsePtr Response, bool Ok) {
+            if (G != Generation || !ActiveAnnotations.Remove(Key) || !AnnotationVisible.Contains(Key))
+                return;
+            if (!Ok || !Response || Response->GetResponseCode() != 200)
+            {
+                // 天地图 throttles per key. Cesium relied on a retry with frame-based
+                // backoff; here the tile simply goes back in the queue a few times, and
+                // a permanently missing tile costs its labels, never the shot.
+                if (AnnotationAttempts.FindRef(Key) < 4)
+                    AnnotationQueue.Insert({Key, -1.}, 0);
+                else
+                    AnnotationFailures.Add(Key);
+                return;
+            }
+            auto &M = FModuleManager::LoadModuleChecked<IImageWrapperModule>(TEXT("ImageWrapper"));
+            auto Type = M.DetectImageFormat(Response->GetContent().GetData(), Response->GetContentLength());
+            if (Type == EImageFormat::Invalid)
+            {
+                AnnotationFailures.Add(Key);
+                return;
+            }
+            auto W = M.CreateImageWrapper(Type);
+            TArray64<uint8> Pixels;
+            if (!W.IsValid() || !W->SetCompressed(Response->GetContent().GetData(), Response->GetContentLength()) ||
+                !W->GetRaw(ERGBFormat::BGRA, 8, Pixels))
+            {
+                AnnotationFailures.Add(Key);
+                return;
+            }
+            AnnotationAttempts.Remove(Key);
+            AnnotationImages.Add({Key, int32(W->GetWidth()), int32(W->GetHeight()), Generation, MoveTemp(Pixels)});
+        });
+    if (!Request->ProcessRequest() && ActiveAnnotations.Remove(Key))
+        AnnotationFailures.Add(Key);
+}
+
+/**
+ * A transparent label sheet over the imagery.
+ *
+ * The material is a separate translucent one because these tiles carry an alpha channel
+ * and must not occlude the basemap: `M_Tile` is opaque unlit, which would turn every
+ * label tile into a grey rectangle. The mesh sits 24 m up — the imagery tops out at
+ * 2 + Z * .2 m (≈5 m at the levels the film uses) while the boundary slab starts at
+ * 60 m — so it clears the tiles, cannot z-fight with them, and still passes under the
+ * relief. It is otherwise built like a base tile so both surfaces agree on their
+ * curvature at every LOD handoff.
+ */
+void AGeoMap::CommitAnnotation(FGeoTileImage &&Image)
+{
+    if (Image.Width <= 0 || Image.Height <= 0)
+        return;
+    const FIntVector Key = Image.Key;
+    auto *Texture = UTexture2D::CreateTransient(Image.Width, Image.Height, PF_B8G8R8A8);
+    void *Ptr = Texture->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+    FMemory::Memcpy(Ptr, Image.Pixels.GetData(), Image.Pixels.Num());
+    Texture->GetPlatformData()->Mips[0].BulkData.Unlock();
+    Texture->SRGB = true;
+    Texture->UpdateResource();
+    auto *Material = UMaterialInstanceDynamic::Create(AnnotationMaterial ? AnnotationMaterial : TileMaterial, this);
+    Material->SetTextureParameterValue(TEXT("Imagery"), Texture);
+    auto *Mesh = NewObject<UProceduralMeshComponent>(this);
+    Mesh->SetupAttachment(RootComponent);
+    Mesh->RegisterComponent();
+    TArray<FVector> Vertices;
+    TArray<int32> Indices;
+    TArray<FVector2D> UV;
+    const int32 X = Key.X, Y = Key.Y, Z = Key.Z, Size = 1 << Z;
+    const int32 Steps = FMath::Max(4, 128 >> Z);
+    for (int32 J = 0; J <= Steps; J++)
+        for (int32 I = 0; I <= Steps; I++)
+        {
+            double U = double(I) / Steps, V = double(J) / Steps, Lon = (X + U) / Size * 360 - 180,
+                   Lat = FMath::RadiansToDegrees(FMath::Atan(FMath::Sinh(PI * (1 - 2 * (Y + V) / Size))));
+            Vertices.Add(Geo(Lon, Lat, 24.0));
+            UV.Add(FVector2D(U, V));
+        }
+    for (int32 J = 0; J < Steps; J++)
+        for (int32 I = 0; I < Steps; I++)
+        {
+            int32 A = J * (Steps + 1) + I, B = A + 1, C = A + Steps + 1, D = C + 1;
+            Indices.Append({A, C, B, B, C, D});
+        }
+    Mesh->CreateMeshSection(0, Vertices, Indices, TArray<FVector>(), UV, TArray<FColor>(),
+                            TArray<FProcMeshTangent>(), false);
+    Mesh->SetMaterial(0, Material);
+    Mesh->SetCastShadow(false);
+    Resources.Append({Texture, Material, Mesh});
+    AnnotationMeshes.Add(Key, Mesh);
+    AnnotationOrder.Add(Key);
+    const bool Shown = AnnotationVisible.Contains(Key) && AnnotationsVisible;
+    Mesh->SetVisibility(Shown);
+    if (Shown)
+        AnnotationShown.Add(Key);
+    TrimAnnotationCache();
+}
+
+void AGeoMap::TrimAnnotationCache()
+{
+    constexpr int32 CacheLimit = 128;
+    for (int32 Index = 0; AnnotationMeshes.Num() > CacheLimit && Index < AnnotationOrder.Num();)
+    {
+        const FIntVector Key = AnnotationOrder[Index];
+        if (AnnotationVisible.Contains(Key))
+        {
+            ++Index;
+            continue;
+        }
+        auto *Mesh = AnnotationMeshes.FindRef(Key).Get();
+        AnnotationMeshes.Remove(Key);
+        AnnotationOrder.RemoveAt(Index, EAllowShrinking::No);
+        AnnotationShown.Remove(Key);
+        if (!IsValid(Mesh))
+            continue;
+        auto *Material = Cast<UMaterialInstanceDynamic>(Mesh->GetMaterial(0));
+        UTexture *Texture = nullptr;
+        if (Material)
+            Material->GetTextureParameterValue(FMaterialParameterInfo(TEXT("Imagery")), Texture);
+        Resources.Remove(Texture);
+        Resources.Remove(Material);
+        Resources.Remove(Mesh);
+        Mesh->DestroyComponent();
+    }
+}
 void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
 {
     const double Started = FPlatformTime::Seconds();
@@ -1004,7 +1318,35 @@ void AGeoMap::ApplyFrame(const TSharedPtr<FJsonObject> &Data)
                    VisibleTiles.Num());
     }
     const double BeforeTiles = FPlatformTime::Seconds();
+    // The annotation layer is a scene-clock rectangle booth: visible inside any window
+    // the studio sent, invisible outside. It is evaluated from the frame's own `mapTime`
+    // rather than from wall-clock time, so a seek to t always paints the same picture
+    // and an offline capture can sample any moment deterministically.
+    const double MapTime = N(Data, TEXT("mapTime"), -DBL_MAX);
+    bool AnnotationsNow = false;
+    if (!AnnotationWindows.IsEmpty())
+        for (const auto &Window : AnnotationWindows)
+            if (MapTime + .001 >= Window.Key && MapTime <= Window.Value + .001)
+            {
+                AnnotationsNow = true;
+                break;
+            }
+    if (AnnotationsNow != AnnotationsVisible)
+    {
+        AnnotationsVisible = AnnotationsNow;
+        // Force a rebuild: entering a window has to re-derive the parent-level keys from
+        // the camera the shot is at, which may have moved while the layer was down.
+        AnnotationLevel = -1;
+        for (auto It = AnnotationShown.CreateIterator(); It; ++It)
+        {
+            if (auto *Mesh = AnnotationMeshes.FindRef(*It).Get(); IsValid(Mesh))
+                Mesh->SetVisibility(AnnotationsVisible);
+            if (!AnnotationsVisible)
+                It.RemoveCurrent();
+        }
+    }
     RefreshTiles(Lon, Lat, Range);
+    RefreshAnnotations();
     RefreshMs = FMath::Lerp(RefreshMs, (FPlatformTime::Seconds() - BeforeTiles) * 1000., .1);
     ApplyMs = FMath::Lerp(ApplyMs, (FPlatformTime::Seconds() - Started) * 1000., .1);
 }
@@ -1039,6 +1381,22 @@ void AGeoMap::Tick(float Delta)
         TileImages.RemoveAt(0, EAllowShrinking::No);
         if (Image.Generation == Generation && VisibleTiles.Contains(Image.Key))
             CommitTile(MoveTemp(Image));
+    }
+    // The annotation layer runs its own, smaller budget. It must not compete with the
+    // imagery for the 12 in-flight request slots: a baseline tile that arrives late is a
+    // low-resolution picture, a label tile that arrives late is just a missing name, and
+    // 天地图 throttles per key so pushing both streams hard costs both.
+    constexpr int32 MaxActiveAnnotations = 6, AnnotationSpawnsPerTick = 2, AnnotationUploadsPerTick = 2;
+    for (int32 Spawned = 0; Spawned < AnnotationSpawnsPerTick && ActiveAnnotations.Num() < MaxActiveAnnotations &&
+                            !AnnotationQueue.IsEmpty();
+         ++Spawned)
+        StartAnnotation(AnnotationQueue.Pop(EAllowShrinking::No).Tile);
+    for (int32 Uploaded = 0; Uploaded < AnnotationUploadsPerTick && !AnnotationImages.IsEmpty(); ++Uploaded)
+    {
+        FGeoTileImage Image = MoveTemp(AnnotationImages[0]);
+        AnnotationImages.RemoveAt(0, EAllowShrinking::No);
+        if (Image.Generation == Generation && AnnotationVisible.Contains(Image.Key))
+            CommitAnnotation(MoveTemp(Image));
     }
     static int32 ProfileReport = 0;
     if (++ProfileReport % 90 == 0)

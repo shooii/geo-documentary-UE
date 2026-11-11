@@ -70,7 +70,7 @@ async function run() {
   });
   if (!stops.length) throw new Error('项目无可捕获的巡游站点');
   const focus = stops[Math.min(5, stops.length - 1)]!;
-  const samples: { name: string; time: number; subtitleBounds?: { left: number; top: number; right: number; bottom: number } }[] = [
+  const samples: { name: string; time: number; subtitleBounds?: { left: number; top: number; right: number; bottom: number }; annotationWindows?: { sceneId: string; start: number; end: number }[] }[] = [
     { name: 'tour-near', time: focus.start + focus.flightDuration + .9 },
     { name: 'tour-mid', time: focus.start + focus.flightDuration * .5 },
     { name: 'closing-mid', time: cursor + returnDuration * .5 },
@@ -84,6 +84,16 @@ async function run() {
     const [left, top, right, bottom] = subtitleOption.split(',').map(Number);
     if (![left, top, right, bottom].every(value => value !== undefined && Number.isFinite(value)) || left! < 0 || top! < 0 || right! > 1 || bottom! > 1 || left! >= right! || top! >= bottom!) throw new Error('--subtitle-bounds需提供有效归一化矩形left,top,right,bottom');
     samples.push({ name: 'tour-near-subtitle', time: focus.start + focus.flightDuration + .9, subtitleBounds: { left: left!, top: top!, right: right!, bottom: bottom! } });
+  }
+  // 注记层验收：同一个时间点各出一张「开注记 / 关注记」，像素差异就是这一层画上去的
+  // 内容。没有这个对照，一张"看起来没变化"的图无法区分"没启用"和"启用但没画"。
+  const annotationWindow = option('annotation-window', '');
+  if (annotationWindow) {
+    const [start, end] = annotationWindow.split(',').map(Number);
+    if (![start, end].every(value => value !== undefined && Number.isFinite(value)) || end! <= start!) throw new Error('--annotation-window需提供start,end两个递增秒数');
+    const probeTime = Number(option('annotation-time', String(start! + 1)));
+    samples.push({ name: 'annotation-on', time: probeTime, annotationWindows: [{ sceneId: 'probe', start: start!, end: end! }] });
+    samples.push({ name: 'annotation-off', time: probeTime, annotationWindows: [] });
   }
   const manifest: any = { phase, region, project: projectPath, imagery: 'tianditu-imagery', width, height, playerAsset,
     createdAt: new Date().toISOString(), tourEnd: cursor, returnDuration, stops, samples: [], status: 'running' };
@@ -139,6 +149,7 @@ async function run() {
     await page.evaluate(payload => (window as any).geoVideo.prepareStudioTour(payload), { tourStops: stops, returnDuration });
     for (const sample of samples) {
       if (sample.subtitleBounds) await page.evaluate(payload => (window as any).geoVideo.setSubtitleWindows([{ start: payload.time, end: payload.time + .01, bounds: payload.subtitleBounds }]), sample);
+      if (sample.annotationWindows) await page.evaluate(windows => (window as any).geoVideo.setAnnotationWindows(windows), sample.annotationWindows);
       const previous = new Set(await readdir(frames));
       for (let attempt = 1; ; attempt++) {
         try { await page.evaluate(time => (window as any).geoVideo.renderFrame(time), sample.time); break; }

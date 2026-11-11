@@ -104,6 +104,31 @@ export function tiandituTile(token: string, z: number, x: number, y: number) {
   return url;
 }
 
+/**
+ * 天地图 `cia` 影像注记（地名/道路名）瓦片。
+ *
+ * 和 `img` 同属 EPSG:3857 的 `w` 矩阵集，同一套 z/x/y 编号 —— 服务端返回的仍是
+ * 256 px 位图。Cesium 版靠把瓦片声明成 512 px 让请求层级整体低一级、每张瓦片被
+ * 放大两倍来读清 9–10 px 的地名；UE 版用的是同一招（见 AGeoMap::RefreshAnnotations
+ * 取父级 key），所以这里只需要原样代理瓦片。
+ */
+export function tiandituAnnotationTile(token: string, z: number, x: number, y: number) {
+  const subdomain = (x + y) % 8;
+  const url = new URL(`https://t${subdomain}.tianditu.gov.cn/cia_w/wmts`);
+  url.searchParams.set('SERVICE', 'WMTS');
+  url.searchParams.set('REQUEST', 'GetTile');
+  url.searchParams.set('VERSION', '1.0.0');
+  url.searchParams.set('LAYER', 'cia');
+  url.searchParams.set('STYLE', 'default');
+  url.searchParams.set('TILEMATRIXSET', 'w');
+  url.searchParams.set('FORMAT', 'tiles');
+  url.searchParams.set('TILEMATRIX', String(z));
+  url.searchParams.set('TILEROW', String(y));
+  url.searchParams.set('TILECOL', String(x));
+  url.searchParams.set('tk', token);
+  return url;
+}
+
 export function ionTileUrl(tiles: BingTiles, z: number, x: number, y: number) {
   let key = '';
   for (let bit = z - 1; bit >= 0; bit--) key += String(((x >> bit) & 1) + 2 * ((y >> bit) & 1));
@@ -114,6 +139,12 @@ export function ionTileUrl(tiles: BingTiles, z: number, x: number, y: number) {
 }
 
 type Settings = { map?: Record<string, unknown> };
+/**
+ * Pseudo-provider for the 天地图 `cia` annotation tiles. It is not a basemap — it is a
+ * second layer over one — but it goes through the same proxy/cache/UA path, because
+ * 天地图 rejects the default Node UA on this endpoint exactly as it does on `img`.
+ */
+export const ANNOTATION_PROVIDER = 'tianditu-annotation';
 export class ImageryService {
   private readonly cache = new Map<string, { bytes: Buffer; type: string; expires: number }>();
   private cacheBytes = 0;
@@ -155,6 +186,11 @@ export class ImageryService {
       const key = await secret(this.root, this.env, 'TIANDITU_TOKEN') || String(settings.tianditu_token || '').trim();
       if (!key) throw new ImageryError(503, '天地图尚未配置访问令牌，请在本机 .env.local 设置 TIANDITU_TOKEN。');
       return tiandituTile(key, z, x, y);
+    }
+    if (provider === ANNOTATION_PROVIDER) {
+      const key = await secret(this.root, this.env, 'TIANDITU_TOKEN') || String(settings.tianditu_token || '').trim();
+      if (!key) throw new ImageryError(503, '天地图尚未配置访问令牌，请在本机 .env.local 设置 TIANDITU_TOKEN。');
+      return tiandituAnnotationTile(key, z, x, y);
     }
     if (provider === 'bing-aerial') {
       const key = await secret(this.root, this.env, 'BING_MAPS_KEY') || String(settings.bing_maps_key || '').trim();
@@ -208,6 +244,18 @@ export class ImageryService {
     };
     return { provider, tileTemplate, attribution: credit[provider] || 'Esri World Imagery' };
   }
+  /**
+   * The annotation layer only exists on top of 天地图 imagery: the same `w` tile matrix
+   * and the same key, so any other basemap gets no template and the runtime reports
+   * zero supported windows rather than drawing a mismatched label grid.
+   */
+  async annotationTemplate(provider: string, origin: string) {
+    if (provider !== 'tianditu-imagery') return '';
+    const settings = await this.settings();
+    const key = await secret(this.root, this.env, 'TIANDITU_TOKEN') || String(settings.tianditu_token || '').trim();
+    if (!key) return '';
+    return `${origin}/api/imagery/${ANNOTATION_PROVIDER}/{z}/{x}/{y}`;
+  }
   warmCenter(provider: string, session: string, lon: number, lat: number) {
     if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
     const longitude = ((lon + 180) % 360 + 360) % 360 / 360;
@@ -238,7 +286,7 @@ export class ImageryService {
       // 天地图对非浏览器 UA 直接返回 403（与 Referer 无关），而 Node 的默认 UA
       // 正是 `undici`；这里统一伪装成普通浏览器，影像服务本身都在本机代理后面。
       const headers: Record<string, string> = { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36' };
-      if (provider === 'tianditu-imagery') headers.referer = 'http://127.0.0.1/';
+      if (provider === 'tianditu-imagery' || provider === ANNOTATION_PROVIDER) headers.referer = 'http://127.0.0.1/';
       try { response = await fetch(url, { signal: AbortSignal.timeout(20000), headers, ...(this.dispatcher ? { dispatcher: this.dispatcher } : {}) }); }
       catch { throw new ImageryError(502, '卫星影像服务连接失败，请检查网络或 UE_HTTP_PROXY 代理配置。'); }
       if (!response.ok) {

@@ -12,6 +12,33 @@ if material is None:
     unreal.MaterialEditingLibrary.recompile_material(material)
 unreal.EditorAssetLibrary.save_loaded_asset(material)
 
+# 天地图注记层（`cia`）是带 alpha 的透明 PNG：影像材质 `M_Tile` 是不透明 unlit，
+# 直接复用会把每张注记瓦片画成一块灰板。这里单独建一个半透明材质，颜色走
+# Emissive、透明度取贴图 alpha，网格叠在影像上方 40 m，不遮挡底图。
+OVERLAY = '/Game/Geo/M_TileOverlay'
+overlay = unreal.load_asset(OVERLAY)
+if overlay is None:
+    tools = unreal.AssetToolsHelpers.get_asset_tools()
+    overlay = tools.create_asset('M_TileOverlay', '/Game/Geo', unreal.Material, unreal.MaterialFactoryNew())
+    overlay.set_editor_property('shading_model', unreal.MaterialShadingModel.MSM_UNLIT)
+    overlay.set_editor_property('two_sided', True)
+    overlay.set_editor_property('blend_mode', unreal.BlendMode.BLEND_TRANSLUCENT)
+    editor = unreal.MaterialEditingLibrary
+    sample = editor.create_material_expression(overlay, unreal.MaterialExpressionTextureSampleParameter2D, -420, 0)
+    sample.set_editor_property('parameter_name', 'Imagery')
+    sample.set_editor_property('texture', unreal.load_asset('/Engine/EngineResources/DefaultTexture'))
+    multiply = editor.create_material_expression(overlay, unreal.MaterialExpressionMultiply, -180, 60)
+    if not editor.connect_material_expressions(sample, 'RGB', multiply, 'A'):
+        raise RuntimeError('Cannot connect M_TileOverlay RGB')
+    # 注记是纯白描边字，乘 1.15 让它在压暗后的暗底图上仍然清楚。
+    multiply.set_editor_property('const_b', 1.15)
+    if not editor.connect_material_property(multiply, '', unreal.MaterialProperty.MP_EMISSIVE_COLOR):
+        raise RuntimeError('Cannot connect M_TileOverlay emissive')
+    if not editor.connect_material_property(sample, 'A', unreal.MaterialProperty.MP_OPACITY):
+        raise RuntimeError('Cannot connect M_TileOverlay opacity')
+    editor.recompile_material(overlay)
+    unreal.EditorAssetLibrary.save_loaded_asset(overlay)
+
 
 def prepare_boundary_material(name, blend_mode, opacity_code):
     material = unreal.load_asset('/Game/Geo/' + name)

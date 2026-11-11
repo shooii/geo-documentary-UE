@@ -316,6 +316,8 @@ Object.assign(window,{ geoVideo: {
   playOpeningPreview: (opening={}) => handle({action:'play-opening',opening}),
   prepareStudioTour: (preview:any) => handle({action:'prepare-tour',preview}),
   setSubtitleWindows: (windows: SubtitleWindow[]) => { subtitleWindows = windows; },
+  /** 注记时间窗直接下发到 UE；验收脚本用它做「开/关」同帧对照。 */
+  setAnnotationWindows: async (windows: { sceneId?: string; start: number; end: number }[]) => send('set-annotations', { annotationWindows: windows }),
   renderFrame: async (t: number) => { stop(); time=t; openingOnly=false; if (!ready) throw new Error('UE renderer not ready'); return send('capture-frame',{ frame:{ ...frameAt(scene,stops ?? [],t,profile,duration,false), subtitleBounds: activeSubtitleBounds(subtitleWindows, t) ?? null } }); },
   seek: async (t: number) => { stop(); flightOrigin=undefined; time=t; draw(true); },
   getStreamHealth: () => ({
