@@ -229,6 +229,7 @@ void AGeoMap::Respond(FString Id, FString Error)
         J->SetStringField(TEXT("error"), Error);
     J->SetNumberField(TEXT("pendingTiles"), PendingTiles);
     J->SetNumberField(TEXT("failedTiles"), FailedTiles);
+    J->SetNumberField(TEXT("annotationsUnsupported"), AnnotationsUnsupported);
     J->SetNumberField(TEXT("wantedDetailTiles"), RequiredTiles.Num());
     J->SetNumberField(TEXT("visibleDetailTiles"), RequiredTiles.Num() - PendingTiles - FailedTiles);
     J->SetStringField(TEXT("imagery"), ImageryProvider);
@@ -330,13 +331,18 @@ void AGeoMap::OnInput(const FString &Descriptor)
     }
     if (Action == TEXT("set-annotations"))
     {
+        // 原生注记图层尚未移植。旧实现直接返回错误，会把整块预览（以及走同一
+        // 信令链路的导出）变成一块错误板。改为容忍：记录被忽略的窗口数，
+        // 诊断走 Respond / get-status 里的 annotationsUnsupported 字段。
         const TArray<TSharedPtr<FJsonValue>> *Windows;
         if (J->TryGetArrayField(TEXT("annotationWindows"), Windows) && Windows->Num() > 0)
         {
-            Respond(Id, TEXT("Native imagery annotation layers are pending"));
+            AnnotationsUnsupported = Windows->Num();
+            UE_LOG(LogTemp, Warning, TEXT("GEO_ANNOTATIONS_UNSUPPORTED %d annotation window(s) ignored: the native annotation layer is not ported yet"), Windows->Num());
         }
         else
-            Respond(Id);
+            AnnotationsUnsupported = 0;
+        Respond(Id);
         return;
     }
     if (Action == TEXT("update-tour-labels"))

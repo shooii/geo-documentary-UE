@@ -106,6 +106,9 @@ class AGeoMap : public AActor
     TSharedPtr<FJsonObject> Frame;
     double OriginLon = 110, OriginLat = 20;
     int32 SceneRequest = 0, Generation = 0, PendingTiles = 0, FailedTiles = 0;
+    /** Non-empty annotation windows received while the native annotation layer is
+     *  still unported; counted instead of failing the whole preview or export. */
+    int32 AnnotationsUnsupported = 0;
     UPROPERTY() TMap<FIntVector, TObjectPtr<UProceduralMeshComponent>> TileMeshes;
     TArray<FIntVector> TileCacheOrder;
     TSet<FIntVector> VisibleTiles, RequiredTiles, TileFailures;
