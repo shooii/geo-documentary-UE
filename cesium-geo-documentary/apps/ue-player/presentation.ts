@@ -286,10 +286,10 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   if (stops.length && !openingOnly) {
     const representatives = overviewRepresentatives(stops, profile);
     for (const [id, label] of Object.entries(labels)) {
-      if (id !== current && !representatives.has(id)) label.alpha *= 1 - hierarchy.labelMix;
+      // 收尾把全部村名交还给 UE 的标注避让（放不下的按巡游顺序淡出），不再按
+      // “代表村”收缩：labelMix 的压制随收尾进度线性放开，巡游中行为不变。
+      if (id !== current && !representatives.has(id)) label.alpha *= 1 - hierarchy.labelMix * (1 - closing);
     }
-    // The town becomes the closing title; ordinary village names become supporting detail.
-    parentLabel = Math.max(parentLabel, .92 * smooth((closing - .25) / .65));
   }
   const focusId = Object.keys(accents).reduce((best, id) => accents[id]! > (accents[best] ?? parentAccent) ? id : best, '');
   const nextAccent = Math.max(focusId ? parentAccent : 0, ...Object.entries(accents).filter(([id]) => id !== focusId).map(([, value]) => value));
