@@ -34,16 +34,12 @@ test("全屏 is a real fit value on both sides of the export", async () => {
   assert.match(compositor, /class="clip visual \$\{sourceClass\} visual-\$\{kind\}\$\{layout\}"/);
   assert.match(compositor, /\.visual\.visual-fullscreen\{left:0;top:0;width:\$\{profile\.width\}px;height:\$\{profile\.height\}px;border:0;border-radius:0;box-shadow:none\}/);
   assert.match(compositor, /\.visual-main\.fit-fullscreen\{object-fit:cover\}/);
-  // A full-bleed picture covers the whole frame, including the imagery
-  // attribution line at the bottom. That text is a licence requirement, so it
-  // has to sit above the visual layer (z-index 20, subtitles 40): with the old
-  // 15 the layout audit reported `text_occluded` and the export was blocked.
-  assert.match(compositor, /\.provider-credit\{z-index:60;/);
-  // 全屏素材的标签落在画面底边，和右下角的影像署名是同一片区域。两个文字块叠在
-  // 一起会被 layout 审计判成 content_overlap（error，2026-10-12 拦住过一次导出：
-  // #provider-credit ↔ #visual-caption-2），所以全屏标签的底边要抬到署名上方
-  // （58px = 署名 18 底边 + 行盒 + 内边距 + 12 间隙），没有署名时才用原值。
-  assert.match(compositor, /const creditTopPx = 18 \+ Math\.round\(creditFontPx \* 1\.2\) \+ 10;/);
-  assert.match(compositor, /const fullscreenCaptionBottomPx = imageryAttribution \? creditTopPx \+ 12 : \(isPortrait \? 16 : 14\);/);
+  // 影像署名（provider-credit）已按需求整体移除出画面（2026-11-11）：
+  // 成片与 UE HUD 都不再渲染 Mapbox/Cesium/Esri 等文字带。
+  assert.doesNotMatch(compositor, /provider-credit/);
+  // 全屏素材的标签曾为避开右下角署名而抬高（creditTopPx + 12）；署名删除后
+  // 直接贴底边，不再有 content_overlap 风险。
+  assert.doesNotMatch(compositor, /creditTopPx/);
+  assert.match(compositor, /const fullscreenCaptionBottomPx = isPortrait \? 16 : 14;/);
   assert.match(compositor, /\.visual\.visual-fullscreen figcaption\{bottom:\$\{fullscreenCaptionBottomPx\}px\}/);
 });

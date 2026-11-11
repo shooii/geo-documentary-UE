@@ -3331,18 +3331,8 @@ void AGeoHUD::DrawHUD()
         CloudLayer(Map->CloudDeck, N(Clouds, TEXT("volume")) * .18, 1.5 + Raw * .8, (Raw - .5) * 100, (Raw - .5) * -70);
         CloudLayer(Map->CloudPass, N(Clouds, TEXT("veil")), 1.06 + Raw * .13, (Raw - .5) * -31, (Raw - .5) * 17);
     }
-    if (Map->ImageryProvider == TEXT("cesium-ion-world-imagery") && !Map->ImageryAttribution.IsEmpty())
-    {
-        const auto *Font = GEngine->GetLargeFont();
-        float Width, Height;
-        Canvas->StrLen(Font, Map->ImageryAttribution, Width, Height);
-        const float CreditScale = FMath::Min(18 * Scale / FMath::Max(1.f, Height), (Size.X - 24 * Scale) / FMath::Max(1.f, Width));
-        FCanvasTextItem Credit(FVector2D(12 * Scale, Size.Y - Height * CreditScale - 9 * Scale),
-            FText::FromString(Map->ImageryAttribution), Font, FLinearColor::White);
-        Credit.Scale = FVector2D(CreditScale);
-        Credit.EnableShadow(FLinearColor::Black, FVector2D(1, 1));
-        Canvas->DrawItem(Credit);
-    }
+    // 影像署名（Mapbox/Cesium/Esri 等拼接的文字带）已按需求从画面移除（2026-11-11）；
+    // ImageryAttribution 仍在 LoadScene 时读取，供诊断日志使用，但不再绘制到 HUD。
 }
 bool AGeoMap::UsesNativeClouds() const
 {

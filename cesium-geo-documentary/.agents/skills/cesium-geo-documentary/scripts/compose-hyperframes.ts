@@ -116,9 +116,8 @@ const profile = profiles.profiles[profileName] ?? (() => { throw new Error(`Unkn
 const projectConfig = YAML.parse(await readFile(resolve(root, "config/project.yaml"), "utf8")) as {
   map?: { imagery_provider?: string; imagery_attribution?: string };
 };
-const imageryAttribution = projectConfig.map?.imagery_provider === "esri-world-imagery"
-  ? "Esri World Imagery · Esri, Maxar, Earthstar Geographics and contributors"
-  : projectConfig.map?.imagery_attribution ?? "";
+// 影像署名按需求从画面移除（2026-11-11）：UE HUD 与成片都不再渲染
+// provider credit；`imagery_attribution` 配置仅保留在 project.yaml 里备查。
 
 const compositor = resolve(root, "apps/video-compositor");
 const mediaDir = resolve(compositor, "media");
@@ -241,14 +240,8 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
   // never trust a hand-picked column.
   const subtitleBottomPercent = 25;
   const subtitleBottomPx = Math.round(profile.height * (subtitleBottomPercent / 100));
-  /* 影像署名是右下角的一条固定文字带（`bottom:18px` + 自身行盒与内边距）。「全屏」
-     适配会把素材标签放到画面底边，于是两个文字块叠在一起 —— HyperFrames 的
-     layout 审计一旦发现同一个重叠跨多个采样点就升为 error（`content_overlap`），
-     2026-10-12 就是这么拦住一次导出的（#provider-credit ↔ #visual-caption-N）。
-     署名是许可要求必须可读，所以让全屏标签另占一条区域：抬到署名上方。 */
-  const creditFontPx = isPortrait ? 15 : 13;
-  const creditTopPx = 18 + Math.round(creditFontPx * 1.2) + 10;
-  const fullscreenCaptionBottomPx = imageryAttribution ? creditTopPx + 12 : (isPortrait ? 16 : 14);
+  /* 影像署名已按需求移除出画面，全屏标签直接贴底边（原为避开右下角署名而抬高）。 */
+  const fullscreenCaptionBottomPx = isPortrait ? 16 : 14;
   const captionClips = displayCues.map((cue, index) => {
     const timeline = timelineValues(Math.max(offset, cue.start + narrationOffset + subtitleLeadSeconds), Math.max(offset + 0.08, cue.end + narrationOffset + subtitleLeadSeconds));
     // 两层同一段文字：ink 是白的（还没讲到的部分），wash 是高亮色（已经讲到的部分）。
@@ -351,7 +344,6 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
     .visual.visual-fullscreen{left:0;top:0;width:${profile.width}px;height:${profile.height}px;border:0;border-radius:0;box-shadow:none}
     .visual.visual-fullscreen figcaption{bottom:${fullscreenCaptionBottomPx}px}
     .visual-main.fit-fullscreen{object-fit:cover}
-    .provider-credit{z-index:60;right:${Math.max(18, Math.round(profile.safe_margin / 3))}px;bottom:18px;padding:5px 9px;border-radius:6px;background:rgba(4,10,15,.58);font-size:${isPortrait ? 15 : 13}px;letter-spacing:.02em;color:rgba(244,247,249,.78);text-shadow:0 1px 4px #000;white-space:nowrap}
     .visual-credit{z-index:4;position:absolute;left:${isPortrait ? 18 : 14}px;top:${isPortrait ? 18 : 14}px;padding:4px 9px;border-radius:6px;background:rgba(4,10,15,.6);font-size:${isPortrait ? 22 : 16}px;letter-spacing:.04em;color:rgba(244,247,249,.82);text-shadow:0 1px 4px #000;white-space:nowrap}
   </style>
 </head>
@@ -359,7 +351,6 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
 <main id="root" data-map-clock-offset="${offset.toFixed(3)}" data-composition-id="${regionId}-${profileName}" data-start="0" data-width="${profile.width}" data-height="${profile.height}" data-duration="${compositionDuration.toFixed(3)}" data-fps="30">
   <video id="map" class="clip map" src="${prefix}/maps/${regionId}-map-${profileName}.mp4" muted playsinline preload="auto" data-start="${offset.toFixed(3)}" data-duration="${timelineDuration.toFixed(3)}" data-track-index="${COMPOSITION_TRACKS.map}"></video>
   <div id="shade" class="clip shade" data-start="${offset.toFixed(3)}" data-duration="${timelineDuration.toFixed(3)}" data-track-index="${COMPOSITION_TRACKS.shade}"></div>
-  ${imageryAttribution ? `<div id="provider-credit" class="clip provider-credit" data-start="${offset.toFixed(3)}" data-duration="${timelineDuration.toFixed(3)}" data-track-index="${COMPOSITION_TRACKS.imageryCredit}">${escapeHtml(imageryAttribution)}</div>` : ""}
   ${visualClips}
   ${captionClips}
   <audio id="narration-audio" class="clip" src="${prefix}/audio/${regionId}-narration.wav" data-start="${narrationOffset.toFixed(3)}" data-duration="${audioDuration.toFixed(3)}" data-track-index="${COMPOSITION_TRACKS.narration}" data-volume="1"></audio>
