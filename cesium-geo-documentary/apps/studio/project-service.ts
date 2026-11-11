@@ -345,7 +345,9 @@ export async function makeProject(root: string, regionId?: string, options: { pr
     updatedAt: now,
     template: {
       id: "xinliao-town-tour-v1", lockedOpening: true,
-      openingDescentSeconds: opening.enabled === false ? 0 : Number(opening.seconds ?? 3),
+      // 穿云开场已按需求整体移除（2026-11-11）：新方案不再生成高空下降 + 云层镜头，
+      // 进入地图直接落在乡镇行政边界。字段保留是为了旧项目快照仍可读取。
+      openingDescentSeconds: 0,
       openingStartHeightMeters: Number(opening.startHeightMeters ?? 900000),
       openingStartPitchDegrees: Number(opening.startPitchDegrees ?? -52),
       cloudDeckHeightMeters: Number(opening.cloudDeckHeightMeters ?? 45000),
@@ -472,7 +474,13 @@ export async function normalizeProject(root: string, input: VideoProject | Recor
     ...baseline,
     ...legacy,
     schemaVersion: 2,
-    template: { ...baseline.template, ...(legacy.template ?? {}) },
+    template: {
+      ...baseline.template,
+      ...(legacy.template ?? {}),
+      // 穿云开场已移除：旧快照里存过的下降秒数一律归零，任何加载路径都不会再
+      // 生成高空下降 + 云层镜头（见 makeProject 的说明）。
+      openingDescentSeconds: 0
+    },
     cover: { ...baseline.cover, ...(legacy.cover ?? {}), ...(legacy.schemaVersion === 2 ? {} : { introSeconds: baseline.cover.introSeconds }) },
     output: {
       ...baseline.output,

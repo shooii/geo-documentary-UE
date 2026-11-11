@@ -1,8 +1,11 @@
 const clamp=(x:number)=>Math.max(0,Math.min(1,x));
 const smooth=(x:number)=>{x=clamp(x);return x*x*x*(x*(x*6-15)+10);};
+/** 穿云开场已移除（2026-11-11）：descent ≤0 时开场保持禁用，不再钳到最短 2 秒。 */
 export function configureOpening(region:any,overrides:any={}) {
   const base=region.openingDescent || {};
-  return {...region,openingDescent:{...base,enabled:true,seconds:Math.max(2,Math.min(16,Number(overrides.descentSeconds ?? overrides.seconds ?? base.seconds ?? 3))),startHeightMeters:Math.max(800000,Number(overrides.startHeightMeters ?? base.startHeightMeters ?? 900000)),startPitchDegrees:Number(overrides.startPitchDegrees ?? base.startPitchDegrees ?? -52),cloudDeckHeightMeters:Number(overrides.cloudDeckHeightMeters ?? base.cloudDeckHeightMeters ?? 45000),cloudAlphaPeak:Number(overrides.cloudAlphaPeak ?? base.cloudAlphaPeak ?? .95),clouds:overrides.clouds!==false && base.clouds!==false}};
+  const seconds=Math.max(0,Math.min(16,Number(overrides.descentSeconds ?? overrides.seconds ?? base.seconds ?? 0)));
+  if(seconds<=0)return {...region,openingDescent:{...base,enabled:false,seconds:0,clouds:false}};
+  return {...region,openingDescent:{...base,enabled:true,seconds,startHeightMeters:Math.max(800000,Number(overrides.startHeightMeters ?? base.startHeightMeters ?? 900000)),startPitchDegrees:Number(overrides.startPitchDegrees ?? base.startPitchDegrees ?? -52),cloudDeckHeightMeters:Number(overrides.cloudDeckHeightMeters ?? base.cloudDeckHeightMeters ?? 45000),cloudAlphaPeak:Number(overrides.cloudAlphaPeak ?? base.cloudAlphaPeak ?? .95),clouds:overrides.clouds!==false && base.clouds!==false}};
 }
 export function cloudStateAt(time:number,opening:any,height:number) {
   const seconds=Number(opening?.seconds || 0),raw=seconds?clamp(time/seconds):1;

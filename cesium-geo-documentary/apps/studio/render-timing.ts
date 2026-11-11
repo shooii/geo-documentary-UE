@@ -182,7 +182,8 @@ export async function applyProjectTiming(jobRoot: string, project: VideoProject,
       outroPause?: Record<string, unknown> & { applied?: boolean; outroCueIndex?: number };
     };
     duration.durationSeconds = Number(duration.durationSeconds ?? spec.narrationDurationSeconds) + insertedSeconds;
-    duration.timelineDurationSeconds = Math.ceil(duration.durationSeconds + project.template.openingDescentSeconds);
+    // 穿云下降已移除：时间轴不再在旁白长度之外追加下降秒数。
+    duration.timelineDurationSeconds = Math.ceil(duration.durationSeconds);
     duration.studioTiming = { insertedSeconds, insertions };
     if (duration.outroPause?.applied) {
       const childRanges = spec.sceneCueRanges.filter((range) => sceneById.get(range.sceneId)?.section === "child");

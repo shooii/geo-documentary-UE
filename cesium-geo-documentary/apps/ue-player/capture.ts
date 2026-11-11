@@ -129,7 +129,7 @@ try{
  console.log('UE_STREAM_HEALTH',JSON.stringify(health));
  const requestedTimes=process.env.GEO_QA_TIMES?process.env.GEO_QA_TIMES.split(',').map(Number):undefined;
 const sampleTimes=requestedTimes ?? (qa?[0,2.1,8]:undefined);
- if(qa){await page.evaluate(()=>(window as any).geoVideo.playOpeningPreview({descentSeconds:3}));}
+ if(qa){await page.evaluate(()=>(window as any).geoVideo.playOpeningPreview({descentSeconds:0}));}
  // One frame, with the stream allowed to come back. A WebRTC hiccup mid-take used to
  // abort the whole export; in capture mode the page reconnects and re-applies the scene,
  // so the only thing the grabber has to do is wait and ask again.
@@ -160,7 +160,7 @@ const sampleTimes=requestedTimes ?? (qa?[0,2.1,8]:undefined);
    if(!bounds || bounds.left<0 || bounds.top<0 || bounds.right>1 || bounds.bottom>1)throw new Error(`UE viewport clips region: ${JSON.stringify(bounds)}`);
    await page.waitForTimeout(5000);
    const motion=await page.evaluate(async()=>{
-     (window as any).geoVideo.playOpeningPreview({descentSeconds:3});
+     (window as any).geoVideo.playOpeningPreview({descentSeconds:0});
      const video=document.querySelector('video')!;const before=video.getVideoPlaybackQuality();const at=performance.now();
      await new Promise(r=>setTimeout(r,3000));
      const after=video.getVideoPlaybackQuality();

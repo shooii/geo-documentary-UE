@@ -266,18 +266,16 @@ async function prepareSandbox(root: string, jobRoot: string, project: VideoProje
   const region = JSON.parse(await readFile(regionSource, "utf8")) as { geometryPath?: string; childGeometryPath?: string };
   await copyFile(regionSource, join(sandbox, regionRelative));
   await copyIfExists(await boundarySource(`data/regions/${project.regionId}.timeline.json`), join(sandbox, "data", "regions", `${project.regionId}.timeline.json`));
-  // 开场闸门：UE 的开场下降走完、金色光束（parent-outline）落笔之后才起旁白与字幕，
-  // 否则穿云那几秒画面还在云里，字幕已经念到第二句了。合成器把这个数同时加到人声、
-  // 字幕和落笔音上，三者仍然对齐；0 表示模板没开开场镜头。
+  // 开场闸门：穿云下降已按需求移除（2026-11-11），旁白与字幕在乡镇边界开始描绘
+  // （约 0.35s）后即起拍；descent 恒为 0，这个闸门不会再等待任何穿云时间。
   {
     const timelinePath = join(sandbox, "data", "regions", `${project.regionId}.timeline.json`);
     if (existsSync(timelinePath)) {
       const timeline = JSON.parse(await readFile(timelinePath, "utf8")) as {
         actions?: { id?: string; time?: number }[];
       } & Record<string, unknown>;
-      const descent = Math.max(0, Number(project.template.openingDescentSeconds ?? 0));
       const beam = Number(timeline.actions?.find((action) => action.id === "parent-outline")?.time ?? 0.35) || 0;
-      timeline.openingGateSeconds = descent > 0 ? descent + Math.max(0, beam) : 0;
+      timeline.openingGateSeconds = Math.max(0, beam);
       await writeFile(timelinePath, JSON.stringify(timeline, null, 2), "utf8");
     }
   }
@@ -443,13 +441,15 @@ export async function materializeProject(sandbox: string, project: VideoProject,
       name: childDisplayNames.get(String(child.id)) || child.name
     }));
   }
+  // 穿云开场已移除（2026-11-11）：region 永远携带禁用的 openingDescent，
+  // 前端 presentation 与巡游构建器据此得到 descent = 0，直接落在乡镇边界。
   region.openingDescent = {
-    enabled: project.template.openingDescentSeconds > 0,
-    seconds: project.template.openingDescentSeconds,
+    enabled: false,
+    seconds: 0,
     startHeightMeters: project.template.openingStartHeightMeters,
     startPitchDegrees: project.template.openingStartPitchDegrees,
     cloudDeckHeightMeters: project.template.cloudDeckHeightMeters,
-    clouds: true,
+    clouds: false,
     cloudAlphaPeak: project.template.cloudAlphaPeak
   };
   await writeFile(regionPath, JSON.stringify(region, null, 2), "utf8");

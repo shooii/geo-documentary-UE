@@ -1053,10 +1053,12 @@ test("clicking a child scene previews its complete administrative camera segment
 
 test("the editor playhead and the total duration share one origin", async () => {
   // Render-spec cue ranges are measured from the start of the *narration*, and
-  // the compositor lays that narration down after two lead-ins: the cover still
-  // and the opening descent (`narrationStartSeconds` in the composition
-  // manifest). `totalDurationSeconds` counts both, so the playhead must too —
-  // otherwise every scene reads one descent earlier than the video plays it.
+  // the compositor lays that narration down after one lead-in: the cover still
+  // (`narrationStartSeconds` in the composition manifest). `totalDurationSeconds`
+  // counts it, so the playhead must too — otherwise every scene reads earlier
+  // than the video plays it. The opening descent was removed on 2026-11-11:
+  // the film now lands directly on the township boundary, so `descentSeconds`
+  // is always 0 and the map timeline is exactly the narration.
   const clientSource = await readFile(resolve(root, "apps/studio/public/studio.js"), "utf8");
   assert.match(clientSource, /function timelineOffsetSeconds\(\)/);
   assert.match(clientSource, /state\.renderSpec\?\.cover\?\.introSeconds \?\? state\.project\.cover\?\.introSeconds/);
@@ -1071,18 +1073,17 @@ test("the editor playhead and the total duration share one origin", async () => 
   const project = await makeProject(root, "440825112");
   const spec = await buildProjectRenderSpec(root, project);
   assert.ok(spec.cover.introSeconds > 0, "shipped projects open with a cover");
-  assert.ok(spec.opening.descentSeconds > 0, "shipped projects open with a descent");
+  assert.equal(spec.opening.descentSeconds, 0, "the cloud descent has been removed; projects open on the township directly");
   assert.equal(
     spec.totalDurationSeconds,
     spec.cover.introSeconds + spec.timelineDurationSeconds,
     "the total is the cover plus the map timeline"
   );
-  // The map timeline is the descent plus the narration, so the cue clock cannot
-  // already contain the descent — that is what makes the playhead offset two
-  // lead-ins rather than one.
+  // Without the descent the map timeline is exactly the narration (ceil adds up
+  // to a second).
   assert.ok(
-    Math.abs(spec.timelineDurationSeconds - (spec.narrationDurationSeconds + spec.opening.descentSeconds)) <= 1,
-    `map timeline ${spec.timelineDurationSeconds}s should be the ${spec.opening.descentSeconds}s descent plus ${spec.narrationDurationSeconds}s of narration (ceil adds up to a second)`
+    Math.abs(spec.timelineDurationSeconds - spec.narrationDurationSeconds) <= 1,
+    `map timeline ${spec.timelineDurationSeconds}s should be the ${spec.narrationDurationSeconds}s of narration with no descent (ceil adds up to a second)`
   );
   const scenesById = new Map(spec.scenes.map((scene) => [scene.sceneId, scene]));
   const firstNarration = spec.sceneCueRanges.find((range) => scenesById.get(range.sceneId)?.section !== "cover");
@@ -1092,17 +1093,11 @@ test("the editor playhead and the total duration share one origin", async () => 
     0,
     "the cover has no narration cue of its own"
   );
-  // The narration opens the cue clock, so the playhead of the first narrated
-  // scene is exactly the two lead-ins (cover + descent). Reading it as the cover
-  // alone is the bug this pins down. The first cue sits well inside the descent,
-  // which is what makes the cue clock descent-exclusive.
+  // The narration opens the cue clock at ~0: the playhead offset for the first
+  // narrated scene is exactly the cover lead-in.
   assert.ok(
-    Number(firstNarration.start) < spec.opening.descentSeconds,
-    `first cue ${firstNarration.start}s should open the narration, well inside the ${spec.opening.descentSeconds}s descent`
-  );
-  assert.ok(
-    spec.cover.introSeconds + spec.opening.descentSeconds > spec.cover.introSeconds,
-    "the corrected playhead offset is strictly larger than the cover alone"
+    Number(firstNarration.start) < 1,
+    `first cue should open the narration right away with no descent (got ${firstNarration.start}s)`
   );
 });
 
