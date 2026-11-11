@@ -100,7 +100,11 @@
         <details id="mapViewControls" class="map-view-controls" hidden>
           <summary>底图视角</summary>
           <div class="map-view-fields" aria-label="底图视角">
-            <label>应用范围<select id="mapViewScope"><option value="scene">仅当前场景</option><option value="global">全局（所有场景）</option></select></label>
+            <label>应用范围</label>
+            <div class="map-view-scope" role="group" aria-label="视角作用范围">
+              <button type="button" class="scope-btn active" data-scope="scene">仅当前场景</button>
+              <button type="button" class="scope-btn" data-scope="global">全局默认</button>
+            </div>
             <div class="grid-2">
               <label>经度偏移（°）<input type="number" name="longitudeOffset" min="-180" max="180" step="0.001" /></label>
               <label>纬度偏移（°）<input type="number" name="latitudeOffset" min="-85" max="85" step="0.001" /></label>

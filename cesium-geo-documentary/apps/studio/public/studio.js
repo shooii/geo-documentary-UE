@@ -2825,7 +2825,7 @@ function renderMapView() {
   panel.hidden = state.previewMode !== "actual" || !scene || scene.section === "cover";
   if (panel.hidden) panel.open = false;
   const scope = mapViewScope();
-  $("mapViewScope").value = scope;
+  for (const button of panel.querySelectorAll(".scope-btn")) button.classList.toggle("active", button.dataset.scope === scope);
   $("mapViewScopeHint").textContent = MAP_VIEW_SCOPE_HINTS[scope];
   const view = scope === "global" ? (state.project?.template?.mapView ?? DEFAULT_MAP_VIEW) : (scene?.mapView ?? DEFAULT_MAP_VIEW);
   for (const input of panel.querySelectorAll("input[name]")) input.value = view[input.name];
@@ -4068,7 +4068,12 @@ function bind() {
   $("actualViewTab").onclick = () => setPreviewMode("actual");
   $("safeAreaTab").onclick = () => setPreviewMode("safe");
   for (const input of $("mapViewControls").querySelectorAll("input[name]")) input.onchange = () => updateMapView(input);
-  $("mapViewScope").onchange = (event) => { state.mapViewScope = event.target.value === "global" ? "global" : "scene"; renderMapView(); pushMapView(); };
+  for (const button of $("mapViewControls").querySelectorAll(".scope-btn")) button.onclick = () => {
+    if (button.classList.contains("active")) return;
+    state.mapViewScope = button.dataset.scope === "global" ? "global" : "scene";
+    renderMapView();
+    pushMapView();
+  };
   $("resetMapView").onclick = () => updateMapView();
   $("projectName").onclick = () => setSaveProjectOpen(true);
   $("projectName").onfocus = () => { $("projectName").blur(); setSaveProjectOpen(true); };
