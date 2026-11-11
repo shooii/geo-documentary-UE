@@ -11,6 +11,17 @@ export const smooth = (x: number) => { x = clamp(x); return x*x*x*(x*(x*6-15)+10
 const lerp = (from: number, to: number, progress: number) => from + (to - from) * progress;
 const wrapAngle = (angle: number) => ((angle + 180) % 360 + 360) % 360 - 180;
 
+// 行政村填充底色（含当前村与累计填色）。默认沿用参考片 saturated green；
+// 在 region 内容里配 `villageFill: "#e06666"` 这样的 hex 即可整体换色。
+const DEFAULT_VILLAGE_FILL: [number, number, number] = [0.20, 0.62, 0.20];
+export function villageFillColor(region: any): [number, number, number] {
+  const raw = typeof region?.villageFill === 'string' ? region.villageFill.trim() : '';
+  const hex = /^#([0-9a-f]{6})$/i.exec(raw);
+  if (!hex) return DEFAULT_VILLAGE_FILL;
+  const value = Number.parseInt(hex[1]!, 16);
+  return [((value >> 16) & 255) / 255, ((value >> 8) & 255) / 255, (value & 255) / 255];
+}
+
 export function camera(p: any) {
   return { lon: Number(p.longitude ?? p.lon), lat: Number(p.latitude ?? p.lat), height: Number(p.height), heading: Number(p.heading ?? 0), pitch: Number(p.pitch ?? -64) };
 }
@@ -303,6 +314,8 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
     parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity, contextErasing,
     labels, accents, labelReferenceDistance, focusId, focus, labelsReveal, fills, hierarchy, plateFade,
+    // 行政村填充底色（RGB 0-1），UE 端 GeoMap 用来替换默认的饱和绿。
+    villageFill: villageFillColor(region),
     // Villages the tour has already reached. UE keeps their plate painted, so the
     // map accumulates colour the way the reference reel does.
     visitedIds: stops.filter(item => mapTime >= Number(item.start)).map(item => String(item.id)),

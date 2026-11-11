@@ -48,6 +48,18 @@ static TSharedPtr<FJsonObject> O(const TSharedPtr<FJsonObject> &J, const TCHAR *
     const TSharedPtr<FJsonObject> *V;
     return J.IsValid() && J->TryGetObjectField(Key, V) ? *V : MakeShared<FJsonObject>();
 }
+// villageFill: [r, g, b]（0-1，由前端从 region 配置的 hex 换算）。缺失或非法时回落默认色。
+static FLinearColor C(const TSharedPtr<FJsonObject> &J, const TCHAR *Key, const FLinearColor &Default)
+{
+    const TArray<TSharedPtr<FJsonValue>> *V;
+    if (!J.IsValid() || !J->TryGetArrayField(Key, V) || V->Num() < 3)
+        return Default;
+    const auto Channel = [](const TSharedPtr<FJsonValue> &Value) {
+        double Out = 0;
+        return Value.IsValid() && Value->TryGetNumber(Out) ? FMath::Clamp(Out, 0., 1.) : 0.;
+    };
+    return FLinearColor(Channel((*V)[0]), Channel((*V)[1]), Channel((*V)[2]), 1.);
+}
 static UTexture2D *LoadCloudTexture(const FString &File)
 {
     TArray<uint8> Bytes;
@@ -1571,6 +1583,9 @@ void AGeoHUD::DrawHUD()
         return true;
     };
     const double Focus = N(F, TEXT("focus")), Reveal = N(F, TEXT("parentReveal"));
+    // 行政村填充底色：region 内容配 `villageFill`（前端已换算成 [r,g,b]）即可整体换色，
+    // 默认仍是参考片的饱和绿。
+    const FLinearColor VillageFill = C(F, TEXT("villageFill"), FLinearColor(.20, .62, .20, 1.));
     const double ChildReveal = N(F, TEXT("childReveal"), 1);
     const auto Trace = O(F, TEXT("trace"));
     const auto Accents = O(F, TEXT("accents"));
@@ -1702,7 +1717,7 @@ void AGeoHUD::DrawHUD()
                 Points.Add(Pixel);
             }
             FGeoVisitedFill Painted;
-            const FLinearColor Tint(.20, .62, .20, .55 * Strength * FillScale);
+            const FLinearColor Tint(VillageFill.R, VillageFill.G, VillageFill.B, .55 * Strength * FillScale);
             for (int I = 0; I + 2 < Fill.Indices.Num(); I += 3)
             {
                 const int A = Fill.Indices[I], B = Fill.Indices[I + 1], C = Fill.Indices[I + 2];
@@ -2213,7 +2228,7 @@ void AGeoHUD::DrawHUD()
         // Closing title and accumulated village paint must not double-tint the terrain.
         const double ParentFillAlpha = FillStrengths->Values.Num() > 0 ? .18 : .45;
         const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.18, .60, .18, ParentFillAlpha * Focus * FillScale)
-                                                    : FLinearColor(.20, .62, .20, .55 * Focus * FillScale);
+                                                    : FLinearColor(VillageFill.R, VillageFill.G, VillageFill.B, .55 * Focus * FillScale);
         for (auto &Triangle : FocusTriangles)
             Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
         FCanvasTriangleItem Fill(FocusTriangles, GWhiteTexture);
