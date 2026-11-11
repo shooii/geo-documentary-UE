@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { buildSingleLineCues, normalizeSubtitleSemantics, splitSingleLineText, type SingleLineCueOverride } from "../content-engine/subtitles.js";
-import { normalizeSemanticText, type AssetPlacement, type MapView, type StudioScene, type VideoProject } from "../project-schema/index.js";
+import { effectiveMapView, normalizeSemanticText, type AssetPlacement, type MapView, type StudioScene, type VideoProject } from "../project-schema/index.js";
 import { MINIMUM_RENDERED_VISUAL_SECONDS, planVisualClip, resolveVisualClipWindow } from "./visual-timeline.js";
 import { compositionNarrationLeadSeconds } from "./opening-timing.js";
 
@@ -321,8 +321,11 @@ export function buildRenderSpec(input: {
       const range = rangeByScene.get(scene.id);
       return range ? [{ sceneId: scene.id, start: range.start, end: range.end }] : [];
     });
-  const mapViewTrack = project.scenes.some(scene => scene.mapView)
-    ? ranges.map(range => ({ start: range.start, view: project.scenes.find(scene => scene.id === range.sceneId)?.mapView ?? null }))
+  // 全局底图视角：全默认值视为未设置。场景单独设置的 mapView 优先，
+  // 未设置的场景回落到全局视角，都没有才是 null（自动取景，无任何偏移）。
+  const globalMapView = effectiveMapView(project.template.mapView);
+  const mapViewTrack = project.scenes.some(scene => scene.mapView) || globalMapView
+    ? ranges.map(range => ({ start: range.start, view: project.scenes.find(scene => scene.id === range.sceneId)?.mapView ?? globalMapView ?? null }))
     : undefined;
   const narrationDurationSeconds = input.narrationDurationSeconds ?? cues.at(-1)?.end ?? 0;
   const timelineDurationSeconds = input.timelineDurationSeconds ?? Math.ceil(narrationDurationSeconds + project.template.openingDescentSeconds);

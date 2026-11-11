@@ -25,6 +25,8 @@ const state = {
   assetLibrarySelected: new Set(), assetPreviewId: null, assetRenameContext: null,
   assetUndoStack: [], assetTouch: Object.create(null), coverPreviewTimer: null, coverPreviewObjectUrl: "", coverPreviewRequest: 0, previewMode: "actual",
   previewAssetReadySceneId: null, previewAssetRevealTimer: null, previewAssetHideTimer: null,
+  /** 底图视角编辑作用域：scene=仅当前场景，global=所有场景的默认视角。 */
+  mapViewScope: "scene",
   /** What the stage is currently painting; see `applyPreviewStagePlacement`. */
   previewStageSceneId: null, previewStageAssetId: null,
   /** The picture playback is showing right now (null = follow the selection). */
@@ -1902,7 +1904,7 @@ function playSelectedScenePreview() {
   state.previewAssetReadySceneId = null;
   setPreviewAssetVisible(false);
   const opening = openingPreviewSettings();
-  $("cesiumPreview").contentWindow?.postMessage({ type: "geo-video-studio", action: "play-opening", opening, mapView: scene.mapView ?? null }, CESIUM_PREVIEW_ORIGIN);
+  $("cesiumPreview").contentWindow?.postMessage({ type: "geo-video-studio", action: "play-opening", opening, mapView: effectiveSceneMapView(scene) }, CESIUM_PREVIEW_ORIGIN);
 }
 
 // The child-tour payload the preview needs. Studio builds it once and uses it
@@ -1995,7 +1997,7 @@ function showSelectedTourFrame() {
   $("cesiumPreview").contentWindow?.postMessage({
     type: "geo-video-studio",
     action,
-    mapView: scene.mapView ?? null,
+    mapView: effectiveSceneMapView(scene),
     preview: { tourStops, time, returnDuration, annotationWindows, targetId: scene.childId, segmentDuration: sceneDuration(scene) }
   }, CESIUM_PREVIEW_ORIGIN);
 }
@@ -2788,30 +2790,66 @@ function applyPreviewStagePlacement(scene, placement) {
 }
 
 
+/* —— 底图视角：支持「仅当前场景」与「全局（所有场景）」两种作用域 ——
+   场景视角 scene.mapView 优先；未单独设置的场景用全局 project.template.mapView，
+   都没有才是自动取景（无任何偏移）。全局值全默认（0/0/1/0/0）视为未设置。 */
+function isDefaultMapView(view) {
+  if (!view) return true;
+  return !Number(view.longitudeOffset) && !Number(view.latitudeOffset)
+    && !(Math.abs(Number(view.zoom) - 1) > 1e-9)
+    && !Number(view.headingOffset) && !Number(view.pitchOffset);
+}
+
+function globalMapView() {
+  const view = state.project?.template?.mapView;
+  return isDefaultMapView(view) ? null : view;
+}
+
+/** 当前场景生效的视角：场景值优先，其次全局。 */
+function effectiveSceneMapView(scene) {
+  return scene?.mapView ?? globalMapView() ?? null;
+}
+
+function mapViewScope() {
+  return state.mapViewScope === "global" ? "global" : "scene";
+}
+
+const MAP_VIEW_SCOPE_HINTS = {
+  scene: "以场景自动取景为基准，只影响当前场景，保存方案后用于导出。",
+  global: "作为所有未单独设置视角的场景的默认值；已单独设置的场景不受影响。"
+};
+
 function renderMapView() {
   const scene = selectedScene();
   const panel = $("mapViewControls");
   panel.hidden = state.previewMode !== "actual" || !scene || scene.section === "cover";
   if (panel.hidden) panel.open = false;
-  const view = scene?.mapView ?? DEFAULT_MAP_VIEW;
+  const scope = mapViewScope();
+  $("mapViewScope").value = scope;
+  $("mapViewScopeHint").textContent = MAP_VIEW_SCOPE_HINTS[scope];
+  const view = scope === "global" ? (state.project?.template?.mapView ?? DEFAULT_MAP_VIEW) : (scene?.mapView ?? DEFAULT_MAP_VIEW);
   for (const input of panel.querySelectorAll("input[name]")) input.value = view[input.name];
-  $("resetMapView").disabled = !scene?.mapView;
+  const hasValue = scope === "global" ? !isDefaultMapView(state.project?.template?.mapView) : Boolean(scene?.mapView);
+  $("resetMapView").disabled = !hasValue;
 }
 
 function pushMapView() {
   if ($("cesiumPreview").hidden) return;
   $("cesiumPreview").contentWindow?.postMessage({
-    type: "geo-video-studio", action: "set-map-view", mapView: selectedScene()?.mapView ?? null
+    type: "geo-video-studio", action: "set-map-view", mapView: effectiveSceneMapView(selectedScene())
   }, CESIUM_PREVIEW_ORIGIN);
 }
 
 function updateMapView(input) {
   const scene = selectedScene();
   if (!scene || scene.section === "cover") return;
+  const global = mapViewScope() === "global";
+  const target = global ? (state.project.template.mapView ?? { ...DEFAULT_MAP_VIEW }) : (scene.mapView ?? { ...DEFAULT_MAP_VIEW });
   if (input) {
     const value = Number.isFinite(input.valueAsNumber) ? input.valueAsNumber : DEFAULT_MAP_VIEW[input.name];
-    scene.mapView = { ...DEFAULT_MAP_VIEW, ...scene.mapView, [input.name]: Math.min(Number(input.max), Math.max(Number(input.min), value)) };
-  } else delete scene.mapView;
+    const next = { ...DEFAULT_MAP_VIEW, ...target, [input.name]: Math.min(Number(input.max), Math.max(Number(input.min), value)) };
+    if (global) state.project.template.mapView = next; else scene.mapView = next;
+  } else if (global) delete state.project.template.mapView; else delete scene.mapView;
   markDirty();
   renderMapView();
   pushMapView();
@@ -4030,6 +4068,7 @@ function bind() {
   $("actualViewTab").onclick = () => setPreviewMode("actual");
   $("safeAreaTab").onclick = () => setPreviewMode("safe");
   for (const input of $("mapViewControls").querySelectorAll("input[name]")) input.onchange = () => updateMapView(input);
+  $("mapViewScope").onchange = (event) => { state.mapViewScope = event.target.value === "global" ? "global" : "scene"; renderMapView(); pushMapView(); };
   $("resetMapView").onclick = () => updateMapView();
   $("projectName").onclick = () => setSaveProjectOpen(true);
   $("projectName").onfocus = () => { $("projectName").blur(); setSaveProjectOpen(true); };

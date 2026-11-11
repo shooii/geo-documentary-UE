@@ -88,6 +88,19 @@ export interface MapView {
   pitchOffset: number;
 }
 
+/** 全默认值（0/0/1/0/0）等于没有调整过视角——判定全局视角是否真的设置过。 */
+export function isDefaultMapView(view: MapView | null | undefined): boolean {
+  if (!view) return true;
+  return !Number(view.longitudeOffset) && !Number(view.latitudeOffset)
+    && !(Math.abs(Number(view.zoom) - 1) > 1e-9)
+    && !Number(view.headingOffset) && !Number(view.pitchOffset);
+}
+
+/** 全局视角入口：未设置或全默认时返回 undefined，导出轨道据此回落自动取景。 */
+export function effectiveMapView(view: MapView | null | undefined): MapView | undefined {
+  return view && !isDefaultMapView(view) ? view : undefined;
+}
+
 export interface StudioScene {
   id: string;
   type: SceneType;
@@ -167,6 +180,12 @@ export interface VideoProject {
     cloudDeckHeightMeters: number;
     cloudAlphaPeak: number;
     tourReturnSeconds: number;
+    /**
+     * 全局底图视角（对自动取景的偏移）：所有未单独设置视角的场景都用它；
+     * 设置了 `scene.mapView` 的场景仍以场景值为准。全默认值（0/0/1/0/0）
+     * 视为未设置。
+     */
+    mapView?: MapView;
   };
   cover: CoverManifest;
   output: {

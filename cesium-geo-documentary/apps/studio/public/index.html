@@ -99,7 +99,8 @@
         <div class="view-tabs"><button id="actualViewTab" class="active" aria-pressed="true">实际画面</button><button id="safeAreaTab" aria-pressed="false">字幕安全区</button></div>
         <details id="mapViewControls" class="map-view-controls" hidden>
           <summary>底图视角</summary>
-          <div class="map-view-fields" aria-label="当前场景底图视角">
+          <div class="map-view-fields" aria-label="底图视角">
+            <label>应用范围<select id="mapViewScope"><option value="scene">仅当前场景</option><option value="global">全局（所有场景）</option></select></label>
             <div class="grid-2">
               <label>经度偏移（°）<input type="number" name="longitudeOffset" min="-180" max="180" step="0.001" /></label>
               <label>纬度偏移（°）<input type="number" name="latitudeOffset" min="-85" max="85" step="0.001" /></label>
@@ -107,7 +108,7 @@
               <label>旋转（°）<input type="number" name="headingOffset" min="-180" max="180" step="1" /></label>
               <label>俯仰（°）<input type="number" name="pitchOffset" min="-60" max="60" step="1" /></label>
             </div>
-            <small>以场景自动取景为基准，保存方案后用于导出。</small>
+            <small id="mapViewScopeHint">以场景自动取景为基准，只影响当前场景，保存方案后用于导出。</small>
             <button id="resetMapView" type="button">恢复自动取景</button>
           </div>
         </details>
