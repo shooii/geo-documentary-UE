@@ -2300,9 +2300,11 @@ void AGeoHUD::DrawHUD()
                         return true;
                 return false;
             };
-            const double BandY = .75 * Size.Y;
-            const FBox2D Caption(FVector2D(.08 * Size.X, BandY - 56 * Scale),
-                                 FVector2D(.92 * Size.X, BandY + 56 * Scale));
+            const auto ActiveSubtitle = O(F, TEXT("subtitleBounds"));
+            const bool HasSubtitle = ActiveSubtitle.IsValid() && N(ActiveSubtitle, TEXT("right")) > N(ActiveSubtitle, TEXT("left"))
+                && N(ActiveSubtitle, TEXT("bottom")) > N(ActiveSubtitle, TEXT("top"));
+            const FBox2D Caption(FVector2D(N(ActiveSubtitle, TEXT("left")) * Size.X, N(ActiveSubtitle, TEXT("top")) * Size.Y),
+                                 FVector2D(N(ActiveSubtitle, TEXT("right")) * Size.X, N(ActiveSubtitle, TEXT("bottom")) * Size.Y));
             const FBox2D Safe(FVector2D(20, 20) * Scale, FVector2D(Size.X, Size.Y) - FVector2D(20, 20) * Scale);
             // Distance from the township outline, not from its screen box: the box is a
             // superset and the seat of 雷州市 pokes out of the northern rim, so a bbox
@@ -2324,7 +2326,7 @@ void AGeoHUD::DrawHUD()
                 const FBox2D Box(At - Half, At + Half);
                 if (!Safe.IsInside(Box))
                     return 1;
-                if (Caption.Intersect(Box))
+                if (HasSubtitle && Caption.ExpandBy(12 * Scale).Intersect(Box))
                     return 2;
                 // Only a hairline of tolerance here: the exits below already step a whole
                 // Gap clear of the outline, and expanding again by Gap would make the two
@@ -2377,13 +2379,8 @@ void AGeoHUD::DrawHUD()
             Candidates.Sort([&Seat](const FVector2D &A, const FVector2D &B) {
                 return FVector2D::Distance(A, Seat) < FVector2D::Distance(B, Seat);
             });
-            // Shortest move wins, so the name stays where the reader expects it; the
-            // previous choice is kept while it is still valid, so the solver does not
-            // hop between sides as the camera creeps.
-            const int32 *Previous = LabelPlacements.Find(TEXT("@parent"));
+            // 只依据当前画面选择最近候选，不让上一帧影响 seek 截图。
             int32 Chosen = INDEX_NONE;
-            if (Previous && *Previous >= 0 && *Previous < Candidates.Num() && Fits(Candidates[*Previous]) == 0)
-                Chosen = *Previous;
             for (int32 I = 0; Chosen == INDEX_NONE && I < Candidates.Num(); ++I)
                 if (Fits(Candidates[I]) == 0)
                     Chosen = I;
@@ -2730,38 +2727,34 @@ void AGeoHUD::DrawHUD()
         // place matters, and that decision must not change from frame to frame.
         if (A.Rank != B.Rank)
             return A.Rank < B.Rank;
-        const bool WasVisible = LabelPlacements.Contains(A.Id), OtherWasVisible = LabelPlacements.Contains(B.Id);
-        if (WasVisible != OtherWasVisible)
-            return WasVisible;
         return A.Id < B.Id;
     });
-    // Studio and the video compositor center captions 25% above the bottom edge.
-    //
-    // This band is a *reservation*, not a wall. It used to be 112 px tall and 84 % wide,
-    // and a name whose box grazed it by three pixels was thrown away while the spot on
-    // screen was visibly empty — measured over a two-second closing pull-back, the caption
-    // band was the single biggest reason a name disappeared (217 drops, more than every
-    // village-versus-village collision put together), and because the camera carries the
-    // labels across it the names blinked out and back. It is now one caption line tall and
-    // the test below lets a name graze it; only a name actually sitting on the text loses.
-    const double CaptionY = .75 * Size.Y;
-    const double CaptionHalf = 44 * Scale;
-    // `Occupied` runs parallel to `OccupiedNames` so the debug log can say *what* a
-    // dropped name collided with: the caption band, the plaque, the township name, or a
-    // particular neighbour. Index 0 is always the caption band.
-    TArray<FBox2D> Occupied{FBox2D(FVector2D(.10 * Size.X, CaptionY - CaptionHalf),
-                                  FVector2D(.90 * Size.X, CaptionY + CaptionHalf))};
-    TArray<FString> OccupiedNames{TEXT("@caption")};
+    // 字幕矩形由实际排版方传入，坐标相对整个视频画面归一化；无字幕不占位。
+    TArray<FBox2D> Occupied;
+    const auto Subtitle = O(F, TEXT("subtitleBounds"));
+    if (Subtitle.IsValid())
+    {
+        const double Left = N(Subtitle, TEXT("left")), Top = N(Subtitle, TEXT("top"));
+        const double Right = N(Subtitle, TEXT("right")), Bottom = N(Subtitle, TEXT("bottom"));
+        if (Left >= 0 && Top >= 0 && Right <= 1 && Bottom <= 1 && Right > Left && Bottom > Top)
+            Occupied.Add(FBox2D(FVector2D(Left * Size.X, Top * Size.Y), FVector2D(Right * Size.X, Bottom * Size.Y)));
+    }
+    const FBox2D LabelSafe(FVector2D(20, 20) * Scale, FVector2D(Size.X, Size.Y) - FVector2D(20, 20) * Scale);
+    // 在接触前的屏幕空间距离内淡出，不读上一帧：播放、跳转与离线采样一致。
+    const double SoftDistance = 12 * Scale;
+    const auto ClearanceAlpha = [SoftDistance](double Distance) {
+        const double T = FMath::Clamp(Distance / SoftDistance, 0., 1.);
+        return T * T * (3 - 2 * T);
+    };
     TMap<FString, int32> Placements;
     if (bContextName)
     {
         // Reserve the parent name: a village label drawn on top of it made the county
         // read as the village's name instead of its parent.
         Occupied.Add(ContextBox);
-        OccupiedNames.Add(TEXT("@parent"));
         Placements.Add(TEXT("@parent"), ContextPlacement);
     }
-    for (const auto &Label : DrawLabels)
+    for (auto Label : DrawLabels)
     {
         const bool Pinned = Label.IconSize > 0;
         const double Gap = (Pinned ? 20 : 8) * Scale;
@@ -2770,54 +2763,37 @@ void AGeoHUD::DrawHUD()
         {
             const float IconSize = Label.IconSize;
             const FVector2D IconMin(Label.Anchor.X - IconSize * .5f, Label.Anchor.Y - IconSize);
+        // 保持原锚点；安全检测覆盖整行字形、描边及动画最大起伏，不截掉半字。
+        const FVector2D Point = Label.Anchor + FVector2D(0, BaseY);
+        const FBox2D Bounds(Point - Label.Extent, Point + Label.Extent);
+        const double LayoutHalo = FMath::Max(2. * Scale, Label.Ink * .08);
+        const FVector2D FullExtent(FMath::Max(double(Label.Extent.X), double(Label.UnitWidth) * .5) + LayoutHalo,
+            FMath::Max(double(Label.Extent.Y), double(Label.Ink) * (Label.Animated ? .55 : .5)) + LayoutHalo);
+        FBox2D Footprint = Label.PlateTexture ? Bounds : FBox2D(Point - FullExtent, Point + FullExtent);
+        if (Pinned && LabelPin)
+        {
+            Footprint += FVector2D(Label.Anchor.X - Label.IconSize * .5, Label.Anchor.Y - Label.IconSize);
+            Footprint += FVector2D(Label.Anchor.X + Label.IconSize * .5, Label.Anchor.Y);
+        }
+        double Clearance = FMath::Min(FMath::Min(Footprint.Min.X - LabelSafe.Min.X, LabelSafe.Max.X - Footprint.Max.X),
+                                      FMath::Min(Footprint.Min.Y - LabelSafe.Min.Y, LabelSafe.Max.Y - Footprint.Max.Y));
+        for (const FBox2D &Other : Occupied)
+        {
+            const double Separation = FMath::Max(FMath::Max(Other.Min.X - Footprint.Max.X, Footprint.Min.X - Other.Max.X),
+                                                FMath::Max(Other.Min.Y - Footprint.Max.Y, Footprint.Min.Y - Other.Max.Y));
+            Clearance = FMath::Min(Clearance, Separation);
+        }
+        const double LayoutAlpha = ClearanceAlpha(Clearance);
+        if (LayoutAlpha <= 0)
+            continue;
+        Label.Color.A *= LayoutAlpha;
             FCanvasTileItem Icon(IconMin, FVector2D(IconSize, IconSize),
                                  FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.08f) * Label.Fade));
             Icon.Texture = LabelPin->GetResource();
             Icon.BlendMode = SE_BLEND_Translucent;
             Canvas->DrawItem(Icon);
-            Occupied.Add(FBox2D(FVector2D(Label.Anchor.X - IconSize * .5f, Label.Anchor.Y - IconSize),
-                                FVector2D(Label.Anchor.X + IconSize * .5f, Label.Anchor.Y))
-                             .ExpandBy(2 * Scale));
-            OccupiedNames.Add(TEXT("@pin"));
         }
-        // Every name sits exactly on its anchor, always — Cesium's camera code never
-        // moves a child label. `declutterChildLabels` only decides whether it can be
-        // drawn, so a place is either named where it is or not named at all, and the eye
-        // can follow the same name through the whole shot.
-        //
-        // This build used to offer each name a menu of fifteen offsets, plus a pull-back
-        // inside the safe frame and a "do not touch an outline" rule. While the camera was
-        // still moving, a name would step aside for a neighbour, the neighbour would then
-        // step aside for it, and the whole closing overview shimmered — the positions were
-        // the only thing moving in an otherwise locked-off frame. One anchor, one decision.
-        const FVector2D Point = Label.Anchor + FVector2D(0, BaseY);
-        const FBox2D Bounds(Point - Label.Extent, Point + Label.Extent);
-        if (!Pinned && !Label.Animated)
-        {
-            int32 Hit = INDEX_NONE;
-            for (int32 Slot = 0; Slot < Occupied.Num(); ++Slot)
-            {
-                // Slot 0 is the caption band: shrink it before the test so a name may
-                // overlap the reservation's edge without being dropped.
-                const FBox2D Test = Slot == 0 ? Occupied[Slot].ExpandBy(-6 * Scale) : Occupied[Slot];
-                if (Test.Intersect(Bounds))
-                {
-                    Hit = Slot;
-                    break;
-                }
-            }
-            if (Hit != INDEX_NONE)
-            {
-                // Overflow, not relocation: no room, no name.
-                if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_DEBUG")).Len() > 0)
-                    UE_LOG(LogTemp, Display, TEXT("LABEL_DROPPED %s rank=%d at=%.0f,%.0f hit=%s"),
-                           *Label.Id, Label.Rank, Point.X, Point.Y,
-                           Hit < OccupiedNames.Num() ? *OccupiedNames[Hit] : TEXT("?"));
-                continue;
-            }
-        }
-        Occupied.Add(Bounds.ExpandBy(3 * Scale));
-        OccupiedNames.Add(Label.Id);
+        Occupied.Add(Footprint.ExpandBy(3 * Scale));
         Placements.Add(Label.Id, 0);
         const FVector2D Position = Bounds.GetCenter();
         if (Label.PlateTexture)

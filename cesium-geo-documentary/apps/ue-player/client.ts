@@ -1,6 +1,10 @@
 import { Config, PixelStreaming } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.7';
 import { actions, contextIntroSeconds, frameAt, type PreviewFlightOrigin } from './presentation.js';
 import { configureOpening } from './opening.js';
+import { activeSubtitleBounds, subtitleBounds, type SubtitleBounds, type SubtitleWindow } from './subtitle-layout.js';
+
+let previewSubtitleBounds: SubtitleBounds | undefined;
+let subtitleWindows: SubtitleWindow[] = [];
 import { DEFAULT_IMAGERY_PROVIDER, type MapView } from '../../packages/project-schema/index.js';
 
 const query = new URLSearchParams(location.search);
@@ -61,7 +65,7 @@ function draw(force=false) {
   const now=performance.now();if(!force && now-lastDrawAt<frameInterval)return;lastDrawAt=now;
   const overviewProgress = flightOrigin?.overviewStart === undefined ? undefined : (time - flightOrigin.overviewStart) / duration;
   const frame = frameAt(scene, stops ?? [], time, profile, duration, openingOnly, flightOrigin, overviewProgress, previewView, contextIntro);
-  if (stream.emitUIInteraction({ type: 'geo-video-ue', version: 1, action: 'apply-frame', frame })) displayedFrame = frame;
+  if (stream.emitUIInteraction({ type: 'geo-video-ue', version: 1, action: 'apply-frame', frame: { ...frame, subtitleBounds: previewSubtitleBounds ?? null } })) displayedFrame = frame;
 }
 function stop() { cancelAnimationFrame(raf); raf = 0; }
 function play(start: number, end: number, done: string, details = {}, flightSeconds = 0) {
@@ -73,6 +77,11 @@ function play(start: number, end: number, done: string, details = {}, flightSeco
   }; raf = requestAnimationFrame(tick);
 }
 function handle(data: any) {
+  if (data.action === 'set-subtitle-bounds') {
+    previewSubtitleBounds = subtitleBounds(data.bounds);
+    draw(true);
+    return;
+  }
   if (!actions.has(data.action)) return;
   const p = data.preview || {};
   if (p.tourStops) stops = p.tourStops;
@@ -306,7 +315,8 @@ Object.assign(window,{ geoVideo: {
   setImagery: (provider: string) => switchImagery(provider),
   playOpeningPreview: (opening={}) => handle({action:'play-opening',opening}),
   prepareStudioTour: (preview:any) => handle({action:'prepare-tour',preview}),
-  renderFrame: async (t: number) => { stop(); time=t; openingOnly=false; if (!ready) throw new Error('UE renderer not ready'); return send('capture-frame',{ frame:frameAt(scene,stops ?? [],t,profile,duration,false) }); },
+  setSubtitleWindows: (windows: SubtitleWindow[]) => { subtitleWindows = windows; },
+  renderFrame: async (t: number) => { stop(); time=t; openingOnly=false; if (!ready) throw new Error('UE renderer not ready'); return send('capture-frame',{ frame:{ ...frameAt(scene,stops ?? [],t,profile,duration,false), subtitleBounds: activeSubtitleBounds(subtitleWindows, t) ?? null } }); },
   seek: async (t: number) => { stop(); flightOrigin=undefined; time=t; draw(true); },
   getStreamHealth: () => ({
     ready,

@@ -279,6 +279,7 @@ export function buildRenderSpec(input: {
    * 算时间码；不传就按"巡游方案 = 下降 + 0.35 s，其它方案 = 0"推算。
    */
   timelineNarrationStartSeconds?: number | undefined;
+  timelineOpeningGateSeconds?: number | undefined;
 }): RenderSpec {
   const { project, cues } = input;
   const ranges = mapScenesToCues(project.scenes, cues);
@@ -336,6 +337,13 @@ export function buildRenderSpec(input: {
     tour: project.scenes.filter((scene) => scene.section === "child").map((scene) => ({ id: scene.childId, name: scene.childName, camera: scene.camera, timing: defaultTiming(scene) })),
     outro: project.template.tourReturnSeconds,
     cues: cues.map(({ start, end, text }) => ({ start, end, text })),
+    subtitleCues,
+    openingGateSeconds: Math.max(0, Number(input.timelineOpeningGateSeconds ?? 0)),
+    narrationLeadSeconds: compositionNarrationLeadSeconds({
+      descentSeconds: project.template.openingDescentSeconds,
+      hasChildTour: project.scenes.some((scene) => scene.section === "child"),
+      timelineNarrationStartSeconds: input.timelineNarrationStartSeconds
+    }),
   };
   return {
     schema: "geo-documentary-render-spec",

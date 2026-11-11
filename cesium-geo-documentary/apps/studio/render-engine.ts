@@ -903,7 +903,7 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   generatedCues = timingResult.cues;
   await runTsx(".agents/skills/cesium-geo-documentary/scripts/build-child-tour.ts", ["--region", project.regionId], "synthesizing", "生成实际 cue 时间轴与行政区巡游", 27);
   const duration = JSON.parse(await readFile(join(sandbox, "assets", "audio", project.regionId, "duration.json"), "utf8")) as { durationSeconds: number; timelineDurationSeconds: number };
-  const timeline = JSON.parse(await readFile(join(sandbox, "data", "regions", `${project.regionId}.timeline.json`), "utf8")) as { duration: number; narrationStartSeconds?: number };
+  const timeline = JSON.parse(await readFile(join(sandbox, "data", "regions", `${project.regionId}.timeline.json`), "utf8")) as { duration: number; narrationStartSeconds?: number; openingGateSeconds?: number };
   spec = buildRenderSpec({
     project,
     cues: generatedCues,
@@ -913,7 +913,8 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
     timelineDurationSeconds: timeline.duration,
     // build-child-tour just rewrote this; the composition reads the same field, so
     // the spec the editor shows and the file ffmpeg renders can never disagree.
-    timelineNarrationStartSeconds: Number(timeline.narrationStartSeconds ?? NaN)
+    timelineNarrationStartSeconds: Number(timeline.narrationStartSeconds ?? NaN),
+    timelineOpeningGateSeconds: Number(timeline.openingGateSeconds ?? 0)
   });
   await writeRegionAnnotationWindows(sandbox, project.regionId, spec);
   updateProjectMeasuredDurations(project, spec);
@@ -930,9 +931,10 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
      <figure>) cost a full ~40-minute recording before the export was refused.
      The post-capture preflight below still runs - this one is the cheap gate,
      that one is the authoritative one against the real map. */
+  // 字幕真实排版是地图捕获的输入，即使关闭预检也必须先生成，不能复用旧合成页。
+  await ensureFfmpegTools(sandbox);
+  await runTsx(".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts", ["--region", project.regionId, "--profile", project.output.profile, "--cover-intro-seconds", String(project.cover.introSeconds), "--map-fallback"], "composing", "录制前生成字幕排版与合成预演", 36);
   if (preflightEnabled()) {
-    await ensureFfmpegTools(sandbox);
-    await runTsx(".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts", ["--region", project.regionId, "--profile", project.output.profile, "--cover-intro-seconds", String(project.cover.introSeconds), "--map-fallback"], "composing", "录制前预检：预演合成（地图用占位）", 36);
     await preflightComposition(sandbox, callbacks, (message) => callbacks.update({ logs: [message] }), {
       stage: "录制前预检成片",
       progress: 38,
@@ -946,7 +948,7 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   if (hit) callbacks.update({ status: "capturing", stage: "复用完整签名匹配的 Cesium 地图缓存", progress: 48, logs: [`MAP_CACHE_HIT ${spec.cacheSignature}`] });
   else {
     const port = 4600 + Number.parseInt(job.id.replaceAll("-", "").slice(0, 4), 16) % 1000;
-    await runTsx("apps/ue-player/capture.ts", ["--region", project.regionId, "--profile", project.output.profile, "--port", String(port), "--imagery", project.imagery.provider], "capturing", "录制 UE 地图、行政区巡游和返回镜头", 42);
+    await runTsx("apps/ue-player/capture.ts", ["--region", project.regionId, "--profile", project.output.profile, "--port", String(port), "--imagery", project.imagery.provider, "--subtitle-composition", "apps/video-compositor/index.html"], "capturing", "录制 UE 地图、行政区巡游和返回镜头", 42);
     // Verify the take before it becomes the cache: a short capture used to be written to
     // the cache unconditionally, so one bad take poisoned every later export of this
     // signature. capture.ts already checks frame count and encoded duration; this is the

@@ -1764,6 +1764,36 @@ function fitPreviewSubtitle(preview) {
   }
 }
 
+// 预览字幕由音频时钟驱动；直接发送当前可见文字的实测矩形，避免换算到相机时钟而漂移。
+let lastSubtitleBoundsMessage = "";
+function syncMapSubtitleBounds() {
+  const preview = $("previewSubtitle");
+  const ink = preview.querySelector(".preview-subtitle-ink");
+  const iframe = $("cesiumPreview");
+  const frame = iframe.getBoundingClientRect();
+  let bounds = null;
+  if (!preview.hidden && ink && frame.width && frame.height && getComputedStyle(preview).display !== "none") {
+    const rect = ink.getBoundingClientRect();
+    // 将描边和阴影也计入实际占用区域，不预留整条屏幕带。
+    const pad = (parseFloat(getComputedStyle(preview).fontSize) || 12) * .12;
+    if (rect.width && rect.height) bounds = {
+      left: Math.max(0, (rect.left - pad - frame.left) / frame.width),
+      top: Math.max(0, (rect.top - pad - frame.top) / frame.height),
+      right: Math.min(1, (rect.right + pad - frame.left) / frame.width),
+      bottom: Math.min(1, (rect.bottom + pad - frame.top) / frame.height)
+    };
+  }
+  const message = JSON.stringify(bounds);
+  if (message === lastSubtitleBoundsMessage) return;
+  lastSubtitleBoundsMessage = message;
+  iframe.contentWindow?.postMessage({ type: "geo-video-studio", action: "set-subtitle-bounds", bounds }, CESIUM_PREVIEW_ORIGIN);
+}
+const subtitleLayoutObserver = new MutationObserver(syncMapSubtitleBounds);
+subtitleLayoutObserver.observe($("previewSubtitle"), { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "style", "class"] });
+new ResizeObserver(syncMapSubtitleBounds).observe($("cesiumPreview"));
+$("cesiumPreview").addEventListener("load", () => { lastSubtitleBoundsMessage = ""; syncMapSubtitleBounds(); });
+document.fonts?.ready.then(syncMapSubtitleBounds);
+
 function showPreviewSubtitle(scene, index = 0) {
   const entries = previewSubtitleEntries(scene);
   const text = entries[Math.min(index, Math.max(0, entries.length - 1))]?.text || "";

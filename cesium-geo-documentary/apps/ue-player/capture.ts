@@ -3,6 +3,8 @@ import { dirname, resolve, join } from 'node:path';
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { chromium } from 'playwright';
+import { pathToFileURL } from 'node:url';
+import { measureSubtitleWindows } from './subtitle-layout.js';
 import { DEFAULT_IMAGERY_PROVIDER } from '../../packages/project-schema/index.js';
 import { ionToken } from './imagery.js';
 const root = resolve(process.cwd());
@@ -70,6 +72,11 @@ const start=(exe:string,args:string[],env={})=>{const p=spawn(exe,args,{cwd:root
 const tsx=join(root,'node_modules/tsx/dist/cli.mjs');
 let browser:Awaited<ReturnType<typeof chromium.launch>>|undefined;
 try{
+ // 独立录制同样先生成本轮字幕；QA无旁白时明确不预留字幕空间。
+ if (!qa && !option('subtitle-composition')) {
+   const composition = start(process.execPath, [tsx, join(root, '.agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts'), '--region', region, '--profile', profile, '--map-fallback']);
+   await new Promise<void>((ok, no) => { composition.once('error', no); composition.once('exit', code => code === 0 ? ok() : no(new Error(`字幕预合成失败：${code}`))); });
+ }
  start(process.execPath,[tsx,join(root,'apps/ue-player/signalling.ts')],{UE_SIGNALLING_PORT:String(signallingPort),UE_STREAMER_PORT:String(streamerPort)});
  start(process.execPath,[tsx,join(root,'apps/ue-player/server.ts'),`--port=${port}`],{UE_SIGNALLING_URL:`ws://127.0.0.1:${signallingPort}`, ...(token ? { CESIUM_ION_TOKEN: token } : {})});
  const deadline=Date.now()+30000;
@@ -87,7 +94,18 @@ try{
    if(Date.now()>unrealDeadline)throw new Error('UE streamer startup timeout');
    await new Promise(r=>setTimeout(r,500));
  }
- browser=await chromium.launch({headless:true});
+ browser=await chromium.launch({headless:true, args: ['--allow-file-access-from-files']});
+ let subtitleWindows: Awaited<ReturnType<typeof measureSubtitleWindows>> = [];
+ if (!qa || option('subtitle-composition')) {
+   const layoutPage = await browser.newPage({ viewport: { width: profile === 'landscape' ? 1920 : 1080, height: profile === 'landscape' ? 1080 : profile === 'square' ? 1080 : 1920 } });
+   // index.html与media同级；直接使用composition子目录会导致字体相对路径错误。
+   await layoutPage.goto(pathToFileURL(resolve(root, option('subtitle-composition', 'apps/video-compositor/index.html'))).href);
+   const compositionId = await layoutPage.locator('main').getAttribute('data-composition-id');
+   if (compositionId !== `${region}-${profile}`) throw new Error(`字幕合成页不属于本次录制：${compositionId}`);
+   subtitleWindows = await measureSubtitleWindows(layoutPage);
+   await layoutPage.close();
+   console.log(`UE_SUBTITLE_LAYOUT ${subtitleWindows.length} windows (map clock)`);
+ }
  const page=await browser.newPage({viewport:{width,height}});
  // The player only exposes its state through the overlay; when it never becomes ready
  // the useful information is the HTTP failure or the exception, so surface both.
@@ -104,6 +122,7 @@ try{
    console.log('UE_PAGE_OVERLAY',JSON.stringify(status));
    throw error;
  }
+ await page.evaluate(windows => (window as any).geoVideo.setSubtitleWindows(windows), subtitleWindows);
  const health=await page.evaluate(()=>(window as any).geoVideo?.getStreamHealth?.()).catch(()=>null);
  // If `captureMode` is not true here the page will wait for a click after a dropped
  // stream and the whole recovery path is dead code — worth one line in the log.
@@ -161,7 +180,7 @@ const sampleTimes=requestedTimes ?? (qa?[0,2.1,8]:undefined);
  const encodedSeconds=await probeSeconds(output);
  const expectedSeconds=total/fps;
  if(encodedSeconds===null||encodedSeconds<expectedSeconds-0.1)throw new Error(`Encoded ${encodedSeconds ?? 0}s, expected ${expectedSeconds.toFixed(2)}s`);
- await writeFile(join(frames,'capture-report.json'),JSON.stringify({engine:'unreal',region,profile,imagery,fps,total,framesWritten:written,expectedDurationSeconds:expectedSeconds,encodedDurationSeconds:encodedSeconds,sourceDurationSeconds:seconds,capturedDurationSeconds:encodedSeconds,startTime,sampleTimes,qualityReport,output},null,2));
+ await writeFile(join(frames,'capture-report.json'),JSON.stringify({engine:'unreal',region,profile,imagery,fps,total,framesWritten:written,expectedDurationSeconds:expectedSeconds,encodedDurationSeconds:encodedSeconds,sourceDurationSeconds:seconds,capturedDurationSeconds:encodedSeconds,startTime,sampleTimes,subtitleLayout:{clock:'map',windows:subtitleWindows},qualityReport,output},null,2));
 }finally{
  await browser?.close();
  // `child.kill()` on Windows terminates the node wrapper only: the UE renderer, the

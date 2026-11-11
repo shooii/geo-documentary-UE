@@ -252,7 +252,9 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
     // 两层排版完全一致，靠 clip-path 从左向右擦除 wash，读起来才像歌词逐字点亮，
     // 而不是整句在结尾"啪"地变色。aria-hidden 让读屏只念一遍。
     const html = escapeHtml(cue.text);
-    return `<div id="caption-${index}" class="clip subtitle" data-start="${timeline.start}" data-duration="${timeline.duration}" data-track-index="${COMPOSITION_TRACKS.subtitle}"><span id="caption-inner-${index}" class="subtitle-inner" data-layout-allow-overlap><span id="caption-wash-${index}" class="subtitle-wash" aria-hidden="true">${html}</span><span class="subtitle-ink">${html}</span></span></div>`;
+    const cueEnd = Number(timeline.start) + Number(timeline.duration);
+    const activeEnd = Math.min(cueEnd, Math.max(Number(timeline.start) + .08, cueEnd - .1) + .08);
+    return `<div id="caption-${index}" class="clip subtitle" data-active-end="${activeEnd.toFixed(3)}" data-start="${timeline.start}" data-duration="${timeline.duration}" data-track-index="${COMPOSITION_TRACKS.subtitle}"><span id="caption-inner-${index}" class="subtitle-inner" data-layout-allow-overlap><span id="caption-wash-${index}" class="subtitle-wash" aria-hidden="true">${html}</span><span class="subtitle-ink">${html}</span></span></div>`;
   }).join("\n");
   const visualClips = visuals.map((visual, index) => {
     const clipDuration = Math.max(0.1, visual.end - visual.start);
@@ -349,7 +351,7 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
   </style>
 </head>
 <body>
-<main id="root" data-composition-id="${regionId}-${profileName}" data-start="0" data-width="${profile.width}" data-height="${profile.height}" data-duration="${compositionDuration.toFixed(3)}" data-fps="30">
+<main id="root" data-map-clock-offset="${offset.toFixed(3)}" data-composition-id="${regionId}-${profileName}" data-start="0" data-width="${profile.width}" data-height="${profile.height}" data-duration="${compositionDuration.toFixed(3)}" data-fps="30">
   <video id="map" class="clip map" src="${prefix}/maps/${regionId}-map-${profileName}.mp4" muted playsinline preload="auto" data-start="${offset.toFixed(3)}" data-duration="${timelineDuration.toFixed(3)}" data-track-index="${COMPOSITION_TRACKS.map}"></video>
   <div id="shade" class="clip shade" data-start="${offset.toFixed(3)}" data-duration="${timelineDuration.toFixed(3)}" data-track-index="${COMPOSITION_TRACKS.shade}"></div>
   ${imageryAttribution ? `<div id="provider-credit" class="clip provider-credit" data-start="${offset.toFixed(3)}" data-duration="${timelineDuration.toFixed(3)}" data-track-index="${COMPOSITION_TRACKS.imageryCredit}">${escapeHtml(imageryAttribution)}</div>` : ""}

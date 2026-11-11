@@ -557,6 +557,25 @@ test("cache signature is deterministic and invalidates on camera or cue timing c
   assert.notEqual(first.cacheSignature, imageryChanged.cacheSignature);
 });
 
+test("实际字幕分句和旁白偏移变化使地图避让缓存失效", async () => {
+  const project = await makeProject(root, "440825112");
+  const cues = await readCanonicalCues(root, project.regionId);
+  const geometry = await geometrySignature(root, project.regionId);
+  const base = buildRenderSpec({ project, cues, geometrySignature: geometry, timelineNarrationStartSeconds: 3.35 });
+  const changedProject = structuredClone(project);
+  changedProject.scenes.find(scene => scene.id === "overview-1")!.subtitle = "徐闻县新寮镇位于徐闻东北部海域，\n是徐闻唯一的海岛建制镇，\n由新寮岛、后海岛等岛屿组成，下辖10个行政村。";
+  const changed = buildRenderSpec({ project: changedProject, cues, geometrySignature: geometry, timelineNarrationStartSeconds: 3.35 });
+  assert.notDeepEqual(changed.subtitleCues, base.subtitleCues);
+  assert.notEqual(changed.cacheSignature, base.cacheSignature);
+  const shifted = buildRenderSpec({ project, cues, geometrySignature: geometry, timelineNarrationStartSeconds: 3.6 });
+  assert.notEqual(shifted.cacheSignature, base.cacheSignature);
+  const gated = buildRenderSpec({ project, cues, geometrySignature: geometry, timelineNarrationStartSeconds: 0, timelineOpeningGateSeconds: 2 });
+  const shiftedGate = buildRenderSpec({ project, cues, geometrySignature: geometry, timelineNarrationStartSeconds: 0, timelineOpeningGateSeconds: 2.2 });
+  assert.notEqual(gated.cacheSignature, shiftedGate.cacheSignature);
+  const repeated = buildRenderSpec({ project, cues, geometrySignature: geometry, timelineNarrationStartSeconds: 3.35 });
+  assert.equal(repeated.cacheSignature, base.cacheSignature);
+});
+
 test("editing the Cesium sources invalidates the cached map video", async () => {
   // Regression: the focus-mask frame footprint and the child-tour flight origin
   // were both fixed in runtime.js without bumping the hand-maintained cache
@@ -576,6 +595,12 @@ test("editing the Cesium sources invalidates the cached map video", async () => 
     assert.notEqual(await mapRendererSignature(sandbox), before, "editing runtime.js must invalidate the cache");
     await writeFile(join(sandbox, RENDERED_MAP_SOURCES.at(-1)!), "", "utf8");
     assert.notEqual(await mapRendererSignature(sandbox), before, "editing the capture script must invalidate the cache");
+    for (const relative of ["apps/ue-player/subtitle-layout.ts", "apps/ue-player/visual-hierarchy.ts", ".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts", "assets/fonts/NotoSansSC-Bold.woff2", "assets/fonts/YouSheBiaoTiHei.ttf"]) {
+      assert.ok(RENDERED_MAP_SOURCES.includes(relative));
+      const previous = await mapRendererSignature(sandbox);
+      await writeFile(join(sandbox, relative), `changed ${relative}`, "utf8");
+      assert.notEqual(await mapRendererSignature(sandbox), previous, `${relative} 必须使地图布局缓存失效`);
+    }
     const live = await mapRendererSignature(root);
     assert.match(live, /^sha256:[0-9a-f]{64}$/);
     const project = await makeProject(root, "440825112");
@@ -1496,8 +1521,8 @@ test("编辑器预览的旁白起拍点与成片读同一个数", async () => {
     "without a timeline the fallback is the child-tour rule");
   const explicit = buildRenderSpec({ project, cues, geometrySignature: geometry, timelineNarrationStartSeconds: measured });
   assert.equal(explicit.opening.narrationLeadSeconds, measured);
-  assert.equal(explicit.cacheSignature, guessed.cacheSignature,
-    "the preview lead must not invalidate a cached map render");
+  assert.equal(explicit.cacheSignature === guessed.cacheSignature, measured === guessed.opening.narrationLeadSeconds,
+    "相同旁白偏移应复用缓存，不同偏移必须重录实际字幕避让");
 
   // One number, three readers: the builder writes it, the spec carries it, the
   // preview adds it. Any of these drifting apart re-opens the same bug.
