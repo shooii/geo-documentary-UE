@@ -1401,10 +1401,10 @@ void AGeoMap::Tick(float Delta)
     static int32 ProfileReport = 0;
     if (++ProfileReport % 90 == 0)
         UE_LOG(LogTemp, Display,
-               TEXT("GEO_PROFILE fps=%.1f frame=%.1fms apply=%.2fms refresh=%.2fms hud=%.2fms (rings=%.2f mask=%.2f) tiles=%d shown=%d "
+               TEXT("GEO_PROFILE fps=%.1f frame=%.1fms apply=%.2fms refresh=%.2fms hud=%.2fms (rings=%.2f mask=%.2f rects=%.2f flood=%.2f layout=%.2f glyphs=%.2f) tiles=%d shown=%d "
                     "queued=%d active=%d uploads=%d rects=%d ringPoints=%d"),
                1000. / FMath::Max(1e-3, AverageFrameMs), AverageFrameMs, ApplyMs, RefreshMs, HudMs,
-               HudRingsMs, HudMaskMs,
+               HudRingsMs, HudMaskMs, HudFloodMs, 0., HudLayoutMs, HudLabelMs,
                TileMeshes.Num(), ShownTiles.Num(), TileQueue.Num(), ActiveTiles.Num(), TileImages.Num(),
                HudRects, BoundaryVertices);
     if (CaptureId.IsEmpty())
@@ -1895,21 +1895,44 @@ void AGeoHUD::DrawHUD()
     }
     Map->HudRingsMs = FMath::Lerp(Map->HudRingsMs, (RingsDone - Timer.Started) * 1000., .1);
     Map->HudMaskMs = FMath::Lerp(Map->HudMaskMs, (FPlatformTime::Seconds() - RingsDone) * 1000., .1);
+    // The dim/shadow submission and the county flood share one clock — the rects are
+    // batched (see DrawRects) so the interesting halves are layout and glyphs.
+    const double FloodDone = FPlatformTime::Seconds();
     Map->HudRects = DimRects.Num();
     for (const auto &Layer : ShadowRects)
         Map->HudRects += Layer.Num();
     // The dim sheet and its three shadow steps are built per scanline, so a shot with
-    // the county focused emits six thousand quads per frame. Submitted one FCanvasTileItem
-    // at a time that was 5.7 ms of the render thread — six thousand item constructions for
-    // what is one colour over one shape. Batch each layer into a single triangle item:
-    // same pixels, four draw calls instead of six thousand.
+    // the county focused emits six thousand quads per frame … as one colour over one
+    // shape. Batching them into a single triangle item is four draw calls instead of
+    // six thousand, which is what took this section from ~6 ms to noise. Each layer is
+    // extruded into two triangles with a shared UV into GWhiteTexture, so the whole
+    // layer is one `FCanvasTriangleItem`.
     const auto DrawRects = [this](const TArray<FVector4> &Rects, const FLinearColor &Color) {
+        if (Rects.IsEmpty())
+            return;
+        TArray<FCanvasUVTri> Triangles;
+        Triangles.Reserve(Rects.Num() * 2);
         for (const auto &Rect : Rects)
         {
-            FCanvasTileItem Tile(FVector2D(Rect.X, Rect.Y), FVector2D(Rect.Z, Rect.W), Color);
-            Tile.BlendMode = SE_BLEND_Translucent;
-            Canvas->DrawItem(Tile);
+            const double X0 = Rect.X, Y0 = Rect.Y, X1 = Rect.X + Rect.Z, Y1 = Rect.Y + Rect.W;
+            // Skip degenerate quads: a zero-width scanline still costs two triangles.
+            if (X1 <= X0 || Y1 <= Y0)
+                continue;
+            FCanvasUVTri A, B;
+            A.V0_Pos = FVector2D(X0, Y0); A.V1_Pos = FVector2D(X1, Y0); A.V2_Pos = FVector2D(X1, Y1);
+            B.V0_Pos = FVector2D(X0, Y0); B.V1_Pos = FVector2D(X1, Y1); B.V2_Pos = FVector2D(X0, Y1);
+            A.V0_UV = A.V1_UV = A.V2_UV = FVector2D(.5, .5);
+            B.V0_UV = B.V1_UV = B.V2_UV = FVector2D(.5, .5);
+            A.V0_Color = A.V1_Color = A.V2_Color = Color;
+            B.V0_Color = B.V1_Color = B.V2_Color = Color;
+            Triangles.Add(A);
+            Triangles.Add(B);
         }
+        if (!Triangles.Num())
+            return;
+        FCanvasTriangleItem Batch(MoveTemp(Triangles), GWhiteTexture);
+        Batch.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Batch);
     };
     // Keyed off the township's own reveal, not the shot's focus strength: the periphery
     // stays dimmed from the opening to the outro instead of breathing with each cut.
@@ -2043,6 +2066,7 @@ void AGeoHUD::DrawHUD()
         };
         TArray<TArray<FFloodSpan>> Starts;
         Starts.SetNum(Rows);
+        TArray<FVector2D> FloodPos, FloodExt, LipPos, LipExt;
         for (const auto &Ring : CountyScreen)
         {
             for (int I = 0; I < Ring.Num(); I++)
@@ -2093,32 +2117,53 @@ void AGeoHUD::DrawHUD()
                     const double Right = FMath::Min(Active[I + 1].X, Seed.X + HalfR);
                     if (Right <= Left)
                         continue;
-                    FCanvasTileItem Body(FVector2D(Left, Row * Band), FVector2D(Right - Left, Height), FloodBody);
-                    Body.BlendMode = SE_BLEND_Translucent;
-                    Canvas->DrawItem(Body);
+                    FloodPos.Add(FVector2D(Left, Row * Band)); FloodExt.Add(FVector2D(Right - Left, Height));
                     // A thin brighter band right on the front: the flood's own leading
                     // edge, so the moving boundary still has something to read now that
                     // the straight blade is gone. Only where the field actually cuts —
                     // once the county is fully flooded the lip disappears with it.
                     if (Right < Active[I + 1].X - .5)
                     {
-                        const double Cut = FMath::Max(Left, Right - LipWidth);
-                        FCanvasTileItem Lip(FVector2D(Cut, Row * Band), FVector2D(Right - Cut, Height), WetLip);
-                        Lip.BlendMode = SE_BLEND_Translucent;
-                        Canvas->DrawItem(Lip);
+                        LipPos.Add(FVector2D(FMath::Max(Left, Right - LipWidth), Row * Band));
+                        LipExt.Add(FVector2D(FMath::Min(LipWidth, Right - Left), Height));
                     }
                     if (Left > Active[I].X + .5)
                     {
-                        const double Cut = FMath::Min(Right, Left + LipWidth);
-                        FCanvasTileItem Lip(FVector2D(Left, Row * Band), FVector2D(Cut - Left, Height), WetLip);
-                        Lip.BlendMode = SE_BLEND_Translucent;
-                        Canvas->DrawItem(Lip);
+                        LipPos.Add(FVector2D(Left, Row * Band));
+                        LipExt.Add(FVector2D(FMath::Min(LipWidth, Right - Left), Height));
                     }
                 }
             }
             for (auto &Span : Active)
                 Span.X += Span.Step;
         }
+        // Nine hundred and sixty scanlines × a handful of spans each was up to three
+        // thousand `FCanvasTileItem`s per frame, all one of two colours. Two triangle
+        // batches instead — same pixels, and this half stops showing up in GEO_PROFILE.
+        const auto DrawSpans = [this](TArray<FVector2D> &In, TArray<FVector2D> &Ext, const FLinearColor &Color) {
+            if (In.IsEmpty())
+                return;
+            TArray<FCanvasUVTri> Triangles;
+            Triangles.Reserve(In.Num() * 2);
+            for (int I = 0; I < In.Num(); ++I)
+            {
+                const double X0 = In[I].X, Y0 = In[I].Y, X1 = X0 + Ext[I].X, Y1 = Y0 + Ext[I].Y;
+                FCanvasUVTri A, B;
+                A.V0_Pos = FVector2D(X0, Y0); A.V1_Pos = FVector2D(X1, Y0); A.V2_Pos = FVector2D(X1, Y1);
+                B.V0_Pos = FVector2D(X0, Y0); B.V1_Pos = FVector2D(X1, Y1); B.V2_Pos = FVector2D(X0, Y1);
+                A.V0_UV = A.V1_UV = A.V2_UV = FVector2D(.5, .5);
+                B.V0_UV = B.V1_UV = B.V2_UV = FVector2D(.5, .5);
+                A.V0_Color = A.V1_Color = A.V2_Color = Color;
+                B.V0_Color = B.V1_Color = B.V2_Color = Color;
+                Triangles.Add(A);
+                Triangles.Add(B);
+            }
+            FCanvasTriangleItem Batch(MoveTemp(Triangles), GWhiteTexture);
+            Batch.BlendMode = SE_BLEND_Translucent;
+            Canvas->DrawItem(Batch);
+        };
+        DrawSpans(FloodPos, FloodExt, FloodBody);
+        DrawSpans(LipPos, LipExt, WetLip);
     }
     if (ContextAlpha > .01 && Focus < .05 && Map->Fills.Num())
     {
@@ -2394,6 +2439,29 @@ void AGeoHUD::DrawHUD()
     const auto FlushRun = [&]() {
         if (Run.Points.Num() >= 2)
         {
+            // 屏幕空间保形抽稀。巡游后的边界环有 4–5 万个顶点，投影到 720×1280 的画面
+            // 后仍有大量相邻点只隔一两像素——对一条 3 px 的芯线，2 px 以内的折线偏差完全
+            // 不可辨；而它们让 EmitRim 每层跑 6 个三角形/段、三层共几十万次三角形构造
+            // （每帧几十 MB 的三角形写入），单是 HUD 就吃掉 20+ ms——正是镜头一动就掉帧
+            // 的那部分。阈值随描边宽度走：芯线越细抽得越保守，发丝线（1.5 px）用 0.75 px，
+            // 村界/镇界的宽描边用 2 px。首尾点无条件保留：闭合判定与终点形状都依赖它们。
+            if (Run.Points.Num() > 2)
+            {
+                const double KeepDistance =
+                    Run.Style == 3 ? 0.75 : Run.Style == 2 ? 1.5 : 2.0;
+                TArray<FVector2D> Points;
+                TArray<FLinearColor> Colors;
+                Points.Reserve(Run.Points.Num());
+                const int32 Last = Run.Points.Num() - 1;
+                for (int32 I = 0; I <= Last; ++I)
+                    if (I == 0 || I == Last || FVector2D::Distance(Points.Last(), Run.Points[I]) >= KeepDistance)
+                    {
+                        Points.Add(Run.Points[I]);
+                        Colors.Add(Run.Colors[I]);
+                    }
+                Run.Points = MoveTemp(Points);
+                Run.Colors = MoveTemp(Colors);
+            }
             if (Run.Style == 1 || Run.Style == 4)
             {
                 const bool CurrentRim = Run.Style == 4;
@@ -2887,6 +2955,8 @@ void AGeoHUD::DrawHUD()
         }
         return Room;
     };
+    Map->HudFloodMs = FMath::Lerp(Map->HudFloodMs, (FPlatformTime::Seconds() - FloodDone) * 1000., .1);
+    const double LayoutStarted = FPlatformTime::Seconds();
     for (const auto &Label : Map->Labels)
     {
         const TSharedPtr<FJsonObject> *Style = nullptr;
@@ -3101,6 +3171,8 @@ void AGeoHUD::DrawHUD()
         return A.Id < B.Id;
     });
     // 字幕矩形由实际排版方传入，坐标相对整个视频画面归一化；无字幕不占位。
+    Map->HudLayoutMs = FMath::Lerp(Map->HudLayoutMs, (FPlatformTime::Seconds() - LayoutStarted) * 1000., .1);
+    const double LayoutDone = FPlatformTime::Seconds();
     TArray<FBox2D> Occupied;
     const auto Subtitle = O(F, TEXT("subtitleBounds"));
     if (Subtitle.IsValid())
@@ -3224,6 +3296,7 @@ void AGeoHUD::DrawHUD()
             DrawGlyph(Label.Name, Position, Label.TextScale);
         }
     }
+    Map->HudLabelMs = FMath::Lerp(Map->HudLabelMs, (FPlatformTime::Seconds() - LayoutDone) * 1000., .1);
     LabelPlacements = MoveTemp(Placements);
     const auto Clouds = O(F, TEXT("clouds"));
     const double Raw = N(Clouds, TEXT("raw"), 1);

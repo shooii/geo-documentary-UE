@@ -154,6 +154,8 @@ class AGeoMap : public AActor
     int32 HudRects = 0;
     /** HUD split: projecting rings vs. building the dim/shadow mask. */
     double HudRingsMs = 0, HudMaskMs = 0;
+    /** HUD split after the mask: county flood, name layout, and label/pin drawing. */
+    double HudFloodMs = 0, HudLayoutMs = 0, HudLabelMs = 0;
     int32 BoundaryVertices = 0;
     FVector Geo(double Lon, double Lat, double Height = 0) const;
     void Respond(FString RequestId, FString Error = TEXT(""));
