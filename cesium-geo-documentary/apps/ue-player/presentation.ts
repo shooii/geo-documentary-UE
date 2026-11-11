@@ -3,6 +3,7 @@ import { tourHighlightStrength, tourLabelPresentationAt } from '../cesium-player
 import type { MapView } from '../../packages/project-schema/index.js';
 import { cloudStateAt } from './opening.js';
 import { boundaryAnimation } from './boundary-style.js';
+import { visualHierarchy, overviewRepresentatives } from './visual-hierarchy.js';
 
 export const actions = new Set(['prepare-tour', 'play-opening', 'set-annotations', 'show-tour-frame', 'play-tour-segment', 'play-scene-range', 'stop-scene-playback', 'update-tour-labels', 'play-tour-outro', 'play-parent-overview', 'preview-child-camera', 'set-map-view', 'switch-imagery']);
 export const clamp = (x: number) => Math.max(0, Math.min(1, x));
@@ -275,6 +276,16 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     }
   }
 
+  const closing = Math.max(returning?.progress ?? 0, overviewProgress === undefined ? 0 : smooth(overviewProgress));
+  const hierarchy = visualHierarchy(pose.height, overview.height, closing);
+  if (stops.length && !openingOnly) {
+    const representatives = overviewRepresentatives(stops, profile);
+    for (const [id, label] of Object.entries(labels)) {
+      if (id !== current && !representatives.has(id)) label.alpha *= 1 - hierarchy.labelMix;
+    }
+    // The town becomes the closing title; ordinary village names become supporting detail.
+    parentLabel = Math.max(parentLabel, .92 * smooth((closing - .25) / .65));
+  }
   const focusId = Object.keys(accents).reduce((best, id) => accents[id]! > (accents[best] ?? parentAccent) ? id : best, '');
   const nextAccent = Math.max(focusId ? parentAccent : 0, ...Object.entries(accents).filter(([id]) => id !== focusId).map(([, value]) => value));
   const focus = ((accents[focusId] ?? parentAccent) - nextAccent) * smooth((mapTime - .18) / 1.15);
@@ -286,7 +297,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
     parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity, contextErasing,
-    labels, accents, labelReferenceDistance, focusId, focus, labelsReveal, fills,
+    labels, accents, labelReferenceDistance, focusId, focus, labelsReveal, fills, hierarchy,
     // Villages the tour has already reached. UE keeps their plate painted, so the
     // map accumulates colour the way the reference reel does.
     visitedIds: stops.filter(item => mapTime >= Number(item.start)).map(item => String(item.id)),

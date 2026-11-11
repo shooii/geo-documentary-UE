@@ -30,7 +30,7 @@ test('UE tour starts at settled opening camera and returns to the same camera',(
  const returned=frameAt(scene,stops,30,'portrait',4.4).camera;
  assert.ok(Math.abs(returned.height-overview.height)<1e-8);
  assert.equal(returned.lon,overview.lon);
- assert.equal(frameAt(scene,stops,30,'portrait',4.4).parentLabel,0);
+ assert.equal(frameAt(scene,stops,30,'portrait',4.4).parentLabel,.92);
  assert.deepEqual(frameAt(scene,stops,30,'portrait',4.4).visited,['one']);
 });
 test('UE camera heading takes the short path across north',()=>{
@@ -69,7 +69,7 @@ test('UE keeps the displayed camera and label when jumping to a nonadjacent vill
   assert.deepEqual(settled.camera, camera(stops[2]!.cameraPreset));
 
   const returned = frameAt(scene, stops, 45, 'portrait', 4.4);
-  assert.equal(returned.parentLabel, 0);
+  assert.equal(returned.parentLabel, .92);
   assert.equal(returned.labels.c!.scale, .9 * .68);
 });
 

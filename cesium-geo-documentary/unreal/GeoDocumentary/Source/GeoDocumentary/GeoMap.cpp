@@ -1208,6 +1208,11 @@ void AGeoHUD::DrawHUD()
     const auto Trace = O(F, TEXT("trace"));
     const auto Accents = O(F, TEXT("accents"));
     const auto FillStrengths = O(F, TEXT("fills"));
+    const auto Hierarchy = O(F, TEXT("hierarchy"));
+    const double FillScale = FMath::Clamp(N(Hierarchy, TEXT("fillScale"), .8), 0., 1.);
+    const double InteriorAlpha = FMath::Clamp(N(Hierarchy, TEXT("interiorAlpha"), .65), 0., 1.);
+    const double InteriorWidth = FMath::Clamp(N(Hierarchy, TEXT("interiorWidth"), .85), .4, 1.);
+    const double InteriorGlow = FMath::Clamp(N(Hierarchy, TEXT("interiorGlow"), .25), 0., 1.);
     const auto Styles = O(F, TEXT("labels"));
     const auto ContextCamera = O(F, TEXT("camera"));
     const double CameraHeight = N(ContextCamera, TEXT("height"), 30000);
@@ -1330,7 +1335,7 @@ void AGeoHUD::DrawHUD()
                 Points.Add(Pixel);
             }
             FGeoVisitedFill Painted;
-            const FLinearColor Tint(.20, .62, .20, .55 * Strength);
+            const FLinearColor Tint(.20, .62, .20, .55 * Strength * FillScale);
             for (int I = 0; I + 2 < Fill.Indices.Num(); I += 3)
             {
                 const int A = Fill.Indices[I], B = Fill.Indices[I + 1], C = Fill.Indices[I + 2];
@@ -1781,7 +1786,7 @@ void AGeoHUD::DrawHUD()
         {
             // The town is not part of the wipe: it is what the county is erased back
             // down to, so it keeps its tint for the whole county phase.
-            const FLinearColor Tint(.12, .55, .14, .45 * ContextAlpha);
+            const FLinearColor Tint(.12, .55, .14, .45 * ContextAlpha * FillScale);
             for (auto &Triangle : TownTriangles)
                 Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
             FCanvasTriangleItem Fill(TownTriangles, GWhiteTexture);
@@ -1793,8 +1798,8 @@ void AGeoHUD::DrawHUD()
     {
         // Saturated green, like the reference reel: the region reads as filled land,
         // not as a translucent blue selection.
-        const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.18, .60, .18, .45 * Focus)
-                                                    : FLinearColor(.20, .62, .20, .55 * Focus);
+        const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.18, .60, .18, .45 * Focus * FillScale)
+                                                    : FLinearColor(.20, .62, .20, .55 * Focus * FillScale);
         for (auto &Triangle : FocusTriangles)
             Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
         FCanvasTriangleItem Fill(FocusTriangles, GWhiteTexture);
@@ -2013,23 +2018,26 @@ void AGeoHUD::DrawHUD()
     {
         TArray<FVector2D> Points;
         TArray<FLinearColor> Colors;
-        int32 Style = 0; // 1 village rim, 2 township rim, 3 hairline
+        int32 Style = 0; // 1 quiet village, 2 township, 3 hairline, 4 current village
         double Width = 0;
     };
     FStrokeRun Run;
     const auto FlushRun = [&]() {
         if (Run.Points.Num() >= 2)
         {
-            if (Run.Style == 1)
+            if (Run.Style == 1 || Run.Style == 4)
             {
-                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 13. * Scale * RimHalo, 1.2 * Scale, .12f);
-                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 6.5 * Scale * RimMid, 1.1 * Scale, .32f);
-                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 3.0 * Scale * RimCore, 1.05 * Scale, .96f);
+                const bool CurrentRim = Run.Style == 4;
+                const double WidthScale = CurrentRim ? 1. : InteriorWidth;
+                const float GlowScale = CurrentRim ? 1.f : float(InteriorGlow);
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 13. * Scale * RimHalo * WidthScale, 1.2 * Scale, .12f * GlowScale);
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 6.5 * Scale * RimMid * WidthScale, 1.1 * Scale, .32f * GlowScale);
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 3.0 * Scale * RimCore * WidthScale, .85 * Scale, .96f);
             }
             else if (Run.Style == 2)
             {
-                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 7. * Scale * RimHalo, 1.1 * Scale, .16f);
-                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 2.4 * Scale * RimCore, 1.0 * Scale, .90f);
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 7. * Scale * RimHalo, 1.1 * Scale, .08f);
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 3.2 * Scale * RimCore, 1.0 * Scale, .94f);
             }
             else if (Run.Style == 3)
                 EmitRim(BoundaryTriangles, Run.Points, Run.Colors, Run.Width, FMath::Min(1.0 * Scale, Run.Width * .45), 1.f);
@@ -2053,6 +2061,11 @@ void AGeoHUD::DrawHUD()
         const uint64 KA = Q(A), KB = Q(B);
         return KA < KB ? KA ^ (KB * 0x9E3779B97F4A7C15ull) : KB ^ (KA * 0x9E3779B97F4A7C15ull);
     };
+    // A shared edge belongs to the focus even if an older ring appears first in data.
+    TSet<uint64> CurrentEdges;
+    for (const auto &Stroke : Strokes)
+        if (Stroke.Touring && !Stroke.Parent)
+            CurrentEdges.Add(EdgeKey(Stroke.A, Stroke.B));
     double LastStart = -1;
     for (const auto &Stroke : Strokes)
     {
@@ -2062,19 +2075,16 @@ void AGeoHUD::DrawHUD()
         double Width = 0;
         if (!Stroke.Parent)
         {
-            // The village being toured carries the thick white rim of the reference reel:
-            // a soft halo plus a solid core, so the boundary reads even over bright imagery.
-            // A village whose shot is over keeps that exact rim — nothing fades out, the
-            // accumulated state is the point. Only the village the camera is flying to
-            // ramps its rim in; every other one was already lit and stays lit.
+            // Current village owns the glow. Visited places keep their geometry and tint,
+            // but become quiet structure as the shot widens; the township stays stronger.
             const float A = Stroke.Touring ? float(FMath::Clamp(Stroke.Accent, 0., 1.)) : 1.f;
             if (A < .02)
             {
                 FlushRun();
                 continue;
             }
-            Style = 1;
-            Tint = FLinearColor(.93, 1., .90).CopyWithNewOpacity(A);
+            Style = Stroke.Touring ? 4 : 1;
+            Tint = FLinearColor(.93, 1., .90).CopyWithNewOpacity(A * (Stroke.Touring ? 1.f : float(InteriorAlpha)));
         }
         // While the county flood layer is up it already outlines the county rim;
         // stroking the same rim again doubled it into a heavy band.
@@ -2126,11 +2136,11 @@ void AGeoHUD::DrawHUD()
                 Width = 1.5 * Scale;
             }
         }
-        if (Style == 1)
+        if (Style == 1 || Style == 4)
         {
             // TSet::Add hands back an id, not a bool: test first, then claim.
             const uint64 Key = EdgeKey(Stroke.A, End);
-            if (ClaimedEdges.Contains(Key))
+            if (ClaimedEdges.Contains(Key) || (Style == 1 && CurrentEdges.Contains(Key)))
             {
                 FlushRun();
                 continue;
@@ -2535,7 +2545,7 @@ void AGeoHUD::DrawHUD()
         // Cesium fades a name to nothing as it leaves its NearFarScalar range. On a
         // satellite photo under a black rim that also fades, the far names turned grey
         // rather than quiet — 0.85 keeps the hierarchy without emptying the glyph.
-        const float Opacity = float(Alpha * LabelsReveal * (1 - Ramp(1, 2.8) * (Primary ? .40 : .85)));
+        const float Opacity = float(Alpha * LabelsReveal * (1 - Ramp(1, 2.8) * (Primary ? .20 : .15)));
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
