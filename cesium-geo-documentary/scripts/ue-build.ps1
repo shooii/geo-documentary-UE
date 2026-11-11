@@ -2,7 +2,7 @@ param([string]$EngineRoot='C:\Program Files\Epic Games\UE_5.7')
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path $PSScriptRoot -Parent
 Push-Location $projectRoot
-try { & pnpm exec tsx scripts/ue-cloud-assets.ts; if($LASTEXITCODE -ne 0){throw 'Cloud texture generation failed'} } finally { Pop-Location }
+try { & node (Join-Path $projectRoot 'node_modules\tsx\dist\cli.mjs') (Join-Path $projectRoot 'scripts\ue-cloud-assets.ts'); if($LASTEXITCODE -ne 0){throw 'Cloud texture generation failed'} } finally { Pop-Location }
 $source=Join-Path $projectRoot 'unreal\GeoDocumentary'
 # SHA256::HashData / Convert::ToHexString are PowerShell 7 APIs. Windows PowerShell
 # 5.1 is what ships on this machine, so compute the same staging hash the long way —
