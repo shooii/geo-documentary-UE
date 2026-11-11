@@ -190,30 +190,11 @@ void AGeoMap::BeginPlay()
         AnnotationMaterial = TileMaterial;
         UE_LOG(LogTemp, Warning, TEXT("GEO_ANNOTATION_MATERIAL missing /Game/Geo/M_TileOverlay; labels will be opaque"));
     }
-    // Native UE5 sky: SkyAtmosphere + VolumetricCloud (1.5-3.5 km) + sun. The old
-    // canvas cloud overlay stands down as soon as this actor exists.
-    // GEO_NO_SKY=1 keeps the pre-sky render path for A/B diagnosis.
-    const bool bNoSky = FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_NO_SKY")).Len() > 0;
-    if (!bNoSky)
-    {
-        Sky = GetWorld()->SpawnActor<AGeoVolumetricSky>(AGeoVolumetricSky::StaticClass(), FTransform::Identity);
-        if (auto *Volume = GetWorld()->SpawnActor<APostProcessVolume>())
-        {
-            Volume->bUnbound = true;
-            Volume->BlendWeight = 1.f;
-            Volume->Priority = 10.f;
-            // Do not switch the exposure method here: AEM_Manual pulls the whole map
-            // about 2.5 stops down and the tiles are unlit, so nothing adapts back.
-            // The shot-driven bias below is enough for the through-cloud beat.
-            Volume->Settings.bOverride_AutoExposureBias = true;
-            Volume->Settings.AutoExposureBias = 0.f;
-            Volume->Settings.bOverride_BloomIntensity = true;
-            Volume->Settings.BloomIntensity = 1.f;
-            Volume->Settings.bOverride_BloomThreshold = true;
-            Volume->Settings.BloomThreshold = 1.1f;
-            PostProcess = Volume;
-        }
-    }
+    // 原生天空（SkyAtmosphere + VolumetricCloud + 太阳 + 雾）已随穿云开场一并移除
+    // （2026-11-11）：穿云删掉后这套天空只剩副作用 —— 相机从云层上方俯视时，整条
+    // 视线穿过大气散射和云层残余，把画面蒙上一层白雾，还会出现太阳/云团光球。
+    // 走 pre-sky 渲染路径：unlit 瓦片 + canvas 叠层，画面干净清晰。
+    // （诊断时可用 GEO_NO_SKY=1 临时回到带天空路径做 A/B。）
     InitBoundaryEffects();
     CloudDeck = LoadCloudTexture(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Geo/cloud-deck.png")));
     CloudPass = LoadCloudTexture(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Geo/cloud-pass.png")));
