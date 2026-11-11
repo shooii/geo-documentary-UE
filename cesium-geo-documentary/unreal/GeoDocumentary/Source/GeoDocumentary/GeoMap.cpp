@@ -2660,7 +2660,12 @@ void AGeoHUD::DrawHUD()
         // outlined them in black at any distance; a grey body under a black rim reads
         // as a hole in the map rather than a label, so the body goes white here too.
         const bool RetiredVillage = !Label.Parent && !CurrentVillage;
-        FVector2D Extent = FVector2D(Label.Parent ? Width + TrackingTotal : Width, Height) * TextScale * .5
+        // The box the declutter pass reasons about is the ink, not the line box. A Canvas
+        // line box is 1/0.70 times the letter, so measuring with it made every name look
+        // 40 % taller than it is and the closing overview dropped names that had room to
+        // spare — the layout was fighting a box nobody could see.
+        const float InkHeight = Height * NotoInkPerLineBox;
+        FVector2D Extent = FVector2D(Label.Parent ? Width + TrackingTotal : Width, InkHeight) * TextScale * .5
                            + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
         const FLinearColor Color = (RetiredVillage ? FLinearColor::White
                                                   : FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
@@ -2724,7 +2729,6 @@ void AGeoHUD::DrawHUD()
     const double CaptionY = .75 * Size.Y;
     TArray<FBox2D> Occupied{FBox2D(FVector2D(.08 * Size.X, CaptionY - 56 * Scale),
                                   FVector2D(.92 * Size.X, CaptionY + 56 * Scale))};
-    const FBox2D SafeFrame(FVector2D(20, 20) * Scale, FVector2D(Size.X, Size.Y) - FVector2D(20, 20) * Scale);
     TMap<FString, int32> Placements;
     if (bContextName)
     {
@@ -2736,28 +2740,8 @@ void AGeoHUD::DrawHUD()
     for (const auto &Label : DrawLabels)
     {
         const bool Pinned = Label.IconSize > 0;
-        // Village names grew by half, so the packing has to be tighter — at the old slack
-        // the closing overview started dropping four or five names instead of fitting them.
         const double Gap = (Pinned ? 20 : 8) * Scale;
-        const double X = Label.Extent.X + Gap, Y = Label.Extent.Y + Gap;
         const double BaseY = Pinned ? -(Label.IconSize + Gap + Label.Extent.Y) : 0;
-        TArray<FVector2D> Offsets;
-        if (Pinned)
-            Offsets = {FVector2D(0, BaseY), FVector2D(0, BaseY - Y), FVector2D(X, BaseY),
-                       FVector2D(-X, BaseY), FVector2D(X, BaseY - Y), FVector2D(-X, BaseY - Y),
-                       FVector2D(0, BaseY - 2 * Y)};
-        else
-            // Small nudges only. A name is allowed to step aside by up to two of its own
-            // heights to clear an outline or the caption band; anything further and it
-            // stops being a label on a place. What does not fit is dropped by the
-            // declutter pass below — ArcGIS calls this label overflow, and the alternative
-            // (push it three heights away and draw a line back) gave the closing overview
-            // a dozen stray hairlines that read as terrain, not as annotation.
-            Offsets = {{0, 0}, {0, -Y}, {X, 0}, {-X, 0}, {0, Y},
-                       {X, -Y}, {-X, -Y}, {X, Y}, {-X, Y},
-                       {0, -Y - 40 * Scale}, {0, Y + 40 * Scale},
-                       {X * 1.35, 0}, {-X * 1.35, 0}, {0, -2 * Y}, {0, 2 * Y}};
-        const int32 OffsetCount = Offsets.Num();
         if (Pinned && LabelPin)
         {
             const float IconSize = Label.IconSize;
@@ -2771,100 +2755,29 @@ void AGeoHUD::DrawHUD()
                                 FVector2D(Label.Anchor.X + IconSize * .5f, Label.Anchor.Y))
                              .ExpandBy(2 * Scale));
         }
-        const int32 *PreviousRaw = LabelPlacements.Find(Label.Id);
-        // INDEX_NONE is stored for a name the declutter pass dropped; it must never be
-        // used as an offset index.
-        const int32 *Previous = PreviousRaw && *PreviousRaw >= 0 && *PreviousRaw < OffsetCount ? PreviousRaw : nullptr;
-        int32 Selected = INDEX_NONE;
-        FBox2D Bounds;
-        if (Pinned || Label.Animated)
+        // Every name sits exactly on its anchor, always — Cesium's camera code never
+        // moves a child label. `declutterChildLabels` only decides whether it can be
+        // drawn, so a place is either named where it is or not named at all, and the eye
+        // can follow the same name through the whole shot.
+        //
+        // This build used to offer each name a menu of fifteen offsets, plus a pull-back
+        // inside the safe frame and a "do not touch an outline" rule. While the camera was
+        // still moving, a name would step aside for a neighbour, the neighbour would then
+        // step aside for it, and the whole closing overview shimmered — the positions were
+        // the only thing moving in an otherwise locked-off frame. One anchor, one decision.
+        const FVector2D Point = Label.Anchor + FVector2D(0, BaseY);
+        const FBox2D Bounds(Point - Label.Extent, Point + Label.Extent);
+        if (!Pinned && !Label.Animated &&
+            Occupied.ContainsByPredicate([&Bounds](const FBox2D &Other) { return Other.Intersect(Bounds); }))
         {
-            // The pin and its plaque are one unit: keep the plaque centered directly above
-            // the pin and never draw a leader line to it.
-            // The town name is pinned to its label point for the same reason it is sized
-            // against the outline: any nudge would push it back outside the boundary.
-            const FVector2D Point = Label.Anchor + FVector2D(0, BaseY);
-            Bounds = FBox2D(Point - Label.Extent, Point + Label.Extent);
-            Selected = 0;
-        }
-        else
-        {
-            // Reuse a valid placement during motion. The second pass drops the "do not sit
-            // on a boundary line" rule: a village name that crosses its own outline reads
-            // far better than a village with no name at all.
-            for (int32 Pass = 0; Pass < 2 && Selected == INDEX_NONE; ++Pass)
-                for (int32 Order = Previous ? -1 : 0; Order < OffsetCount; ++Order)
-                {
-                    const int32 Candidate = Order < 0 ? *Previous : Order;
-                    if (Order >= 0 && Previous && Candidate == *Previous)
-                        continue;
-                    const FVector2D Point = Label.Anchor + Offsets[Candidate];
-                    FBox2D Box(Point - Label.Extent, Point + Label.Extent);
-                    // Villages on the edge of the town are only half in frame. Pulling a
-                    // candidate back inside is worth more than dropping the name: at the
-                    // closing overview those were the names that never showed up.
-                    if (!SafeFrame.IsInside(Box) && Box.GetSize().X <= SafeFrame.GetSize().X &&
-                        Box.GetSize().Y <= SafeFrame.GetSize().Y)
-                    {
-                        const FVector2D Span = Box.GetSize();
-                        FVector2D Center = Box.GetCenter();
-                        Center.X = FMath::Clamp(Center.X, SafeFrame.Min.X + Span.X * .5, SafeFrame.Max.X - Span.X * .5);
-                        Center.Y = FMath::Clamp(Center.Y, SafeFrame.Min.Y + Span.Y * .5, SafeFrame.Max.Y - Span.Y * .5);
-                        Box = FBox2D(Center - Span * .5, Center + Span * .5);
-                    }
-                    if (!SafeFrame.IsInside(Box) || Occupied.ContainsByPredicate([&Box](const FBox2D &Other) {
-                            return Other.Intersect(Box);
-                        }))
-                        continue;
-                    const FBox EdgeBox(FVector(Box.Min, -1), FVector(Box.Max, 1));
-                    if (Pass == 0 && Strokes.ContainsByPredicate([&](const FGeoStroke &Stroke) {
-                            if (Stroke.Parent && Stroke.Start >= Reveal)
-                                return false;
-                            const FVector Start(Stroke.A, 0), End(Stroke.B, 0);
-                            return FMath::LineBoxIntersection(EdgeBox, Start, End, End - Start);
-                        }))
-                        continue;
-                    Selected = Candidate;
-                    Bounds = Box;
-                    break;
-                }
-            if (Selected == INDEX_NONE)
-            {
-                // Label overflow, the ArcGIS way: a name that cannot be placed without
-                // covering a neighbour is not drawn at all. Stacking it where it fell is
-                // what made the closing overview read as two lumps of ink, and tying it off
-                // with a leader just replaced the lump with a thicket of hairlines.
-                // The current village and the township are exempt — they are what the shot
-                // is about, so they are admitted first and always placed.
-                if (Label.Priority == 0)
-                {
-                    if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_DEBUG")).Len() > 0)
-                        UE_LOG(LogTemp, Display, TEXT("LABEL_DROPPED %s rank=%d"), *Label.Id, Label.Rank);
-                    continue;
-                }
-                FVector2D Center = Label.Anchor;
-                const FVector2D Span = Label.Extent * 2;
-                if (Span.X <= SafeFrame.GetSize().X && Span.Y <= SafeFrame.GetSize().Y)
-                {
-                    Center.X = FMath::Clamp(Center.X, SafeFrame.Min.X + Label.Extent.X, SafeFrame.Max.X - Label.Extent.X);
-                    Center.Y = FMath::Clamp(Center.Y, SafeFrame.Min.Y + Label.Extent.Y, SafeFrame.Max.Y - Label.Extent.Y);
-                }
-                Bounds = FBox2D(Center - Label.Extent, Center + Label.Extent);
-                Selected = 0;
-                if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_DEBUG")).Len() > 0)
-                    UE_LOG(LogTemp, Warning, TEXT("LABEL_FALLBACK %s anchor %.0f,%.0f extent %.0fx%.0f"),
-                           *Label.Id, Label.Anchor.X, Label.Anchor.Y, Label.Extent.X, Label.Extent.Y);
-            }
+            // Overflow, not relocation: no room, no name.
+            if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_DEBUG")).Len() > 0)
+                UE_LOG(LogTemp, Display, TEXT("LABEL_DROPPED %s rank=%d"), *Label.Id, Label.Rank);
+            continue;
         }
         Occupied.Add(Bounds.ExpandBy(3 * Scale));
-        Placements.Add(Label.Id, Selected);
+        Placements.Add(Label.Id, 0);
         const FVector2D Position = Bounds.GetCenter();
-        if (Label.Priority == 2 && Selected != 0 && !Label.PlateTexture)
-        {
-            FCanvasTileItem Backdrop(Bounds.Min, Bounds.GetSize(), DarkEdge.CopyWithNewOpacity(.66 * Label.Color.A));
-            Backdrop.BlendMode = SE_BLEND_Translucent;
-            Canvas->DrawItem(Backdrop);
-        }
         if (Label.PlateTexture)
         {
             FCanvasTileItem Plate(Position - Label.Extent, Label.Extent * 2,
@@ -2884,7 +2797,7 @@ void AGeoHUD::DrawHUD()
         // fixed 3.4 px whatever the glyph size: at the closing overview, where names sit at
         // 0.68 scale, that is 8 % of the letter on every side and the counters filled in.
         // It is now an eight-direction ring whose width rides the glyph: `Ink` is the
-        // Canvas line box and Noto puts 0.466 of it into ink, so 0.062 of the ink is 3.4 px
+        // Canvas line box and Noto puts 0.70 of it into ink, so 0.062 of the ink is 3.4 px
         // at a 55 px name — the ratio Cesium's 3.4 / 56 implies.
         const bool RestName = Label.Priority == 0;
         const double InkPx = Label.Ink * NotoInkPerLineBox;
