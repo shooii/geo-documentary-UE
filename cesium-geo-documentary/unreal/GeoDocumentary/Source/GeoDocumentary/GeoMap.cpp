@@ -1798,7 +1798,9 @@ void AGeoHUD::DrawHUD()
     {
         // Saturated green, like the reference reel: the region reads as filled land,
         // not as a translucent blue selection.
-        const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.18, .60, .18, .45 * Focus * FillScale)
+        // Closing title and accumulated village paint must not double-tint the terrain.
+        const double ParentFillAlpha = FillStrengths->Values.Num() > 0 ? .18 : .45;
+        const FLinearColor Tint = FocusId.IsEmpty() ? FLinearColor(.18, .60, .18, ParentFillAlpha * Focus * FillScale)
                                                     : FLinearColor(.20, .62, .20, .55 * Focus * FillScale);
         for (auto &Triangle : FocusTriangles)
             Triangle.V0_Color = Triangle.V1_Color = Triangle.V2_Color = Tint;
@@ -2552,6 +2554,8 @@ void AGeoHUD::DrawHUD()
         // these into the label scale property, so reading it back is what keeps the
         // tour, the hand-off and the closing overview identical between the two builds.
         const float StyleScale = Label.Parent ? 1.f : float(N(*Style, TEXT("scale"), 1.));
+        const float ClosingTitleScale = Label.Parent && Styles->Values.Num() > 0
+            ? float(FMath::Lerp(1., .70, N(Hierarchy, TEXT("wide")))) : 1.f;
         // Position in the tour. The child labels are decluttered by rank the way Cesium's
         // `declutterChildLabels` does it: the place the narration reached first keeps its
         // name when two collide, and the frame does not reshuffle itself between shots.
@@ -2596,8 +2600,8 @@ void AGeoHUD::DrawHUD()
             return float(FMath::Lerp(1.1, .68, FMath::Clamp((Ratio - .5) / 2.5, 0., 1.)));
         };
         const float SizePx = Label.Parent
-            ? 120.f * TownNameScale * FaceInkCompensation * Scale * FMath::Lerp(1.f, Primary ? .90f : .88f, Ramp(.5, 3))
-            : ChildLabelPx * StyleScale * Scale * NearFarScale(FMath::Sqrt(DistanceRatioSq));
+            ? 120.f * TownNameScale * FaceInkCompensation * Scale * ClosingTitleScale * FMath::Lerp(1.f, Primary ? .90f : .88f, Ramp(.5, 3))
+            : FMath::Max(28.f * Scale / FaceInkPerLineBox, ChildLabelPx * StyleScale * Scale * NearFarScale(FMath::Sqrt(DistanceRatioSq)));
         // Two atlases: the township name and the village names never overlap in size, and
         // rasterising both from one 64 px bitmap is what made the big ones soft.
         UFont *Font = (Label.Parent && TownFont) ? TownFont : LabelFont;
@@ -2759,10 +2763,6 @@ void AGeoHUD::DrawHUD()
         const bool Pinned = Label.IconSize > 0;
         const double Gap = (Pinned ? 20 : 8) * Scale;
         const double BaseY = Pinned ? -(Label.IconSize + Gap + Label.Extent.Y) : 0;
-        if (Pinned && LabelPin)
-        {
-            const float IconSize = Label.IconSize;
-            const FVector2D IconMin(Label.Anchor.X - IconSize * .5f, Label.Anchor.Y - IconSize);
         // 保持原锚点；安全检测覆盖整行字形、描边及动画最大起伏，不截掉半字。
         const FVector2D Point = Label.Anchor + FVector2D(0, BaseY);
         const FBox2D Bounds(Point - Label.Extent, Point + Label.Extent);
@@ -2787,6 +2787,10 @@ void AGeoHUD::DrawHUD()
         if (LayoutAlpha <= 0)
             continue;
         Label.Color.A *= LayoutAlpha;
+        if (Pinned && LabelPin)
+        {
+            const float IconSize = Label.IconSize;
+            const FVector2D IconMin(Label.Anchor.X - IconSize * .5f, Label.Anchor.Y - IconSize);
             FCanvasTileItem Icon(IconMin, FVector2D(IconSize, IconSize),
                                  FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.08f) * Label.Fade));
             Icon.Texture = LabelPin->GetResource();
@@ -2806,20 +2810,12 @@ void AGeoHUD::DrawHUD()
         }
         else
         {
-        // The retired village name gets the Cesium outline: pure black, fully opaque.
-        // Priority 0 is exactly "a village that is neither the subject nor the township".
-        //
-        // Two things were wrong with the old rim. It was four copies nudged up/down/
-        // left/right, so a diagonal was only 0.71 of the width and the corner of a 圆 came
-        // out thinner than its side — the "worn" look on 德 / 墩 / 楼. And the width was a
-        // fixed 3.4 px whatever the glyph size: at the closing overview, where names sit at
-        // 0.68 scale, that is 8 % of the letter on every side and the counters filled in.
-        // It is now an eight-direction ring whose width rides the glyph: `Ink` is the
-        // Canvas line box and Noto puts 0.70 of it into ink, so 0.062 of the ink is 3.4 px
-        // at a 55 px name — the ratio Cesium's 3.4 / 56 implies.
+        // A single eight-direction proportional outline, capped for close shots. No
+        // second fixed-pixel Canvas outline: distant Chinese counters must stay open.
+        // Priority 0 is a village that is neither the subject nor the township.
         const bool RestName = Label.Priority == 0;
         const double InkPx = Label.Ink * NotoInkPerLineBox;
-        const double Halo = FMath::Max(1.15 * Scale, InkPx * (RestName ? .062 : .045));
+        const double Halo = FMath::Clamp(InkPx * (RestName ? .045 : .038), 1.0 * Scale, 2.7 * Scale);
         const FLinearColor Outline = (RestName ? FLinearColor::Black : DarkEdge)
                                          .CopyWithNewOpacity((RestName ? 1.f : .93f) * Label.Color.A);
         UFont *DrawFont = Label.Font ? Label.Font : LabelFont.Get();
@@ -2836,8 +2832,9 @@ void AGeoHUD::DrawHUD()
             for (const FVector2D &Offset : Ring)
                 Canvas->DrawItem(Text, At + Offset);
             Text.SetColor(Label.Color);
-            Text.bOutlined = true;
-            Text.OutlineColor = Outline;
+            // The eight-offset ring already provides a proportional outline. Applying
+            // Canvas's fixed one-pixel outline again closes counters on distant glyphs.
+            Text.bOutlined = false;
             Canvas->DrawItem(Text, At);
         };
         if (Label.Animated)

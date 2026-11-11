@@ -191,5 +191,10 @@ export function boundaryAnimation(mapTime:number,start:number,current:string) {
   if(!current||orbit<0) return {target:current,progress,alpha:sweep};
   // The ring is closed, so wrapping 1 -> 0 puts the head back where it started and the
   // orbit reads as continuous.
-  return {target:current,progress:(orbit%ORBIT_PERIOD)/ORBIT_PERIOD,alpha:.85};
+  // The focus remains alive, but does not compete with the name for an entire shot.
+  // Ease back in after the first sweep rather than jumping from zero to full glow.
+  const enter = Math.max(0, Math.min(1, orbit / .25));
+  const settle = Math.max(0, Math.min(1, orbit / 3));
+  const alpha = (.55 - .23 * settle * settle * (3 - 2 * settle)) * enter * enter * (3 - 2 * enter);
+  return {target:current,progress:(orbit%ORBIT_PERIOD)/ORBIT_PERIOD,alpha};
 }

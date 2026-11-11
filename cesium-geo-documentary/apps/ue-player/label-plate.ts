@@ -3,7 +3,7 @@ import { access, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createCanvas, GlobalFonts } from '@napi-rs/canvas';
 
-const STYLE_VERSION = 'v6';
+const STYLE_VERSION = 'v7';
 const PIXELS = 2;
 const PLATE_HEIGHT = 150 * PIXELS;
 const BASE_FONT = 78 * PIXELS;
@@ -15,16 +15,18 @@ const MAX_WIDTH = 1280 * PIXELS;
 // the same file the HUD rasterises and the same face the narration is subtitled in.
 const FONT_NAME = 'NotoSansSC-Bold';
 const fontFile = (root: string) => join(root, 'assets', 'fonts', 'NotoSansSC-Bold.ttf');
-let fontRegistered = false;
+const LETTER_SPACING_EM = 0.045;
 
 function registerFont(root: string) {
-  if (fontRegistered) return;
+  if (GlobalFonts.has(FONT_NAME)) return;
+  const path = fontFile(root);
   try {
-    GlobalFonts.registerFromPath(fontFile(root), FONT_NAME);
-  } catch {
-    // The plate still renders with the fallback font.
+    if (!GlobalFonts.registerFromPath(path, FONT_NAME) || !GlobalFonts.has(FONT_NAME)) {
+      throw new Error('字体注册未成功');
+    }
+  } catch (cause) {
+    throw new Error(`名牌字体 ${FONT_NAME} 加载失败：${path}。请恢复该字体文件，或预先全局注册同名字体；已禁止系统字体回退。`, { cause });
   }
-  fontRegistered = true;
 }
 
 function escapeFileName(name: string) {
@@ -47,17 +49,21 @@ export async function labelPlate(root: string, name: string) {
   await mkdir(dir, { recursive: true });
 
   const measure = createCanvas(8, 8).getContext('2d');
-  measure.font = `${BASE_FONT}px ${FONT_NAME}`;
   let fontSize = BASE_FONT;
-  let textWidth = measure.measureText(clean).width;
-  let width = Math.ceil(textWidth + SIDE_PADDING * 2);
-  if (width > MAX_WIDTH) {
-    fontSize = Math.max(42, fontSize * (MAX_WIDTH - SIDE_PADDING * 2) / textWidth);
+  const measureWidth = () => {
     measure.font = `${fontSize}px ${FONT_NAME}`;
-    textWidth = measure.measureText(clean).width;
-    width = Math.ceil(textWidth + SIDE_PADDING * 2);
+    // 以像素设置字距；原生画布的 em 换算不一定使用当前字体大小。
+    measure.letterSpacing = `${fontSize * LETTER_SPACING_EM}px`;
+    return measure.measureText(clean).width;
+  };
+  let textWidth = measureWidth();
+  const availableWidth = MAX_WIDTH - SIDE_PADDING * 2;
+  while (textWidth > availableWidth) {
+    // 保留一个栅格像素余量，避免字体尺寸量化后的宽度超过安全区。
+    fontSize *= (availableWidth - 1) / textWidth;
+    textWidth = measureWidth();
   }
-  width = Math.max(340 * PIXELS, width);
+  const width = Math.max(340 * PIXELS, Math.ceil(textWidth + SIDE_PADDING * 2));
 
   const canvas = createCanvas(width, PLATE_HEIGHT);
   const ctx = canvas.getContext('2d');
@@ -104,7 +110,7 @@ export async function labelPlate(root: string, name: string) {
   ctx.font = `${fontSize}px ${FONT_NAME}`;
   // Noto is tighter than the display face it replaces; a breath of tracking keeps the
   // three or four characters of a village name from reading as one block.
-  (ctx as unknown as { letterSpacing?: string }).letterSpacing = '0.045em';
+  ctx.letterSpacing = `${fontSize * LETTER_SPACING_EM}px`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = '#ffffff';
