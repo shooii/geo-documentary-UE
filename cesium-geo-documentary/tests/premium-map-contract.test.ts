@@ -92,7 +92,10 @@ test("photo captions stay inside their measured narration cues during image cros
   assert.match(source, /id="visual-caption-\$\{index\}"/);
   assert.match(source, /data-visual-id="\$\{visual\.id\}"/);
   assert.match(source, /narrationOffset \+ visual\.cueStart/);
-  assert.match(source, /narrationOffset \+ visual\.cueEnd/);
+  // 图片标签随影像窗进出（target 停留封顶后 cue 结束不再是退场条件），
+  // 但它仍以 cueStart 为最早出现时刻，避免图未入场字先跳出来。
+  assert.match(source, /capIn = Math\.max\(start \+ \.25, cueStart\)/);
+  assert.match(source, /capOut = Math\.max\(capIn \+ \.15, end - \.45\)/);
 });
 
 test("every image selected for the final film receives a visible compositor window", async () => {

@@ -26,6 +26,33 @@ export const OPENING_VISUAL_DELAY_SECONDS = 2.8;
 export const MINIMUM_RENDERED_VISUAL_SECONDS = 0.5;
 /** A child photo waits for the camera to finish its flight before it may appear. */
 export const CHILD_FLIGHT_SECONDS = { min: 3.2, max: 5.4 } as const;
+/**
+ * How long a picture stays on screen once it has appeared (entrance included).
+ *
+ * The old rule parked a photo on screen until its narration cue ended — often
+ * the whole village paragraph, 20 s or more, with the map hidden the entire
+ * time. 5.5 s is the sweet spot measured against the reference reel: about a
+ * second to notice the card, two to read the caption, and the rest to actually
+ * look at the picture before the map gets the stage back. A scene may override
+ * it per asset through `targetDisplaySeconds`.
+ */
+export const DEFAULT_TARGET_DISPLAY_SECONDS = 5.5;
+/**
+ * A picture waits until the village plaque and pin have finished their own
+ * reveal, not merely until the camera has landed.
+ *
+ * `tourLabelPresentationAt` reveals the plaque starting at 55% of the flight
+ * and completing after `max(0.45, 35% of the flight)` more seconds. Adding a
+ * small buffer lets the plate settle from "just landed" to "reading steady"
+ * before anything competes with it for attention.
+ */
+export const PLATE_SETTLE_BUFFER_SECONDS = 0.4;
+
+/** Seconds after the flight starts when the plaque + pin are fully stable. */
+export function plateSettleSeconds(flightSeconds: number): number {
+  const flight = Math.max(0, flightSeconds);
+  return flight * 0.55 + Math.max(0.45, flight * 0.35) + PLATE_SETTLE_BUFFER_SECONDS;
+}
 
 export interface VisualClipRange {
   start: number;
@@ -108,10 +135,13 @@ export function planVisualClip(input: VisualClipPlanInput): VisualClipPlan {
   const flight = scene.section === "child"
     ? childFlightSeconds(rangeLength, Number(scene.timing?.mapHoldSeconds ?? 2))
     : 0;
+  // 素材等到名牌与标钉完全稳定之后才入场，而不是相机一落地就压上来：
+  // 名牌 reveal 在飞行 55% 处开始，再经过 max(0.45, 35% 飞行时长) 完成，
+  // 加一小段缓冲让它从"刚出现"过渡到"看得稳"。
   const notBeforeNarrationSeconds = scene.id === input.openingSceneId && range
     ? range.start + openingDelay
     : scene.section === "child" && range
-    ? range.start + flight
+    ? range.start + plateSettleSeconds(flight)
     : range && sequenceIndex === 0
     ? range.start
     : undefined;
@@ -139,6 +169,12 @@ export interface VisualClipWindowInput {
   leadSeconds?: number;
   tailSeconds?: number;
   minimumDisplaySeconds?: number;
+  /**
+   * How long the card stays up once shown (entrance included). The cue end no
+   * longer stretches the clip — the card leaves while the narration may still
+   * be running, so the map gets its stage back. 0 disables the cap.
+   */
+  targetDisplaySeconds?: number;
   notBeforeNarrationSeconds?: number;
   notAfterNarrationSeconds?: number;
   sequenceIndex?: number;
@@ -166,7 +202,13 @@ export function resolveVisualClipWindow(input: VisualClipWindowInput): VisualCli
   const hardEndSeconds = input.notAfterNarrationSeconds === undefined
     ? Number.POSITIVE_INFINITY
     : Math.max(0, Number(input.notAfterNarrationSeconds));
-  const naturalEnd = Math.min(hardEndSeconds, input.cueEndSeconds + tailSeconds);
+  // 停留时长封顶：cue 讲完不再是图片退场的条件，出现后 target 秒就走。
+  // 配置了 0 表示不封顶（沿用"挂到 cue 结束"的旧行为）。
+  const target = input.targetDisplaySeconds === undefined
+    ? DEFAULT_TARGET_DISPLAY_SECONDS
+    : Math.max(0, Number(input.targetDisplaySeconds) || 0);
+  const cueEnd = target > 0 ? Math.min(input.cueEndSeconds + tailSeconds, startSeconds + target) : input.cueEndSeconds + tailSeconds;
+  const naturalEnd = Math.min(hardEndSeconds, cueEnd);
   const minimumEnd = startSeconds + Math.max(0.1, Number(input.minimumDisplaySeconds ?? 0.1));
   let endSeconds = Math.min(hardEndSeconds, Math.max(naturalEnd, minimumEnd));
   let sequenceStart = startSeconds;

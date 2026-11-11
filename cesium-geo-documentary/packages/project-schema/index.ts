@@ -10,6 +10,10 @@ export type SceneType = "cover" | "map-overview" | "region-focus" | "image-card"
  */
 export type AssetFit = "cover" | "contain" | "fill" | "fullscreen";
 export type AssetAnimation = "still" | "push-in" | "pull-out" | "pan-left" | "pan-right";
+/**
+ * 影像窗的入场动画。默认 bloom（中心向外扩散）。
+ */
+export type AssetEntrance = "bloom" | "wipe" | "rise" | "blur" | "fade";
 
 export interface StudioAsset {
   id: string;
@@ -48,9 +52,13 @@ export interface AssetPlacement {
   offsetX: number;
   offsetY: number;
   animation: AssetAnimation;
+  /** 入场动画，缺省 bloom（中心向外扩散）。 */
+  entrance?: AssetEntrance;
   leadSeconds: number;
   tailSeconds: number;
   minimumDisplaySeconds: number;
+  /** 图片出现后停留的上限秒数；缺省 5.5 秒，0 表示挂到旁白 cue 结束。 */
+  targetDisplaySeconds?: number;
   requiredKeywords: string[];
   alt: string;
   /** Explicit per-image export selection. Undefined preserves legacy first-N behavior. */

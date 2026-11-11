@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { planVisualTimeline, type RenderSpec, type RenderSpecAsset } from "../packages/render-spec/index.js";
-import { childFlightSeconds, planVisualClip, resolveVisualClipWindow, type VisualClipWindowInput } from "../packages/render-spec/visual-timeline.js";
+import { childFlightSeconds, DEFAULT_TARGET_DISPLAY_SECONDS, planVisualClip, resolveVisualClipWindow, type VisualClipWindowInput } from "../packages/render-spec/visual-timeline.js";
 import type { StudioScene, VideoProject } from "../packages/project-schema/index.js";
 
 function scene(id: string, section: NonNullable<StudioScene["section"]> = "overview", type: StudioScene["type"] = "image-card"): StudioScene {
@@ -52,8 +52,10 @@ test("子场景飞行上下限与自定义地图停留均遵循导出规则", ()
   assert.equal(childFlightSeconds(3, 2), 3.2);
   assert.equal(childFlightSeconds(12, 2), 5.4);
   assert.equal(childFlightSeconds(8, 4), 4);
+  // 名牌与标钉的 reveal 在飞行 55% 处开始、再经 max(0.45, 35% 飞行) 完成，
+  // 外加缓冲 —— 素材等它稳定之后才入场，而不是相机一落地就压上来。
   const plan = planVisualClip({ scene: { id: "child", section: "child", timing: { mapHoldSeconds: 4 } }, placement: { minimumDisplaySeconds: 10 }, range: { start: 10, end: 18 }, sequenceIndex: 1 });
-  assert.equal(plan.notBeforeNarrationSeconds, 14);
+  assert.equal(plan.notBeforeNarrationSeconds, 10 + 4 * 0.55 + Math.max(0.45, 4 * 0.35) + 0.4);
   assert.equal(plan.minimumDisplaySeconds, 4);
 });
 
@@ -68,21 +70,30 @@ test("无区间的计划不伪造边界或夹紧配置，后续普通图片保�
 test("单图窗口保留cue前后余量与最短展示，边界始终封顶", () => {
   const natural = resolveVisualClipWindow({ cueStartSeconds: 3, cueEndSeconds: 4 });
   close(natural.startSeconds, 2.7);
+  // cue 结束不再是退场条件：出现 5.5 秒后即离场（2.7 + 5.5 = 8.2 > 4.24? 不 ——
+  // target 封顶取 min(cueEnd+tail, start+target) 后仍保留下限语义），这里 cueEnd+tail=4.24
+  // 早于 target 封顶，所以自然结束不变。
   close(natural.endSeconds, 4.24);
   assert.equal(natural.hardEndSeconds, Infinity);
   assert.equal(natural.truncatedByScene, false);
   assert.equal(resolveVisualClipWindow({ cueStartSeconds: 3, cueEndSeconds: 4, minimumDisplaySeconds: 10, notAfterNarrationSeconds: 6 }).endSeconds, 6);
   close(resolveVisualClipWindow({ cueStartSeconds: 3, cueEndSeconds: 4, minimumDisplaySeconds: 5 }).endSeconds, 7.7);
+  // 长旁白挂图的旧行为被 target 封顶：cue 到 20 秒，图 2.7 秒进、7.7+5.5 秒出。
+  close(resolveVisualClipWindow({ cueStartSeconds: 3, cueEndSeconds: 20 }).endSeconds, 2.7 + DEFAULT_TARGET_DISPLAY_SECONDS);
+  // target = 0 显式关闭封顶，回到"挂到 cue 结束"的旧行为。
+  close(resolveVisualClipWindow({ cueStartSeconds: 3, cueEndSeconds: 20, targetDisplaySeconds: 0 }).endSeconds, 20.24);
 });
 
 test("多图使用自然cue窗口切片而非配置最短展示，并保留逐图起点造成的切口重叠", () => {
+  // target 封顶同样作用于多图：整场窗口被压到每张图的出现点 + 5.5 秒内，
+  // 切片按各自的 sequenceStart 等分，不同起点仍会形成诊断上的切口重叠。
   const shared = { cueStartSeconds: 10, cueEndSeconds: 20, notAfterNarrationSeconds: 20, minimumDisplaySeconds: 100, sequenceCount: 2 };
   const first = resolveVisualClipWindow({ ...shared, sequenceIndex: 0, notBeforeNarrationSeconds: 10 });
   const second = resolveVisualClipWindow({ ...shared, sequenceIndex: 1 });
   assert.equal(first.startSeconds, 10);
-  assert.equal(first.endSeconds, 15);
-  close(second.startSeconds, 14.85);
-  assert.equal(second.endSeconds, 20);
+  close(first.endSeconds, 12.75);
+  close(second.startSeconds, 12.45);
+  close(second.endSeconds, 15.2);
   assert.ok(second.startSeconds < first.endSeconds, "诊断须忠实显示既有合成切口重叠，不得悄悄改成共同等分");
   const short = resolveVisualClipWindow({ cueStartSeconds: 0, cueEndSeconds: 2, minimumDisplaySeconds: 100, notAfterNarrationSeconds: 10, sequenceCount: 2, sequenceIndex: 1 });
   close(short.endSeconds, 2.24);
@@ -102,7 +113,7 @@ test("共享窗口与实际合成器计算代码在时间偏移及多图样例�
   const start = source.indexOf("    const cueDrivenStart = narrationStartSeconds +");
   const end = source.indexOf("    return {", start);
   assert.ok(start >= 0 && end > start, "实际合成器时间计算段必须存在");
-  const compositor = new Function("visual", "cueStart", "cueEnd", "narrationStartSeconds", `const leadSeconds = visual.leadSeconds ?? 0.3; const tailSeconds = visual.tailSeconds ?? 0.24;\n${source.slice(start, end)}\nreturn { startSeconds: sequenceStart - narrationStartSeconds, endSeconds: resolvedEnd - narrationStartSeconds };`) as (input: VisualClipWindowInput, start: number, end: number, offset: number) => { startSeconds: number; endSeconds: number };
+  const compositor = new Function("visual", "cueStart", "cueEnd", "narrationStartSeconds", `const leadSeconds = visual.leadSeconds ?? 0.3; const tailSeconds = visual.tailSeconds ?? 0.24; const DEFAULT_TARGET_DISPLAY_SECONDS = ${DEFAULT_TARGET_DISPLAY_SECONDS};\n${source.slice(start, end)}\nreturn { startSeconds: sequenceStart - narrationStartSeconds, endSeconds: resolvedEnd - narrationStartSeconds };`) as (input: VisualClipWindowInput, start: number, end: number, offset: number) => { startSeconds: number; endSeconds: number };
   const cases: VisualClipWindowInput[] = [
     { cueStartSeconds: 0.05, cueEndSeconds: 7.287, notBeforeNarrationSeconds: 2.85, notAfterNarrationSeconds: 7.287, minimumDisplaySeconds: 13.5 },
     { cueStartSeconds: 10, cueEndSeconds: 20, leadSeconds: 0.75, tailSeconds: 0.75, notBeforeNarrationSeconds: 15.4, notAfterNarrationSeconds: 20, sequenceCount: 3, sequenceIndex: 1 },
@@ -134,7 +145,7 @@ test("总时间线只收录明确勾选图片并遵守placement顺序、地图�
   assert.equal(timeline.scenes[3]!.imageCount, 2);
   assert.equal(timeline.scenes[1]!.expectsImages, false);
   assert.equal(timeline.totalSeconds, 20);
-  assert.deepEqual(timeline.counts, { scenes: 4, scenesWithImages: 1, imageScenesWithoutPictures: 2, clips: 2, clamped: 2, truncated: 1, tooShort: 0, overflows: 0 });
+  assert.deepEqual(timeline.counts, { scenes: 4, scenesWithImages: 1, imageScenesWithoutPictures: 2, clips: 2, clamped: 2, truncated: 0, tooShort: 0, overflows: 0 });
   assert.equal(JSON.stringify({ project, spec }), before, "规划不能修改项目或实测spec");
 });
 
@@ -162,7 +173,8 @@ test("过密序列在总时间线中保留越界和负窗口警告，不掩饰�
   const { project, spec } = fixture([scene("opening", "overview", "map-overview"), child], images, [{ sceneId: "opening", start: 0, end: 10 }, { sceneId: "child", start: 10, end: 13.4 }]);
   const timeline = planVisualTimeline(project, spec);
   assert.equal(timeline.counts.tooShort, 4);
-  assert.equal(timeline.counts.overflows, 1);
+  // notBefore 后移到名牌稳定（13.28）后，0.1 秒切片下限让第二张也探出场景边界。
+  assert.equal(timeline.counts.overflows, 2);
   assert.ok(timeline.clips[3]!.startSeconds > timeline.clips[3]!.endSeconds);
   assert.equal(timeline.scenes[1]!.perImageSeconds, 0);
 });
@@ -171,8 +183,8 @@ test("时间线用实际飞行后的图片窗口报告不足0.5秒，而不是�
   const child = scene("child", "child", "region-focus");
   const { project, spec } = fixture([scene("opening", "overview", "map-overview"), child], [asset("a", "child", 1), asset("b", "child", 1)], [{ sceneId: "opening", start: 0, end: 10 }, { sceneId: "child", start: 10, end: 13.8 }]);
   const timeline = planVisualTimeline(project, spec);
-  close(timeline.clips[0]!.startSeconds, 13.2);
-  close(timeline.clips[0]!.endSeconds, 13.5);
+  close(timeline.clips[0]!.startSeconds, 13.28);
+  close(timeline.clips[0]!.endSeconds, 13.54);
   assert.equal(timeline.counts.tooShort, 2);
-  close(timeline.scenes[1]!.perImageSeconds!, 0.3);
+  close(timeline.scenes[1]!.perImageSeconds!, 0.26);
 });

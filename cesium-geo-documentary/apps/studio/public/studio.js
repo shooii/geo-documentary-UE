@@ -24,7 +24,7 @@ const state = {
   assetLibraryOpen: false, assetLibrarySearch: "", assetLibrarySource: "all", assetLibraryUsage: "all", assetLibrarySort: "recent",
   assetLibrarySelected: new Set(), assetPreviewId: null, assetRenameContext: null,
   assetUndoStack: [], assetTouch: Object.create(null), coverPreviewTimer: null, coverPreviewObjectUrl: "", coverPreviewRequest: 0, previewMode: "actual",
-  previewAssetReadySceneId: null, previewAssetRevealTimer: null,
+  previewAssetReadySceneId: null, previewAssetRevealTimer: null, previewAssetHideTimer: null,
   /** What the stage is currently painting; see `applyPreviewStagePlacement`. */
   previewStageSceneId: null, previewStageAssetId: null,
   /** The picture playback is showing right now (null = follow the selection). */
@@ -469,11 +469,15 @@ function previewMediaReady(media) {
     : media.complete && media.naturalWidth > 0;
 }
 
-function setPreviewAssetVisible(visible) {
+function setPreviewAssetVisible(visible, entrance) {
   const previewAsset = previewMediaElement();
   const previewAssetFrame = $("previewAssetFrame");
   const previewAssetCaption = $("previewAssetCaption");
   const previewShade = $("previewShade");
+  // 入场动画变体与成片 compose-hyperframes.ts 的 entranceMotion 对齐；
+  // rise 是默认（frame 基础样式的上浮），其余按 data-entrance 切换。
+  previewAssetFrame.dataset.entrance = entrance || "bloom";
+  if (!visible) clearTimeout(state.previewAssetHideTimer);
   previewAssetFrame.classList.toggle("is-visible", visible);
   previewAsset.classList.toggle("is-visible", visible);
   previewAssetCaption.classList.toggle("is-visible", visible);
@@ -506,7 +510,15 @@ function revealSelectedSceneAsset(placement = state.playbackStageActive ? state.
   if (!scene || !asset || scene.section === "cover") return setPreviewAssetVisible(false);
   const waitsForMapReveal = isOpeningScene(scene) || scene.section === "child";
   const cameraLocked = !waitsForMapReveal || state.previewAssetReadySceneId === scene.id;
-  setPreviewAssetVisible(cameraLocked && previewMediaReady(previewMediaElement()));
+  const show = cameraLocked && previewMediaReady(previewMediaElement());
+  // 与成片一致：图片出现 target 秒后自动退场，不再挂到旁白讲完才消失。
+  // 0 表示显式关闭封顶（挂到场景结束），与合成器的 targetDisplaySeconds 同义。
+  clearTimeout(state.previewAssetHideTimer);
+  setPreviewAssetVisible(show, placement.entrance);
+  if (show) {
+    const target = Number(asset.targetDisplaySeconds ?? 5.5);
+    if (target > 0) state.previewAssetHideTimer = setTimeout(() => setPreviewAssetVisible(false), target * 1000);
+  }
 }
 
 function handleCesiumPreviewMessage(event) {
@@ -2684,7 +2696,7 @@ function renderInspector() {
      export would not deliver. */
   applyPreviewStagePlacement(scene, state.playbackStageActive ? state.playbackStagePlacement : placement);
   if (asset && placement && !isCover) {
-    $("assetFit").value = placement.fit; $("assetAnimation").value = placement.animation; $("focalX").value = placement.focalPoint.x; $("focalY").value = placement.focalPoint.y; $("assetScale").value = placement.scale; $("assetMinimum").value = placement.minimumDisplaySeconds; $("assetLead").value = placement.leadSeconds; $("assetTail").value = placement.tailSeconds; $("assetAlt").value = placement.alt;
+    $("assetFit").value = placement.fit; $("assetAnimation").value = placement.animation; $("assetEntrance").value = placement.entrance || "bloom"; $("assetTarget").value = placement.targetDisplaySeconds ?? ""; $("focalX").value = placement.focalPoint.x; $("focalY").value = placement.focalPoint.y; $("assetScale").value = placement.scale; $("assetMinimum").value = placement.minimumDisplaySeconds; $("assetLead").value = placement.leadSeconds; $("assetTail").value = placement.tailSeconds; $("assetAlt").value = placement.alt;
   }
 }
 
@@ -4094,7 +4106,14 @@ function bind() {
   $("sceneImageryAnnotation").onchange = (event) => { editScene("imageryAnnotation", event.target.checked); setTimeout(previewSelectedScene, 40); };
   [["preHold", "preHoldSeconds"], ["postHold", "postHoldSeconds"], ["mapHold", "mapHoldSeconds"]].forEach(([id, key]) => $(id).onchange = (event) => editTiming(key, event.target.value));
   ["longitude", "latitude", "height"].forEach((id) => $(id).onchange = editCamera);
-  [["assetFit", "fit"], ["assetAnimation", "animation"], ["focalX", "focalX"], ["focalY", "focalY"], ["assetScale", "scale"], ["assetMinimum", "minimumDisplaySeconds"], ["assetLead", "leadSeconds"], ["assetTail", "tailSeconds"], ["assetAlt", "alt"]].forEach(([id, key]) => $(id).onchange = (event) => editPlacement(key, ["fit", "animation", "alt"].includes(key) ? event.target.value : Number(event.target.value)));
+  [["assetFit", "fit"], ["assetAnimation", "animation"], ["assetEntrance", "entrance"], ["focalX", "focalX"], ["focalY", "focalY"], ["assetScale", "scale"], ["assetMinimum", "minimumDisplaySeconds"], ["assetLead", "leadSeconds"], ["assetTail", "tailSeconds"], ["assetAlt", "alt"]].forEach(([id, key]) => $(id).onchange = (event) => editPlacement(key, ["fit", "animation", "entrance", "alt"].includes(key) ? event.target.value : Number(event.target.value)));
+  // 停留秒数留空 = 回到默认 5.5 秒（从 placement 上删掉字段），填 0 = 挂到旁白讲完。
+  $("assetTarget").onchange = (event) => {
+    const placement = selectedPlacement(); if (!placement) return;
+    const raw = String(event.target.value).trim();
+    if (raw === "") delete placement.targetDisplaySeconds; else placement.targetDisplaySeconds = Math.max(0, Number(raw) || 0);
+    markDirty(); render();
+  };
   $("renderButton").onclick = startRender; $("openExportPanel").onclick = () => openExportPanel().catch((error) => toastError(error.message));
   bindWorkbookPanel();
   $("saveProjectButton").onclick = () => setSaveProjectOpen(true);

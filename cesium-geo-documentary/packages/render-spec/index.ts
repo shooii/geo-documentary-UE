@@ -570,6 +570,7 @@ export function planVisualTimeline(project: VideoProject, spec: RenderSpec): Vis
         leadSeconds: asset.leadSeconds,
         tailSeconds: asset.tailSeconds,
         minimumDisplaySeconds: plan.minimumDisplaySeconds,
+        ...(asset.targetDisplaySeconds !== undefined ? { targetDisplaySeconds: asset.targetDisplaySeconds } : {}),
         ...(plan.notBeforeNarrationSeconds !== undefined ? { notBeforeNarrationSeconds: plan.notBeforeNarrationSeconds } : {}),
         ...(plan.notAfterNarrationSeconds !== undefined ? { notAfterNarrationSeconds: plan.notAfterNarrationSeconds } : {}),
         sequenceIndex,

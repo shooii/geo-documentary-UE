@@ -10,6 +10,7 @@ import { mediaKindForPath } from "../../../../packages/content-engine/media.js";
 import { COMPOSITION_TRACKS, musicTrack, visualTrack } from "../../../../packages/content-engine/tracks.js";
 import { normalizeAnchorText } from "../../../../packages/content-engine/visual-anchoring.js";
 import type { AssetFit } from "../../../../packages/project-schema/index.js";
+import { DEFAULT_TARGET_DISPLAY_SECONDS } from "../../../../packages/render-spec/visual-timeline.js";
 import { generateCoverAsset, resolveCoverDefinition } from "./cover.js";
 
 interface RegionContent {
@@ -43,6 +44,8 @@ interface VisualClip {
   start?: number;
   end?: number;
   minimumDisplaySeconds?: number;
+  /** 上限展示秒数：出现后这么久就退场，不再等旁白 cue 讲完。0 = 沿用旧行为。 */
+  targetDisplaySeconds?: number;
   /** Audio-relative floor used when a visual must wait for its map camera flight to lock. */
   notBeforeNarrationSeconds?: number;
   /** Audio-relative hard boundary that prevents a visual entering the next scene. */
@@ -56,6 +59,8 @@ interface VisualClip {
   offsetX?: number;
   offsetY?: number;
   animation?: "still" | "push-in" | "pull-out" | "pan-left" | "pan-right";
+  /** 入场动画：bloom 中心向外扩散（默认）/ wipe 横向擦除 / rise 下方浮入 / blur 聚焦 / fade 纯淡入。 */
+  entrance?: "bloom" | "wipe" | "rise" | "blur" | "fade";
 }
 interface ResolvedVisualClip extends VisualClip {
   src: string;
@@ -392,7 +397,7 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
   gsap.set([".subtitle-inner",".visual",".visual figcaption"],{opacity:0});
   tl.fromTo("#cover",{opacity:1},{opacity:0,duration:${coverFadeSeconds.toFixed(3)},ease:"power2.inOut"},${coverFadeStart.toFixed(3)}).set("#cover",{opacity:0},${offset.toFixed(3)});
   ${mapRefinement}
-  ${visuals.map((visual, index) => { const start = visual.start + offset; const end = visual.end + offset; return `tl.fromTo("#visual-${index}",{opacity:0,y:34,scale:1.025},{opacity:1,y:0,scale:1,duration:.42,ease:"power2.out"},${start.toFixed(3)}).set("#visual-${index}",{opacity:0},${end.toFixed(3)});`; }).join("\n")}
+  ${visuals.map((visual, index) => entranceMotion(index, visual.start + offset, visual.end + offset, visual.entrance)).join("\n")}
   ${visuals.map((visual, index) => {
     const start = visual.start + offset;
     const duration = Math.max(0.1, visual.end - visual.start);
@@ -407,7 +412,7 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
     const toX = motion === "pan-right" ? x + 24 : motion === "pan-left" ? x - 24 : x;
     return `tl.fromTo("#visual-main-${index}",{scale:${fromScale.toFixed(3)},x:${fromX.toFixed(1)},y:${y.toFixed(1)}},{scale:${toScale.toFixed(3)},x:${toX.toFixed(1)},y:${y.toFixed(1)},duration:${duration.toFixed(3)},ease:"none"},${start.toFixed(3)});`;
   }).join("\n")}
-  ${visuals.map((visual, index) => { const cueStart = visual.cueStart === undefined ? visual.start + offset : narrationOffset + visual.cueStart; const cueEnd = visual.cueEnd === undefined ? visual.end + offset : narrationOffset + visual.cueEnd; const fadeOutAt = Math.max(cueStart + 0.08, cueEnd - 0.12); return `tl.fromTo("#visual-caption-${index}",{opacity:0},{opacity:1,duration:.1},${cueStart.toFixed(3)}).to("#visual-caption-${index}",{opacity:0,duration:.1},${fadeOutAt.toFixed(3)}).set("#visual-caption-${index}",{opacity:0},${cueEnd.toFixed(3)});`; }).join("\n")}
+  ${visuals.map((visual, index) => { const start = visual.start + offset; const end = visual.end + offset; const cueStart = visual.cueStart === undefined ? start : narrationOffset + visual.cueStart; const capIn = Math.max(start + .25, cueStart); const capOut = Math.max(capIn + .15, end - .45); return `tl.fromTo("#visual-caption-${index}",{opacity:0},{opacity:1,duration:.12},${capIn.toFixed(3)}).to("#visual-caption-${index}",{opacity:0,duration:.12},${capOut.toFixed(3)}).set("#visual-caption-${index}",{opacity:0},${end.toFixed(3)});`; }).join("\n")}
   ${displayCues.map((cue, index) => { const timing = timelineValues(Math.max(offset, cue.start + narrationOffset + subtitleLeadSeconds), Math.max(offset + 0.08, cue.end + narrationOffset + subtitleLeadSeconds)); const cueEnd = Number(timing.start) + Number(timing.duration); const fadeOutAt = Math.max(Number(timing.start) + 0.08, cueEnd - 0.1); const hardKillAt = Math.min(cueEnd, fadeOutAt + 0.08); const washSeconds = Math.max(.12, fadeOutAt - Number(timing.start) - .04); return `tl.fromTo("#caption-inner-${index}",{opacity:0,y:8},{opacity:1,y:0,duration:.08},${timing.start}).fromTo("#caption-wash-${index}",{clipPath:"inset(0 100% 0 0)"},{clipPath:"inset(0 0% 0 0)",duration:${washSeconds.toFixed(3)},ease:"none"},${(Number(timing.start) + .06).toFixed(3)}).to("#caption-inner-${index}",{opacity:0,duration:.08},${fadeOutAt.toFixed(3)}).set("#caption-inner-${index}",{opacity:0},${hardKillAt.toFixed(3)});`; }).join("\n")}
   window.__timelines=window.__timelines||{};window.__timelines["${regionId}-${profileName}"]=tl;
 </script>
@@ -432,6 +437,48 @@ function normalizeSearchText(value: string): string {
   // Shared with the Studio's readiness report so the two can never disagree
   // about whether a keyword found its sentence.
   return normalizeAnchorText(value);
+}
+
+/**
+ * 素材影像窗的入场/出场动画。
+ *
+ * 入场（entrance 字段，默认 bloom）：
+ *  - bloom  中心向外扩散：圆形 clip-path 从 0% 扩到 140%，同时从 0.94 轻微放大到 1，
+ *           读作"图片从它的中心生长出来"，是参考短视频最常用的一拍；
+ *  - wipe   从左向右矩形擦除，适合横幅/长图；
+ *  - rise   下方浮入（旧的默认入场，保留为可选项）；
+ *  - blur   模糊聚焦：从 18px 高斯模糊 + 1.07 倍缩放收敛到清晰；
+ *  - fade   纯淡入。
+ *
+ * 出场统一为 0.35s 淡出 + 轻微缩小，不再硬切。
+ * 入场时长随窗口自适应（最长 0.85s），保证最短 0.5s 的窗口也能完整走完入场。
+ */
+function entranceMotion(index: number, start: number, end: number, entrance: VisualClip["entrance"]): string {
+  const clipDuration = Math.max(0.1, end - start);
+  const id = `#visual-${index}`;
+  const enterDuration = Math.min(0.85, Math.max(0.3, clipDuration * .55));
+  const enterEnd = start + enterDuration;
+  const exitDuration = Math.min(0.35, Math.max(0.12, clipDuration * .3));
+  const exitAt = Math.max(start + 0.05, end - exitDuration);
+  const fixed = (value: number) => value.toFixed(3);
+  let enter: string;
+  switch (entrance) {
+    case "wipe":
+      enter = `tl.fromTo("${id}",{opacity:1,clipPath:"inset(0% 100% 0% 0%)",y:0,scale:1},{opacity:1,clipPath:"inset(0% 0% 0% 0%)",duration:${fixed(enterDuration)},ease:"power2.inOut"},${fixed(start)}).set("${id}",{clipPath:"none"},${fixed(enterEnd)})`;
+      break;
+    case "blur":
+      enter = `tl.fromTo("${id}",{opacity:0,y:0,scale:1.07,filter:"blur(18px)",clipPath:"none"},{opacity:1,y:0,scale:1,filter:"blur(0px)",duration:${fixed(enterDuration)},ease:"power2.out"},${fixed(start)}).set("${id}",{filter:"none"},${fixed(enterEnd)})`;
+      break;
+    case "fade":
+      enter = `tl.fromTo("${id}",{opacity:0,y:0,scale:1,clipPath:"none"},{opacity:1,duration:${fixed(Math.max(0.3, Math.min(0.5, enterDuration)))},ease:"power2.out"},${fixed(start)})`;
+      break;
+    case "rise":
+      enter = `tl.fromTo("${id}",{opacity:0,y:46,scale:1,clipPath:"none"},{opacity:1,y:0,scale:1,duration:${fixed(enterDuration)},ease:"power2.out"},${fixed(start)})`;
+      break;
+    default: // bloom
+      enter = `tl.fromTo("${id}",{opacity:0,y:0,scale:.94,clipPath:"circle(0% at 50% 50%)"},{opacity:1,y:0,scale:1,clipPath:"circle(140% at 50% 50%)",duration:${fixed(enterDuration)},ease:"power2.out"},${fixed(start)}).set("${id}",{clipPath:"none"},${fixed(enterEnd)})`;
+  }
+  return `${enter}.to("${id}",{opacity:0,scale:.965,duration:${fixed(exitDuration)},ease:"power2.in"},${fixed(exitAt)}).set("${id}",{opacity:0},${fixed(end)});`;
 }
 
 function resolveVisualTiming(
@@ -529,7 +576,14 @@ function resolveVisualTiming(
       throw new Error(`Visual ${visual.id} has no display window before its scene boundary`);
     }
     let sequenceStart = resolvedStart;
-    const naturalEnd = Math.min(hardEnd, narrationStartSeconds + cueEnd + tailSeconds);
+    // 停留时长封顶：与 packages/render-spec/visual-timeline.ts 的
+    // resolveVisualClipWindow 保持一致 —— 图片出现后 target 秒即退场，
+    // 不再被 cue 结束时间拉住（0 表示不封顶，沿用挂到 cue 结束的旧行为）。
+    const target = visual.targetDisplaySeconds === undefined
+      ? DEFAULT_TARGET_DISPLAY_SECONDS
+      : Math.max(0, Number(visual.targetDisplaySeconds) || 0);
+    const cueNaturalEnd = narrationStartSeconds + cueEnd + tailSeconds;
+    const naturalEnd = Math.min(hardEnd, target > 0 ? Math.min(cueNaturalEnd, resolvedStart + target) : cueNaturalEnd);
     let resolvedEnd = Math.min(hardEnd, Math.max(naturalEnd, resolvedStart + Math.max(0.1, Number(visual.minimumDisplaySeconds ?? 0.1))));
     const sequenceCount = Math.max(1, Math.floor(Number(visual.sequenceCount || 1)));
     const sequenceIndex = Math.max(0, Math.min(sequenceCount - 1, Math.floor(Number(visual.sequenceIndex || 0))));

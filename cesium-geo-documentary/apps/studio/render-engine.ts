@@ -588,6 +588,8 @@ async function writeVisualsManifest(sandbox: string, project: VideoProject, spec
         offsetX: asset.offsetX,
         offsetY: asset.offsetY,
         animation: asset.animation,
+        entrance: asset.entrance,
+        targetDisplaySeconds: asset.targetDisplaySeconds,
         ...(kept.length > 1 ? { sequenceIndex, sequenceCount: kept.length } : {}),
         // Every picture stops at its own scene's narration boundary. A child
         // photo must not run into the next stop of the tour, and an overview or

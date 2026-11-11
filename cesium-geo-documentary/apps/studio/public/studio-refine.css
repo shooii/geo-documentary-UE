@@ -856,3 +856,13 @@ button:focus-visible{outline:2px solid #58ddcf;outline-offset:2px}
 }
 .map-view-fields small { margin: 10px 0 7px; }
 .map-view-fields button { padding: 5px 9px; font-size: 11px; }
+
+/* 素材影像窗入场动画变体 —— 与成片 compose-hyperframes.ts 的 entranceMotion 一一对应。
+   rise（下方浮入）是 frame 基础样式的默认；其余按 data-entrance 切换，
+   退场即回到各自初始态（bloom 向中心收回、wipe 反向擦除、blur 重新失焦）。 */
+.preview-asset-frame[data-entrance="bloom"]{clip-path:circle(0% at 50% 50%);transition:opacity .3s ease,transform .8s cubic-bezier(.22,.61,.36,1),clip-path .8s cubic-bezier(.22,.61,.36,1),filter .42s ease}
+.preview-asset-frame[data-entrance="bloom"].is-visible{clip-path:circle(140% at 50% 50%)}
+.preview-asset-frame[data-entrance="wipe"]{clip-path:inset(0 100% 0 0);transition:opacity .2s ease,transform .7s cubic-bezier(.65,0,.35,1),clip-path .7s cubic-bezier(.65,0,.35,1),filter .42s ease}
+.preview-asset-frame[data-entrance="wipe"].is-visible{clip-path:inset(0 0 0 0)}
+.preview-asset-frame[data-entrance="blur"]{filter:blur(18px);transform:translate3d(var(--asset-offset-x,0),var(--asset-offset-y,0px),0) scale(1.07);transition:opacity .5s ease,transform .8s cubic-bezier(.22,.61,.36,1),filter .8s ease}
+.preview-asset-frame[data-entrance="fade"]{transform:translate3d(var(--asset-offset-x,0),var(--asset-offset-y,0px),0) scale(var(--asset-scale,1));transition:opacity .5s ease,filter .42s ease}

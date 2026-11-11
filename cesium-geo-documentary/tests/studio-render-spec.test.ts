@@ -805,7 +805,9 @@ test("Studio keeps one task-first export history with explicit output actions", 
   assert.match(clientSource, /const cameraLocked = !waitsForMapReveal \|\| state\.previewAssetReadySceneId === scene\.id/);
   // The reveal has to honour the stage placement, not the panel selection: during
   // playback the flight-complete handler must show the picture the film is on.
-  assert.match(clientSource, /function revealSelectedSceneAsset\(placement = state\.playbackStageActive \? state\.playbackStagePlacement : selectedPlacement\(\)\)[\s\S]*?setPreviewAssetVisible\(cameraLocked && previewMediaReady\(previewMediaElement\(\)\)\)/);
+  assert.match(clientSource, /function revealSelectedSceneAsset\(placement = state\.playbackStageActive \? state\.playbackStagePlacement : selectedPlacement\(\)\)[\s\S]*?setPreviewAssetVisible\(show, placement\.entrance\)/);
+  // 与成片一致：预览图片出现后按 targetDisplaySeconds 自动退场。
+  assert.match(clientSource, /asset\.targetDisplaySeconds \?\? 5\.5/);
   assert.match(clientSource, /state\.previewAssetReadySceneId = scene\.id;[\s\S]*?revealSelectedSceneAsset\(\)/);
   assert.match(clientSource, /function selectScene\(sceneId, preview = false\)[\s\S]*?setPreviewAssetVisible\(false\);[\s\S]*?state\.previewAssetReadySceneId = null;[\s\S]*?state\.selectedSceneId = sceneId/);
   assert.match(css, /\.preview-asset\.is-visible/);
@@ -842,7 +844,7 @@ test("Studio keeps one task-first export history with explicit output actions", 
   assert.match(css, /\.preview-asset-frame\.is-visible\{[^}]*opacity:1[^}]*filter:blur\(0\)/);
   const visualTimelineSource = await readFile(resolve(root, "packages/render-spec/visual-timeline.ts"), "utf8");
   assert.match(engineSource, /const plan = planVisualClip\(\{/);
-  assert.match(visualTimelineSource, /scene\.section === "child" && range\s*\? range\.start \+ flight/);
+  assert.match(visualTimelineSource, /scene\.section === "child" && range\s*\? range\.start \+ plateSettleSeconds\(flight\)/);
   // 共享计划仍限制所有场景的结束边界，并将相同字段写入正式导出清单。
   assert.match(visualTimelineSource, /\.\.\.\(range \? \{ notAfterNarrationSeconds: range\.end \} : \{\}\)/);
   assert.match(visualTimelineSource, /clampMinimumDisplaySeconds\(configuredMinimumSeconds, availableSeconds\)/);
