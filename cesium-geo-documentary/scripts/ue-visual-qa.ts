@@ -95,7 +95,8 @@ async function run() {
     samples.push({ name: 'annotation-on', time: probeTime, annotationWindows: [{ sceneId: 'probe', start: start!, end: end! }] });
     samples.push({ name: 'annotation-off', time: probeTime, annotationWindows: [] });
   }
-  const manifest: any = { phase, region, project: projectPath, imagery: 'tianditu-imagery', width, height, playerAsset,
+  const imageryProvider = option('imagery', 'tianditu-imagery');
+  const manifest: any = { phase, region, project: projectPath, imagery: imageryProvider, width, height, playerAsset,
     createdAt: new Date().toISOString(), tourEnd: cursor, returnDuration, stops, samples: [], status: 'running' };
   const saveManifest = () => writeFile(join(output, 'manifest.json'), JSON.stringify(manifest, null, 2));
   await saveManifest();
@@ -131,7 +132,7 @@ async function run() {
     launch(process.execPath, [tsx, join(root, 'scripts/ue-visual-qa.ts'), '--serve-existing', `--port=${port}`], { UE_SIGNALLING_URL: `ws://127.0.0.1:${signallingPort}`, UE_QA_PUBLIC_ROOT: publicRoot });
     await until(async () => { try { return (await fetch(`http://127.0.0.1:${port}/runtime-config.json`)).ok; } catch { return false; } }, 30000, '本地播放器启动超时');
     // 只检查代理返回的影像响应，不读取或打印任何凭证。
-    const test = await fetch(`http://127.0.0.1:${port}/api/imagery/tianditu-imagery/0/0/0?session=visual-qa`);
+    const test = await fetch(`http://127.0.0.1:${port}/api/imagery/${imageryProvider}/0/0/0?session=visual-qa`);
     if (!test.ok) throw new Error(`天地图本地代理不可用（HTTP ${test.status}），请检查已有本地天地图配置或网络`);
     await test.arrayBuffer();
     const unrealLog = join(output, 'unreal.log');
@@ -144,12 +145,22 @@ async function run() {
     }, 240000, 'UE串流启动超时');
     browser = await chromium.launch({ headless: true });
     const page = await browser.newPage({ viewport: { width, height } });
-    await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=portrait&imagery=tianditu-imagery&capture=1`);
+    await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=portrait&imagery=${imageryProvider}&capture=1`);
     await page.waitForFunction(() => Boolean((window as any).geoVideo?.getDiagnostics().ready), {}, { timeout: 240000 });
     await page.evaluate(payload => (window as any).geoVideo.prepareStudioTour(payload), { tourStops: stops, returnDuration });
     for (const sample of samples) {
       if (sample.subtitleBounds) await page.evaluate(payload => (window as any).geoVideo.setSubtitleWindows([{ start: payload.time, end: payload.time + .01, bounds: payload.subtitleBounds }]), sample);
-      if (sample.annotationWindows) await page.evaluate(windows => (window as any).geoVideo.setAnnotationWindows(windows), sample.annotationWindows);
+      if (sample.annotationWindows) {
+        await page.evaluate(windows => (window as any).geoVideo.setAnnotationWindows(windows), sample.annotationWindows);
+        if (sample.annotationWindows.length > 0) {
+          // 注记瓦片是异步 HTTP 队列：开关切换后立即截图会拍到"瓦片还在路上"的
+          // 空注记层。等一拍让队列落地（真实预览持续渲染，不存在这个问题）。
+          await page.waitForTimeout(2500);
+          // 再渲染一次同样本帧，让新到的注记瓦片有机会贴到网格上。
+          await page.evaluate(time => (window as any).geoVideo.renderFrame(time), sample.time).catch(() => undefined);
+          await page.waitForTimeout(800);
+        }
+      }
       const previous = new Set(await readdir(frames));
       for (let attempt = 1; ; attempt++) {
         try { await page.evaluate(time => (window as any).geoVideo.renderFrame(time), sample.time); break; }

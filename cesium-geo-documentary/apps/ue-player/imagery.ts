@@ -245,12 +245,12 @@ export class ImageryService {
     return { provider, tileTemplate, attribution: credit[provider] || 'Esri World Imagery' };
   }
   /**
-   * The annotation layer only exists on top of 天地图 imagery: the same `w` tile matrix
-   * and the same key, so any other basemap gets no template and the runtime reports
-   * zero supported windows rather than drawing a mismatched label grid.
+   * 天地图 cia 注记是独立的透明地名瓦片层（同 `w` 矩阵集、同一 token 代理），
+   * 与底图提供者无关——Mapbox/Esri/Bing 等任何底图上都可以叠加。只要配置了
+   * 天地图 token 就返回模板；token 缺失时返回空，运行时报告零支持窗口。
    */
   async annotationTemplate(provider: string, origin: string) {
-    if (provider !== 'tianditu-imagery') return '';
+    void provider;
     const settings = await this.settings();
     const key = await secret(this.root, this.env, 'TIANDITU_TOKEN') || String(settings.tianditu_token || '').trim();
     if (!key) return '';
