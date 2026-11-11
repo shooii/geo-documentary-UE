@@ -1173,6 +1173,9 @@ void AGeoHUD::DrawHUD()
             FadingPlateSince = -1;
         }
     }
+    // 收尾起始段由前端收尾进度(plateFade)显式驱动的淡出：覆盖跳转采样 / 收尾首帧时
+    // 状态机尚未启动而满强度残留的情况。两者取更小值，确保任何路径都不会晚淡出。
+    PlateFade = FMath::Min(PlateFade, float(FMath::Clamp(N(F, TEXT("plateFade"), 1), 0., 1.)));
     const FString CurrentId = Current.IsEmpty() ? FadingPlateId : Current;
     const float Scale = Canvas->SizeX / (Map->RenderProfile == TEXT("landscape") ? 1920.f : 1080.f);
     const FIntPoint Size(Canvas->SizeX, Canvas->SizeY);

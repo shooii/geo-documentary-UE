@@ -277,6 +277,11 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   }
 
   const closing = Math.max(returning?.progress ?? 0, overviewProgress === undefined ? 0 : smooth(overviewProgress));
+  // 收尾起始段让当前村的名牌与定位点淡出。旧实现靠 UE 端「current 从非空跳空」的跨帧
+  // 检测启动 0.45s 淡出，跳转采样（QA 的 renderFrame 直接落帧）或收尾首帧会满强度残留。
+  // 这里改为用收尾进度线性显式驱动，两条收尾路径（tour 返航 / outro 总览）都覆盖。
+  const closingLinear = overviewProgress !== undefined ? clamp(overviewProgress) : returnProgress !== null ? clamp(returnProgress) : 0;
+  const plateFade = clamp(1 - closingLinear / .12);
   const hierarchy = visualHierarchy(pose.height, overview.height, closing);
   if (stops.length && !openingOnly) {
     const representatives = overviewRepresentatives(stops, profile);
@@ -297,7 +302,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
     parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity, contextErasing,
-    labels, accents, labelReferenceDistance, focusId, focus, labelsReveal, fills, hierarchy,
+    labels, accents, labelReferenceDistance, focusId, focus, labelsReveal, fills, hierarchy, plateFade,
     // Villages the tour has already reached. UE keeps their plate painted, so the
     // map accumulates colour the way the reference reel does.
     visitedIds: stops.filter(item => mapTime >= Number(item.start)).map(item => String(item.id)),
