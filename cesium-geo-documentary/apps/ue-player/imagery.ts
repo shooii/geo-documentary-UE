@@ -1,4 +1,5 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { parseEnv } from 'node:util';
 import { parse } from 'yaml';
@@ -152,6 +153,15 @@ export class ImageryService {
   private readonly ionSessions = new Map<string, Promise<BingTiles>>();
   private readonly bingSessions = new Map<string, Promise<BingTiles>>();
   private readonly dispatcher: Dispatcher | undefined;
+  /**
+   * L2 disk cache: an exported film pulls tens of thousands of tile requests, and the
+   * in-memory L1 holds only ~1024 before evicting. Persisting every fetch means a
+   * re-export of the same region runs fully offline (no CDN latency, no 429 retries),
+   * and a long capture never re-downloads a tile the L1 forgot. Keys are hashed;
+   * entries never expire (imagery providers version by URL, not by date).
+   */
+  private get diskDir() { return join(this.root, 'workspace', 'imagery-cache'); }
+  private readonly diskKey = (key: string) => createHash('sha1').update(key).digest('hex');
   constructor(private readonly root: string, private readonly env: NodeJS.ProcessEnv = process.env, dispatcher?: Dispatcher) {
     const proxy = env.UE_HTTP_PROXY || env.HTTPS_PROXY || env.HTTP_PROXY;
     this.dispatcher = dispatcher ?? (proxy ? new ProxyAgent(proxy) : undefined);
@@ -279,6 +289,19 @@ export class ImageryService {
       if (cached.expires > Date.now()) { this.cache.set(key, cached); return cached; }
       this.cacheBytes -= cached.bytes.length;
     }
+    // L2: a tile on disk never touches the network again. Sessions (Cesium ion) are
+    // excluded — their template resolves through a per-session endpoint.
+    const diskFile = ion ? '' : join(this.diskDir, this.diskKey(key));
+    if (diskFile) {
+      const hit = await readFile(diskFile).catch(() => undefined);
+      if (hit) {
+        const type = this.sniffType(hit) || 'image/jpeg';
+        const result = { bytes: hit, type, expires: Date.now() + 3600000 };
+        this.cache.set(key, result);
+        this.cacheBytes += hit.length;
+        return result;
+      }
+    }
     const existing = this.pending.get(key);
     if (existing) return existing;
     const request = (async () => {
@@ -315,10 +338,24 @@ export class ImageryService {
         this.cacheBytes -= this.cache.get(oldest)!.bytes.length;
         this.cache.delete(oldest);
       }
+      if (diskFile)
+        void mkdir(this.diskDir, { recursive: true })
+          .then(() => writeFile(diskFile, bytes))
+          .catch(() => undefined);
       return result;
     })();
     this.pending.set(key, request);
     try { return await request; } finally { this.pending.delete(key); }
+  }
+  /** Content-type sniff for disk hits (the header is not stored alongside the bytes). */
+  private sniffType(bytes: Buffer) {
+    if (bytes.length < 12) return '';
+    if (bytes[0] === 0xff && bytes[1] === 0xd8) return 'image/jpeg';
+    if (bytes[0] === 0x89 && bytes[1] === 0x50) return 'image/png';
+    if (bytes[0] === 0x47 && bytes[1] === 0x49) return 'image/gif';
+    if (bytes[0] === 0x42 && bytes[1] === 0x4d) return 'image/bmp';
+    if (bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return 'image/webp';
+    return '';
   }
   async close() { await this.dispatcher?.close(); }
 }

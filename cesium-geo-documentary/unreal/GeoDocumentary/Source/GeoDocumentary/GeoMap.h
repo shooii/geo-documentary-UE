@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "Dom/JsonObject.h"
 #include "Engine/Canvas.h"
+#include "HAL/ThreadSafeCounter.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/HUD.h"
@@ -76,6 +77,8 @@ class AGeoMap : public AActor
     FString BoundaryFocus;
     /** Layers muted for diagnosis, parsed from GEO_BOUNDARY_OFF at BeginPlay. */
     uint8 BoundaryOff = 0;
+    /** Sends a ready-built response over the Pixel Streaming data channel. */
+    void RespondJsonText(const FString &Out);
     int32 BoundaryGeneration = -1;
     /** Parent rings — the slab that stays up for the whole scene. */
     TArray<int32> BoundaryPaths;
@@ -145,9 +148,33 @@ class AGeoMap : public AActor
     FString TileTemplate, ImageryProvider, ImageryAttribution;
     FString RenderProfile;
     FIntPoint RequestedSize;
-    int32 CaptureIndex = 0, CaptureTicks = 0;
+    int32 CaptureIndex = 0, CaptureTicks = 0, CaptureIndexOffset = 0;
     double CaptureStarted = 0;
     double AverageFrameMs = 0;
+    /**
+     * Offline batch capture (capture-batch): the studio hands over a whole run of
+     * frames at once and the runtime walks them on its own Tick — one round trip per
+     * batch instead of one per frame. Each frame reuses the single-frame pipeline
+     * (apply, wait for imagery, screenshot); only the transport differs, so a batched
+     * film is pixel-identical to a single-frame one.
+     */
+    TArray<TSharedPtr<FJsonObject>> CaptureBatch;
+    FString CaptureBatchId;
+    int32 CaptureBatchSize = 0, CaptureBatchStart = 0;
+    /** Set from the moment RequestScreenshot goes out until the read-back callback
+     *  lands on the game thread; the next batch frame may only be applied after that,
+     *  or the back buffer would be read one frame late. */
+    bool CaptureScreenshotInFlight = false;
+    /** Ownership of the screenshot currently in flight (cleared by the callback). */
+    FString PendingCaptureFile, PendingCaptureId;
+    bool PendingCaptureIsBatch = false;
+    /** Pending async PNG saves (shared with the worker threads, never a raw this). */
+    TSharedPtr<FThreadSafeCounter, ESPMode::ThreadSafe> CaptureSavesPending;
+    TSharedPtr<FThreadSafeCounter, ESPMode::ThreadSafe> CaptureSaveFailures;
+    /** Applies a frame and arms the deterministic wait; one frame of a batch or a solo. */
+    void LaunchCaptureFrame(const TSharedPtr<FJsonObject> &Frame);
+    /** Game-thread screenshot dispatch: solo frames answer at once, batch frames go on. */
+    void OnScreenshotCaptured(int32 Width, int32 Height, const TArray<FColor> &Pixels);
     /** Smoothed per-frame costs, reported as GEO_PROFILE so a regression is visible. */
     double ApplyMs = 0, RefreshMs = 0, HudMs = 0;
     /** Canvas quads the HUD emitted last frame; the shadow pass dominates them. */
@@ -216,6 +243,21 @@ class AGeoHUD : public AHUD
     TArray<FGeoVisitedFill> VisitedFills;
     TArray<FVector4> DimRects;
     TArray<FVector4> ShadowRects[3];
+    /**
+     * Scratch buffers for the per-frame triangle batches. The rim pass alone writes
+     * several MB of FCanvasUVTri per frame; allocating and freeing that every frame
+     * kept the allocator's page map growing across a 24000-frame capture (the "15 MB
+     * per frame leak"). Resetting members keeps the capacity warm and the committed
+     * memory flat; the Canvas API still copies the item, but nothing else churns.
+     */
+    TArray<FCanvasUVTri> BoundaryTriangleScratch;
+    TArray<FCanvasUVTri> BeamTriangleScratch;
+    TArray<FCanvasUVTri> BatchTriangleScratch;
+    TArray<FVector2D> RimOffsetScratch;
+    TArray<FVector2D> RunPointScratch;
+    TArray<FLinearColor> RunColorScratch;
+    TSet<uint64> ClaimedEdgeScratch;
+    TSet<uint64> CurrentEdgeScratch;
     UPROPERTY() TObjectPtr<UFont> LabelFont;
     /** Township names. A second atlas, rasterised large: one 64 px font made every big
      *  name a 2x upscale of a small bitmap. */

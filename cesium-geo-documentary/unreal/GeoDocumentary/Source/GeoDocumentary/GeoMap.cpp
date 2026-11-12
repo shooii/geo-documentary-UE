@@ -1,5 +1,6 @@
 #include "GeoMap.h"
 #include "GeoSky.h"
+#include "Async/Async.h"
 #include "Engine/PostProcessVolume.h"
 #include "Engine/Scene.h"
 #include "Camera/CameraComponent.h"
@@ -26,6 +27,7 @@
 #include "ProceduralMeshComponent.h"
 #include "Serialization/JsonSerializer.h"
 #include "Slate/SceneViewport.h"
+#include "UObject/UObjectArray.h"
 #include "UObject/UnrealType.h"
 #include "UnrealClient.h"
 #include <cmath>
@@ -179,6 +181,7 @@ void AGeoMap::BeginPlay()
     if (auto *Rate = IConsoleManager::Get().FindConsoleVariable(TEXT("PixelStreaming2.WebRTC.Fps")))
         Rate->Set(StreamFps, ECVF_SetByCode);
     FParse::Value(FCommandLine::Get(), TEXT("GeoCaptureRoot="), CaptureRoot);
+    FParse::Value(FCommandLine::Get(), TEXT("GeoCaptureIndexOffset="), CaptureIndexOffset);
     TileMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_Tile.M_Tile"));
     // The 天地图 annotation layer is transparent, so it needs its own material: M_Tile
     // is opaque unlit and would paint every label tile as a grey card over the imagery.
@@ -218,6 +221,19 @@ void AGeoMap::BeginPlay()
     {
         PC->SetViewTarget(this);
         PC->bShowMouseCursor = true;
+    }
+    // Offline capture: register the screenshot callback ONCE. The old code attached a
+    // fresh lambda per captured frame and removed it from inside the callback, which
+    // was correct but kept the delegate array growing and shrinking 24000 times; a
+    // persistent weak lambda is dispatch-equivalent and churns nothing.
+    if (!CaptureRoot.IsEmpty())
+    {
+        CaptureSavesPending = MakeShared<FThreadSafeCounter, ESPMode::ThreadSafe>();
+        CaptureSaveFailures = MakeShared<FThreadSafeCounter, ESPMode::ThreadSafe>();
+        UGameViewportClient::OnScreenshotCaptured().AddWeakLambda(
+            this, [this](int32 Width, int32 Height, const TArray<FColor> &Pixels) {
+                OnScreenshotCaptured(Width, Height, Pixels);
+            });
     }
 }
 void AGeoMap::Respond(FString Id, FString Error)
@@ -281,6 +297,10 @@ void AGeoMap::Respond(FString Id, FString Error)
     }
     FString Out;
     FJsonSerializer::Serialize(J, TJsonWriterFactory<>::Create(&Out));
+    RespondJsonText(Out);
+}
+void AGeoMap::RespondJsonText(const FString &Out)
+{
     if (UFunction *F = Input->FindFunction(TEXT("SendPixelStreaming2Response")))
     {
         struct
@@ -326,15 +346,43 @@ void AGeoMap::OnInput(const FString &Descriptor)
             Respond(Id, TEXT("Launch with -GeoCaptureRoot for offline frame capture"));
             return;
         }
-        if (!CaptureId.IsEmpty())
+        if (!CaptureId.IsEmpty() || !CaptureBatchId.IsEmpty())
         {
             Respond(Id, TEXT("Capture already in progress"));
             return;
         }
-        ApplyFrame(O(J, TEXT("frame")));
+        LaunchCaptureFrame(O(J, TEXT("frame")));
         CaptureId = Id;
-        CaptureTicks = 0;
-        CaptureStarted = FPlatformTime::Seconds();
+        return;
+    }
+    if (Action == TEXT("capture-batch"))
+    {
+        if (CaptureRoot.IsEmpty())
+        {
+            Respond(Id, TEXT("Launch with -GeoCaptureRoot for offline frame capture"));
+            return;
+        }
+        if (!CaptureId.IsEmpty() || !CaptureBatchId.IsEmpty())
+        {
+            Respond(Id, TEXT("Capture already in progress"));
+            return;
+        }
+        const TArray<TSharedPtr<FJsonValue>> *Frames;
+        if (!J->TryGetArrayField(TEXT("frames"), Frames) || Frames->Num() == 0)
+        {
+            Respond(Id, TEXT("capture-batch requires a non-empty frames array"));
+            return;
+        }
+        CaptureBatch.Reset();
+        for (const auto &Value : *Frames)
+            CaptureBatch.Add(Value->AsObject());
+        CaptureBatchId = Id;
+        CaptureBatchSize = CaptureBatch.Num();
+        CaptureBatchStart = CaptureIndexOffset + CaptureIndex;
+        CaptureSaveFailures->Reset();
+        UE_LOG(LogTemp, Display, TEXT("GEO_CAPTURE_BATCH %d frames from #%d"), CaptureBatchSize, CaptureBatchStart);
+        LaunchCaptureFrame(CaptureBatch[0]);
+        CaptureId = CaptureBatchId;
         return;
     }
     if (Action == TEXT("set-annotations"))
@@ -720,6 +768,12 @@ void AGeoMap::SetImagery(const TSharedPtr<FJsonObject> &Data, FString Id)
         Resources.Remove(Texture);
         Resources.Remove(Material);
         Resources.Remove(Mesh);
+        // Transient tile textures carry RF_Transient, so dropping the reference is not
+        // enough — the RHI/GPU memory is only released by an explicit destroy, and GC
+        // skips transient objects. Free it here or the cache eviction leaks the texture
+        // for the rest of the process.
+        if (Texture)
+            Texture->ConditionalBeginDestroy();
         Mesh->DestroyComponent();
     }
     TileMeshes.Reset();
@@ -907,6 +961,12 @@ void AGeoMap::TrimTileCache()
         Resources.Remove(Texture);
         Resources.Remove(Material);
         Resources.Remove(Mesh);
+        // Transient tile textures carry RF_Transient, so dropping the reference is not
+        // enough — the RHI/GPU memory is only released by an explicit destroy, and GC
+        // skips transient objects. Free it here or the cache eviction leaks the texture
+        // for the rest of the process.
+        if (Texture)
+            Texture->ConditionalBeginDestroy();
         Mesh->DestroyComponent();
     }
 }
@@ -1233,6 +1293,12 @@ void AGeoMap::TrimAnnotationCache()
         Resources.Remove(Texture);
         Resources.Remove(Material);
         Resources.Remove(Mesh);
+        // Transient tile textures carry RF_Transient, so dropping the reference is not
+        // enough — the RHI/GPU memory is only released by an explicit destroy, and GC
+        // skips transient objects. Free it here or the cache eviction leaks the texture
+        // for the rest of the process.
+        if (Texture)
+            Texture->ConditionalBeginDestroy();
         Mesh->DestroyComponent();
     }
 }
@@ -1356,6 +1422,53 @@ void AGeoMap::UpdateTileCounts()
         }
 }
 
+void AGeoMap::LaunchCaptureFrame(const TSharedPtr<FJsonObject> &NextFrame)
+{
+    ApplyFrame(NextFrame);
+    CaptureTicks = 0;
+    CaptureStarted = FPlatformTime::Seconds();
+}
+
+/**
+ * Single place the screenshot read-back lands. A solo capture-frame answers here
+ * (compress synchronously, respond); a batch frame hands the PNG encode + disk write
+ * to a worker thread and lets the Tick immediately apply the next frame — the encode
+ * of one frame then overlaps the render of the next, and the game thread never
+ * touches an 8 MB pixel array longer than the copy below. Worker state travels in
+ * shared counters, never as a captured `this`, so a teardown race cannot dangle.
+ */
+void AGeoMap::OnScreenshotCaptured(int32 Width, int32 Height, const TArray<FColor> &Pixels)
+{
+    if (PendingCaptureFile.IsEmpty())
+        return;
+    const FString File = MoveTemp(PendingCaptureFile);
+    const FString RespondId = MoveTemp(PendingCaptureId);
+    const bool Batch = PendingCaptureIsBatch;
+    PendingCaptureIsBatch = false;
+    CaptureScreenshotInFlight = false;
+    TArray<FColor> Opaque = Pixels;
+    for (auto &P : Opaque)
+        P.A = 255;
+    if (!Batch)
+    {
+        TArray64<uint8> PNG;
+        FImageUtils::PNGCompressImageArray(Width, Height, Opaque, PNG);
+        const bool Saved = FFileHelper::SaveArrayToFile(PNG, *File);
+        Respond(RespondId, Saved ? TEXT("") : TEXT("Unable to save PNG frame"));
+        return;
+    }
+    TSharedPtr<FThreadSafeCounter, ESPMode::ThreadSafe> Pending = CaptureSavesPending,
+                                                        Failures = CaptureSaveFailures;
+    Pending->Increment();
+    AsyncThread([Pending, Failures, Width, Height, Opaque = MoveTemp(Opaque), File]() mutable {
+        TArray64<uint8> PNG;
+        FImageUtils::PNGCompressImageArray(Width, Height, Opaque, PNG);
+        if (!FFileHelper::SaveArrayToFile(PNG, *File))
+            Failures->Increment();
+        Pending->Decrement();
+    });
+}
+
 void AGeoMap::Tick(float Delta)
 {
     Super::Tick(Delta);
@@ -1400,13 +1513,80 @@ void AGeoMap::Tick(float Delta)
                HudRingsMs, HudMaskMs, HudFloodMs, 0., HudLayoutMs, HudLabelMs,
                TileMeshes.Num(), ShownTiles.Num(), TileQueue.Num(), ActiveTiles.Num(), TileImages.Num(),
                HudRects, BoundaryVertices);
-    if (CaptureId.IsEmpty())
+    // Leak triage: paired allocations should not grow commit. Report the object count
+    // alongside the process memory so a per-frame object leak (textures, MIDs, meshes)
+    // separates itself from raw heap growth in one glance.
+    if (ProfileReport % 90 == 0)
+    {
+        const FPlatformMemoryStats MemStats = FPlatformMemory::GetStats();
+        UE_LOG(LogTemp, Display, TEXT("GEO_MEM commit=%.2fGB phys=%.2fGB uobjects=%d"),
+               MemStats.UsedVirtual / 1073741824.0, MemStats.UsedPhysical / 1073741824.0, GUObjectArray.GetObjectArrayNum());
+    }
+    // Every per-frame allocation in the HUD/capture path is paired, yet committed memory
+    // still climbed ~20 MB/frame on long captures and the allocator itself slowed down
+    // (rects 62 -> 157 ms on constant data): the binned allocator parks freed pages on
+    // its free lists and never hands them back, so the climb is fragmentation, not a
+    // leaked object. A periodic trim returns those pages to the OS; once per ~60 frames
+    // keeps the cost (a TLS-cache walk) off the hot path.
+    if (ProfileReport % 60 == 0)
+        FMemory::Trim();
+    if (CaptureId.IsEmpty() && CaptureBatchId.IsEmpty())
         return;
     UpdateTileCounts();
+    const bool Batch = !CaptureBatchId.IsEmpty();
+    const FString RespondId = Batch ? CaptureBatchId : CaptureId;
     if (FPlatformTime::Seconds() - CaptureStarted > 45)
     {
-        Respond(CaptureId, TEXT("Timed out waiting for imagery"));
+        Respond(RespondId, TEXT("Timed out waiting for imagery"));
         CaptureId.Empty();
+        CaptureBatch.Reset();
+        CaptureBatchId.Reset();
+        CaptureBatchSize = 0;
+        return;
+    }
+    // Batch mode: the previous frame's read-back has landed (CaptureId was cleared by
+    // the screenshot launch), so apply the next frame. The read-back and the async PNG
+    // save are what gate this — never wall time — which keeps the sequence
+    // deterministic while removing the per-frame round trip.
+    if (CaptureId.IsEmpty())
+    {
+        if (CaptureScreenshotInFlight)
+            return;
+        const int32 Done = CaptureIndex - CaptureBatchStart;
+        if (Done >= CaptureBatchSize)
+        {
+            // The last frames' PNG encode + disk write run on worker threads; the batch
+            // must not answer until they land, or the grabber tears the process down and
+            // the tail frames never reach the disk.
+            if (CaptureSavesPending->GetValue() > 0)
+                return;
+            const int32 Failed = CaptureSaveFailures->GetValue();
+            // The batch summary carries its own captured/failed counters: the grabber
+            // verifies them instead of trusting an empty reply, and a truncated or
+            // vanished message therefore fails loudly instead of silently skipping frames.
+            auto Summary = MakeShared<FJsonObject>();
+            Summary->SetStringField(TEXT("type"), TEXT("geo-video-ue"));
+            Summary->SetStringField(TEXT("requestId"), CaptureBatchId);
+            Summary->SetNumberField(TEXT("captured"), Done - Failed);
+            Summary->SetNumberField(TEXT("failed"), Failed);
+            Summary->SetNumberField(TEXT("pendingTiles"), PendingTiles);
+            Summary->SetNumberField(TEXT("failedTiles"), FailedTiles);
+            if (Failed)
+                Summary->SetStringField(TEXT("error"), FString::Printf(TEXT("%d of %d frame(s) failed to save"), Failed, CaptureBatchSize));
+            FString Out;
+            FJsonSerializer::Serialize(Summary, TJsonWriterFactory<>::Create(&Out));
+            RespondJsonText(Out);
+            CaptureBatch.Reset();
+            CaptureBatchId.Reset();
+            CaptureBatchSize = 0;
+            return;
+        }
+        // Keep the pending-write queue shallow: an encode slower than the render loop
+        // would otherwise stockpile full-resolution pixel arrays.
+        if (CaptureSavesPending->GetValue() > 6)
+            return;
+        LaunchCaptureFrame(CaptureBatch[Done]);
+        CaptureId = CaptureBatchId;
         return;
     }
     if (PendingTiles > 0 || (TileMaterial && TileMaterial->IsCompiling()) || BoundaryEffectsCompiling())
@@ -1416,8 +1596,6 @@ void AGeoMap::Tick(float Delta)
     }
     if (++CaptureTicks < 4)
         return;
-    FString Id = CaptureId;
-    CaptureId.Empty();
     // One dead tile used to refuse the frame — and with it the whole take. Across a
     // 20-minute capture the chance of a single 404 is close to one, and the hole is
     // covered by the coarser level anyway. Refuse only a frame that is mostly holes;
@@ -1425,22 +1603,30 @@ void AGeoMap::Tick(float Delta)
     const int32 FailedLimit = FMath::Max(8, RequiredTiles.Num() / 4);
     if (FailedTiles > FailedLimit)
     {
-        Respond(Id, FString::Printf(TEXT("Imagery tile errors (%d of %d); frame capture refused"), FailedTiles, RequiredTiles.Num()));
+        Respond(RespondId, FString::Printf(TEXT("Imagery tile errors (%d of %d); frame capture refused"), FailedTiles, RequiredTiles.Num()));
+        CaptureId.Empty();
+        CaptureBatch.Reset();
+        CaptureBatchId.Reset();
+        CaptureBatchSize = 0;
         return;
     }
-    FString File = FPaths::Combine(CaptureRoot, FString::Printf(TEXT("frame-%06d.png"), CaptureIndex++));
+    FString File = FPaths::Combine(CaptureRoot, FString::Printf(TEXT("frame-%06d.png"), CaptureIndexOffset + CaptureIndex++));
     IFileManager::Get().MakeDirectory(*CaptureRoot, true);
-    UGameViewportClient::OnScreenshotCaptured().AddWeakLambda(
-        this, [this, Id, File](int32 Width, int32 Height, const TArray<FColor> &Pixels) {
-            TArray<FColor> Opaque = Pixels;
-            for (auto &P : Opaque)
-                P.A = 255;
-            TArray64<uint8> PNG;
-            FImageUtils::PNGCompressImageArray(Width, Height, Opaque, PNG);
-            bool Saved = FFileHelper::SaveArrayToFile(PNG, *File);
-            Respond(Id, Saved ? TEXT("") : TEXT("Unable to save PNG frame"));
-            UGameViewportClient::OnScreenshotCaptured().RemoveAll(this);
-        });
+    PendingCaptureFile = MoveTemp(File);
+    PendingCaptureId = Batch ? FString() : RespondId;
+    PendingCaptureIsBatch = Batch;
+    CaptureScreenshotInFlight = true;
+    CaptureId.Empty();
+    // Diagnostic path (GEO_CAPTURE_NOSHOT): skip the read-back entirely so a leak can
+    // be attributed to the screenshot pipeline versus the render/HUD path. Batch mode
+    // advances itself; solo mode answers immediately.
+    if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_CAPTURE_NOSHOT")).Len())
+    {
+        CaptureScreenshotInFlight = false;
+        if (!Batch)
+            Respond(RespondId);
+        return;
+    }
     // No filename: the callback above owns the write. Passing one made the engine write
     // the same PNG a second time while the callback was still saving it, which is how a
     // truncated frame (and an ffmpeg exit 1 that "went away on retry") happened.
@@ -1906,7 +2092,8 @@ void AGeoHUD::DrawHUD()
     const auto DrawRects = [this](const TArray<FVector4> &Rects, const FLinearColor &Color) {
         if (Rects.IsEmpty())
             return;
-        TArray<FCanvasUVTri> Triangles;
+        TArray<FCanvasUVTri> &Triangles = BatchTriangleScratch;
+        Triangles.Reset();
         Triangles.Reserve(Rects.Num() * 2);
         for (const auto &Rect : Rects)
         {
@@ -1926,7 +2113,7 @@ void AGeoHUD::DrawHUD()
         }
         if (!Triangles.Num())
             return;
-        FCanvasTriangleItem Batch(MoveTemp(Triangles), GWhiteTexture);
+        FCanvasTriangleItem Batch(Triangles, GWhiteTexture);
         Batch.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Batch);
     };
@@ -2139,7 +2326,8 @@ void AGeoHUD::DrawHUD()
         const auto DrawSpans = [this](TArray<FVector2D> &In, TArray<FVector2D> &Ext, const FLinearColor &Color) {
             if (In.IsEmpty())
                 return;
-            TArray<FCanvasUVTri> Triangles;
+            TArray<FCanvasUVTri> &Triangles = BatchTriangleScratch;
+            Triangles.Reset();
             Triangles.Reserve(In.Num() * 2);
             for (int I = 0; I < In.Num(); ++I)
             {
@@ -2154,7 +2342,7 @@ void AGeoHUD::DrawHUD()
                 Triangles.Add(A);
                 Triangles.Add(B);
             }
-            FCanvasTriangleItem Batch(MoveTemp(Triangles), GWhiteTexture);
+            FCanvasTriangleItem Batch(Triangles, GWhiteTexture);
             Batch.BlendMode = SE_BLEND_Translucent;
             Canvas->DrawItem(Batch);
         };
@@ -2224,12 +2412,17 @@ void AGeoHUD::DrawHUD()
     }
     const FLinearColor TownEdge(.031, .070, .026);
     const FLinearColor ContextEdge(.35, .43, .41), DarkEdge(.009, .018, .021);
-    TArray<FCanvasUVTri> BoundaryTriangles;
+    // The rim/comet batches are members now: the rim pass alone writes several MB of
+    // triangles per frame, and re-mallocing that every frame is what made committed
+    // memory creep on long captures.
+    TArray<FCanvasUVTri> &BoundaryTriangles = BoundaryTriangleScratch;
+    BoundaryTriangles.Reset();
     // The beam is lifted out of the rim batch. Both used to share one triangle array, and
     // the village rim's 13 px halo plus its 3 px core swallowed the 4.2 px golden trail
     // whole — the triangles were built (the log counted them) and never seen. Drawn as a
     // second item it is guaranteed to sit on top of the white rim.
-    TArray<FCanvasUVTri> BeamTriangles;
+    TArray<FCanvasUVTri> &BeamTriangles = BeamTriangleScratch;
+    BeamTriangles.Reset();
     const auto AddStrokeTo = [](TArray<FCanvasUVTri> &Into, const FVector2D &A, const FVector2D &B, double Width,
                                 const FLinearColor &ColorA, const FLinearColor &ColorB) {
         FVector2D Delta = B - A;
@@ -2304,7 +2497,7 @@ void AGeoHUD::DrawHUD()
     //
     // The miter is capped at 2.4x half-width (clamping the bisector length); past that a
     // cartographic renderer would bevel, which at 3 px is indistinguishable.
-    const auto EmitRim = [](TArray<FCanvasUVTri> &Into, const TArray<FVector2D> &Pts, const TArray<FLinearColor> &Cols,
+    const auto EmitRim = [this](TArray<FCanvasUVTri> &Into, const TArray<FVector2D> &Pts, const TArray<FLinearColor> &Cols,
                             double Width, double Feather, float AlphaMul) {
         const int32 Count = Pts.Num();
         if (Count < 2 || Cols.Num() != Count)
@@ -2314,7 +2507,8 @@ void AGeoHUD::DrawHUD()
         // A closed ring's first and last point are the same vertex: its offsets have to be
         // built from both neighbours, or the seam keeps a notch half a line wide.
         const bool Closed = FVector2D::Distance(Pts[0], Pts[Count - 1]) < .75;
-        TArray<FVector2D> Offset;
+        TArray<FVector2D> &Offset = RimOffsetScratch;
+        Offset.Reset();
         Offset.SetNum(Count);
         for (int32 I = 0; I < Count; ++I)
         {
@@ -2445,8 +2639,10 @@ void AGeoHUD::DrawHUD()
             {
                 const double KeepDistance =
                     Run.Style == 3 ? 0.75 : Run.Style == 2 ? 1.5 : 2.0;
-                TArray<FVector2D> Points;
-                TArray<FLinearColor> Colors;
+                TArray<FVector2D> &Points = RunPointScratch;
+                TArray<FLinearColor> &Colors = RunColorScratch;
+                Points.Reset();
+                Colors.Reset();
                 Points.Reserve(Run.Points.Num());
                 const int32 Last = Run.Points.Num() - 1;
                 for (int32 I = 0; I <= Last; ++I)
@@ -2455,8 +2651,8 @@ void AGeoHUD::DrawHUD()
                         Points.Add(Run.Points[I]);
                         Colors.Add(Run.Colors[I]);
                     }
-                Run.Points = MoveTemp(Points);
-                Run.Colors = MoveTemp(Colors);
+                Run.Points = Points;
+                Run.Colors = Colors;
             }
             if (Run.Style == 1 || Run.Style == 4)
             {
@@ -2483,8 +2679,10 @@ void AGeoHUD::DrawHUD()
     // Two villages that touch stroke the same edge twice. The 3 px cores are opaque, so
     // that was invisible — but the 13 px and 6.5 px halos were composited twice and every
     // seam inside the township came out a stop brighter than the rim around it. The first
-    // ring to claim an edge keeps it.
-    TSet<uint64> ClaimedEdges;
+    // ring to claim an edge keeps it. Member scratch: tens of thousands of entries per
+    // frame used to be freshly allocated and freed here.
+    TSet<uint64> &ClaimedEdges = ClaimedEdgeScratch;
+    ClaimedEdges.Reset();
     const auto EdgeKey = [](const FVector2D &A, const FVector2D &B) {
         const auto Q = [](const FVector2D &P) {
             const uint64 X = uint64(FMath::Clamp(FMath::RoundToInt(P.X * 2.), 0, (1 << 22) - 1));
@@ -2495,7 +2693,8 @@ void AGeoHUD::DrawHUD()
         return KA < KB ? KA ^ (KB * 0x9E3779B97F4A7C15ull) : KB ^ (KA * 0x9E3779B97F4A7C15ull);
     };
     // A shared edge belongs to the focus even if an older ring appears first in data.
-    TSet<uint64> CurrentEdges;
+    TSet<uint64> &CurrentEdges = CurrentEdgeScratch;
+    CurrentEdges.Reset();
     for (const auto &Stroke : Strokes)
         if (Stroke.Touring && !Stroke.Parent)
             CurrentEdges.Add(EdgeKey(Stroke.A, Stroke.B));

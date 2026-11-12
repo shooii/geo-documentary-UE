@@ -53,7 +53,10 @@ function send(action: string, payload = {}): Promise<any> {
   if (!channelReady) return Promise.reject(new Error('UE data channel unavailable'));
   const requestId = crypto.randomUUID();
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => { pending.delete(requestId); reject(new Error(`UE command timeout: ${action}`)); }, action==='capture-frame'?90000:30000);
+    // A batch rides one round trip for N frames; its reply can therefore take far
+    // longer than a solo capture-frame, so it gets its own timeout budget.
+    const budget = action === 'capture-frame' ? 90000 : action === 'capture-batch' ? 300000 : 30000;
+    const timer = setTimeout(() => { pending.delete(requestId); reject(new Error(`UE command timeout: ${action}`)); }, budget);
     pending.set(requestId, { resolve, reject, timer });
     if (!stream.emitUIInteraction({ type: 'geo-video-ue', version: 1, requestId, action, ...payload })) {
       clearTimeout(timer); pending.delete(requestId); reject(new Error('UE data channel unavailable'));
@@ -319,6 +322,37 @@ Object.assign(window,{ geoVideo: {
   /** 注记时间窗直接下发到 UE；验收脚本用它做「开/关」同帧对照。 */
   setAnnotationWindows: async (windows: { sceneId?: string; start: number; end: number }[]) => send('set-annotations', { annotationWindows: windows }),
   renderFrame: async (t: number) => { stop(); time=t; openingOnly=false; if (!ready) throw new Error('UE renderer not ready'); return send('capture-frame',{ frame:{ ...frameAt(scene,stops ?? [],t,profile,duration,false), subtitleBounds: activeSubtitleBounds(subtitleWindows, t) ?? null } }); },
+  /**
+   * Batch capture: compose N frames locally (frameAt is a pure function of t) and hand
+   * the run to UE in one or more data-channel messages. UE walks them on its own Tick
+   * and answers each message once, so the per-frame evaluate/datachannel round trip
+   * disappears; each frame is still rendered and screenshotted by the same single-frame
+   * pipeline. A message is split to stay under ~120 KB, because the WebRTC data channel
+   * silently truncates a larger reliable message and UE then drops the whole JSON.
+   */
+  renderBatch: async (times: number[]) => {
+    stop(); time=times.at(-1) ?? time; openingOnly=false;
+    if (!ready) throw new Error('UE renderer not ready');
+    if (!times.length) return { captured: 0 };
+    const MAX_MESSAGE = 120_000;
+    let captured = 0;
+    for (let base = 0; base < times.length;) {
+      const frames: any[] = [];
+      let size = 0;
+      let i = base;
+      while (i < times.length) {
+        const t = times[i]!;
+        const frame = { ...frameAt(scene, stops ?? [], t, profile, duration, false), subtitleBounds: activeSubtitleBounds(subtitleWindows, t) ?? null };
+        const n = JSON.stringify(frame).length;
+        if (frames.length && size + n > MAX_MESSAGE) break;
+        frames.push(frame); size += n; i++;
+      }
+      const response = await send('capture-batch', { frames });
+      captured += Number(response?.captured ?? frames.length);
+      base = i;
+    }
+    return { captured };
+  },
   seek: async (t: number) => { stop(); flightOrigin=undefined; time=t; draw(true); },
   getStreamHealth: () => ({
     ready,
