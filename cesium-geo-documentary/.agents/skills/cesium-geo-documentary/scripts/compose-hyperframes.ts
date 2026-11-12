@@ -452,6 +452,9 @@ function entranceMotion(index: number, start: number, end: number, entrance: Vis
   const exitDuration = Math.min(0.35, Math.max(0.12, clipDuration * .3));
   const exitAt = Math.max(start + 0.05, end - exitDuration);
   const fixed = (value: number) => value.toFixed(3);
+  // 使用已输出的淡出起点与时长求和，保证 lint 与 GSAP 看到完全相同的终点；
+  // 再次 toFixed 会在距字幕边界恰好 50ms 时把 hard kill 舍到阈值另一侧。
+  const hardKillAt = Number(fixed(exitAt)) + Number(fixed(exitDuration));
   let enter: string;
   switch (entrance) {
     case "wipe":
@@ -469,7 +472,7 @@ function entranceMotion(index: number, start: number, end: number, entrance: Vis
     default: // bloom
       enter = `tl.fromTo("${id}",{opacity:0,y:0,scale:.94,clipPath:"circle(0% at 50% 50%)"},{opacity:1,y:0,scale:1,clipPath:"circle(140% at 50% 50%)",duration:${fixed(enterDuration)},ease:"power2.out"},${fixed(start)}).set("${id}",{clipPath:"none"},${fixed(enterEnd)})`;
   }
-  return `${enter}.to("${id}",{opacity:0,scale:.965,duration:${fixed(exitDuration)},ease:"power2.in"},${fixed(exitAt)}).set("${id}",{opacity:0},${fixed(end)});`;
+  return `${enter}.to("${id}",{opacity:0,scale:.965,duration:${fixed(exitDuration)},ease:"power2.in"},${fixed(exitAt)}).set("${id}",{opacity:0},${hardKillAt});`;
 }
 
 function resolveVisualTiming(
