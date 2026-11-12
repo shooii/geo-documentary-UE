@@ -269,7 +269,11 @@ test("both route planners pin the opening village", async () => {
       "utf8"
     )
   ]);
-  assert.match(studioRoute, /startId: currentOrder\[0\]!,[\s\S]{0,600}?pinOpening: true/);
+  // The opening village is pinned over the children the planner can actually
+  // see (`known`, i.e. the ones with a boundary polygon). A village without a
+  // polygon cannot be a planning anchor at all — 龙门镇 440882112220 is one — and
+  // it is re-inserted at its original index after planning instead.
+  assert.match(studioRoute, /startId: (?:currentOrder|known)\[0\]!,[\s\S]{0,600}?pinOpening: true/);
   assert.match(cli, /pinOpening: !has\("allow-start-move"\)/);
 });
 
