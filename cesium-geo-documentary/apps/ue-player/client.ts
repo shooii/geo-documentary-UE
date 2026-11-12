@@ -271,7 +271,7 @@ const slotEnabled = query.get('slot') !== 'off' && !captureMode;
 let holdsSlot = false;
 let leaseGeneration = 0;
 let joining = false;
-let renewing = false;
+let renewing: number | undefined;
 let leaseConfirmedAt = 0;
 let slotHeartbeat: ReturnType<typeof setTimeout> | undefined;
 let slotPoll: ReturnType<typeof setTimeout> | undefined;
@@ -414,7 +414,9 @@ function checkVideoHealth() {
     // A paused element looks identical to a dead one. Ask it to play before blaming
     // the network: a rejected autoplay is handled by the play overlay, not by a
     // reconnect, which would rebuild a stream that was never broken.
+    const generation = streamGeneration;
     void video.play().catch(() => {
+      if (generation !== streamGeneration || video !== document.querySelector('video') || suspended) return;
       playBlocked = true;
       status.textContent = '点击播放 UE 地图视频流';
       retryButton.textContent = '播放视频';
@@ -440,9 +442,14 @@ document.addEventListener('loadedmetadata', maybeLoad, true);
 document.addEventListener('loadeddata', maybeLoad, true);
 retryButton.onclick = () => {
   if (playBlocked) {
-    void document.querySelector('video')?.play().then(() => {
+    const video = document.querySelector('video');
+    const generation = streamGeneration;
+    void video?.play().then(() => {
+      if (generation !== streamGeneration || video !== document.querySelector('video') || suspended) return;
       playBlocked = false; overlay.hidden = ready; resetVideoHealth(); maybeLoad();
-    }).catch(() => { status.textContent = '浏览器阻止了播放，请再次点击播放视频'; });
+    }).catch(() => {
+      if (generation === streamGeneration && video === document.querySelector('video') && !suspended) status.textContent = '浏览器阻止了播放，请再次点击播放视频';
+    });
     return;
   }
   clearTimeout(recoveryTimer); recoveryTimer = undefined;
@@ -661,15 +668,18 @@ function scheduleHeartbeat() {
   if (!suspended && holdsSlot) slotHeartbeat = setTimeout(() => { slotHeartbeat = undefined; void renewSlot(); }, 4000);
 }
 async function renewSlot() {
-  if (suspended || !holdsSlot || renewing || joining) return;
-  renewing = true;
+  const connectionGeneration = streamGeneration;
+  if (suspended || !holdsSlot || renewing === connectionGeneration || joining) return;
+  renewing = connectionGeneration;
   const generation = leaseGeneration;
   const state = await claimSlot();
-  renewing = false;
-  // The page went away (or was replaced) while this reply was in flight. A grant we
-  // no longer need must be handed back, or the next window waits on a ghost.
-  if (suspended || generation !== leaseGeneration) {
-    if (state === 'granted') sendSlotRelease();
+  if (renewing === connectionGeneration) renewing = undefined;
+  // A stream recovery starts a new lease epoch. Ignore its predecessor's reply so a
+  // stale busy/offline response cannot dismantle the replacement connection.
+  if (suspended || generation !== leaseGeneration || connectionGeneration !== streamGeneration) {
+    // pagehide invalidates the page's lease; a newer stream with the same viewer id
+    // may already own it, so only release for the page-level invalidation.
+    if (state === 'granted' && (suspended || generation !== leaseGeneration)) sendSlotRelease();
     return;
   }
   if (state === 'granted') {

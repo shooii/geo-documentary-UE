@@ -172,6 +172,56 @@ test('租约心跳返回占用时不拆断仍在出画面的流', async () => {
   assert.equal(h.instances[0]!.disconnectCalls, 0);
 });
 
+test('恢复后的新流握手不受旧续租 busy 或 offline 响应影响', async () => {
+  for (const outcome of ['busy', 'offline']) {
+    const h = await harness(); await h.open();
+    let settleOld!: (value: any) => void;
+    h.setLease(() => new Promise(resolve => { settleOld = resolve; }).then(value => {
+      if (outcome === 'offline') throw new Error('network unavailable');
+      return value;
+    }));
+    await h.advance(4000);
+    assert.equal(h.claims.length, 2);
+    h.instances[0]!.dispatch('dataChannelClose');
+    h.setLease(async () => ({ granted: true }));
+    await h.advance(2800);
+    assert.equal(h.connections(), 2);
+    const replacement = h.instances.at(-1)!;
+    assert.equal(h.window.geoVideo.getStreamHealth().stage, 'connecting');
+
+    settleOld({ granted: false });
+    await h.flush();
+    assert.equal(replacement.disconnectCalls, 0, outcome);
+    assert.equal(h.instances.length, 2);
+    assert.equal(h.window.geoVideo.getStreamHealth().stage, 'connecting');
+    await h.open(replacement);
+    assert.equal(h.window.geoVideo.getStreamHealth().ready, true);
+  }
+});
+
+test('新流可以独立续租，旧成功回复不释放新租约也不清除新请求标记', async () => {
+  const h = await harness(); await h.open();
+  let settleOld!: (value: any) => void;
+  h.setLease(() => new Promise(resolve => { settleOld = resolve; }));
+  await h.advance(4000);
+  h.instances[0]!.dispatch('dataChannelClose');
+  h.setLease(async () => ({ granted: true }));
+  await h.advance(2800); await h.open();
+  let settleNew!: (value: any) => void;
+  h.setLease(() => new Promise(resolve => { settleNew = resolve; }));
+  await h.advance(4000);
+  assert.equal(h.claims.length, 4);
+  const releases = h.beacons.length;
+  settleOld({ granted: true }); await h.flush();
+  assert.equal(h.beacons.length, releases);
+  h.document.dispatch('visibilitychange'); await h.flush();
+  assert.equal(h.claims.length, 4);
+  settleNew({ granted: true }); await h.flush();
+  h.setLease(async () => ({ granted: true }));
+  await h.advance(4000);
+  assert.equal(h.claims.length, 5);
+});
+
 test('租约续期串行进行，挂起请求不能叠加心跳', async () => {
   const h = await harness(); await h.open();
   let settle!: (value: any) => void;
@@ -213,6 +263,47 @@ test('手动重试重新申请租约，不直接调用库重连', async () => {
   h.elements.retry!.click(); await h.flush(); await h.advance(3000);
   assert.ok(h.claims.length > before);
   assert.equal(h.instances[0]!.reconnectCalls, 0);
+});
+
+test('旧视频 play 延迟拒绝不会让恢复流卡在 play-blocked', async () => {
+  const h = await harness('?slot=off'); await h.open();
+  let rejectOld!: (error: Error) => void;
+  h.video.paused = true;
+  h.video.play = () => new Promise((_resolve, reject) => { rejectOld = reject; });
+  await h.advance(2000);
+  h.instances[0]!.dispatch('dataChannelClose');
+  await h.advance(2000);
+  h.video.readyState = 0; h.video.videoWidth = 0;
+  await h.open(h.instances.at(-1)!);
+  rejectOld(new Error('old video play rejected'));
+  await h.flush();
+  assert.equal(h.window.geoVideo.getStreamHealth().stage, 'waiting-first-frame');
+  await h.advance(26000);
+  assert.equal(h.connections(), 3);
+  assert.notEqual(h.window.geoVideo.getStreamHealth().stage, 'play-blocked');
+});
+
+test('旧播放按钮请求的成功或失败均不回写新实例的播放提示', async () => {
+  for (const outcome of ['resolved', 'rejected']) {
+    const h = await harness('?slot=off'); await h.open();
+    const old = h.instances[0]!;
+    old.dispatch('playStreamRejected');
+    let settleOld!: () => void;
+    h.video.play = () => new Promise<void>((resolve, reject) => {
+      settleOld = () => outcome === 'resolved' ? resolve() : reject(new Error('old play rejected'));
+    });
+    h.elements.retry!.click();
+    old.dispatch('dataChannelClose');
+    await h.advance(2000);
+    h.video.readyState = 0; h.video.videoWidth = 0;
+    const replacement = h.instances.at(-1)!;
+    await h.open(replacement);
+    replacement.dispatch('playStreamRejected');
+    const message = h.elements.status!.textContent;
+    settleOld(); await h.flush();
+    assert.equal(h.window.geoVideo.getStreamHealth().stage, 'play-blocked', outcome);
+    assert.equal(h.elements.status!.textContent, message, outcome);
+  }
 });
 
 test('自动播放被拒后的点击只播放视频，不创建连接', async () => {
