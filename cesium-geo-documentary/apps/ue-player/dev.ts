@@ -65,6 +65,10 @@ async function scheduleRendererRestart() {
 function startRenderer() {
   const child = start(join(runtime.engineRoot, 'Engine/Binaries/Win64/UnrealEditor.exe'), [
     runtime.project, '/Engine/Maps/Entry', '-game', '-RenderOffscreen', '-Unattended', '-NoSplash', '-AudioMixer',
+    // mimalloc: the binned default parks freed page blocks and never returns them, so a
+    // long-lived preview session gets slower the longer it plays (HUD rect time 30 -> 100
+    // ms on constant data). mimalloc hands that memory back and keeps the preview flat.
+    '-mimalloc',
     `-PixelStreamingURL=ws://127.0.0.1:${process.env.UE_STREAMER_PORT || 8889}`,
     '-ResX=720', '-ResY=1280', '-ForceRes', `-abslog=${join(logDir, 'preview-renderer.log')}`,
     // Offline frame capture: `renderFrame(t)` then renders the exact scene time and writes
