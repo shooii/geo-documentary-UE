@@ -1,5 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, execFile, type ChildProcess } from "node:child_process";
+import { promisify } from "node:util";
+import { acquireExportLease, type ExportLease } from "../ue-player/export-lease.js";
+import { CAPTURE_CLEANUP_FATAL } from "../ue-player/capture-lifecycle.js";
+import { previewRendererMatches } from "../ue-player/runtime.js";
 import { existsSync } from "node:fs";
 import { copyFile, cp, lstat, mkdir, readFile, readdir, readlink, rm, rmdir, stat, symlink, unlink, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, resolve, sep } from "node:path";
@@ -94,6 +98,7 @@ export interface RenderCallbacks {
  * `黄金成片 QA 未通过` and `输出文件不是本任务新生成` must stay non-retryable.
  */
 export function isRetryableRenderFailure(message: string): boolean {
+  if (message.includes(CAPTURE_CLEANUP_FATAL)) return false;
   if (/exited with (?!0\b)\S+/.test(message)) return true;
   // A stage watchdog firing means the pipeline deadlocked, not that the project is
   // wrong — the retry restarts from the cached narration / map clip.
@@ -317,10 +322,15 @@ async function prepareSandbox(root: string, jobRoot: string, project: VideoProje
  * one that had just failed, so every teardown path goes through taskkill /t.
  */
 export function killProcessTree(child: ChildProcess): void {
-  if (child.exitCode !== null) return;
-  child.kill();
+  if (child.exitCode !== null || child.signalCode !== null) return;
   if (process.platform === "win32" && child.pid) {
-    spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], { windowsHide: true, stdio: "ignore" }).once("exit", () => undefined);
+    // Kill the tree before its parent: killing the wrapper first can orphan UE,
+    // Chromium and FFmpeg, so taskkill can no longer discover their ancestry.
+    const killer = spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], { windowsHide: true, stdio: "ignore" });
+    killer.once("error", () => { child.kill(); });
+    killer.once("exit", (code) => { if (code !== 0 && child.exitCode === null) child.kill(); });
+  } else {
+    child.kill();
   }
 }
 
@@ -349,23 +359,46 @@ function command(callbacks: RenderCallbacks, cwd: string, executable: string, ar
   return new Promise((resolve, reject) => {
     const child = spawn(executable, args, { cwd, shell: false, windowsHide: true, env: { ...process.env, GEO_VIDEO_PROJECT_ROOT: cwd, ...envOverrides } });
     callbacks.registerProcess(child);
-    const append = (chunk: unknown) => callbacks.update({ logs: [String(chunk).trim()] });
+    let cleanupFatal = false;
+    let outputTail = "";
+    const append = (chunk: unknown) => {
+      const text = String(chunk);
+      if ((outputTail + text).includes(CAPTURE_CLEANUP_FATAL)) cleanupFatal = true;
+      outputTail = (outputTail + text).slice(-CAPTURE_CLEANUP_FATAL.length);
+      callbacks.update({ logs: [text.trim()] });
+    };
+    const failure = (message: string) => new Error(cleanupFatal ? `${CAPTURE_CLEANUP_FATAL}: ${message}` : message);
     child.stdout.on("data", append); child.stderr.on("data", append);
     const timeoutMs = commandTimeoutMs(status);
     let timedOut = false;
+    let settled = false;
+    let killDeadline: ReturnType<typeof setTimeout> | undefined;
+    const settle = () => {
+      if (settled) return false;
+      settled = true;
+      clearTimeout(timer);
+      if (killDeadline) clearTimeout(killDeadline);
+      callbacks.registerProcess(null);
+      return true;
+    };
     const timer = setTimeout(() => {
       timedOut = true;
       callbacks.update({ logs: [`${stage} 超过 ${Math.round(timeoutMs / 60_000)} 分钟没有结束，已终止并清理进程树`] });
       killProcessTree(child);
+      // Inherited pipes can remain open even after the wrapper exits. The
+      // watchdog must settle the stage even when no close event ever arrives.
+      killDeadline = setTimeout(() => {
+        if (settle()) reject(failure(`${stage} timed out after ${Math.round(timeoutMs / 1000)}s`));
+      }, 15000);
     }, timeoutMs);
-    const settle = () => { clearTimeout(timer); callbacks.registerProcess(null); };
-    child.once("error", (error) => { settle(); reject(error); });
+    child.once("error", (error) => { if (settle()) reject(cleanupFatal ? failure(error.message) : error); });
     child.once("close", (code) => {
-      settle();
-      if (callbacks.cancelled()) reject(new Error("Render cancelled"));
-      else if (timedOut) reject(new Error(`${stage} timed out after ${Math.round(timeoutMs / 1000)}s`));
+      if (!settle()) return;
+      if (cleanupFatal) reject(failure(`${stage} exited with ${code}`));
+      else if (callbacks.cancelled()) reject(new Error("Render cancelled"));
+      else if (timedOut) reject(failure(`${stage} timed out after ${Math.round(timeoutMs / 1000)}s`));
       else if (code === 0) resolve();
-      else reject(new Error(`${stage} exited with ${code}`));
+      else reject(failure(`${stage} exited with ${code}`));
     });
   });
 }
@@ -669,10 +702,18 @@ function mapVideoSeconds(root: string, file: string): Promise<number> {
     const probe = spawn(ffmpeg, ["-hide_banner", "-i", file], { windowsHide: true });
     let text = "";
     probe.stderr.on("data", (chunk: Buffer) => { text += chunk.toString("utf8"); });
-    probe.once("error", () => resolveSeconds(0));
-    probe.once("exit", () => {
+    let settled = false;
+    const finish = (seconds: number) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolveSeconds(seconds);
+    };
+    const timer = setTimeout(() => { killProcessTree(probe); finish(0); }, 15000);
+    probe.once("error", () => finish(0));
+    probe.once("close", () => {
       const match = /Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/.exec(text);
-      resolveSeconds(match ? Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]) : 0);
+      finish(match ? Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]) : 0);
     });
   });
 }
@@ -788,26 +829,29 @@ function runCaptured(executable: string, args: string[], options: { cwd: string;
     let stdout = "";
     let stderr = "";
     let timedOut = false;
+    let settled = false;
+    let killDeadline: ReturnType<typeof setTimeout> | undefined;
+    const finish = (code: number | null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (killDeadline) clearTimeout(killDeadline);
+      resolvePromise({ code, stdout, stderr, timedOut });
+    };
     const timer = setTimeout(() => {
       timedOut = true;
-      child.kill();
-      // The check drives a real browser, so the CLI's own PID is the head of a
-      // tree. Killing only that head on Windows would leave the browser holding
-      // the profile lock until it exits on its own.
-      if (process.platform === "win32" && child.pid) {
-        spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], { windowsHide: true, stdio: "ignore" }).once("exit", () => undefined);
-      }
+      killProcessTree(child);
+      // 子进程继承的管道可能一直不关闭，清理宽限期后也必须结束预检。
+      killDeadline = setTimeout(() => finish(null), 15_000);
     }, options.timeoutMs);
     child.stdout?.on("data", (chunk) => { stdout += String(chunk); });
     child.stderr?.on("data", (chunk) => { stderr += String(chunk); });
     child.once("error", (error) => {
-      clearTimeout(timer);
-      resolvePromise({ code: null, stdout, stderr: `${stderr}${error.message}`, timedOut });
+      if (settled) return;
+      stderr += error.message;
+      finish(null);
     });
-    child.once("close", (code) => {
-      clearTimeout(timer);
-      resolvePromise({ code, stdout, stderr, timedOut });
-    });
+    child.once("close", finish);
   });
 }
 
@@ -895,28 +939,114 @@ async function preflightComposition(
 // —— 导出录制期间暂停预览渲染器，避免双 UE 抢显存/内存触发 OOM ——
 // 录制（apps/ue-player/capture.ts）会拉起 1080×1920 的录制 UE；预览 UE（720×1280）
 // 与它同抢资源时，实测二者之一会 OOM 退出（exit 4294967295，日志无 fatal）。
-// 这里写锁文件并杀掉预览 UE；dev.ts 看到锁就不重启预览，录制结束删锁后恢复。
-const EXPORT_LOCK = "workspace/export-recording.lock";
+// 内核租约跨进程互斥且崩溃自动释放；旧守护器通过持续更新的锁文件兼容。
 const PREVIEW_PID_FILE = "workspace/ue-preview.pid";
+const previewExec = promisify(execFile);
 
-async function pausePreviewRenderer(root: string): Promise<void> {
-  await writeFile(join(root, EXPORT_LOCK), String(Date.now()), "utf8");
+export function previewStopCommand(pid: string): string {
+  if (!/^[1-9]\d*$/.test(pid)) throw new Error("预览 PID 无效");
+  return `$ErrorActionPreference='Stop'; $same = { param($p) $p -and ($p.CommandLine -ceq $env:GEO_PREVIEW_COMMAND) -and ([string]$p.CreationDate.Ticks -ceq $env:GEO_PREVIEW_CREATED) -and ($p.ExecutablePath -ieq $env:GEO_PREVIEW_EXECUTABLE) }; $p = Get-CimInstance Win32_Process -Filter "ProcessId=${pid}"; if (& $same $p) { & taskkill.exe /pid ${pid} /t /f; $killCode = $LASTEXITCODE; if ($killCode -ne 0) { $remaining = Get-CimInstance Win32_Process -Filter "ProcessId=${pid}"; if (& $same $remaining) { exit $killCode } } }; exit 0`;
+}
+
+async function pausePreviewRenderer(root: string, cancelled: () => boolean): Promise<ExportLease> {
+  const lease = await acquireExportLease(root, cancelled);
   try {
-    const pid = (await readFile(join(root, PREVIEW_PID_FILE), "utf8")).trim();
-    if (/^\d+$/.test(pid)) {
-      await new Promise<void>(done => {
-        const killer = spawn("taskkill", ["/pid", pid, "/t", "/f"], { windowsHide: true, stdio: "ignore" });
-        killer.once("error", () => done());
-        killer.once("exit", () => done());
-      });
+    let pid: string;
+    try { pid = (await readFile(join(root, PREVIEW_PID_FILE), "utf8")).trim(); }
+    catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return lease;
+      throw error;
     }
-  } catch {
-    /* 预览渲染器未运行，或 pid 文件尚不存在 */
+    if (!/^[1-9]\d*$/.test(pid)) return lease;
+    const runtimeFile = process.env.GEO_UE_RUNTIME || join(root, "workspace", "ue-runtime.json");
+    const config = JSON.parse((await readFile(runtimeFile, "utf8")).replace(/^\uFEFF/, "")) as { project?: string; engineRoot?: string };
+    if (!config.project || !config.engineRoot) throw new Error("无法确认预览 UE 所属项目，运行时配置不完整");
+    const streamer = Number(process.env.UE_STREAMER_PORT || 8889);
+    if (process.platform === "win32") {
+      const { stdout } = await previewExec("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", `[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false); Get-CimInstance Win32_Process -Filter "ProcessId=${pid}" | Select-Object Name,CommandLine,ExecutablePath,@{Name='CreatedTicks';Expression={[string]$_.CreationDate.Ticks}} | ConvertTo-Json -Compress`], { windowsHide: true, timeout: 10000 });
+      if (!stdout.trim()) return lease;
+      const info = JSON.parse(stdout.replace(/^\uFEFF/, "")) as { Name?: string; CommandLine?: string; ExecutablePath?: string; CreatedTicks?: string };
+      if (info.Name?.toLowerCase() !== "unrealeditor.exe" || !info.CommandLine || !info.ExecutablePath
+        || !samePath(info.ExecutablePath, join(config.engineRoot, "Engine/Binaries/Win64/UnrealEditor.exe"))
+        || !previewRendererMatches(info.CommandLine, config.project, streamer)) return lease;
+      // 再次核验同一进程，避免探测期间旧 PID 被其他程序复用后误杀。
+      await previewExec("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", previewStopCommand(pid)], { windowsHide: true, timeout: 15000, env: { ...process.env, GEO_PREVIEW_COMMAND: info.CommandLine, GEO_PREVIEW_CREATED: String(info.CreatedTicks ?? ""), GEO_PREVIEW_EXECUTABLE: info.ExecutablePath } });
+    }
+    return lease;
+  } catch (error) {
+    await lease.release();
+    throw error;
   }
 }
 
-async function resumePreviewRenderer(root: string): Promise<void> {
-  await unlink(join(root, EXPORT_LOCK)).catch(() => { /* 锁已不在也无妨 */ });
+export interface CaptureProcessInfo { ProcessId: number; ParentProcessId?: number; CommandLine?: string | null }
+
+export function taskCaptureProcesses(processes: CaptureProcessInfo[], sandbox: string): CaptureProcessInfo[] {
+  const normalize = (value: string) => value.replaceAll("\\", "/").replace(/\/$/, "").toLowerCase();
+  const base = normalize(sandbox);
+  const scripts = new Set(["capture.ts", "server.ts", "signalling.ts"].map(name => `${base}/apps/ue-player/${name}`));
+  const selected = new Set<number>();
+  for (const info of processes) {
+    const args = (info.CommandLine?.match(/(?:[^\s"]|"[^"]*")+/g) ?? []).map(arg => normalize(arg.replaceAll('"', '')));
+    if (args.some(arg => scripts.has(arg) || arg.startsWith(`-geocaptureroot=${base}/renders/ue-frames/`))) selected.add(info.ProcessId);
+  }
+  // 根进程还在时，同一次只读快照中的后代也必须全部退出。
+  let added: boolean;
+  do {
+    added = false;
+    for (const info of processes) if (info.ParentProcessId && selected.has(info.ParentProcessId) && !selected.has(info.ProcessId)) {
+      selected.add(info.ProcessId); added = true;
+    }
+  } while (added);
+  return processes.filter(info => selected.has(info.ProcessId));
+}
+
+async function probeTaskCaptureProcesses(sandbox: string): Promise<boolean> {
+  let processes: CaptureProcessInfo[];
+  if (process.platform === "win32") {
+    const { stdout } = await previewExec("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", "$ErrorActionPreference='Stop'; [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false); ConvertTo-Json -Compress -InputObject @(Get-CimInstance Win32_Process | Select-Object ProcessId,ParentProcessId,CommandLine)"], { windowsHide: true, timeout: 10_000, maxBuffer: 8 * 1024 * 1024 });
+    processes = JSON.parse(stdout.replace(/^\uFEFF/, ""));
+    if (!Array.isArray(processes)) throw new Error("进程查询没有返回完整快照");
+  } else {
+    const { stdout } = await previewExec("ps", ["-eo", "pid=,ppid=,args="], { timeout: 10_000, maxBuffer: 8 * 1024 * 1024 });
+    processes = stdout.split(/\r?\n/).flatMap(line => {
+      const match = line.match(/^\s*(\d+)\s+(\d+)\s+(.+)$/);
+      return match ? [{ ProcessId: Number(match[1]), ParentProcessId: Number(match[2]), CommandLine: match[3]! }] : [];
+    });
+  }
+  return taskCaptureProcesses(processes, sandbox).length > 0;
+}
+
+// 此保护由当前服务的内核租约维持；强制终止服务仍会释放它，不提供跨服务重启恢复协议。
+const recoveringCaptureSandboxes = new Set<string>();
+
+export async function releaseCaptureLeaseWhenSafe(
+  lease: ExportLease, sandbox: string, log: (message: string) => void,
+  probe: () => Promise<boolean> = () => probeTaskCaptureProcesses(sandbox), intervalMs = 5_000
+): Promise<boolean> {
+  const safe = async () => {
+    try { return !await probe(); } catch { return false; }
+  };
+  if (await safe()) { await lease.release(); return true; }
+  recoveringCaptureSandboxes.add(sandbox);
+  log(`${CAPTURE_CLEANUP_FATAL}: 尚未确认本任务录制进程树退出，继续保留渲染保护并后台检查`);
+  let lastLog = Date.now();
+  const check = async () => {
+    if (await safe()) {
+      try {
+        await lease.release();
+        recoveringCaptureSandboxes.delete(sandbox);
+        log("本任务录制进程已退出，渲染保护已恢复");
+        return;
+      } catch { /* 释放异常也保持检查，不丢失租约。 */ }
+    }
+    if (Date.now() - lastLog >= 60_000) {
+      lastLog = Date.now(); log("仍未确认本任务录制进程完全退出，渲染保护保持中");
+    }
+    setTimeout(() => { void check(); }, intervalMs);
+  };
+  setTimeout(() => { void check(); }, intervalMs);
+  return false;
 }
 
 export async function executeRender(root: string, job: RenderJobRecord, projectInput: VideoProject, callbacks: RenderCallbacks): Promise<void> {
@@ -997,9 +1127,9 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   else {
     const port = 4600 + Number.parseInt(job.id.replaceAll("-", "").slice(0, 4), 16) % 1000;
     // 录制 UE 与预览 UE 同抢显存/内存会 OOM；录制前停掉预览渲染器，录完（无论成败）恢复。
-    await pausePreviewRenderer(root);
+    const exportLease = await pausePreviewRenderer(root, callbacks.cancelled);
     try {
-      await runTsx("apps/ue-player/capture.ts", ["--region", project.regionId, "--profile", project.output.profile, "--port", String(port), "--imagery", project.imagery.provider, "--subtitle-composition", "apps/video-compositor/index.html"], "capturing", "录制 UE 地图、行政区巡游和返回镜头", 42);
+      await runTsx(join(sandbox, "apps/ue-player/capture.ts"), ["--region", project.regionId, "--profile", project.output.profile, "--port", String(port), "--imagery", project.imagery.provider, "--subtitle-composition", "apps/video-compositor/index.html"], "capturing", "录制 UE 地图、行政区巡游和返回镜头", 42);
       // Verify the take before it becomes the cache: a short capture used to be written to
       // the cache unconditionally, so one bad take poisoned every later export of this
       // signature. capture.ts already checks frame count and encoded duration; this is the
@@ -1016,7 +1146,9 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
       await copyFile(capturedFile, join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`));
       await pruneSupersededMapCache(root, project.regionId, project.output.profile, spec.cacheSignature);
     } finally {
-      await resumePreviewRenderer(root);
+      if (!await releaseCaptureLeaseWhenSafe(exportLease, sandbox, message => callbacks.update({ logs: [message] }))) {
+        throw new Error(`${CAPTURE_CLEANUP_FATAL}: 本任务录制进程退出尚未确认，禁止重试`);
+      }
     }
   }
   const mapEndedAt = Date.now();
@@ -1117,28 +1249,37 @@ export async function collectJobDiagnostics(
   job: Pick<RenderJobRecord, "jobRoot" | "regionId" | "profile">
 ): Promise<JobDiagnostics | null> {
   if (!job.regionId || !job.profile) return null;
-  // The capture writes to `renders/ue-frames/<region>-<profile>` (frame PNGs, the UE
-  // log, capture-report.json). Only the old Cesium pipeline used
-  // `renders/diagnostics/<region>-<profile>`, so a failed export kept looking for a
-  // directory that no longer exists and saved nothing — the user got a one-line error
-  // and "这次导出没有留下诊断文件" while the evidence sat right there in the sandbox.
+  const slot = `${job.regionId}-${job.profile}`;
+  const framesRoot = join(job.jobRoot, "sandbox", "renders", "ue-frames");
+  // 只查看本任务沙箱；精确匹配时间戳，避免混入 QA 或其他 region/profile。
+  const timestamped = (await readdir(framesRoot, { withFileTypes: true }).catch(() => []))
+    .filter(entry => entry.isDirectory() && entry.name.startsWith(`${slot}-`) && /^\d+$/.test(entry.name.slice(slot.length + 1)))
+    .sort((a, b) => Number(b.name.slice(slot.length + 1)) - Number(a.name.slice(slot.length + 1)));
   const candidates = [
-    join(job.jobRoot, "sandbox", "renders", "ue-frames", `${job.regionId}-${job.profile}`),
-    join(job.jobRoot, "sandbox", "renders", "diagnostics", `${job.regionId}-${job.profile}`)
+    ...timestamped.map(entry => join(framesRoot, entry.name)),
+    join(framesRoot, slot),
+    join(job.jobRoot, "sandbox", "renders", "diagnostics", slot),
+    join(job.jobRoot, "sandbox", "renders", "diagnostics"),
+    join(job.jobRoot, "qa")
   ];
-  const source = candidates.find((candidate) => existsSync(candidate));
-  if (!source) return null;
-  const entries = (await readdir(source, { withFileTypes: true }).catch(() => [])).filter((entry) => entry.isFile());
-  // The report first: if the byte budget only fits a few files, they are the ones
-  // that explain the failure, not the hundredth `failed-frame-*.png`.
-  const rank = (name: string) => (/^capture-report/.test(name) ? 0 : name.endsWith(".json") ? 1 : name.endsWith(".log") ? 2 : name.endsWith(".png") ? 3 : 4);
-  const ordered = [...entries].sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
+  const entries = (await Promise.all(candidates.map(async (source, sourceIndex) => {
+    const names = await readdir(source, { withFileTypes: true }).catch(() => []);
+    return names.filter(entry => entry.isFile()
+      && (sourceIndex < candidates.length - 2
+        || (sourceIndex === candidates.length - 1 ? entry.name === "golden-report.json"
+          : /(?:delivery-validation|preflight|visual-sync).*\.json$/i.test(entry.name))))
+      .map(entry => ({ name: entry.name, from: join(source, entry.name), sourceIndex }));
+  }))).flat();
+  // 核心成片 QA 先于捕获日志进入同一份12文件/8MiB预算。
+  const rank = (name: string) => (/^(?:golden-report\.json)$|(?:delivery-validation|preflight|visual-sync).*\.json$/i.test(name) ? 0 : /^capture-report/.test(name) ? 1 : name.endsWith(".json") ? 2 : name.endsWith(".log") ? 3 : name.endsWith(".png") ? 4 : 5);
+  const ordered = entries.sort((a, b) => rank(a.name) - rank(b.name) || a.sourceIndex - b.sourceIndex || b.name.localeCompare(a.name, undefined, { numeric: true }));
   const outDir = join(job.jobRoot, "diagnostics");
   const files: string[] = [];
   let bytes = 0;
   for (const entry of ordered) {
     if (files.length >= DIAGNOSTIC_FILE_LIMIT) break;
-    const from = join(source, entry.name);
+    if (files.includes(entry.name)) continue;
+    const { from } = entry;
     const info = await stat(from).catch(() => null);
     if (!info || bytes + info.size > DIAGNOSTIC_BYTES_LIMIT) continue;
     await mkdir(outDir, { recursive: true });
@@ -1173,11 +1314,12 @@ export async function pruneJobIntermediates(
   // full copy, which is where most of the stranded gigabytes came from. It is
   // only removed when the caller asks for it, because a recursive delete is not
   // something an automatic housekeeping pass should decide on its own.
+  const tempRoot = join(tmpdir(), "geo-video-studio");
+  const tempJobRoot = join(tempRoot, basename(job.jobRoot));
+  if (recoveringCaptureSandboxes.has(join(tempJobRoot, "sandbox"))) return;
   const stats = await lstat(link).catch(() => null);
   if (stats?.isSymbolicLink()) await removeDirectoryLink(link);
   else if (stats?.isDirectory() && options.includeMaterializedSandbox) await rm(link, { recursive: true, force: true });
-  const tempRoot = join(tmpdir(), "geo-video-studio");
-  const tempJobRoot = join(tempRoot, basename(job.jobRoot));
   if (basename(job.jobRoot) !== job.id || !tempJobRoot.startsWith(`${tempRoot}${sep}`)) return;
   if (existsSync(tempJobRoot)) await rm(tempJobRoot, { recursive: true, force: true });
 }

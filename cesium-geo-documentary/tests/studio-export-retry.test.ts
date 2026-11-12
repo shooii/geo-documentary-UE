@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { isRetryableRenderFailure, NARRATION_REUSE_FILES, pruneJobIntermediates } from "../apps/studio/render-engine.js";
+import { isRetryableRenderFailure, NARRATION_REUSE_FILES, pruneJobIntermediates, collectJobDiagnostics, taskCaptureProcesses, releaseCaptureLeaseWhenSafe } from "../apps/studio/render-engine.js";
 
 const root = resolve(import.meta.dirname, "..");
 
@@ -29,10 +29,54 @@ test("transient tool failures retry and authored failures do not", () => {
     "无法按文本稳定映射场景 overview-1；请重新生成配音，或检查旁白是否与 SRT 一致",
     "Visual v1 has no display window before its scene boundary",
     "Selected visuals have no visible video frame: 3:asset-a",
-    "Render cancelled"
+    "Render cancelled",
+    "UE_CAPTURE_CLEANUP_FATAL: 录制 exited with 1",
+    "UE_CAPTURE_CLEANUP_FATAL: 录制 timed out after 300s"
   ]) {
     assert.equal(isRetryableRenderFailure(message), false, `${message} must not be retried`);
   }
+});
+
+test("恢复探测精确匹配本任务的UE、绝对脚本及后代，不误认其他任务", () => {
+  const sandbox = 'C:/Temp/geo-video-studio/job-a/sandbox';
+  const processes = [
+    { ProcessId: 1, CommandLine: 'UnrealEditor.exe "-GeoCaptureRoot=C:\\Temp\\geo-video-studio\\job-a\\sandbox\\renders\\ue-frames\\region-portrait-123"' },
+    { ProcessId: 2, CommandLine: `node "${sandbox}/apps/ue-player/server.ts" --port=4000` },
+    { ProcessId: 3, ParentProcessId: 2, CommandLine: 'node internal-worker' },
+    { ProcessId: 4, CommandLine: 'node C:/Temp/geo-video-studio/job-b/sandbox/apps/ue-player/server.ts' },
+    { ProcessId: 5, CommandLine: `node ${sandbox}/apps/ue-player/server.ts.backup` },
+    { ProcessId: 6, CommandLine: 'UnrealEditor.exe -GeoCaptureRoot=C:/Temp/geo-video-studio/job-ab/sandbox/renders/ue-frames/r-portrait-1' },
+    { ProcessId: 7, CommandLine: `node "${sandbox}/apps/ue-player/capture.ts" --region r` }
+  ];
+  assert.deepEqual(taskCaptureProcesses(processes, sandbox).map(info => info.ProcessId), [1, 2, 3, 7]);
+  assert.deepEqual(taskCaptureProcesses(processes.slice(3, 6), sandbox), []);
+});
+
+test("有残留或查询异常时保留租约，空快照后自动恢复且停止探测", async () => {
+  for (const initial of ['active', 'error']) {
+    let calls = 0, releases = 0;
+    let finished!: () => void;
+    const released = new Promise<void>(resolve => { finished = resolve; });
+    const logs: string[] = [];
+    const result = await releaseCaptureLeaseWhenSafe({ token: 'test', release: async () => { releases++; finished(); } }, `mock-${initial}`, message => logs.push(message), async () => {
+      calls++;
+      if (calls === 1) {
+        if (initial === 'error') throw new Error('CIM不可用');
+        return true;
+      }
+      return false;
+    }, 1);
+    assert.equal(result, false);
+    assert.equal(releases, 0);
+    await released;
+    await Promise.resolve();
+    assert.equal(calls, 2);
+    assert.equal(releases, 1);
+    assert.equal(logs.length, 2);
+  }
+  let releases = 0;
+  assert.equal(await releaseCaptureLeaseWhenSafe({ token: 'safe', release: async () => { releases++; } }, 'safe', () => {}, async () => false, 1), true);
+  assert.equal(releases, 1);
 });
 
 test("a terminal job keeps its narration and gives the sandbox back", async () => {
@@ -74,6 +118,59 @@ test("a terminal job keeps its narration and gives the sandbox back", async () =
     await rm(base, { recursive: true, force: true });
     await rm(tempJobRoot, { recursive: true, force: true });
   }
+});
+
+test("时间戳录制诊断仅收集本任务并优先保留最新报告与日志", async () => {
+  const jobRoot = await mkdtemp(join(tmpdir(), "geo-diagnostics-"));
+  const framesRoot = join(jobRoot, "sandbox", "renders", "ue-frames");
+  try {
+    for (const name of ["region-portrait-100", "region-portrait-200", "region-portrait-qa-300", "other-portrait-400"]) {
+      await mkdir(join(framesRoot, name), { recursive: true });
+      await writeFile(join(framesRoot, name, "capture-report.json"), name);
+      await writeFile(join(framesRoot, name, "unreal.log"), name);
+    }
+    await writeFile(join(framesRoot, "region-portrait-200", "unreal-100.log"), "旧块");
+    await writeFile(join(framesRoot, "region-portrait-200", "unreal-200.log"), "最新块");
+    await writeFile(join(framesRoot, "region-portrait-200", "too-large.log"), Buffer.alloc(8 * 1024 * 1024 + 1));
+    for (let i = 0; i < 20; i++) await writeFile(join(framesRoot, "region-portrait-200", `frame-${i}.png`), "帧");
+    const result = await collectJobDiagnostics({ jobRoot, regionId: "region", profile: "portrait" });
+    assert.ok(result);
+    assert.equal(await readFile(join(result.dir, "capture-report.json"), "utf8"), "region-portrait-200");
+    assert.equal(await readFile(join(result.dir, "unreal.log"), "utf8"), "region-portrait-200");
+    assert.ok(result.files.indexOf("unreal-200.log") < result.files.indexOf("unreal-100.log"));
+    assert.equal(result.files.includes("too-large.log"), false);
+    assert.equal(result.files.length, 12);
+  } finally { await rm(jobRoot, { recursive: true, force: true }); }
+});
+
+test("无录制目录也保留核心QA，报告优先于捕获日志并遵守原预算", async () => {
+  const jobRoot = await mkdtemp(join(tmpdir(), 'geo-qa-diagnostics-'));
+  const qaRoot = join(jobRoot, 'sandbox', 'renders', 'diagnostics');
+  const captureRoot = join(jobRoot, 'sandbox', 'renders', 'ue-frames', 'region-portrait-123');
+  const reports = ['final-delivery-validation.json', 'region-portrait-preflight.json', 'region-portrait-visual-sync.json', 'golden-report.json'];
+  try {
+    await mkdir(qaRoot, { recursive: true });
+    await mkdir(join(jobRoot, 'qa'), { recursive: true });
+    for (const name of reports.slice(0, 3)) await writeFile(join(qaRoot, name), name);
+    await writeFile(join(jobRoot, 'qa', 'golden-report.json'), 'golden');
+    await writeFile(join(qaRoot, 'unrelated.json'), '不应复制');
+    const job = { jobRoot, regionId: 'region', profile: 'portrait' as const };
+    const onlyQa = await collectJobDiagnostics(job);
+    assert.ok(onlyQa);
+    assert.deepEqual([...onlyQa.files].sort(), [...reports].sort());
+    await mkdir(captureRoot, { recursive: true });
+    // 捕获日志既不能耗完数量，也不能先耗完8MiB让核心报告丢失。
+    for (let i = 0; i < 16; i++) await writeFile(join(captureRoot, `unreal-${i}.log`), 'log');
+    await writeFile(join(captureRoot, 'unreal-999.log'), Buffer.alloc(8 * 1024 * 1024));
+    const result = await collectJobDiagnostics(job);
+    assert.ok(result);
+    assert.equal(result.files.length, 12);
+    for (const name of reports) assert.ok(result.files.slice(0, 4).includes(name), name);
+    assert.equal(result.files.includes('unreal-999.log'), false);
+    assert.equal(result.files.includes('unrelated.json'), false);
+    await rm(join(jobRoot, 'sandbox'), { recursive: true, force: true });
+    for (const name of reports) assert.ok((await readFile(join(result.dir, name), 'utf8')).length > 0);
+  } finally { await rm(jobRoot, { recursive: true, force: true }); }
 });
 
 test("the retry budget and the sandbox reclaim are wired into the export queue", async () => {

@@ -128,6 +128,52 @@ test('初始导出锁阻止预览UE，锁释放后恢复', async () => {
   f.runtime.stop();
 });
 
+test('运行中出现导出租约只停自有渲染器，信令保持且释放后恢复', async () => {
+  let exporting = false;
+  const f = fixture({ exportActive: async () => exporting });
+  await f.runtime.start();
+  exporting = true;
+  await f.tick();
+  assert.deepEqual(f.killed, [f.launched[1]!.child]);
+  assert.equal(f.logs.filter(line => line.includes('FAILED renderer')).length, 0);
+  exporting = false;
+  await f.tick();
+  assert.deepEqual(f.launched.map(x => x.kind), ['signalling', 'renderer', 'renderer']);
+  f.runtime.stop();
+});
+
+test('renderer异步探测期间出现导出租约不再启动预览', async () => {
+  let exporting = false;
+  let finish!: (running: boolean) => void;
+  const f = fixture({
+    exportActive: async () => exporting,
+    rendererRunning: () => new Promise(resolve => { finish = resolve; })
+  });
+  const starting = f.runtime.start();
+  for (let i = 0; i < 30; i++) await Promise.resolve();
+  exporting = true;
+  finish(false);
+  await starting;
+  assert.deepEqual(f.launched.map(x => x.kind), ['signalling']);
+  f.runtime.stop();
+});
+
+test('异步launch期间出现导出租约立即清理刚启动的自有renderer', async () => {
+  let exporting = false;
+  const renderer = Object.assign(new EventEmitter(), { pid: 99, exitCode: null, signalCode: null }) as ChildProcess;
+  const f = fixture({
+    exportActive: async () => exporting,
+    launch: async kind => {
+      if (kind === 'renderer') exporting = true;
+      return kind === 'renderer' ? renderer : Object.assign(new EventEmitter(), { pid: 98, exitCode: null, signalCode: null }) as ChildProcess;
+    }
+  });
+  await f.runtime.start();
+  assert.deepEqual(f.killed, [renderer]);
+  assert.equal(f.logs.filter(line => line.includes('FAILED renderer')).length, 0);
+  f.runtime.stop();
+});
+
 test('部分信令端口被占用时不抢占并明确报告', async () => {
   const f = fixture({ portOpen: async port => port === 8888 });
   await f.runtime.start();
@@ -225,4 +271,6 @@ test('识别相同项目与streamer端口，忽略录制实例与其他项目', 
   assert.equal(previewRendererMatches(command.replace(':8889', ':88890'), 'E:/项目/demo.uproject', 8889), false);
   assert.equal(previewRendererMatches(command, 'E:/项目/other.uproject', 8889), false);
   assert.equal(previewRendererMatches(command.replace(':8889', ':4676'), 'E:/项目/demo.uproject', 8889), false);
+  assert.equal(previewRendererMatches(command.replace('demo.uproject', 'demo.uproject-other'), 'E:/项目/demo.uproject', 8889), false);
+  assert.equal(previewRendererMatches(command.replace('-game ', '-game-other '), 'E:/项目/demo.uproject', 8889), false);
 });

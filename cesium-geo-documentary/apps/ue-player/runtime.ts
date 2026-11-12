@@ -1,5 +1,6 @@
 import { spawn, execFile, type ChildProcess } from 'node:child_process';
-import { mkdir, readFile, stat, writeFile, unlink } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, unlink } from 'node:fs/promises';
+import { exportRecordingActive, legacyExportLockActive, tryAcquireExportGuard } from './export-lease.js';
 import { createConnection, createServer } from 'node:net';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
@@ -36,9 +37,18 @@ export function createPreviewRuntime(deps: RuntimeDependencies, ports: { player:
     retryAt[kind] = deps.now() + delay;
     deps.log(`UE_RUNTIME_FAILED ${kind}: ${reason}；${delay / 1000} 秒后重试`);
   };
+  function pauseRenderer() {
+    const child = children.get('renderer');
+    if (!child) return;
+    children.delete('renderer');
+    deps.kill(child);
+    deps.log('UE_RUNTIME_PAUSED renderer 导出正在占用渲染资源');
+  }
   async function launch(kind: 'signalling' | 'renderer') {
     if (!allowed() || children.has(kind) || deps.now() < retryAt[kind]) return;
     try {
+      if (kind === 'renderer' && await deps.exportActive()) return;
+      if (!allowed()) return;
       const child = await deps.launch(kind, allowed);
       if (!allowed()) { deps.kill(child); return; }
       children.set(kind, child);
@@ -51,6 +61,12 @@ export function createPreviewRuntime(deps: RuntimeDependencies, ports: { player:
       };
       child.once('error', error => ended(error.message));
       child.once('exit', (code, signal) => ended(signal || `exit ${code}`));
+      if (kind === 'renderer') {
+        try {
+          if (await deps.exportActive()) { pauseRenderer(); return; }
+        } catch (error) { pauseRenderer(); throw error; }
+        if (!allowed()) { pauseRenderer(); return; }
+      }
       // 启动期间子进程可能已经退出，不能漏掉它的退出事件。
       if (child.exitCode !== null || child.signalCode !== null) ended(`exit ${child.exitCode ?? child.signalCode}`);
       deps.log(`UE_RUNTIME_STARTED ${kind} pid=${child.pid ?? '?'}`);
@@ -82,6 +98,7 @@ export function createPreviewRuntime(deps: RuntimeDependencies, ports: { player:
       if (!allowed()) return;
       const exporting = await deps.exportActive();
       if (!allowed()) return;
+      if (exporting) pauseRenderer();
       if (owned.has('renderer') && !exporting && !children.has('renderer') && deps.now() >= retryAt.renderer) {
         const running = await deps.rendererRunning();
         if (!allowed()) return;
@@ -114,7 +131,8 @@ const exec = promisify(execFile);
 export function previewRendererMatches(command: string, project: string, streamerPort: number) {
   const normalized = command.replaceAll('\\', '/').toLowerCase();
   const projectPath = project.replaceAll('\\', '/').toLowerCase();
-  return normalized.includes(projectPath) && /-game\b/.test(normalized)
+  const escapedProject = projectPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?:^|[\\s"'])${escapedProject}(?=["'\\s]|$)`).test(normalized) && /(?:^|\s)-game(?:\s|$)/.test(normalized)
     && new RegExp(`-pixelstreamingurl=["']?ws://127\\.0\\.0\\.1:${streamerPort}(?:["'\\s/]|$)`).test(normalized);
 }
 
@@ -153,10 +171,7 @@ export function startPreviewRuntime(root: string, rendererOnly = false) {
       socket.once('error', () => finish(false));
       socket.once('timeout', () => finish(false));
     }),
-    exportActive: async () => {
-      try { return Date.now() - (await stat(join(root, 'workspace/export-recording.lock'))).mtimeMs < 20 * 60 * 1000; }
-      catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false; throw error; }
-    },
+    exportActive: () => exportRecordingActive(root),
     rendererRunning: async () => {
       const config = await loadRuntime();
       const { stdout } = process.platform === 'win32'
@@ -167,29 +182,35 @@ export function startPreviewRuntime(root: string, rendererOnly = false) {
     launch: async (kind, allowed) => {
       await mkdir(logDir, { recursive: true });
       const config = kind === 'renderer' ? await loadRuntime() : null;
-      if (!allowed()) throw new Error('预览运行时已停止');
-      const child = kind === 'signalling'
-        ? spawn(process.execPath, [join(root, 'node_modules/tsx/dist/cli.mjs'), join(root, 'apps/ue-player/signalling.ts')], { cwd: root, windowsHide: true, stdio: 'inherit' })
-        : spawn(join(config!.engineRoot, 'Engine/Binaries/Win64/UnrealEditor.exe'), [
-          config!.project, '/Engine/Maps/Entry', '-game', '-RenderOffscreen', '-Unattended', '-NoSplash', '-AudioMixer', '-mimalloc',
-          `-PixelStreamingURL=ws://127.0.0.1:${streamer}`, '-ResX=720', '-ResY=1280', '-ForceRes',
-          `-abslog=${join(logDir, 'preview-renderer.log')}`,
-          ...(process.env.UE_CAPTURE_ROOT ? [`-GeoCaptureRoot=${process.env.UE_CAPTURE_ROOT}`] : [])
-        ], { cwd: root, windowsHide: true, stdio: 'inherit' });
-      // 等待 spawn 成功；ENOENT 等错误先在本层处理，避免 await 交接时丢失事件。
-      await new Promise<void>((resolve, reject) => {
-        child.once('error', reject);
-        child.once('spawn', () => { child.removeListener('error', reject); resolve(); });
-      });
-      if (kind === 'renderer' && child.pid) {
-        void writeFile(pidFile, String(child.pid), 'utf8').catch(error => console.warn(`UE_RUNTIME_PID_FAILED ${String(error)}`));
-        child.once('exit', () => {
-          void (async () => {
-            if ((await readFile(pidFile, 'utf8')).trim() === String(child.pid)) await unlink(pidFile);
-          })().catch(() => {});
+      const release = kind === 'renderer' ? await tryAcquireExportGuard() : null;
+      if (kind === 'renderer' && !release) throw new Error('导出正在占用渲染资源');
+      try {
+        // 已持有内核锁，此处只探测旧文件锁，避免把自己的启动锁当作导出。
+        if (kind === 'renderer' && await legacyExportLockActive(root)) throw new Error('旧版导出正在占用渲染资源');
+        if (!allowed()) throw new Error('预览运行时已停止');
+        const child = kind === 'signalling'
+          ? spawn(process.execPath, [join(root, 'node_modules/tsx/dist/cli.mjs'), join(root, 'apps/ue-player/signalling.ts')], { cwd: root, windowsHide: true, stdio: 'inherit' })
+          : spawn(join(config!.engineRoot, 'Engine/Binaries/Win64/UnrealEditor.exe'), [
+            config!.project, '/Engine/Maps/Entry', '-game', '-RenderOffscreen', '-Unattended', '-NoSplash', '-AudioMixer', '-mimalloc',
+            `-PixelStreamingURL=ws://127.0.0.1:${streamer}`, '-ResX=720', '-ResY=1280', '-ForceRes',
+            `-abslog=${join(logDir, 'preview-renderer.log')}`,
+            ...(process.env.UE_CAPTURE_ROOT ? [`-GeoCaptureRoot=${process.env.UE_CAPTURE_ROOT}`] : [])
+          ], { cwd: root, windowsHide: true, stdio: 'inherit' });
+        // 等待 spawn 成功；ENOENT 等错误先在本层处理，避免 await 交接时丢失事件。
+        await new Promise<void>((resolve, reject) => {
+          child.once('error', reject);
+          child.once('spawn', () => { child.removeListener('error', reject); resolve(); });
         });
-      }
-      return child;
+        if (kind === 'renderer' && child.pid) {
+          await writeFile(pidFile, String(child.pid), 'utf8').catch(error => console.warn(`UE_RUNTIME_PID_FAILED ${String(error)}`));
+          child.once('exit', () => {
+            void (async () => {
+              if ((await readFile(pidFile, 'utf8')).trim() === String(child.pid)) await unlink(pidFile);
+            })().catch(() => {});
+          });
+        }
+        return child;
+      } finally { await release?.(); }
     },
     kill: child => {
       if (child.exitCode !== null || child.signalCode !== null) return;

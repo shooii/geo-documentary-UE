@@ -182,6 +182,7 @@ void AGeoMap::BeginPlay()
         Rate->Set(StreamFps, ECVF_SetByCode);
     FParse::Value(FCommandLine::Get(), TEXT("GeoCaptureRoot="), CaptureRoot);
     FParse::Value(FCommandLine::Get(), TEXT("GeoCaptureIndexOffset="), CaptureIndexOffset);
+    CaptureIndex = CaptureIndexOffset;
     TileMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Geo/M_Tile.M_Tile"));
     // The 天地图 annotation layer is transparent, so it needs its own material: M_Tile
     // is opaque unlit and would paint every label tile as a grey card over the imagery.
@@ -378,7 +379,7 @@ void AGeoMap::OnInput(const FString &Descriptor)
             CaptureBatch.Add(Value->AsObject());
         CaptureBatchId = Id;
         CaptureBatchSize = CaptureBatch.Num();
-        CaptureBatchStart = CaptureIndexOffset + CaptureIndex;
+        CaptureBatchStart = CaptureIndex;
         CaptureSaveFailures->Reset();
         UE_LOG(LogTemp, Display, TEXT("GEO_CAPTURE_BATCH %d frames from #%d"), CaptureBatchSize, CaptureBatchStart);
         LaunchCaptureFrame(CaptureBatch[0]);
@@ -1610,7 +1611,7 @@ void AGeoMap::Tick(float Delta)
         CaptureBatchSize = 0;
         return;
     }
-    FString File = FPaths::Combine(CaptureRoot, FString::Printf(TEXT("frame-%06d.png"), CaptureIndexOffset + CaptureIndex++));
+    FString File = FPaths::Combine(CaptureRoot, FString::Printf(TEXT("frame-%06d.png"), CaptureIndex++));
     IFileManager::Get().MakeDirectory(*CaptureRoot, true);
     PendingCaptureFile = MoveTemp(File);
     PendingCaptureId = Batch ? FString() : RespondId;

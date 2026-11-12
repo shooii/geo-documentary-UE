@@ -11,7 +11,7 @@ import { resolve } from "node:path";
 // 现在录制之前多一道「预演合成 + 预检」：地图槽位用黑色占位视频，其余输入
 // （旁白、时长、时间轴、字幕、素材、封面）在录制前就绪，所以整段检查可以提前跑。
 // 录制之后那道预检保留，它才是拿真地图做权威判断的那一次。
-const root = process.cwd();
+const root = resolve(import.meta.dirname, "..");
 
 test("the composition is linted before the map is recorded, and again after it", async () => {
   const [engine, compositor] = await Promise.all([
@@ -25,7 +25,7 @@ test("the composition is linted before the map is recorded, and again after it",
   assert.match(engine, /stopMessage: "已在地图录制前中止，省下了整段录制时间。"/);
   const earlyCompose = engine.indexOf('"--map-fallback"');
   const cacheLookup = engine.indexOf("await cacheMap(root, sandbox, project, spec)");
-  const capture = engine.indexOf('await runTsx("apps/ue-player/capture.ts"');
+  const capture = engine.indexOf('await runTsx(join(sandbox, "apps/ue-player/capture.ts")');
   assert.ok(earlyCompose > 0 && cacheLookup > 0 && capture > 0, "the three pipeline anchors must exist");
   assert.ok(earlyCompose < cacheLookup, "预演合成必须在取地图缓存之前");
   assert.ok(cacheLookup < capture, "录制前的预检必须在录制之前");
