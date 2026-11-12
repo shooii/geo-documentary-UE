@@ -441,6 +441,25 @@ export async function materializeProject(sandbox: string, project: VideoProject,
       name: childDisplayNames.get(String(child.id)) || child.name
     }));
   }
+  // A verified village point can be authored before its boundary is available.
+  // Materialize its camera only inside the export sandbox; never invent a
+  // polygon/bbox or mutate the project's frozen boundary snapshot.
+  const children = (region.childRegions ?? []) as Array<Record<string, unknown>>;
+  for (const scene of project.scenes) {
+    const camera = scene.camera;
+    if (scene.section !== "child" || !scene.childId || !camera
+      || children.some((child) => String(child.id) === scene.childId)
+      || !Number.isFinite(camera.longitude) || Math.abs(camera.longitude) > 180
+      || !Number.isFinite(camera.latitude) || Math.abs(camera.latitude) > 90
+      || !Number.isFinite(camera.height) || camera.height <= 0) continue;
+    const { transition: _transition, ...cameraPreset } = camera;
+    children.push({ id: scene.childId, name: scene.childName || scene.title, cameraPreset, cameraProfiles: { portrait: { ...cameraPreset } } });
+    for (const key of ["childIds", "tourChildIds"] as const) {
+      const ids = Array.isArray(region[key]) ? (region[key] as unknown[]).map(String) : children.map((child) => String(child.id));
+      region[key] = [...new Set([...ids, scene.childId])];
+    }
+  }
+  region.childRegions = children;
   // 穿云开场已移除（2026-11-11）：region 永远携带禁用的 openingDescent，
   // 前端 presentation 与巡游构建器据此得到 descent = 0，直接落在乡镇边界。
   region.openingDescent = {

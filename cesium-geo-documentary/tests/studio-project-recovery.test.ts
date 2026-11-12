@@ -95,6 +95,37 @@ test("legacy saves still receive template migration", async (t) => {
   assert.equal(project.scenes.filter((scene) => scene.section === "outro").length, 1);
 });
 
+test("export materializes a missing village camera without fabricating a boundary", async (t) => {
+  const { root } = await fixture(t);
+  const project = await makeProject(root, regionId);
+  const template = project.scenes.find((scene) => scene.section === "child")!;
+  const camera = { longitude: 110.12, latitude: 20.67, height: 2200, heading: 0, pitch: -64, transition: "fly" as const };
+  const village = { ...structuredClone(template), id: "child-990001001002", childId: "990001001002", childName: "补充村", title: "补充村", camera };
+  const withoutCamera = { ...structuredClone(village), id: "child-990001001003", childId: "990001001003" };
+  delete (withoutCamera as { camera?: typeof camera }).camera;
+  project.scenes.splice(project.scenes.indexOf(template) + 1, 0, village, withoutCamera);
+  const before = structuredClone(project);
+  const spec = await buildProjectRenderSpec(root, project);
+  const regionPath = join(root, "data", "regions", `${regionId}.json`);
+  const initial = JSON.parse(await readFile(regionPath, "utf8"));
+  initial.childIds = [template.childId];
+  initial.tourChildIds = [template.childId];
+  await writeFile(regionPath, JSON.stringify(initial));
+  await materializeProject(root, project, spec);
+  await materializeProject(root, project, spec);
+  const region = JSON.parse(await readFile(regionPath, "utf8"));
+  const added = region.childRegions.filter((child: { id: string }) => child.id === village.childId);
+  assert.equal(added.length, 1);
+  assert.deepEqual(added[0].cameraPreset, { longitude: 110.12, latitude: 20.67, height: 2200, heading: 0, pitch: -64 });
+  assert.deepEqual(added[0].cameraProfiles.portrait, added[0].cameraPreset);
+  assert.equal(added[0].geometry, undefined);
+  assert.equal(added[0].bbox, undefined);
+  assert.deepEqual(region.childRegions[0], initial.childRegions[0]);
+  for (const key of ["childIds", "tourChildIds"]) assert.deepEqual(region[key], [template.childId, village.childId]);
+  assert.equal(region.childRegions.some((child: { id: string }) => child.id === "990001001003"), false);
+  assert.deepEqual(project, before, "export materialization must not mutate the saved project");
+});
+
 test("export restores a missing catalog entry from the saved project inside its sandbox", async (t) => {
   const { root, masterPath } = await fixture(t);
   const project = await makeProject(root, regionId);
