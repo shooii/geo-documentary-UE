@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -17,19 +17,70 @@ interface VisualSyncReport {
   visuals?: Array<{ pass?: boolean; displayDurationSeconds?: number; selectionKey?: string }>;
 }
 
-function run(command: string, args: string[]): Promise<string> {
+export interface GoldenQaLifecycle {
+  cancelled?(): boolean;
+  registerProcess?(child: ChildProcess | null): void;
+  signal?: AbortSignal;
+  timeoutMs?: number;
+}
+
+function checkCancelled(lifecycle: GoldenQaLifecycle): void {
+  if (lifecycle.signal?.aborted || lifecycle.cancelled?.()) throw new Error("Render cancelled");
+}
+
+export function runQaCommand(command: string, args: string[], lifecycle: GoldenQaLifecycle = {}): Promise<string> {
+  checkCancelled(lifecycle);
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
-    let stdout = ""; let stderr = "";
+    lifecycle.registerProcess?.(child);
+    let stdout = ""; let stderr = ""; let settled = false;
+    let stopping: Error | undefined;
+    let killDeadline: ReturnType<typeof setTimeout> | undefined;
+    const finish = (error?: Error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer); clearInterval(poll);
+      if (killDeadline) clearTimeout(killDeadline);
+      lifecycle.signal?.removeEventListener("abort", onAbort);
+      lifecycle.registerProcess?.(null);
+      if (error) reject(error); else resolve(stdout);
+    };
+    const stop = (error: Error) => {
+      if (stopping || settled) return;
+      stopping = error;
+      let killed = false;
+      const fallbackKill = () => {
+        if (settled || killed || child.exitCode !== null || child.signalCode !== null) return;
+        killed = true;
+        child.kill();
+      };
+      killDeadline = setTimeout(() => { fallbackKill(); finish(stopping); }, 15_000);
+      if (process.platform === "win32" && child.pid) {
+        const killer = spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], { windowsHide: true, stdio: "ignore" });
+        killer.once("error", fallbackKill);
+        killer.once("exit", (code) => { if (code !== 0) fallbackKill(); });
+      } else fallbackKill();
+    };
+    const onAbort = () => stop(new Error("Render cancelled"));
+    const timeoutMs = lifecycle.timeoutMs ?? 120_000;
+    const timer = setTimeout(() => stop(new Error(`${command} timed out after ${Math.round(timeoutMs / 1000)}s`)), timeoutMs);
+    const poll = setInterval(() => { if (lifecycle.cancelled?.()) onAbort(); }, 100);
+    lifecycle.signal?.addEventListener("abort", onAbort, { once: true });
+    if (lifecycle.signal?.aborted || lifecycle.cancelled?.()) onAbort();
     child.stdout.on("data", (chunk) => { stdout += String(chunk); });
     child.stderr.on("data", (chunk) => { stderr += String(chunk); });
-    child.once("error", reject);
-    child.once("close", (code) => code === 0 ? resolve(stdout) : reject(new Error(`${command} exited with ${code}: ${stderr.slice(-3000)}`)));
+    child.once("error", (error) => finish(stopping ?? error));
+    child.once("close", (code) => {
+      if (stopping) finish(stopping);
+      else if (lifecycle.cancelled?.() || lifecycle.signal?.aborted) finish(new Error("Render cancelled"));
+      else if (code === 0) finish();
+      else finish(new Error(`${command} exited with ${code}: ${stderr.slice(-3000)}`));
+    });
   });
 }
 
-async function probe(ffprobe: string, path: string): Promise<ProbeResult> {
-  return JSON.parse(await run(ffprobe, ["-v", "error", "-show_streams", "-show_format", "-of", "json", path])) as ProbeResult;
+async function probe(ffprobe: string, path: string, lifecycle: GoldenQaLifecycle): Promise<ProbeResult> {
+  return JSON.parse(await runQaCommand(ffprobe, ["-v", "error", "-show_streams", "-show_format", "-of", "json", path], lifecycle)) as ProbeResult;
 }
 
 function frameRate(value = "0/1"): number {
@@ -37,8 +88,8 @@ function frameRate(value = "0/1"): number {
   return b ? a! / b : 0;
 }
 
-async function extract(ffmpeg: string, video: string, time: number, output: string): Promise<void> {
-  await run(ffmpeg, ["-y", "-ss", time.toFixed(3), "-i", video, "-frames:v", "1", "-vf", "scale=270:480:force_original_aspect_ratio=decrease,pad=270:480:(ow-iw)/2:(oh-ih)/2:black", output]);
+async function extract(ffmpeg: string, video: string, time: number, output: string, lifecycle: GoldenQaLifecycle): Promise<void> {
+  await runQaCommand(ffmpeg, ["-y", "-ss", time.toFixed(3), "-i", video, "-frames:v", "1", "-vf", "scale=270:480:force_original_aspect_ratio=decrease,pad=270:480:(ow-iw)/2:(oh-ih)/2:black", output], lifecycle);
 }
 
 async function grayscale(path: string): Promise<Buffer> {
@@ -95,13 +146,16 @@ export async function runGoldenQa(input: {
   golden?: string | undefined;
   spec: RenderSpec;
   jobCreatedAt: string;
+  lifecycle?: GoldenQaLifecycle;
 }): Promise<Record<string, unknown>> {
+  const lifecycle = input.lifecycle ?? {};
+  checkCancelled(lifecycle);
   const ffmpeg = join(input.root, "node_modules", "ffmpeg-static", process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg");
   const ffprobe = join(input.root, "node_modules", "ffprobe-static", "bin", process.platform === "win32" ? "win32/x64/ffprobe.exe" : "linux/x64/ffprobe");
   if (!existsSync(input.output)) throw new Error("QA output video is missing");
   const hasGolden = Boolean(input.golden && existsSync(input.golden));
-  const [outputProbe, outputStat] = await Promise.all([probe(ffprobe, input.output), stat(input.output)]);
-  const goldenProbe = hasGolden ? await probe(ffprobe, input.golden!) : undefined;
+  const [outputProbe, outputStat] = await Promise.all([probe(ffprobe, input.output, lifecycle), stat(input.output)]);
+  const goldenProbe = hasGolden ? await probe(ffprobe, input.golden!, lifecycle) : undefined;
   const outputVideo = outputProbe.streams?.find((stream) => stream.codec_type === "video");
   const outputAudio = outputProbe.streams?.find((stream) => stream.codec_type === "audio");
   const outputDuration = Number(outputProbe.format?.duration ?? 0);
@@ -125,13 +179,13 @@ export async function runGoldenQa(input: {
   for (let index = 0; index < fractions.length; index += 1) {
     const outputTime = Math.max(0, Math.min(outputDuration - 0.05, outputDuration * fractions[index]!));
     const outputFrame = join(qaDir, `${String(index + 1).padStart(2, "0")}-${names[index]}-output.png`);
-    await extract(ffmpeg, input.output, outputTime, outputFrame);
+    await extract(ffmpeg, input.output, outputTime, outputFrame, lifecycle);
     const a = await grayscale(outputFrame);
     const luma = meanLuma(a);
     if (compareGolden && goldenDuration !== null) {
       const goldenTime = Math.max(0, Math.min(goldenDuration - 0.05, goldenDuration * fractions[index]!));
       const goldenFrame = join(qaDir, `${String(index + 1).padStart(2, "0")}-${names[index]}-golden.png`);
-      await extract(ffmpeg, input.golden!, goldenTime, goldenFrame);
+      await extract(ffmpeg, input.golden!, goldenTime, goldenFrame, lifecycle);
       const b = await grayscale(goldenFrame);
       frames.push({ name: names[index]!, outputTime, goldenTime, ssim: globalSsim(a, b), meanLuma: luma, black: luma < 4 });
     } else {
@@ -171,7 +225,9 @@ export async function runGoldenQa(input: {
     keyframes: frames,
     pass: Object.values(structuralChecks).every(Boolean)
   };
+  checkCancelled(lifecycle);
   await writeFile(join(input.jobRoot, "qa", "golden-report.json"), JSON.stringify(report, null, 2), "utf8");
+  checkCancelled(lifecycle);
   if (!report.pass) throw new Error(`黄金成片 QA 未通过：${Object.entries(structuralChecks).filter(([, pass]) => !pass).map(([name]) => name).join("、")}`);
   return report;
 }

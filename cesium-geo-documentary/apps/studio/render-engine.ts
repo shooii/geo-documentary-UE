@@ -97,8 +97,24 @@ export interface RenderCallbacks {
  * answered. Authored failures such as `Project configuration is incomplete`,
  * `黄金成片 QA 未通过` and `输出文件不是本任务新生成` must stay non-retryable.
  */
+export const DELIVERY_QA_DETERMINISTIC = "DELIVERY_QA_DETERMINISTIC";
+
+export async function deliveryValidationFailure(error: Error, reportPath: string, startedAt: number): Promise<Error> {
+  if (!/^执行项目交付 QA exited with (?!0\b|null\b)\S+$/.test(error.message)) return error;
+  let report: { ok?: boolean; generatedAt?: string; errors?: unknown[]; subtitleErrors?: unknown[]; videos?: Array<{ errors?: unknown[] }> };
+  try {
+    report = JSON.parse(await readFile(reportPath, "utf8")) as typeof report;
+  } catch { return error; }
+  if (!report || report.ok !== false || !report.generatedAt || !(Date.parse(report.generatedAt) >= startedAt)) return error;
+  const errors = [...(Array.isArray(report.errors) ? report.errors : []), ...(Array.isArray(report.subtitleErrors) ? report.subtitleErrors : []),
+    ...(Array.isArray(report.videos) ? report.videos.flatMap(video => Array.isArray(video?.errors) ? video.errors : []) : [])]
+    .filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+  if (errors.length === 0) return error;
+  return new Error(`${DELIVERY_QA_DETERMINISTIC}: 交付 QA 未通过：${errors.join("、")}；报告：${reportPath}`, { cause: error });
+}
+
 export function isRetryableRenderFailure(message: string): boolean {
-  if (message.includes(CAPTURE_CLEANUP_FATAL)) return false;
+  if (message.includes(DELIVERY_QA_DETERMINISTIC) || message.includes(CAPTURE_CLEANUP_FATAL)) return false;
   if (/exited with (?!0\b)\S+/.test(message)) return true;
   // A stage watchdog firing means the pipeline deadlocked, not that the project is
   // wrong — the retry restarts from the cached narration / map clip.
@@ -1177,15 +1193,23 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   const outputDir = join(jobRoot, "output"); await mkdir(outputDir, { recursive: true });
   const output = join(outputDir, `${project.regionId}-${project.output.profile}-${job.id.slice(0, 8)}.mp4`);
   await copyFile(rendered, output);
-  await runTsx(".agents/skills/cesium-geo-documentary/scripts/validate-delivery.ts", ["--region", project.regionId, "--profile", project.output.profile, "--stage", quality === "high" ? "final" : "draft"], "validating", "执行项目交付 QA", 89);
+  const deliveryStage = quality === "high" ? "final" : "draft";
+  const deliveryStartedAt = Date.now();
+  try {
+    await runTsx(".agents/skills/cesium-geo-documentary/scripts/validate-delivery.ts", ["--region", project.regionId, "--profile", project.output.profile, "--stage", deliveryStage], "validating", "执行项目交付 QA", 89);
+  } catch (error) {
+    if (callbacks.cancelled()) throw new Error("Render cancelled");
+    throw error instanceof Error ? await deliveryValidationFailure(error, join(sandbox, "renders", "diagnostics", `${deliveryStage}-delivery-validation.json`), deliveryStartedAt) : error;
+  }
   // Perceptual comparison is meaningful only against the same region/profile.
   // A different town can share the opening grammar while necessarily having a
   // different satellite view, boundary shape, route and duration.
   const goldenCandidate = join(root, "renders", "final", `${project.regionId}-${project.output.profile}-final.mp4`);
   const golden = existsSync(goldenCandidate) ? goldenCandidate : undefined;
-  await runGoldenQa({ root, jobRoot, renderRoot: sandbox, output, golden, spec, jobCreatedAt: job.createdAt });
+  await runGoldenQa({ root, jobRoot, renderRoot: sandbox, output, golden, spec, jobCreatedAt: job.createdAt, lifecycle: { cancelled: callbacks.cancelled, registerProcess: callbacks.registerProcess } });
   const outputInfo = await stat(output);
   if (outputInfo.mtimeMs < new Date(job.createdAt).getTime() - 1000) throw new Error("输出文件不是本任务新生成");
+  if (callbacks.cancelled()) throw new Error("Render cancelled");
   callbacks.update({
     status: "completed",
     stage: "导出与黄金成片 QA 已通过",
