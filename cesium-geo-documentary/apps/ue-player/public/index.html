@@ -18,6 +18,35 @@
 <body>
   <div id="stream"></div>
   <div id="connection" role="status"><span id="status">正在连接 UE 地图视频流…</span><button id="retry">连接 / 播放</button></div>
-  <script type="module" src="/player.js"></script>
+  <script>
+    // This must run before the module: a missing bundle/config otherwise leaves a
+    // decorative retry button with no handler and no way out of the startup screen.
+    (() => {
+      let timer;
+      let loaded = false;
+      const retry = document.getElementById('retry');
+      const status = document.getElementById('status');
+      const reload = () => location.reload();
+      const failed = () => {
+        if (loaded) return;
+        clearTimeout(timer);
+        status.textContent = '播放器启动失败或服务尚未就绪，正在自动重试…';
+        retry.hidden = false;
+        retry.textContent = '重新加载播放器';
+        retry.onclick = reload;
+        timer = setTimeout(reload, 15000);
+      };
+      retry.onclick = reload;
+      timer = setTimeout(failed, 20000);
+      window.__uePlayerBooted = () => { loaded = true; clearTimeout(timer); };
+      window.__uePlayerFailed = failed;
+    })();
+  </script>
+  <script type="module">
+    import('/player.js').then(() => window.__uePlayerBooted()).catch(error => {
+      console.error('UE player bootstrap failed', error);
+      window.__uePlayerFailed();
+    });
+  </script>
 </body>
 </html>

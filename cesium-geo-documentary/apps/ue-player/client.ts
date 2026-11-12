@@ -20,11 +20,24 @@ function sceneQuery(provider = imageryProvider) {
   return params;
 }
 const sceneUrl = () => `/api/scene?${sceneQuery()}`;
+async function fetchJson(url: string, timeoutMs: number, signal?: AbortSignal) {
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  signal?.addEventListener('abort', abort, { once: true });
+  if (signal?.aborted) controller.abort();
+  const timer = setTimeout(abort, timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || `请求失败 (${response.status})`);
+    return data;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', abort);
+  }
+}
 async function fetchScene(url: string, signal?: AbortSignal) {
-  const response = await fetch(url, { ...(signal ? { signal } : {}) });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || '地图场景加载失败');
-  return data;
+  return fetchJson(url, 30000, signal);
 }
 // Start the scene and two local fallback tiles during the WebRTC handshake.
 let preloadedScene = query.has('studioPreview') ? fetchScene(`${sceneUrl()}&warm=1`).catch(() => undefined) : undefined;
@@ -41,14 +54,18 @@ let lastDrawAt=-Infinity;
 const controls = new Map<string, any>();
 const pending = new Map<string, { resolve: (v: any) => void; reject: (e: Error) => void; timer: ReturnType<typeof setTimeout> }>();
 const notify = (event: string, details = {}) => parent.postMessage({ type: 'geo-video-player', event, ...details }, parentOrigin);
-const configResponse = await fetch('/runtime-config.json');
-if (!configResponse.ok) throw new Error('UE configuration unavailable');
-const settings = await configResponse.json();
+const settings = await fetchJson('/runtime-config.json', 10000);
+if (typeof settings.signallingUrl !== 'string' || !/^wss?:\/\//.test(settings.signallingUrl)) {
+  throw new Error('UE signalling configuration unavailable');
+}
 // Camera updates go out at the stream's frame rate, not at a hardcoded 30: at 60 the
 // old throttle halved the rate of the very motion it was meant to smooth.
 const frameInterval = 1000 / Math.max(15, Math.min(120, Number(settings.streamFps) || 30));
-const config = new Config({ useUrlParams: false, initialSettings: { ss: settings.signallingUrl, AutoConnect: false, AutoPlayVideo: true, StartVideoMuted: true, WaitForStreamer: true, MaxReconnectAttempts:600, StreamerAutoJoinInterval:2000, MatchViewportRes: false, KeyboardInput: false, MouseInput: false, TouchInput: false } });
-const stream = new PixelStreaming(config, { videoElementParent: document.getElementById('stream')! });
+// Only the application owns retry timers. SDK retries cannot be cancelled on lease
+// loss and used to race our four-second reconnect loop.
+const createConfig = () => new Config({ useUrlParams: false, initialSettings: { ss: settings.signallingUrl, AutoConnect: false, AutoPlayVideo: true, StartVideoMuted: true, WaitForStreamer: true, MaxReconnectAttempts:0, StreamerAutoJoinInterval:2000, MatchViewportRes: false, KeyboardInput: false, MouseInput: false, TouchInput: false } });
+let stream: PixelStreaming;
+let streamGeneration = 0;
 function send(action: string, payload = {}): Promise<any> {
   if (!channelReady) return Promise.reject(new Error('UE data channel unavailable'));
   const requestId = crypto.randomUUID();
@@ -101,13 +118,13 @@ function handle(data: any) {
     if (ready) {
       const connection = sceneLoad;
       void send(data.action,data.action === 'set-annotations' ? { annotationWindows: data.annotationWindows } : { labels: data.labels }).catch(error => {
-        if (connection === sceneLoad && ready) fail(error);
+        if (connection === sceneLoad && ready) loadFailed(error);
       });
     }
     return;
   }
   if (!ready) { queuedMotion = data; return; }
-  if (data.action === 'switch-imagery') { void switchImagery(String(data.imagery || '')).catch(fail); return; }
+  if (data.action === 'switch-imagery') { void switchImagery(String(data.imagery || '')).catch(error => loadFailed(error)); return; }
   const descent = scene.region.openingDescent?.enabled === false ? 0 : Number(scene.region.openingDescent?.seconds || 0);
   const wasPlaying = raf !== 0;
   stop();
@@ -159,6 +176,14 @@ function handle(data: any) {
   } else draw(true);
 }
 function fail(error: unknown) { status.textContent = String(error); retryButton.hidden = false; overlay.hidden = false; notify('engine-error',{ message:String(error) }); }
+// A scene load rides the same data channel as everything else: if UE restarted under
+// us the command dies with it, and freezing on the error would leave the preview dead
+// until a manual refresh. Treat it as a stream failure and recover instead.
+function loadFailed(error: unknown) {
+  if (suspended) return;
+  notify('engine-error', { message: String(error) });
+  standDown(`地图场景加载失败：${error instanceof Error ? error.message : String(error)}`);
+}
 // The basemap is a tile source, not a scene: swapping it re-resolves the provider and
 // hands the new template to UE, which rebuilds only its tile layer. Geometry, labels
 // and the camera stay where they are, so the video stream is never torn down.
@@ -185,6 +210,7 @@ async function load(signal: AbortSignal) {
   }
   const size=profile==='landscape'?[1280,720]:profile==='square'?[720,720]:[720,1280];
   await send('load-scene',{ url: `${location.origin}${sceneUrl()}`, profile, width:query.has('studioPreview')?size[0]:innerWidth,height:query.has('studioPreview')?size[1]:innerHeight,imagery:imageryProvider });
+  signal.throwIfAborted();
   const expected=query.has('studioPreview')?size:[innerWidth,innerHeight];
   const until=performance.now()+8000;
   while (!signal.aborted && performance.now() < until) {
@@ -193,7 +219,7 @@ async function load(signal: AbortSignal) {
     await new Promise(resolve => setTimeout(resolve, 100));
   }
   signal.throwIfAborted();
-  ready = true; overlay.hidden = true;
+  ready = true; joinAttempts = 0; streamDownAt = 0; lastFailure = ''; resetVideoHealth(); overlay.hidden = !playBlocked;
   // The standalone capture publishes no tour stops: it always opens on the town and
   // therefore carries the county establishing shot.
   contextIntro = (stops ?? scene.region?.tourStops ?? []).length === 0;
@@ -204,26 +230,28 @@ async function load(signal: AbortSignal) {
   if (motion) handle(motion);
   notify('engine-ready');
 }
-stream.addResponseEventListener('geo-documentary', raw => {
+function receiveResponse(raw: string) {
   try {
     const response = JSON.parse(raw);
     if (response.type !== 'geo-video-ue') return;
     const request = pending.get(response.requestId);
     if (request) { clearTimeout(request.timer); pending.delete(response.requestId); response.error ? request.reject(new Error(response.error)) : request.resolve(response); }
   } catch (error) { fail(error); }
-});
+}
 function maybeLoad() {
-  if (!channelReady || sceneLoad || !document.querySelector('video')?.readyState) return;
+  const video = document.querySelector('video');
+  if (!channelReady || sceneLoad || !video || video.readyState < 2 || !video.videoWidth || !video.videoHeight || video.ended) return;
   const loadController = new AbortController();
   sceneLoad = loadController;
   void load(loadController.signal).catch(error => {
     if (loadController.signal.aborted) return;
     sceneLoad = undefined;
-    fail(error);
+    loadFailed(error);
   });
 }
 const retryButton = document.getElementById('retry')!;
 function teardown() {
+  connectedAt = 0;
   channelReady = false;
   ready = false;
   stop();
@@ -235,83 +263,221 @@ function teardown() {
   }
   pending.clear();
 }
-// The streamer accepts a single controller. A page that loses the slot stays down and
-// waits for a click: reconnecting by itself would make two windows evict each other in a
-// loop. A page that never manages to subscribe must retry on its own instead — a refused
-// subscription raises no event here, so without this the overlay sits on "正在连接" forever.
-let joinTimer: ReturnType<typeof setTimeout> | undefined;
-let joinAttempts = 0;
-// `capture=1` is set by the offline frame grabber. It has no UI and no user, so it gets
-// a different contract from the studio preview: the stream is expected to blip (a UE
-// restart, a dropped WebRTC track) and the page must survive it, not report it and die.
 const captureMode = query.has('capture');
+// Lease state is declared before any listener that can touch it: a page hidden while
+// the module is still awaiting its runtime config must not hit a temporal dead zone.
+const viewerId = crypto.randomUUID();
+const slotEnabled = query.get('slot') !== 'off' && !captureMode;
+let holdsSlot = false;
+let leaseGeneration = 0;
+let joining = false;
+let renewing = false;
+let leaseConfirmedAt = 0;
+let slotHeartbeat: ReturnType<typeof setTimeout> | undefined;
+let slotPoll: ReturnType<typeof setTimeout> | undefined;
 let streamDownAt = 0;
-let captureReconnectTimer: ReturnType<typeof setTimeout> | undefined;
-function stopCaptureReconnect() { clearTimeout(captureReconnectTimer); captureReconnectTimer = undefined; }
-function armCaptureReconnect() {
-  clearTimeout(captureReconnectTimer);
-  captureReconnectTimer = setTimeout(() => {
-    if (channelReady) return;
-    joinAttempts = 0;
-    try { stream.reconnect(); } catch { /* the next tick tries again */ }
-    armCaptureReconnect();
-  }, 2000);
-}
-// Events are the only signal the library gives us, and a half-open socket can fail to
-// raise one. A cheap heartbeat makes the recovery path independent of that.
-if (captureMode) {
-  setInterval(() => {
-    if (!channelReady && !captureReconnectTimer) {
-      if (!streamDownAt) streamDownAt = performance.now();
-      armCaptureReconnect();
-    }
-  }, 5000);
-}
+let joinAttempts = 0;
+let joinTimer: ReturnType<typeof setTimeout> | undefined;
+let recoveryTimer: ReturnType<typeof setTimeout> | undefined;
+let healthTimer: ReturnType<typeof setInterval> | undefined;
+let suspended = false;
+let playBlocked = false;
+let lastVideoTime = -1;
+let lastVideoProgress = performance.now();
+let lastHealthCheck = performance.now();
+let connectedAt = 0;
+let lastFailure = '';
+const FIRST_FRAME_TIMEOUT = 20000;
+const HANDSHAKE_TIMEOUT = 60000;
+const VIDEO_STALL_TIMEOUT = 15000;
 function stopJoining() { clearTimeout(joinTimer); joinTimer = undefined; }
-function armJoining() {
-  stopJoining();
-  joinTimer = setTimeout(() => {
-    if (channelReady || ready) return;
-    if (joinAttempts >= 6) { status.textContent = '视频流连接失败'; retryButton.textContent = '重新连接'; return; }
-    joinAttempts += 1;
-    stream.reconnect();
-    armJoining();
-  }, 4000);
+function resetVideoHealth() {
+  lastVideoTime = -1;
+  lastVideoProgress = performance.now();
+  lastHealthCheck = lastVideoProgress;
 }
-function standDown(message: string) {
+function closeStream() {
+  // Invalidate before disconnect: close callbacks can fire synchronously or arrive
+  // after the replacement has opened. Neither may tear down the new connection.
+  streamGeneration++;
   stopJoining();
   teardown();
-  // A capture page has nobody to press "重新连接". Cutting the stream here killed the
-  // whole recording at the first hiccup — the headless page then answers every
-  // capture-frame with "UE data channel unavailable". In capture mode the stream is
-  // allowed to come back on its own; the frame loop waits instead of failing.
-  if (captureMode) {
-    if (!streamDownAt) streamDownAt = performance.now();
-    status.textContent = `${message}（正在自动重连）`;
-    overlay.hidden = true;
-    armCaptureReconnect();
+  // The SDK keeps its old <video> and MediaStream alive after disconnect. Clear the
+  // tracks explicitly, otherwise every recovery leaves another decoded stream behind.
+  const container = document.getElementById('stream');
+  for (const node of container?.querySelectorAll?.('video') ?? []) {
+    const old = node as HTMLVideoElement;
+    old.pause?.();
+    const source = old.srcObject as MediaStream | null;
+    source?.getTracks?.().forEach(track => track.stop());
+    old.srcObject = null;
+  }
+  container?.replaceChildren?.();
+  try { stream?.disconnect(); } catch { /* already closed */ }
+}
+/** MediaStream video elements do not reliably advance currentTime in every browser;
+ *  decoded frame count is the stronger signal, with currentTime as the fallback. */
+function videoProgress(video: HTMLVideoElement) {
+  const frames = video.getVideoPlaybackQuality?.().totalVideoFrames;
+  return typeof frames === 'number' && frames > 0 ? frames : video.currentTime;
+}
+function standDown(message: string) {
+  if (suspended || recoveryTimer || (slotEnabled && !holdsSlot)) return;
+  lastFailure = message;
+  closeStream();
+  if (!streamDownAt) streamDownAt = performance.now();
+  playBlocked = false;
+  status.textContent = `${message}，正在自动恢复…`;
+  retryButton.hidden = false;
+  retryButton.textContent = '立即重试';
+  overlay.hidden = captureMode;
+  notify('engine-reconnecting', { message });
+  const delay = retryDelay(joinAttempts++);
+  recoveryTimer = setTimeout(() => {
+    recoveryTimer = undefined;
+    void joinWithSlot();
+  }, delay);
+}
+function openStream() {
+  closeStream();
+  const generation = streamGeneration;
+  document.getElementById('stream')!.replaceChildren();
+  try {
+    stream = new PixelStreaming(createConfig(), { videoElementParent: document.getElementById('stream')! });
+  } catch (error) {
+    standDown(`视频播放器初始化失败：${error instanceof Error ? error.message : String(error)}`);
     return;
   }
-  stream.disconnect();
-  status.textContent = message;
-  retryButton.hidden = false;
-  retryButton.textContent = '重新连接';
-  overlay.hidden = false;
-}
-document.addEventListener('loadedmetadata',maybeLoad,true);
-stream.addEventListener('dataChannelOpen',() => { channelReady=true; clearTimeout(slotGuard); stopJoining(); stopCaptureReconnect(); streamDownAt=0; maybeLoad(); });
-stream.addEventListener('dataChannelClose',() => standDown('视频流已断开'));
-stream.addEventListener('webRtcDisconnected',() => standDown('视频流已断开'));
-stream.addEventListener('playStreamRejected',() => { status.textContent = '点击播放 UE 地图视频流'; overlay.hidden = false; });
-retryButton.onclick = () => {
-  joinAttempts = 0;
+  const current = () => generation === streamGeneration && !suspended && (!slotEnabled || holdsSlot);
+  stream.addResponseEventListener('geo-documentary', raw => { if (current()) receiveResponse(raw); });
+  stream.addEventListener('dataChannelOpen', () => {
+    if (!current()) return;
+    if (channelReady) return;
+    channelReady = true;
+    connectedAt = performance.now();
+    status.textContent = 'UE 控制通道已连接，正在等待视频首帧…';
+    stopJoining();
+    resetVideoHealth();
+    announceLease();
+    maybeLoad();
+  });
+  stream.addEventListener('dataChannelClose', () => { if (current()) standDown('视频流连接中断'); });
+  stream.addEventListener('webRtcDisconnected', () => { if (current()) standDown('视频流连接中断'); });
+  stream.addEventListener('webRtcFailed', () => { if (current()) standDown('视频流协商失败'); });
+  stream.addEventListener('dataChannelError', () => { if (current()) standDown('UE 控制通道错误'); });
+  stream.addEventListener('subscribeFailed', () => { if (current()) standDown('UE 视频订阅暂时不可用（实例可能被占用）'); });
+  stream.addEventListener('playStreamError', () => { if (current()) standDown('视频解码或播放失败'); });
+  stream.addEventListener('videoInitialized', () => { if (current()) maybeLoad(); });
+  stream.addEventListener('playStreamRejected', () => {
+    if (!current()) return;
+    playBlocked = true;
+    status.textContent = '点击播放 UE 地图视频流';
+    retryButton.textContent = '播放视频';
+    retryButton.hidden = false;
+    overlay.hidden = false;
+  });
   status.textContent = '正在连接 UE 地图视频流…';
-  overlay.hidden = false;
-  stream.reconnect();
-  armJoining();
+  overlay.hidden = captureMode;
+  // Slow UE startup/negotiation is not a failure after four seconds. Allow a full
+  // handshake, and let exactly one application timer retry if it really stalls.
+  joinTimer = setTimeout(() => { if (current() && !channelReady) standDown('视频流连接超时'); }, HANDSHAKE_TIMEOUT);
+  try { stream.connect(); } catch { standDown('预览服务暂时不可用'); }
+}
+function checkVideoHealth() {
+  if (suspended) return;
+  maybeLoad();
+  const now = performance.now();
+  const resumed = now - lastHealthCheck > 10000;
+  lastHealthCheck = now;
+  if (channelReady && !sceneLoad && !ready && !playBlocked) {
+    // A data channel alone is not a usable video stream. Previously opening it
+    // cancelled the handshake timer while the frame watchdog waited for ready,
+    // leaving this in-between state without any timeout at all.
+    if (document.hidden || resumed) connectedAt = now;
+    else if (now - connectedAt >= FIRST_FRAME_TIMEOUT) {
+      standDown('UE 控制通道已连接，但视频首帧超时');
+      return;
+    }
+  }
+  if (!channelReady || !ready || document.hidden || resumed || playBlocked) {
+    lastVideoProgress = now;
+    return;
+  }
+  const video = document.querySelector('video');
+  const tracks = (video?.srcObject as MediaStream | null)?.getVideoTracks?.() ?? [];
+  if (tracks.some(track => track.readyState === 'ended')) { standDown('视频轨道已停止'); return; }
+  if (!video || video.ended) {
+    if (now - lastVideoProgress > VIDEO_STALL_TIMEOUT) standDown('视频轨道不可用');
+    return;
+  }
+  if (video.paused) {
+    // A paused element looks identical to a dead one. Ask it to play before blaming
+    // the network: a rejected autoplay is handled by the play overlay, not by a
+    // reconnect, which would rebuild a stream that was never broken.
+    void video.play().catch(() => {
+      playBlocked = true;
+      status.textContent = '点击播放 UE 地图视频流';
+      retryButton.textContent = '播放视频';
+      retryButton.hidden = false;
+      overlay.hidden = false;
+    });
+    lastVideoProgress = now;
+    return;
+  }
+  if (videoProgress(video) > lastVideoTime) {
+    lastVideoTime = videoProgress(video);
+    lastVideoProgress = now;
+  } else if (now - lastVideoProgress > VIDEO_STALL_TIMEOUT) {
+    standDown('视频画面长时间未更新');
+  }
+}
+function startHealthMonitor() {
+  clearInterval(healthTimer);
+  resetVideoHealth();
+  healthTimer = setInterval(checkVideoHealth, 2000);
+}
+document.addEventListener('loadedmetadata', maybeLoad, true);
+document.addEventListener('loadeddata', maybeLoad, true);
+retryButton.onclick = () => {
+  if (playBlocked) {
+    void document.querySelector('video')?.play().then(() => {
+      playBlocked = false; overlay.hidden = ready; resetVideoHealth(); maybeLoad();
+    }).catch(() => { status.textContent = '浏览器阻止了播放，请再次点击播放视频'; });
+    return;
+  }
+  clearTimeout(recoveryTimer); recoveryTimer = undefined;
+  joinAttempts = 0;
+  if (!channelReady) void joinWithSlot();
+  else { sceneLoad?.abort(); sceneLoad = undefined; maybeLoad(); }
 };
 window.addEventListener('message',event => { if (event.source === parent && event.origin === parentOrigin && event.data?.type === 'geo-video-studio') handle(event.data); });
-window.addEventListener('pagehide', () => { teardown(); releaseSlot(); stream.disconnect(); });
+window.addEventListener('pagehide', () => {
+  suspended = true;
+  leaseGeneration++;
+  clearTimeout(recoveryTimer); recoveryTimer = undefined;
+  clearInterval(healthTimer); healthTimer = undefined;
+  closeStream();
+  releaseSlot();
+});
+window.addEventListener('pageshow', event => {
+  if (!event.persisted || !suspended) return;
+  suspended = false;
+  startHealthMonitor();
+  void joinWithSlot();
+});
+document.addEventListener('visibilitychange', () => {
+  resetVideoHealth();
+  if (!document.hidden && !suspended) {
+    if (holdsSlot) void renewSlot();
+    else if (!recoveryTimer) void joinWithSlot();
+  }
+});
+window.addEventListener('online', () => {
+  if (!suspended && !channelReady) {
+    clearTimeout(recoveryTimer); recoveryTimer = undefined;
+    void joinWithSlot();
+  }
+});
 Object.assign(window,{ geoVideo: {
   getDiagnostics: () => ({ engine:'unreal', ready, time, imagery:scene?.imagery?.provider, imageProvider:imageryProvider }),
   getRendererStatus: () => send('get-status'),
@@ -359,7 +525,11 @@ Object.assign(window,{ geoVideo: {
     channelReady,
     captureMode,
     downSeconds: streamDownAt ? Math.round((performance.now() - streamDownAt) / 100) / 10 : 0,
-    sceneLoaded: Boolean(scene)
+    sceneLoaded: Boolean(scene),
+    stage: suspended ? 'suspended' : ready ? 'ready' : playBlocked ? 'play-blocked' : sceneLoad ? 'scene-loading' : channelReady ? 'waiting-first-frame' : holdsSlot || !slotEnabled ? 'connecting' : 'waiting-slot',
+    attempts: joinAttempts,
+    lastFailure,
+    status: status.textContent
   }),
   // The grabber waits on this instead of polling the DOM: `ready` only turns true once
   // the reconnected stream has re-applied the scene, which is the moment a frame is
@@ -378,65 +548,176 @@ Object.assign(window,{ geoVideo: {
 // One UE instance drives one stream, and the streamer takes a single subscriber.
 // The first window to arrive holds the slot; every later window is told the instance
 // is busy and keeps polling, so it joins by itself the moment the holder goes away.
-const viewerId = crypto.randomUUID();
-const slotEnabled = query.get('slot') !== 'off' && !captureMode;
-let slotHeartbeat: ReturnType<typeof setInterval> | undefined;
-let slotPoll: ReturnType<typeof setTimeout> | undefined;
-let slotGuard: ReturnType<typeof setTimeout> | undefined;
-let holdsSlot = false;
+// One lease round trip at a time. Without this, a reply that arrives after the page
+// is frozen (or after a newer claim) reopened a stream nobody was watching, and two
+// windows ended up fighting over the streamer's single subscriber seat.
 async function claimSlot(): Promise<'granted' | 'busy' | 'offline'> {
-  const response = await fetch('/api/viewer-slot', {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: viewerId })
-  }).catch(() => undefined);
-  if (!response) return 'offline';
-  const data = await response.json().catch(() => ({}));
-  return data.granted ? 'granted' : 'busy';
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch('/api/viewer-slot', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: viewerId }), signal: controller.signal
+    });
+    if (response.status === 409) return 'busy';
+    if (!response.ok) return 'offline';
+    const data = await response.json();
+    return data.granted === true ? 'granted' : 'offline';
+  } catch {
+    return 'offline';
+  } finally {
+    // Keep the timeout active until the body has arrived as well as the headers.
+    clearTimeout(timeout);
+  }
 }
-function releaseSlot(keepWaiting = false) {
-  clearInterval(slotHeartbeat);
-  clearTimeout(slotPoll);
-  if (!keepWaiting) clearTimeout(slotGuard);
-  slotHeartbeat = undefined;
-  slotPoll = undefined;
-  holdsSlot = false;
-  navigator.sendBeacon?.('/api/viewer-slot/release', new Blob([JSON.stringify({ id: viewerId })], { type: 'application/json' }));
+// The HTTP lease cannot tell two windows apart quickly enough: a background tab has
+// its timers throttled to one tick a minute, so its lease expires and the other
+// window claims a subscriber seat that is still in use. Both then fight, and the
+// visible symptom is a preview that drops every time the user switches away. Windows
+// of the same origin can just say who holds the stream, so that is the primary
+// arbiter; the HTTP lease stays as a fallback when BroadcastChannel is unavailable.
+const leaseChannel: BroadcastChannel | undefined = typeof BroadcastChannel === 'function'
+  ? new BroadcastChannel('geo-video-viewer') : undefined;
+let peerClaimAt = 0;
+let probeBarrier: (() => void) | undefined;
+/**
+ * A peer is considered alive only while it keeps answering probes. A window that was
+ * killed (not closed) leaves no release message behind, so trusting a stale flag for
+ * minutes would lock the preview out for minutes.
+ */
+function peerOwnsStream() {
+  return Boolean(leaseChannel && peerClaimAt && performance.now() - peerClaimAt < 10000);
+}
+function announceLease() {
+  if (!leaseChannel || (!holdsSlot && !channelReady)) return;
+  try { leaseChannel.postMessage({ type: 'claim', id: viewerId, video: channelReady }); } catch { /* channel closed */ }
 }
 /**
- * Holding the lease is not proof that we got the video: a page opened before the
- * lease existed (or a session whose socket died without a close frame) can still
- * occupy the streamer's single subscriber slot. When that happens we hand the lease
- * back instead of squatting it, show the same "another window is using it" notice,
- * and keep polling — so the moment that unknown holder goes away we join.
+ * Ask the other windows whether one of them is already showing frames. The HTTP lease
+ * cannot answer that (a throttled tab's lease expires while its stream is perfectly
+ * alive), and subscribing blind is what made two windows evict each other in a loop.
  */
-function armSlotGuard() {
-  clearTimeout(slotGuard);
-  slotGuard = setTimeout(() => {
-    if (channelReady || ready || !holdsSlot) return;
-    releaseSlot(true);
-    retryButton.hidden = true;
-    overlay.hidden = false;
-    status.textContent = '地图实例正在被另一个窗口使用。\n关闭那个窗口后，本窗口会自动接入，无需刷新。';
-    slotPoll = setTimeout(joinWithSlot, 4000);
-  }, 25000);
+function askPeers(timeoutMs = 700): Promise<void> {
+  if (!leaseChannel) return Promise.resolve();
+  return new Promise(resolve => {
+    let done = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      probeBarrier = undefined;
+      clearTimeout(timer);
+      resolve();
+    };
+    probeBarrier = finish;
+    timer = setTimeout(finish, timeoutMs);
+    try { leaseChannel.postMessage({ type: 'probe', id: viewerId }); } catch { finish(); }
+  });
 }
-async function joinWithSlot() {
-  if (!slotEnabled) { stream.connect(); armJoining(); return; }
-  const state = await claimSlot();
-  if (state === 'granted') {
-    holdsSlot = true;
-    joinAttempts = 0;
-    retryButton.hidden = false;
-    slotHeartbeat = setInterval(() => { void claimSlot(); }, 4000);
-    armSlotGuard();
-    stream.connect();
-    armJoining();
+leaseChannel?.addEventListener('message', event => {
+  const data = event.data as { type?: string; id?: string; video?: boolean } | null;
+  if (!data || data.id === viewerId) return;
+  if (data.type === 'probe') { announceLease(); return; }
+  if (data.type === 'release') {
+    peerClaimAt = 0;
+    if (!holdsSlot && !channelReady && !recoveryTimer && !suspended) void joinWithSlot();
     return;
   }
-  retryButton.hidden = true;
+  if (data.type !== 'claim') return;
+  peerClaimAt = performance.now();
+  // A window that is already showing frames owns the single subscriber seat. Retrying
+  // into it only produces rejected subscriptions, so pause and wait for its release.
+  if (data.video && !channelReady && !captureMode) { probeBarrier?.(); waitForSlot('busy'); }
+});
+function sendSlotRelease() {
+  if (!slotEnabled) return;
+  try { leaseChannel?.postMessage({ type: 'release', id: viewerId }); } catch { /* ignored */ }
+  const body = JSON.stringify({ id: viewerId });
+  const queued = navigator.sendBeacon?.('/api/viewer-slot/release', new Blob([body], { type: 'application/json' }));
+  if (!queued) void fetch('/api/viewer-slot/release', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body, keepalive: true
+  }).catch(() => {});
+}
+function releaseSlot() {
+  clearTimeout(slotHeartbeat); slotHeartbeat = undefined;
+  clearTimeout(slotPoll); slotPoll = undefined;
+  holdsSlot = false;
+  sendSlotRelease();
+}
+function waitForSlot(state: 'busy' | 'offline') {
+  if (suspended) return;
+  clearTimeout(slotPoll);
+  retryButton.hidden = state === 'busy';
   overlay.hidden = false;
   status.textContent = state === 'busy'
-    ? '地图实例正在被另一个窗口使用。\n关闭那个窗口后，本窗口会自动接入，无需刷新。'
+    ? '地图实例正在被另一个窗口使用。\n切回那个窗口即可继续预览，关闭它后本窗口会自动接入。'
     : '预览服务暂时不可用，正在自动重试…';
-  slotPoll = setTimeout(joinWithSlot, 2000);
+  // Poll slowly: a fast loop only re-enters contention and keeps the stream churning.
+  const delay = state === 'busy' ? 3000 : retryDelay(joinAttempts++);
+  slotPoll = setTimeout(() => { slotPoll = undefined; void joinWithSlot(); }, delay);
 }
+function scheduleHeartbeat() {
+  clearTimeout(slotHeartbeat);
+  if (!suspended && holdsSlot) slotHeartbeat = setTimeout(() => { slotHeartbeat = undefined; void renewSlot(); }, 4000);
+}
+async function renewSlot() {
+  if (suspended || !holdsSlot || renewing || joining) return;
+  renewing = true;
+  const generation = leaseGeneration;
+  const state = await claimSlot();
+  renewing = false;
+  // The page went away (or was replaced) while this reply was in flight. A grant we
+  // no longer need must be handed back, or the next window waits on a ghost.
+  if (suspended || generation !== leaseGeneration) {
+    if (state === 'granted') sendSlotRelease();
+    return;
+  }
+  if (state === 'granted') {
+    leaseConfirmedAt = performance.now();
+    announceLease();
+    scheduleHeartbeat();
+    return;
+  }
+  // Dropping a working stream because one heartbeat lost a race is exactly the
+  // "disconnects constantly" behaviour. Trust live video; the video watchdog and the
+  // peer announcements are what decide a stream is really gone.
+  if (channelReady) { scheduleHeartbeat(); return; }
+  holdsSlot = false;
+  clearTimeout(slotHeartbeat); slotHeartbeat = undefined;
+  clearTimeout(recoveryTimer); recoveryTimer = undefined;
+  closeStream();
+  notify('engine-reconnecting', { message: state === 'busy' ? '另一个窗口正在使用地图实例' : '预览服务暂时不可用' });
+  waitForSlot(state);
+}
+// Brief handshake failures back off instead of hammering the single subscriber seat.
+function retryDelay(attempt: number) {
+  return Math.min(20000, 2000 * 2 ** Math.min(attempt, 3));
+}
+async function joinWithSlot() {
+  // A round trip already in flight will open the stream; a second claim would only
+  // race it and could hand the lease back out from under the first one.
+  if (joining || suspended || channelReady) return;
+  clearTimeout(slotPoll); slotPoll = undefined;
+  clearTimeout(recoveryTimer); recoveryTimer = undefined;
+  if (!slotEnabled) { openStream(); return; }
+  if (peerOwnsStream() && !captureMode) { waitForSlot('busy'); return; }
+  joining = true;
+  const generation = leaseGeneration;
+  await askPeers();
+  if (suspended || generation !== leaseGeneration) { joining = false; return; }
+  if (peerOwnsStream() && !captureMode) { joining = false; waitForSlot('busy'); return; }
+  const state = await claimSlot();
+  joining = false;
+  if (suspended || generation !== leaseGeneration) {
+    if (state === 'granted') sendSlotRelease();
+    return;
+  }
+  if (state !== 'granted') { waitForSlot(state); return; }
+  holdsSlot = true;
+  leaseConfirmedAt = performance.now();
+  announceLease();
+  scheduleHeartbeat();
+  openStream();
+}
+startHealthMonitor();
 void joinWithSlot();

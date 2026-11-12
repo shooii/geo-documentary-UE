@@ -27,6 +27,7 @@ import { buildProjectWorkbook, collectAssetPreviews, mergeProjectWorkbook, workb
 import { isWorkspaceAssetFileName } from "./media-sniff.js";
 import { MAX_BINARY_ASSET_BYTES, storeUploadedBuffer, storeUploadedFile } from "./asset-store.js";
 import { HttpError } from "./http-error.js";
+import { startPreviewRuntime } from "../ue-player/runtime.js";
 
 const root = resolve(process.cwd());
 const publicRoot = join(root, "apps", "studio", "public");
@@ -40,6 +41,10 @@ const port = Number(process.env.STUDIO_PORT ?? 4180);
 const cesiumPreviewPort = Number(process.env.CESIUM_PREVIEW_PORT ?? 4174);
 const cesiumPreviewScript = join(root, "apps", "ue-player", "server.ts");
 let cesiumPreviewChild: ChildProcess | null = null;
+let cesiumPreviewRestart: ReturnType<typeof setTimeout> | null = null;
+let previewStopping = false;
+let previewFailures = 0;
+let ueRuntime: ReturnType<typeof startPreviewRuntime> | null = null;
 /** Port the preview iframe is actually pointed at; differs from the default when
  *  something else already owns it (see `identifyPreview`). */
 let activePreviewPort = cesiumPreviewPort;
@@ -79,6 +84,8 @@ async function identifyPreview(host: string, previewPort: number): Promise<"free
 }
 
 function startCesiumPreview(): void {
+  if (previewStopping) return;
+  ueRuntime ??= startPreviewRuntime(root);
   // 编辑预览背后是另一个 UnrealEditor（720×1280）。导出录制自己也会拉起一个
   // 1080×1920 的 UE，两个实例同抢显存时录制实例会直接退出（实测录到第 410 帧
   // 就 `UE renderer exited (4294967295)`，日志里什么都没有）。导出期间用
@@ -103,6 +110,7 @@ function startCesiumPreview(): void {
     for (let offset = 0; offset < 12; offset++) {
       const candidate = cesiumPreviewPort + offset;
       const state = await identifyPreview("127.0.0.1", candidate);
+      if (previewStopping) return;
       if (state === "unreal") {
         activePreviewPort = candidate;
         process.stdout.write(`CESIUM_PREVIEW_REUSE http://127.0.0.1:${candidate} (already running, skipped auto-start)\n`);
@@ -125,11 +133,32 @@ function startCesiumPreview(): void {
       };
       child.stdout?.on("data", forward("out"));
       child.stderr?.on("data", forward("err"));
-      child.once("exit", (code) => {
+      const born = Date.now();
+      const ended = (reason: string) => {
+        if (cesiumPreviewChild !== child) return;
         cesiumPreviewChild = null;
-        process.stdout.write(`[cesium-preview] exited with ${code ?? "null"}\n`);
-      });
+        if (previewStopping) return;
+        if (Date.now() - born > 60000) previewFailures = 0;
+        const delay = Math.min(30000, 2000 * 2 ** Math.min(previewFailures++, 4));
+        process.stdout.write(`[cesium-preview] stopped (${reason}); ${delay / 1000} 秒后重试\n`);
+        if (cesiumPreviewRestart) clearTimeout(cesiumPreviewRestart);
+        cesiumPreviewRestart = setTimeout(() => {
+          cesiumPreviewRestart = null;
+          if (!previewStopping && !cesiumPreviewChild && process.env.STUDIO_PREVIEW !== "off") startCesiumPreview();
+        }, delay);
+      };
+      child.once("error", error => ended(error.message));
+      child.once("exit", code => ended(`exit ${code ?? "null"}`));
       process.stdout.write(`CESIUM_PREVIEW_STARTED http://127.0.0.1:${candidate} pid=${child.pid ?? "?"}\n`);
+      const readyDeadline = Date.now() + 8000;
+      while (!previewStopping && cesiumPreviewChild === child && Date.now() < readyDeadline) {
+        if (await identifyPreview("127.0.0.1", candidate) === "unreal") return;
+        if (previewStopping || cesiumPreviewChild !== child) return;
+        await new Promise<void>(resolve => setTimeout(resolve, 200));
+      }
+      if (!previewStopping && cesiumPreviewChild === child) {
+        process.stdout.write(`CESIUM_PREVIEW_NOT_READY http://127.0.0.1:${candidate} 在就绪期限内未响应\n`);
+      }
       return;
     }
     process.stdout.write(`CESIUM_PREVIEW_SKIP no free port in ${cesiumPreviewPort}…${cesiumPreviewPort + 11}\n`);
@@ -141,8 +170,12 @@ function startCesiumPreview(): void {
 }
 
 function stopCesiumPreview(): void {
+  previewStopping = true;
+  if (cesiumPreviewRestart) clearTimeout(cesiumPreviewRestart);
+  cesiumPreviewRestart = null;
+  ueRuntime?.stop();
   if (cesiumPreviewChild && !cesiumPreviewChild.killed && cesiumPreviewChild.exitCode === null) {
-    try { cesiumPreviewChild.kill(); } catch { /* best effort */ }
+    try { killProcessTree(cesiumPreviewChild); } catch { /* 已经退出 */ }
   }
 }
 
