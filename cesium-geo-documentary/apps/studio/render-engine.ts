@@ -873,6 +873,33 @@ async function preflightComposition(
   throw new Error(`成片预检未通过（${summary.errors} 项错误）：${summary.findings.join("；") || "详见预检报告"}。${options.stopMessage}`);
 }
 
+// —— 导出录制期间暂停预览渲染器，避免双 UE 抢显存/内存触发 OOM ——
+// 录制（apps/ue-player/capture.ts）会拉起 1080×1920 的录制 UE；预览 UE（720×1280）
+// 与它同抢资源时，实测二者之一会 OOM 退出（exit 4294967295，日志无 fatal）。
+// 这里写锁文件并杀掉预览 UE；dev.ts 看到锁就不重启预览，录制结束删锁后恢复。
+const EXPORT_LOCK = "workspace/export-recording.lock";
+const PREVIEW_PID_FILE = "workspace/ue-preview.pid";
+
+async function pausePreviewRenderer(root: string): Promise<void> {
+  await writeFile(join(root, EXPORT_LOCK), String(Date.now()), "utf8");
+  try {
+    const pid = (await readFile(join(root, PREVIEW_PID_FILE), "utf8")).trim();
+    if (/^\d+$/.test(pid)) {
+      await new Promise<void>(done => {
+        const killer = spawn("taskkill", ["/pid", pid, "/t", "/f"], { windowsHide: true, stdio: "ignore" });
+        killer.once("error", () => done());
+        killer.once("exit", () => done());
+      });
+    }
+  } catch {
+    /* 预览渲染器未运行，或 pid 文件尚不存在 */
+  }
+}
+
+async function resumePreviewRenderer(root: string): Promise<void> {
+  await unlink(join(root, EXPORT_LOCK)).catch(() => { /* 锁已不在也无妨 */ });
+}
+
 export async function executeRender(root: string, job: RenderJobRecord, projectInput: VideoProject, callbacks: RenderCallbacks): Promise<void> {
   validateVideoProject(projectInput);
   const project = structuredClone(projectInput);
@@ -950,22 +977,28 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   if (hit) callbacks.update({ status: "capturing", stage: "复用完整签名匹配的 Cesium 地图缓存", progress: 48, logs: [`MAP_CACHE_HIT ${spec.cacheSignature}`] });
   else {
     const port = 4600 + Number.parseInt(job.id.replaceAll("-", "").slice(0, 4), 16) % 1000;
-    await runTsx("apps/ue-player/capture.ts", ["--region", project.regionId, "--profile", project.output.profile, "--port", String(port), "--imagery", project.imagery.provider, "--subtitle-composition", "apps/video-compositor/index.html"], "capturing", "录制 UE 地图、行政区巡游和返回镜头", 42);
-    // Verify the take before it becomes the cache: a short capture used to be written to
-    // the cache unconditionally, so one bad take poisoned every later export of this
-    // signature. capture.ts already checks frame count and encoded duration; this is the
-    // second pair of eyes that catches a truncated copy or a stale file.
-    const capturedFile = join(sandbox, "renders", "intermediate", `${project.regionId}-map-${project.output.profile}.mp4`);
-    const capturedSeconds = await mapVideoSeconds(root, capturedFile);
-    const expectedMapSeconds = Number(spec.timelineDurationSeconds) || 0;
-    if (capturedSeconds <= 0) throw new Error("地图录制没有产出可用的视频文件");
-    if (expectedMapSeconds > 0 && capturedSeconds < expectedMapSeconds * 0.98) {
-      throw new Error(`地图录制只有 ${capturedSeconds.toFixed(1)}s，时间轴需要 ${expectedMapSeconds.toFixed(1)}s`);
+    // 录制 UE 与预览 UE 同抢显存/内存会 OOM；录制前停掉预览渲染器，录完（无论成败）恢复。
+    await pausePreviewRenderer(root);
+    try {
+      await runTsx("apps/ue-player/capture.ts", ["--region", project.regionId, "--profile", project.output.profile, "--port", String(port), "--imagery", project.imagery.provider, "--subtitle-composition", "apps/video-compositor/index.html"], "capturing", "录制 UE 地图、行政区巡游和返回镜头", 42);
+      // Verify the take before it becomes the cache: a short capture used to be written to
+      // the cache unconditionally, so one bad take poisoned every later export of this
+      // signature. capture.ts already checks frame count and encoded duration; this is the
+      // second pair of eyes that catches a truncated copy or a stale file.
+      const capturedFile = join(sandbox, "renders", "intermediate", `${project.regionId}-map-${project.output.profile}.mp4`);
+      const capturedSeconds = await mapVideoSeconds(root, capturedFile);
+      const expectedMapSeconds = Number(spec.timelineDurationSeconds) || 0;
+      if (capturedSeconds <= 0) throw new Error("地图录制没有产出可用的视频文件");
+      if (expectedMapSeconds > 0 && capturedSeconds < expectedMapSeconds * 0.98) {
+        throw new Error(`地图录制只有 ${capturedSeconds.toFixed(1)}s，时间轴需要 ${expectedMapSeconds.toFixed(1)}s`);
+      }
+      const cacheDir = join(root, "workspace", "render-cache", spec.cacheSignature.replace("sha256:", ""));
+      await mkdir(cacheDir, { recursive: true });
+      await copyFile(capturedFile, join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`));
+      await pruneSupersededMapCache(root, project.regionId, project.output.profile, spec.cacheSignature);
+    } finally {
+      await resumePreviewRenderer(root);
     }
-    const cacheDir = join(root, "workspace", "render-cache", spec.cacheSignature.replace("sha256:", ""));
-    await mkdir(cacheDir, { recursive: true });
-    await copyFile(capturedFile, join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`));
-    await pruneSupersededMapCache(root, project.regionId, project.output.profile, spec.cacheSignature);
   }
   const mapEndedAt = Date.now();
   // Everything that is not narration and not the map: sandbox setup, child-tour
