@@ -58,7 +58,13 @@ test("bound asset cards contain long names without covering their actions", asyn
     readFile(resolve(root, "apps/studio/public/studio-refine.css"), "utf8")
   ]);
   assert.match(source, /class="scene-bound-asset-title" title="\$\{escapeHtml\(asset\.name\)\}"/);
-  assert.match(styles, /\.scene-bound-asset \.scene-bound-asset-title>b\{[^}]*-webkit-line-clamp:2/);
+  const titleStyle = styles.match(/\.scene-bound-asset \.scene-bound-asset-title>b\{([^}]*)\}/)?.[1] || "";
+  assert.match(titleStyle, /display:block/);
+  assert.match(titleStyle, /min-width:0/);
+  assert.match(titleStyle, /overflow:hidden/);
+  assert.match(titleStyle, /text-overflow:ellipsis/);
+  assert.match(titleStyle, /white-space:nowrap/);
+  assert.doesNotMatch(titleStyle, /line-clamp|white-space:normal/);
   assert.match(styles, /\.scene-bound-asset \.scene-bound-asset-title>small\{[^}]*text-overflow:ellipsis/);
 });
 
