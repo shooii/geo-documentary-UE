@@ -3,6 +3,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { normalizeSubtitleSemantics } from "../../../../packages/content-engine/subtitles.js";
+import { extractCaptionText } from "./delivery-subtitle-text.js";
+import { unexpectedSilenceEvents } from "./delivery-silence.js";
 
 interface ProbeStream {
   codec_name?: string;
@@ -104,6 +106,19 @@ async function validateVideo(regionId: string, profile: string): Promise<Validat
     : {};
   const expectedDuration = compositionMetadata.compositionDuration ?? expectedTimeline.duration;
   const allowedCoverSilenceSeconds = (compositionMetadata.coverIntroSeconds ?? 0) + (compositionMetadata.narrationStartSeconds ?? 0);
+  const narrationDurationPath = resolve(root, `assets/audio/${regionId}/duration.json`);
+  const narrationDuration = existsSync(narrationDurationPath)
+    ? JSON.parse(await readFile(narrationDurationPath, "utf8")) as {
+      outroPause?: { applied?: boolean; insertionAtSeconds?: number; outroNarrationStartSeconds?: number };
+    }
+    : {};
+  const outroPause = narrationDuration.outroPause;
+  const outroSilenceWindow = outroPause?.applied && outroPause.insertionAtSeconds !== undefined && outroPause.outroNarrationStartSeconds !== undefined
+    ? {
+      start: allowedCoverSilenceSeconds + outroPause.insertionAtSeconds,
+      end: allowedCoverSilenceSeconds + outroPause.outroNarrationStartSeconds
+    }
+    : undefined;
   if (!existsSync(absolutePath)) {
     return { regionId, profile, path: relativePath, ok: false, duration: 0, width: 0, height: 0, fps: "", videoCodec: "", audioCodec: "", hasAudio: false, blackEvents: [], silenceEvents: [], errors: ["file-missing"] };
   }
@@ -136,15 +151,9 @@ async function validateVideo(regionId: string, profile: string): Promise<Validat
   if (detection.code !== 0) throw new Error(`FFmpeg validation failed for ${relativePath}: ${detection.output.slice(-4000)}`);
   const blackEvents = detection.output.split(/\r?\n/).filter((line) => line.includes("black_start") || line.includes("black_end"));
   const silenceEvents = detection.output.split(/\r?\n/).filter((line) => line.includes("silence_start") || line.includes("silence_end"));
-  const unexpectedSilenceEvents = silenceEvents.filter((line) => {
-    const start = line.match(/silence_start:\s*([0-9.]+)/)?.[1];
-    if (start !== undefined) return Number(start) > 0.05;
-    const end = line.match(/silence_end:\s*([0-9.]+)/)?.[1];
-    if (end !== undefined) return Number(end) > allowedCoverSilenceSeconds + 0.3;
-    return true;
-  });
+  const unexpectedSilence = unexpectedSilenceEvents(silenceEvents, allowedCoverSilenceSeconds, outroSilenceWindow);
   if (blackEvents.length > 0) errors.push("black-frame-event");
-  if (unexpectedSilenceEvents.length > 0) errors.push("silence-event");
+  if (unexpectedSilence.length > 0) errors.push("silence-event");
 
   return {
     regionId,
@@ -184,15 +193,6 @@ const targets = ids.flatMap((regionId) => profiles.map((profile) => ({ regionId,
 const videoResults = await runWithConcurrency(targets, 3, ({ regionId, profile }) => validateVideo(regionId, profile));
 
 const subtitleErrors: string[] = [];
-function decodeCompositionText(html: string): string {
-  return html
-    .replaceAll(/<br\s*\/?>/gi, "\n")
-    .replaceAll(/<[^>]+>/g, "")
-    .replaceAll("&amp;", "&")
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">")
-    .replaceAll("&quot;", '"');
-}
 for (const { regionId, profile } of targets) {
   const definition = profileDefinitions[profile as keyof typeof profileDefinitions];
   if (!definition) continue;
@@ -202,12 +202,12 @@ for (const { regionId, profile } of targets) {
   const expectedText = captionData.cues.map((cue) => cue.text).join("");
   const html = await readFile(compositionPath, "utf8");
   const clips = [...html.matchAll(/<div id="caption-\d+"[^>]*>([\s\S]*?)<\/div>/g)].map((match) => match[1] ?? "");
-  const actualText = clips.map((clip) => decodeCompositionText(clip).replaceAll("\n", "")).join("");
+  const actualText = clips.map((clip) => extractCaptionText(clip).replaceAll("\n", "")).join("");
   if (normalizeSubtitleSemantics(actualText) !== normalizeSubtitleSemantics(expectedText)) {
     subtitleErrors.push(`${regionId}-${profile}:semantic-text-mismatch`);
   }
   for (const [index, clip] of clips.entries()) {
-    const lines = decodeCompositionText(clip).split("\n");
+    const lines = extractCaptionText(clip).split("\n");
     if (lines.length > definition.subtitleLines) subtitleErrors.push(`${regionId}-${profile}:caption-${index}:too-many-lines`);
     if (lines.some((line) => [...line].length > definition.subtitleMaximum)) subtitleErrors.push(`${regionId}-${profile}:caption-${index}:line-too-long`);
   }
