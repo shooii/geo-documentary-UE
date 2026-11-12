@@ -15,6 +15,7 @@ import {
 } from "./narration-timing.js";
 import { isXfyunVoice, synthesizeXfyun, xfyunCredentialsFromEnvFile } from "../../../../packages/xfyun-tts/index.js";
 import { alignCueBoundaries, splitNarrationSentences } from "../../../../packages/render-spec/narration-align.js";
+import { canReuseFinalNarration } from "../../../../packages/narration-cache/index.js";
 
 interface PronunciationRecord { term: string; pinyin: string; spokenForm?: string }
 interface RegionContent {
@@ -383,6 +384,18 @@ for (const id of ids) {
   const sapiRate = Math.max(-10, Math.min(10, Math.round(requestedRatePercent / 10)));
   const ttsInput = narrationInput(content);
   const narrationTextHash = stableNarrationTextHash(ttsInput);
+  if (!force && !draftMode && await canReuseFinalNarration(audioDir, content)) {
+    loudnessNormalize(mp3, wav);
+    const metadata = JSON.parse(await readFile(metadataPath, "utf8")) as { durationSeconds: number };
+    await synchronizeEditorialDuration(id, metadata.durationSeconds);
+    run(python, [
+      ".agents/skills/cesium-geo-documentary/scripts/generate-subtitles.py",
+      "--region", id, "--narration-srt", edgeSrt,
+      ...(outDirOverride ? ["--captions-dir", outDirOverride] : [])
+    ]);
+    process.stdout.write(`NARRATION_READY ${id} ${metadata.durationSeconds.toFixed(2)}s (cached)\n`);
+    continue;
+  }
   await mkdir(audioDir, { recursive: true });
   await writeFile(ttsInputPath, ttsInput, "utf8");
   await writeFile(pronunciationPath, JSON.stringify({

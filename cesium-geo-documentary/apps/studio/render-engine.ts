@@ -14,6 +14,7 @@ import { buildProjectRenderSpec, geometrySignature, makeProject, mapRendererSign
 import { snapshotFile } from "./boundary-snapshot.js";
 import { runGoldenQa } from "./golden-qa.js";
 import { applyProjectTiming, writeSubtitleOverrides } from "./render-timing.js";
+import { stageNarrationCache } from "../../packages/narration-cache/index.js";
 
 export type RenderJobStatus = "queued" | "preparing" | "synthesizing" | "capturing" | "composing" | "validating" | "completed" | "failed" | "cancelled";
 /**
@@ -274,8 +275,7 @@ async function prepareSandbox(root: string, jobRoot: string, project: VideoProje
      每 40 分钟的录制都能白等一场。字体是只读的构建输入，整目录搬过去。 */
   const sourceFonts = join(root, "assets", "fonts");
   if (existsSync(sourceFonts)) await cp(sourceFonts, join(sandbox, "assets", "fonts"), { recursive: true, force: true });
-  const sourceAudio = join(root, "assets", "audio", project.regionId);
-  if (existsSync(sourceAudio)) await cp(sourceAudio, join(sandbox, "assets", "audio", project.regionId), { recursive: true, force: true });
+  await stageNarrationCache(root, sandbox, jobRoot, project);
   // The sandbox is the export's whole world, so this is where the scheme's
   // frozen boundary is applied: staging the snapshot's copy instead of the live
   // file means an export always renders the boundary the scheme was authored
