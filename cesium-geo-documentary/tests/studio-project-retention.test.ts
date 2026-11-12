@@ -8,6 +8,7 @@ import {
   orderProjectSnapshots,
   sameProjectContent,
   selectProjectRevisionsToPrune,
+  snapshotSchemeId,
   type ProjectRevisionEntry
 } from "../apps/studio/project-revisions.js";
 
@@ -152,4 +153,38 @@ test("snapshots are ordered newest-first, by number, for the scheme asked about"
   // Already-sorted input stays sorted, newest first.
   assert.deepEqual(orderProjectSnapshots(["a.v1.json", "a.v2.json", "a.v3.json"], "a"),
     ["a.v3.json", "a.v2.json", "a.v1.json"]);
+});
+
+test("a report dropped beside the snapshots is not mistaken for a scheme", async () => {
+  /* `workspace/projects` is a shared drop point: `scripts/*.py` write plan
+     reports there, named `<id>.delivery-check.json`. The scheme list read every
+     `.json` as a snapshot, so such a report became a phantom row — no id, no
+     region, no scenes — and that row could not be opened (GET 404) or deleted
+     (DELETE went to `/api/projects/undefined`, which tombstoned the literal
+     string `undefined` and left the row untouched). The dot-suffixed name is
+     what makes it not a scheme: a scheme id is `safeId`-clean. */
+  assert.equal(snapshotSchemeId("project-mwd9ipal.delivery-check.json"), null);
+  assert.equal(snapshotSchemeId("notes.txt"), null);
+  assert.equal(snapshotSchemeId("project-mwd9ipal.deleted"), null);
+  /* A bare `README.json` survives the filename check — `README` is a legal id
+     alphabet — and that is fine: it is then read, found to carry no `id`, and
+     dropped by the second guard. Two cheap layers, one of which catches the
+     names the pattern cannot. */
+  assert.equal(snapshotSchemeId("README.json"), "README");
+  // Anything that *could* be a snapshot keeps resolving, in both layouts.
+  assert.equal(snapshotSchemeId("project-mwd9ipal.v000003.json"), "project-mwd9ipal");
+  assert.equal(snapshotSchemeId("project-mwd9ipal.json"), "project-mwd9ipal");
+  assert.equal(snapshotSchemeId("solo_1-x.v000001.json"), "solo_1-x");
+
+  // End to end on the listing itself: the report contributes no scheme id, so
+  // `buildProjectList` never opens it and never emits a row for it.
+  const listing = [
+    "project-mwd9ipal.delivery-check.json",
+    "project-mwd9ipal.v000001.json",
+    "project-mwd9ipal.v000002.json",
+  ];
+  const ids = new Set(listing.map(snapshotSchemeId).filter(Boolean));
+  assert.deepEqual([...ids], ["project-mwd9ipal"]);
+  assert.deepEqual(orderProjectSnapshots(listing, "project-mwd9ipal"),
+    ["project-mwd9ipal.v000002.json", "project-mwd9ipal.v000001.json"]);
 });

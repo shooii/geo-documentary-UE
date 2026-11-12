@@ -4572,7 +4572,7 @@ async function boot() {
     setProjectBusy(true, "正在启动工作台并加载最近方案…");
     const [provinces] = await Promise.all([api("/api/admin-divisions?level=province"), loadAmapMaterialOptions()]);
     state.admin.provinces = provinces; setAdminOptions("provinceSelect", provinces, "请选择省份");
-    const projects = await api("/api/projects"); state.projects = projects;
+    const projects = usableProjects(await api("/api/projects")); state.projects = projects;
     const lastId = getLastProjectId();
     const remembered = lastId ? projects.find((p) => p.id === lastId) : null;
     const fallback = projects.sort(byUpdatedAtDesc)[0];
@@ -4710,9 +4710,23 @@ function closeNewProjectToList() {
   setNewProjectOpen(false);
   setProjectListOpen(true);
 }
+/**
+ * The list the server hands back, minus anything that is not a scheme.
+ *
+ * Every row is a delete target, and the delete button sends
+ * `/api/projects/${project.id}`. A row whose id is missing (a report file that
+ * happened to be JSON, seen in `workspace/projects` by an older server) sent
+ * `DELETE /api/projects/undefined`: the request succeeded, tombstoned the
+ * literal name `undefined`, and the row stayed exactly where it was. Dropping
+ * rows without an id is the client-side half of that fix; the server no longer
+ * emits them.
+ */
+function usableProjects(projects) {
+  return (Array.isArray(projects) ? projects : []).filter((project) => project && typeof project.id === "string" && project.id);
+}
 async function loadProjects() {
   try {
-    state.projects = await api("/api/projects");
+    state.projects = usableProjects(await api("/api/projects"));
     renderProjectList();
   } catch (error) { /* list is a side panel; ignore */ }
 }

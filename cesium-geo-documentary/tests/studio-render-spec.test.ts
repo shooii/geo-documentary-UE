@@ -1406,6 +1406,26 @@ test("caches keyed on a content signature evict the revision they replace", asyn
   assert.ok(sweep, "tombstones need a startup sweep, or a refused delete is lost on restart");
   assert.match(sweep, /name\.endsWith\("\.deleted"\)/);
 
+  /* The tombstone is only worth writing if the list honours it. A delete the
+     safe-delete budget refused leaves the snapshots on disk, and the list is
+     what the user reads — so `buildProjectList` has to skip a tombstoned scheme
+     by name, not just rely on the in-memory set that a restart empties. And a
+     delete with no snapshot behind it must fail loudly instead of answering 200
+     while the row stays put. */
+  const buildList = /async function buildProjectList\(\): Promise<VideoProject\[\]> \{[\s\S]*?return rawProjects/.exec(serverSource)?.[0];
+  assert.ok(buildList, "buildProjectList must exist");
+  assert.match(buildList, /if \(deletedProjectIds\.has\(schemeId\) \|\| hasProjectTombstone\(schemeId\)\) continue;/,
+    "列表必须按墓碑跳过已删方案，否则被拒的删除会立刻“复活”");
+  assert.match(buildList, /const schemeId = snapshotSchemeId\(name\);/,
+    "只有像快照的文件才能当成方案，报告类 json 不能");
+  assert.match(buildList, /if \(typeof project\?\.id !== "string" \|\| !project\.id\) continue;/,
+    "没有 id 的记录不能进列表——它的删除按钮只会把 undefined 发出去");
+
+  const deleteBody = /async function deleteProject\(projectId: string\): Promise<void> \{[\s\S]*?\n\}/.exec(serverSource)?.[0];
+  assert.ok(deleteBody, "deleteProject must exist");
+  assert.match(deleteBody, /if \(!hasProjectTombstone\(id\) && !\(await projectSnapshotCandidates\(id\)\)\.length\) \{\s*\n\s*throw new HttpError\(404/,
+    "没有快照的“方案”删除必须报 404，不能假成功");
+
   const mapPrune = /async function pruneSupersededMapCache\([\s\S]*?\n\}/.exec(engineSource)?.[0];
   assert.ok(mapPrune, "pruneSupersededMapCache must exist");
   assert.match(mapPrune, /const artifact = `\$\{regionId\}-map-\$\{profile\}\.mp4`;/);

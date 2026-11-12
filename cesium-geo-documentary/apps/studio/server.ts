@@ -22,7 +22,7 @@ import { deepSeekPublicOptions, generateProjectCopy } from "./deepseek-copy.js";
 import { generateCoverAsset, resolveCoverDefinition } from "../../.agents/skills/cesium-geo-documentary/scripts/cover.js";
 import { readFileResilient, readJsonResilient, writeJsonAtomicResilient, writeJsonVersionResilient } from "./fs-resilience.js";
 import { AssetRegionEvidence, withRegionAssetLibrary } from "./asset-library.js";
-import { orderProjectSnapshots, sameProjectContent, selectProjectRevisionsToPrune, type ProjectRevisionEntry } from "./project-revisions.js";
+import { orderProjectSnapshots, sameProjectContent, selectProjectRevisionsToPrune, snapshotSchemeId, type ProjectRevisionEntry } from "./project-revisions.js";
 import { buildProjectWorkbook, collectAssetPreviews, mergeProjectWorkbook, workbookFileName } from "./project-workbook.js";
 import { isWorkspaceAssetFileName } from "./media-sniff.js";
 import { MAX_BINARY_ASSET_BYTES, storeUploadedBuffer, storeUploadedFile } from "./asset-store.js";
@@ -438,8 +438,10 @@ async function scanWorkspaceAssetLibrary(): Promise<StudioAsset[]> {
     const files = (await readdir(projectsRoot)).filter((entry) => entry.endsWith(".json"));
     const schemeIds = new Set<string>();
     for (const name of files) {
-      const match = /^(.*)\.v(\d+)\.json$/.exec(name);
-      schemeIds.add(match ? match[1]! : name.slice(0, -".json".length));
+      // The directory also holds reports such as `<id>.delivery-check.json`,
+      // which are not snapshots; see `snapshotSchemeId`.
+      const schemeId = snapshotSchemeId(name);
+      if (schemeId) schemeIds.add(schemeId);
     }
     for (const schemeId of schemeIds) {
       for (const name of orderProjectSnapshots(files, schemeId)) {
@@ -691,6 +693,12 @@ async function writeProject(project: VideoProject, increment = true): Promise<Vi
   }
 }
 
+/**
+ * The projects directory is a shared drop point: the plan scripts write
+ * `<id>.delivery-check.json` reports beside the snapshots, so not every `.json`
+ * there is a scheme. `snapshotSchemeId` is the one rule for telling them apart.
+ */
+
 async function buildProjectList(): Promise<VideoProject[]> {
   await mkdir(projectsRoot, { recursive: true });
   const files = (await readdir(projectsRoot)).filter((name) => name.endsWith(".json"));
@@ -703,15 +711,27 @@ async function buildProjectList(): Promise<VideoProject[]> {
      at a time keeps the "a damaged revision must not hide the scheme" fallback. */
   const schemeIds = new Set<string>();
   for (const name of files) {
-    const match = /^(.*)\.v(\d+)\.json$/.exec(name);
-    schemeIds.add(match ? match[1]! : name.slice(0, -".json".length));
+    const schemeId = snapshotSchemeId(name);
+    if (schemeId) schemeIds.add(schemeId);
   }
 
   const latestRaw = new Map<string, VideoProject>();
   for (const schemeId of schemeIds) {
+    // A tombstoned scheme keeps its snapshots on disk whenever the sandbox's
+    // safe-delete budget refused the cleanup, and this list is what the user
+    // reads. Skipping the tombstone here is what makes a refused delete *look*
+    // deleted: without it the scheme reappeared on the very next refresh and,
+    // after a restart emptied `deletedProjectIds`, stayed forever.
+    if (deletedProjectIds.has(schemeId) || hasProjectTombstone(schemeId)) continue;
     for (const name of orderProjectSnapshots(files, schemeId)) {
       try {
         const project = await readJsonResilient<VideoProject>(join(projectsRoot, name));
+        // Anything that is not a stored scheme (a report or marker that happens
+        // to be JSON) has no id. It must never enter the list: the row it made
+        // could not be opened and could not be deleted either, because DELETE
+        // was sent to `/api/projects/undefined`.
+        if (typeof project?.id !== "string" || !project.id) continue;
+        if (deletedProjectIds.has(project.id) || hasProjectTombstone(project.id)) continue;
         const current = latestRaw.get(project.id);
         if (!current || (project.updatedAt ?? "") > (current.updatedAt ?? "")
           || (project.updatedAt === current.updatedAt && Number(project.revision ?? 0) > Number(current.revision ?? 0))) {
@@ -859,6 +879,17 @@ async function regionDisplayName(regionId: string): Promise<string> {
  */
 async function deleteProject(projectId: string): Promise<void> {
   const id = safeId(projectId);
+  /* Refuse a delete that has nothing to delete. The UI sends
+     `/api/projects/${project.id}` for every row, so a row whose id was missing
+     arrived here as the literal string `undefined`: the tombstone was written,
+     the request answered 200, and the row the operator was looking at stayed
+     exactly where it was — the click looked broken. A name with no snapshot
+     behind it is not a scheme, and saying so is what makes the click honest.
+     A scheme already tombstoned but not yet reclaimed still passes, so retrying
+     a delete the safe-delete budget refused keeps working. */
+  if (!hasProjectTombstone(id) && !(await projectSnapshotCandidates(id)).length) {
+    throw new HttpError(404, `Project ${id} not found`);
+  }
   deletedProjectIds.add(id);
   invalidateProjectCache(id);
   projectListPromise = undefined;
@@ -979,9 +1010,11 @@ async function latestProjectFiles(): Promise<Array<{ file: string; project: Vide
       // Skip by filename before parsing where we can: a tombstoned scheme's
       // snapshots may still exist (the budget refused to reclaim them), and
       // resurrecting one the user deleted is the one thing this must never do.
-      const stem = name.slice(0, -".json".length).replace(/\.v\d+$/, "");
+      const stem = snapshotSchemeId(name);
+      if (!stem) continue;
       if (deletedProjectIds.has(stem) || hasProjectTombstone(stem)) continue;
       const project = await readJsonResilient<VideoProject>(join(projectsRoot, name));
+      if (typeof project?.id !== "string" || !project.id) continue;
       if (deletedProjectIds.has(project.id) || hasProjectTombstone(project.id)) continue;
       const current = best.get(project.id);
       const currentStamp = current ? `${current.project.updatedAt ?? ""}\u0000${String(current.project.revision ?? 0).padStart(8, "0")}` : "";

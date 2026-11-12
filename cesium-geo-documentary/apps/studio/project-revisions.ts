@@ -101,6 +101,29 @@ export function orderProjectSnapshots(names: readonly string[], projectId: strin
   return [...numbered, ...plain];
 }
 
+/**
+ * Which scheme a file in the projects directory belongs to, or null when it is
+ * not a scheme snapshot at all.
+ *
+ * That directory is a shared drop point, not just the snapshot store: the plan
+ * scripts under `scripts/` write reports beside the snapshots, for instance
+ * `<id>.delivery-check.json`. Treating every `.json` as a snapshot turned such
+ * a report into a phantom scheme — no id, no region, no scenes, no snapshot
+ * behind it — so the list grew a row that could neither be opened (GET 404) nor
+ * deleted (there was no id to put in the URL, so DELETE went to
+ * `/api/projects/undefined` and tombstoned the literal name `undefined` while
+ * the real row stayed).
+ *
+ * `safeId` is the same alphabet the server accepts for a scheme id, so
+ * requiring it here means only files that *could* be a snapshot are ever read
+ * as one, and the drop point stays harmless.
+ */
+export function snapshotSchemeId(name: string): string | null {
+  if (!name.endsWith(".json")) return null;
+  const stem = name.slice(0, -".json".length).replace(/\.v\d+$/, "");
+  return /^[a-zA-Z0-9_-]+$/.test(stem) ? stem : null;
+}
+
 export const PROJECT_REVISION_KEEP_RECENT = 20;
 export const PROJECT_REVISION_KEEP_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
