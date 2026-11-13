@@ -23,7 +23,7 @@ const state = {
   sceneAssetReplaceCandidateId: null, sceneAssetApplyRecommended: false,
   assetLibraryOpen: false, assetLibrarySearch: "", assetLibrarySource: "all", assetLibraryUsage: "all", assetLibrarySort: "recent",
   assetLibrarySelected: new Set(), assetPreviewId: null, assetRenameContext: null,
-  assetUndoStack: [], assetTouch: Object.create(null), coverPreviewTimer: null, coverPreviewObjectUrl: "", coverPreviewRequest: 0, previewMode: "actual",
+  assetUndoStack: [], assetTouch: Object.create(null), coverPreviewTimer: null, coverPreviewObjectUrl: "", coverPreviewRequest: 0, coverPreviewInFlight: false, coverPreviewPending: false, previewMode: "actual",
   previewAssetReadySceneId: null, previewAssetRevealTimer: null, previewAssetHideTimer: null,
   /** 底图视角编辑作用域：scene=仅当前场景，global=所有场景的默认视角。 */
   mapViewScope: "scene",
@@ -1880,18 +1880,35 @@ function syncPreviewSubtitlesToAudio(scene, audio) {
 }
 
 async function refreshCoverPreview() {
+  state.coverPreviewTimer = null;
+  if (state.coverPreviewInFlight) { state.coverPreviewPending = true; return; }
+  const project = state.project;
+  if (!project) return;
   const requestId = ++state.coverPreviewRequest;
+  const body = JSON.stringify({ cover: project.cover });
+  const isCurrent = () => state.project === project && requestId === state.coverPreviewRequest && body === JSON.stringify({ cover: project.cover });
+  state.coverPreviewInFlight = true;
   try {
-    const response = await fetch(`/api/projects/${state.project.id}/cover-preview`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cover: state.project.cover }), cache: "no-store" });
+    const response = await fetch(`/api/projects/${project.id}/cover-preview`, { method: "POST", headers: { "content-type": "application/json" }, body, cache: "no-store" });
     if (!response.ok) { const error = await response.json().catch(() => ({})); throw new Error(error.error || `HTTP ${response.status}`); }
-    const blob = await response.blob(); if (requestId !== state.coverPreviewRequest) return;
+    const blob = await response.blob(); if (!isCurrent()) return;
     const objectUrl = URL.createObjectURL(blob);
     if (state.coverPreviewObjectUrl) URL.revokeObjectURL(state.coverPreviewObjectUrl);
     state.coverPreviewObjectUrl = objectUrl; $("coverPreview").dataset.url = `live:${requestId}`; $("coverPreview").src = objectUrl;
-  } catch (error) { if (requestId === state.coverPreviewRequest) toastError(`封面预览更新失败：${error.message}`); }
+  } catch (error) { if (isCurrent()) toastError(`封面预览更新失败：${error.message}`); }
+  finally {
+    state.coverPreviewInFlight = false;
+    if (state.coverPreviewPending) {
+      state.coverPreviewPending = false;
+      void refreshCoverPreview();
+    }
+  }
 }
 
 function scheduleCoverPreview() {
+  // Invalidate the old response immediately, including the debounce window.
+  ++state.coverPreviewRequest;
+  state.coverPreviewPending = false;
   clearTimeout(state.coverPreviewTimer);
   state.coverPreviewTimer = setTimeout(refreshCoverPreview, 250);
 }
@@ -4336,7 +4353,21 @@ function bind() {
   // button, so there is nothing to wire here — the per-heading buttons bind in render.
   $("planTourRoute").onclick = planTourRoute;
   const coverFields = { coverAdministrativeLabel: "administrativeLabel", coverSubtitle: "subtitle", coverContentMeta: "contentMeta" };
-  Object.entries(coverFields).forEach(([id, key]) => $(id).oninput = (event) => { state.project.cover[key] = event.target.value; markDirty(); render(); scheduleCoverPreview(); });
+  // Cover text only changes its image: do not rebuild the timeline, media or
+  // input nodes on every keystroke (especially during Chinese IME composition).
+  Object.entries(coverFields).forEach(([id, key]) => {
+    const input = $(id);
+    input.oninput = (event) => {
+      state.project.cover[key] = event.target.value;
+      markDirty();
+      if (event.isComposing) {
+        ++state.coverPreviewRequest;
+        state.coverPreviewPending = false;
+        clearTimeout(state.coverPreviewTimer);
+      } else scheduleCoverPreview();
+    };
+    input.oncompositionend = () => scheduleCoverPreview();
+  });
   $("coverIntro").onchange = (event) => { const value = clampInputValue(event.target, 0.25, 10); state.project.cover.introSeconds = value; const coverScene = state.project.scenes.find((scene) => scene.section === "cover"); if (coverScene) coverScene.duration = value; markDirty(); render(); scheduleCoverPreview(); };
   $("coverFadeOut").onchange = (event) => { state.project.cover.fadeOutSeconds = clampInputValue(event.target, 0, 3); markDirty(); }; $("coverOverlay").oninput = (event) => { const v = clampInputValue(event.target, 0, 1); state.project.cover.overlayOpacity = v; markDirty(); };
   $("toggleSceneAssetPicker").onclick = () => { const opening = state.sceneAssetPickerOpen === false; if (opening) state.sceneAssetPickerReplaceId = null; state.sceneAssetPickerOpen = !state.sceneAssetPickerOpen; render(); if (state.sceneAssetPickerOpen) focusPickerListFirst(); };

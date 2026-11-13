@@ -135,6 +135,99 @@ for (const scenario of ["new edit", "wrong revision", "other project", "older re
   });
 }
 
+function coverFixture() {
+  const project = { id: "a", cover: { administrativeLabel: "标题", subtitle: "副标题", contentMeta: "底部" } };
+  const state: any = { project, coverPreviewRequest: 0, coverPreviewInFlight: false, coverPreviewPending: false };
+  const timers = new Map<number, () => any>();
+  const nodes = new Map<string, any>();
+  const requests: { body: any; gate: ReturnType<typeof deferred> }[] = [];
+  const errors: string[] = [];
+  let nextTimer = 0, created = 0, revoked = 0, dirty = 0;
+  const context: any = {
+    state,
+    $: (id: string) => { if (!nodes.has(id)) nodes.set(id, { dataset: {} }); return nodes.get(id); },
+    fetch: (_path: string, options: any) => {
+      const gate = deferred(); requests.push({ body: JSON.parse(options.body), gate }); return gate.promise;
+    },
+    URL: { createObjectURL: () => `blob:${++created}`, revokeObjectURL: () => { revoked++; } },
+    setTimeout: (fn: () => any) => { timers.set(++nextTimer, fn); return nextTimer; },
+    clearTimeout: (id: number) => timers.delete(id),
+    toastError: (message: string) => errors.push(message),
+    markDirty: () => { dirty++; },
+    render: () => { throw new Error("cover typing must not rebuild the editor"); }
+  };
+  runInNewContext(`${section("async function refreshCoverPreview()", "function isOpeningScene(")}\nthis.refresh = refreshCoverPreview; this.schedule = scheduleCoverPreview;`, context);
+  return {
+    state, project, context, requests, errors, nodes, timers,
+    counts: () => ({ created, revoked, dirty }),
+    flushTimer: () => {
+      const callbacks = [...timers.values()]; timers.clear();
+      return Promise.all(callbacks.map((fn) => fn()));
+    }
+  };
+}
+const previewResponse = () => ({ ok: true, blob: async () => ({}) });
+
+test("cover preview serializes slow requests and coalesces edits to the latest text", async () => {
+  const f = coverFixture();
+  const first = f.context.refresh();
+  for (const text of ["第一次修改", "第二次修改", "最终修改"]) {
+    f.project.cover.subtitle = text; f.context.schedule(); await f.flushTimer();
+  }
+  assert.equal(f.requests.length, 1, "a slow image request must not fan out");
+  f.requests[0]!.gate.resolve(previewResponse()); await first;
+  assert.equal(f.requests.length, 2);
+  assert.equal(f.requests[1]!.body.cover.subtitle, "最终修改");
+  assert.equal(f.counts().created, 0, "superseded image must not be displayed");
+  f.requests[1]!.gate.resolve(previewResponse());
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(f.nodes.get("coverPreview").src, "blob:1");
+  assert.equal(f.state.coverPreviewInFlight, false);
+});
+
+test("cover responses cannot overwrite edits during debounce or another project", async () => {
+  for (const scenario of ["debounce", "switch"]) {
+    const f = coverFixture(); const pending = f.context.refresh();
+    if (scenario === "debounce") { f.project.cover.subtitle = "new"; f.context.schedule(); }
+    else f.state.project = { id: "b", cover: { subtitle: "other" } };
+    f.requests[0]!.gate.resolve(previewResponse()); await pending;
+    assert.equal(f.counts().created, 0, scenario);
+    assert.equal(f.errors.length, 0);
+  }
+});
+
+test("failed cover request releases the queue and a later edit still updates", async () => {
+  const f = coverFixture(); const first = f.context.refresh();
+  f.requests[0]!.gate.reject(new Error("offline")); await first;
+  assert.equal(f.errors.length, 1);
+  assert.equal(f.state.coverPreviewInFlight, false);
+  const retry = f.context.refresh();
+  f.requests[1]!.gate.resolve(previewResponse()); await retry;
+  const next = f.context.refresh(); f.requests[2]!.gate.resolve(previewResponse()); await next;
+  assert.equal(f.counts().created, 2);
+  assert.equal(f.counts().revoked, 1, "old image URL is released");
+});
+
+test("all three cover fields preserve typing and defer Chinese composition without rerender", async () => {
+  const f = coverFixture();
+  runInNewContext(section("  const coverFields =", '  $("coverIntro").onchange'), f.context);
+  const fields = { coverAdministrativeLabel: "administrativeLabel", coverSubtitle: "subtitle", coverContentMeta: "contentMeta" } as const;
+  for (const [id, key] of Object.entries(fields)) {
+    const input = f.nodes.get(id);
+    input.oninput({ target: { value: "拼音组合" }, isComposing: true });
+    assert.equal(f.project.cover[key as keyof typeof f.project.cover], "拼音组合");
+    assert.equal(f.timers.size, 0);
+    input.oncompositionend();
+    assert.equal(f.timers.size, 1);
+    input.oninput({ target: { value: "正式中文" }, isComposing: false });
+    assert.equal(f.timers.size, 1);
+  }
+  const pending = f.flushTimer();
+  assert.equal(f.requests.length, 1);
+  f.requests[0]!.gate.resolve(previewResponse()); await pending;
+  assert.equal(f.counts().dirty, 6);
+});
+
 test("saving and structural operations retain guarded failure paths", () => {
   assert.doesNotMatch(source, /setTimeout\(\(\) => saveProject\(\)\.catch\(\(\) => undefined\), 700\)/);
   assert.match(source, /async function saveBeforeAction\(/);

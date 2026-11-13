@@ -1,9 +1,169 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, mkdtemp, open, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { createReadStream, existsSync } from "node:fs";
+import { createServer, get, type ServerResponse } from "node:http";
+import { createHash } from "node:crypto";
+import { tmpdir } from "node:os";
+import { extname, join, resolve } from "node:path";
+import { PassThrough } from "node:stream";
+import { once } from "node:events";
+import { runInNewContext } from "node:vm";
+import { transformSync } from "esbuild";
 
 const root = resolve(import.meta.dirname, "..");
+
+async function serverFragment(start: string, end: string): Promise<string> {
+  const source = await readFile(resolve(root, "apps/studio/server.ts"), "utf8");
+  const from = source.indexOf(start);
+  const to = source.indexOf(end, from);
+  assert.ok(from >= 0 && to > from, "必须能定位服务端待测函数");
+  return transformSync(source.slice(from, to), { loader: "ts" }).code;
+}
+
+function jsonResponse(response: ServerResponse, status: number, data: unknown): void {
+  response.writeHead(status, { "content-type": "application/json" });
+  response.end(JSON.stringify(data));
+}
+
+test("并发封面预览先读完再清理，不会生成同签名半成品", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "studio-cover-race-"));
+  const code = await serverFragment("async function pruneProjectCoverPreviews", "interface ReadinessCheck");
+  let active = 0, maxActive = 0, generated = 0, failOnce = true;
+  const preview = runInNewContext(`${code}\nensureProjectCoverPreview;`, {
+    createHash, join, existsSync, readdir, rm, mkdir, root: directory, coverPreviewsRoot: directory,
+    safeId: (id: string) => id,
+    readFileResilient: async (path: string) => {
+      await new Promise((done) => setImmediate(done));
+      return readFile(path);
+    },
+    resolveCoverDefinition: async (_root: string, _region: string, cover: { subtitle: string }) => cover,
+    generateCoverAsset: async (_root: string, cover: { subtitle: string }, path: string) => {
+      active += 1; generated += 1; maxActive = Math.max(active, maxActive);
+      try {
+        await writeFile(path, "未完成");
+        await new Promise((done) => setImmediate(done));
+        if (cover.subtitle === "失败" && failOnce) { failOnce = false; throw new Error("生成失败"); }
+        await writeFile(path, cover.subtitle);
+      } finally { active -= 1; }
+    }
+  }) as (project: unknown) => Promise<Buffer>;
+  const project = (subtitle: string) => ({ id: "project-a", regionId: "region-a", cover: { subtitle } });
+  try {
+    const previews = await Promise.all([preview(project("甲")), preview(project("甲")), preview(project("乙")), preview(project("丙"))]);
+    assert.deepEqual(previews.map((buffer) => buffer.toString()), ["甲", "甲", "乙", "丙"]);
+    assert.equal(maxActive, 1, "同项目不同签名也必须串行生成和读取");
+    assert.equal(generated, 3, "同签名并发请求只生成一次");
+    assert.equal((await readdir(directory)).length, 1, "清理仍只保留最后一个签名");
+    const failure = preview(project("失败"));
+    const recovery = preview(project("失败"));
+    await assert.rejects(failure, /生成失败/);
+    assert.equal((await recovery).toString(), "失败", "失败不能堵住队列，也不能留下同签名半成品缓存");
+    assert.equal(previews[0]!.toString(), "甲", "磁盘文件被清理后响应 Buffer 仍然可用");
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+test("缺失文件返回 404 后同一服务仍能响应", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "studio-stream-error-"));
+  const code = await serverFragment("function streamFile(", "const IMMUTABLE_ASSET_CACHE");
+  const stream = runInNewContext(`${code}\nstreamFile;`, { createReadStream, extname, mime: {}, sendJson: jsonResponse }) as (path: string, response: ServerResponse) => void;
+  const file = join(directory, "ready.txt");
+  await writeFile(file, "服务仍然存活");
+  const server = createServer((request, response) => stream(request.url === "/missing" ? join(directory, "missing.txt") : file, response));
+  try {
+    server.listen(0, "127.0.0.1");
+    await once(server, "listening");
+    const address = server.address();
+    assert.ok(address && typeof address !== "string");
+    const request = (path: string) => new Promise<{ status: number; text: string }>((done, reject) => {
+      get({ host: "127.0.0.1", port: address.port, path }, (response) => {
+        let text = "";
+        response.setEncoding("utf8");
+        response.on("data", (chunk) => { text += chunk; });
+        response.on("end", () => done({ status: response.statusCode!, text }));
+        response.on("error", reject);
+      }).on("error", reject);
+    });
+    assert.equal((await request("/missing")).status, 404);
+    assert.deepEqual(await request("/ready"), { status: 200, text: "服务仍然存活" });
+  } finally {
+    await new Promise<void>((done, reject) => server.close((error) => error ? reject(error) : done()));
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("流已发送头部后读取失败会关闭连接，客户端退出会销毁源流", async () => {
+  const code = await serverFragment("function streamFile(", "const IMMUTABLE_ASSET_CACHE");
+  for (const disconnect of [false, true]) {
+    const source = new PassThrough();
+    const response = Object.assign(new PassThrough(), {
+      headersSent: false,
+      writeHead() { this.headersSent = true; return this; }
+    });
+    const stream = runInNewContext(`${code}\nstreamFile;`, {
+      createReadStream: () => source, extname, mime: {},
+      sendJson() { assert.fail("头部已发送后不能再次写错误响应"); }
+    });
+    stream("preview.png", response);
+    source.emit("open", 1);
+    if (disconnect) response.destroy();
+    else source.destroy(Object.assign(new Error("读取失败"), { code: "EIO" }));
+    await new Promise((done) => setImmediate(done));
+    assert.equal(response.destroyed, true);
+    assert.equal(source.destroyed, true);
+  }
+});
+
+test("媒体 Range 返回精确字节、拒绝坏范围且缺失文件后服务仍正常", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "studio-media-range-"));
+  const code = await serverFragment("async function streamSeekableMedia(", "async function serveStatic(");
+  const stream = runInNewContext(`${code}\nstreamSeekableMedia;`, { open, extname, mime: {} });
+  const file = join(directory, "media.mp4");
+  await writeFile(file, "0123456789");
+  const server = createServer((request, response) => {
+    Promise.resolve(stream(request.url === "/missing" ? join(directory, "missing") : file, request, response))
+      .catch(() => jsonResponse(response, 404, { error: "missing" }));
+  });
+  try {
+    server.listen(0, "127.0.0.1"); await once(server, "listening");
+    const address = server.address(); assert.ok(address && typeof address !== "string");
+    const url = `http://127.0.0.1:${address.port}`;
+    for (const [range, expected] of [["bytes=2-5", "2345"], ["bytes=-3", "789"], ["bytes=7-", "789"]]) {
+      const response = await fetch(url, { headers: { range: range! } });
+      assert.equal(response.status, 206);
+      assert.equal(await response.text(), expected);
+    }
+    for (const range of ["bytes=10-", "bytes=-0", "bytes=5-2", "bytes=", "bytes=1-2,4-5"]) {
+      const response = await fetch(url, { headers: { range } });
+      assert.equal(response.status, 416); assert.equal(response.headers.get("content-range"), "bytes */10");
+      await response.arrayBuffer();
+    }
+    assert.equal((await fetch(`${url}/missing`)).status, 404);
+    assert.equal(await fetch(url).then((response) => response.text()), "0123456789");
+  } finally {
+    server.closeAllConnections();
+    await new Promise<void>((done) => server.close(() => done()));
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("媒体描述符在坏范围、断连和读流错误后全部关闭", async () => {
+  const code = await serverFragment("async function streamSeekableMedia(", "async function serveStatic(");
+  for (const scenario of ["range", "disconnect", "error"]) {
+    let closed = 0;
+    const source = new PassThrough(); source.once("close", () => { closed++; });
+    const file = { stat: async () => ({ size: 10 }), close: async () => { closed++; }, createReadStream: () => source };
+    const response = Object.assign(new PassThrough(), { writeHead() { return this; } });
+    const stream = runInNewContext(`${code}\nstreamSeekableMedia;`, { open: async () => file, extname, mime: {} });
+    await stream("media.mp4", { headers: scenario === "range" ? { range: "bytes=100-" } : {} }, response);
+    if (scenario === "disconnect") response.destroy();
+    if (scenario === "error") source.destroy(new Error("EIO"));
+    await new Promise((done) => setImmediate(done));
+    assert.equal(closed, 1, scenario);
+  }
+  const server = await readFile(resolve(root, "apps/studio/server.ts"), "utf8");
+  assert.match(server, /return await streamSeekableMedia\(audio, request, response\)/);
+});
 
 /**
  * Robustness is a property of the seams, not of the happy path: a bad request

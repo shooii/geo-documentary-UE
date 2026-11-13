@@ -986,7 +986,7 @@ async function removeProjectFiles(id: string): Promise<boolean> {
   // Cover previews belong to the project and nothing else can reference them, so
   // skipping them would strand a few megabytes per deleted project in
   // `workspace/cover-previews` forever.
-  await pruneProjectCoverPreviews(id).catch(() => undefined);
+  await withProjectCoverPreviewLock(id, () => pruneProjectCoverPreviews(id)).catch(() => undefined);
   await deleteBoundarySnapshot(root, id).catch(() => undefined);
   // The tombstone itself must not count as leftover work, or a scheme whose
   // files are all gone could never retire its marker.
@@ -1163,31 +1163,52 @@ async function pruneProjectCoverPreviews(rawProjectId: string, keepFilename?: st
     .map((name) => rm(join(coverPreviewsRoot, name), { force: true }).catch(() => { /* A preview that cannot be removed is not worth failing a request over. */ })));
 }
 
-async function ensureProjectCoverPreview(project: VideoProject): Promise<string> {
-  const signature = createHash("sha256").update(JSON.stringify({
-    generator: "unified-cover-v1",
-    regionId: project.regionId,
-    administrativeLabel: project.cover.administrativeLabel,
-    subtitle: project.cover.subtitle,
-    contentMeta: project.cover.contentMeta,
-    introSeconds: project.cover.introSeconds
-  })).digest("hex").slice(0, 16);
-  const filename = `${safeId(project.id)}.${signature}.png`;
-  const output = join(coverPreviewsRoot, filename);
-  if (existsSync(output)) {
-    await pruneProjectCoverPreviews(project.id, filename);
-    return output;
+const projectCoverPreviewQueues = new Map<string, Promise<unknown>>();
+
+async function withProjectCoverPreviewLock<T>(rawProjectId: string, operation: () => Promise<T>): Promise<T> {
+  const projectId = safeId(rawProjectId);
+  const previous = projectCoverPreviewQueues.get(projectId) ?? Promise.resolve();
+  const current = previous.catch(() => undefined).then(operation);
+  projectCoverPreviewQueues.set(projectId, current);
+  try {
+    return await current;
+  } finally {
+    if (projectCoverPreviewQueues.get(projectId) === current) projectCoverPreviewQueues.delete(projectId);
   }
-  const definition = await resolveCoverDefinition(root, project.regionId, {
-    topic: project.cover.administrativeLabel,
-    subtitle: project.cover.subtitle,
-    contentMeta: project.cover.contentMeta,
-    coverIntroSeconds: project.cover.introSeconds
+}
+
+async function ensureProjectCoverPreview(project: VideoProject): Promise<Buffer> {
+  return withProjectCoverPreviewLock(project.id, async () => {
+    const signature = createHash("sha256").update(JSON.stringify({
+      generator: "unified-cover-v1",
+      regionId: project.regionId,
+      administrativeLabel: project.cover.administrativeLabel,
+      subtitle: project.cover.subtitle,
+      contentMeta: project.cover.contentMeta,
+      introSeconds: project.cover.introSeconds
+    })).digest("hex").slice(0, 16);
+    const filename = `${safeId(project.id)}.${signature}.png`;
+    const output = join(coverPreviewsRoot, filename);
+    if (existsSync(output)) {
+      await pruneProjectCoverPreviews(project.id, filename);
+      return readFileResilient(output);
+    }
+    const definition = await resolveCoverDefinition(root, project.regionId, {
+      topic: project.cover.administrativeLabel,
+      subtitle: project.cover.subtitle,
+      contentMeta: project.cover.contentMeta,
+      coverIntroSeconds: project.cover.introSeconds
+    });
+    await mkdir(coverPreviewsRoot, { recursive: true });
+    try {
+      await generateCoverAsset(root, definition, output);
+    } catch (error) {
+      await rm(output, { force: true }).catch(() => undefined);
+      throw error;
+    }
+    await pruneProjectCoverPreviews(project.id, filename);
+    return readFileResilient(output);
   });
-  await mkdir(coverPreviewsRoot, { recursive: true });
-  await generateCoverAsset(root, definition, output);
-  await pruneProjectCoverPreviews(project.id, filename);
-  return output;
 }
 
 interface ReadinessCheck { id: string; name: string; pass: boolean; detail: string; advisory?: boolean }
@@ -1826,48 +1847,70 @@ async function copyFileResilient(source: string, target: string): Promise<void> 
  * UI shell, and a stale Studio is a bug report waiting to happen.
  */
 function streamFile(path: string, response: ServerResponse, disposition?: string, cacheControl = "no-store, max-age=0"): void {
-  response.writeHead(200, {
-    "content-type": mime[extname(path).toLowerCase()] ?? "application/octet-stream",
-    "cache-control": cacheControl,
-    "pragma": cacheControl.startsWith("no-store") ? "no-cache" : "public",
-    ...(disposition ? { "content-disposition": disposition } : {})
+  if (response.destroyed) return;
+  const source = createReadStream(path);
+  response.once("close", () => source.destroy());
+  response.once("error", () => source.destroy());
+  source.once("error", (error: NodeJS.ErrnoException) => {
+    if (response.destroyed) return;
+    if (response.headersSent) {
+      response.destroy();
+      return;
+    }
+    sendJson(response, error.code === "ENOENT" ? 404 : 500, { error: "文件暂时无法读取" });
   });
-  createReadStream(path).pipe(response);
+  source.once("open", () => {
+    if (response.destroyed) { source.destroy(); return; }
+    response.writeHead(200, {
+      "content-type": mime[extname(path).toLowerCase()] ?? "application/octet-stream",
+      "cache-control": cacheControl,
+      "pragma": cacheControl.startsWith("no-store") ? "no-cache" : "public",
+      ...(disposition ? { "content-disposition": disposition } : {})
+    });
+    source.pipe(response);
+  });
 }
 
 const IMMUTABLE_ASSET_CACHE = "public, max-age=31536000, immutable";
 
 async function streamSeekableMedia(path: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
-  const size = (await stat(path)).size;
-  const contentType = mime[extname(path).toLowerCase()] ?? "application/octet-stream";
-  const range = request.headers.range;
-  const commonHeaders = { "content-type": contentType, "accept-ranges": "bytes", "cache-control": "no-store" };
-  if (!range) {
-    response.writeHead(200, { ...commonHeaders, "content-length": size });
-    createReadStream(path).pipe(response);
-    return;
+  // Pin the descriptor before checking size: pruning/replacing the pathname
+  // after stat must not turn a range request into an unhandled stream error.
+  const file = await open(path, "r");
+  let streaming = false;
+  try {
+    const size = (await file.stat()).size;
+    if (response.destroyed) return;
+    const contentType = mime[extname(path).toLowerCase()] ?? "application/octet-stream";
+    const range = request.headers.range;
+    const commonHeaders = { "content-type": contentType, "accept-ranges": "bytes", "cache-control": "no-store" };
+    let start = 0, end = size - 1;
+    if (range) {
+      const match = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+      const suffixLength = match && !match[1] ? Number(match[2]) : null;
+      start = suffixLength == null ? Number(match?.[1]) : Math.max(0, size - suffixLength);
+      end = Math.min(size - 1, match?.[2] && match[1] ? Number(match[2]) : size - 1);
+      if (!match || (!match[1] && !match[2]) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || start >= size || end < start) {
+        response.writeHead(416, { ...commonHeaders, "content-range": `bytes */${size}` });
+        response.end();
+        return;
+      }
+    }
+    if (!size) { response.writeHead(200, { ...commonHeaders, "content-length": 0 }); response.end(); return; }
+    const source = file.createReadStream({ start, end, autoClose: true });
+    source.once("error", () => { if (!response.destroyed) response.destroy(); });
+    response.once("close", () => source.destroy());
+    response.once("error", () => source.destroy());
+    streaming = true;
+    response.writeHead(range ? 206 : 200, {
+      ...commonHeaders,
+      ...(range ? { "content-range": `bytes ${start}-${end}/${size}` } : {}),
+      "content-length": end - start + 1
+    });
+    source.pipe(response);
+  } finally {
+    if (!streaming) await file.close();
   }
-  const match = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
-  if (!match || (!match[1] && !match[2])) {
-    response.writeHead(416, { ...commonHeaders, "content-range": `bytes */${size}` });
-    response.end();
-    return;
-  }
-  const suffixLength = match[1] ? null : Number(match[2]);
-  const start = suffixLength == null ? Number(match[1]) : Math.max(0, size - suffixLength);
-  const requestedEnd = match[2] && match[1] ? Number(match[2]) : size - 1;
-  const end = Math.min(size - 1, requestedEnd);
-  if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || start >= size || end < start) {
-    response.writeHead(416, { ...commonHeaders, "content-range": `bytes */${size}` });
-    response.end();
-    return;
-  }
-  response.writeHead(206, {
-    ...commonHeaders,
-    "content-range": `bytes ${start}-${end}/${size}`,
-    "content-length": end - start + 1
-  });
-  createReadStream(path, { start, end }).pipe(response);
 }
 
 async function serveStatic(pathname: string, response: ServerResponse): Promise<void> {
@@ -2149,7 +2192,7 @@ const server = createServer(async (request, response) => {
           stale: generated
         });
       }
-      return streamSeekableMedia(audio, request, response);
+      return await streamSeekableMedia(audio, request, response);
     }
     if (request.method === "POST" && narrationPreviewMatch) {
       // Synthesise just the narration so the preview can play it, without
@@ -2198,7 +2241,7 @@ const server = createServer(async (request, response) => {
       await deleteProject(projectMatch[1]!);
       return sendJson(response, 200, { ok: true });
     }
-    if (request.method === "GET" && coverPreviewMatch) return streamFile(await ensureProjectCoverPreview(await readProject(coverPreviewMatch[1]!)), response);
+    if (request.method === "GET" && coverPreviewMatch) return sendBuffer(response, 200, await ensureProjectCoverPreview(await readProject(coverPreviewMatch[1]!)), "image/png");
     if (request.method === "POST" && coverPreviewMatch) {
       const project = await readProject(coverPreviewMatch[1]!);
       const input = await bodyJson(request) as { cover?: Partial<VideoProject["cover"]> };
@@ -2209,7 +2252,7 @@ const server = createServer(async (request, response) => {
         ...(typeof input.cover?.contentMeta === "string" ? { contentMeta: input.cover.contentMeta.slice(0, 80) } : {}),
         ...(Number.isFinite(Number(input.cover?.introSeconds)) ? { introSeconds: Number(input.cover?.introSeconds) } : {})
       };
-      return streamFile(await ensureProjectCoverPreview({ ...project, cover }), response);
+      return sendBuffer(response, 200, await ensureProjectCoverPreview({ ...project, cover }), "image/png");
     }
     if (request.method === "PUT" && projectMatch) {
       const project = await normalizeProject(root, await bodyJson(request) as VideoProject);

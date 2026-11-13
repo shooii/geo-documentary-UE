@@ -1146,7 +1146,7 @@ test("Studio playback synchronizes the generated narration audio with scene cue 
   assert.match(serverSource, /narration-audio/);
   assert.match(serverSource, /function streamSeekableMedia/);
   assert.match(serverSource, /"accept-ranges": "bytes"/);
-  assert.match(serverSource, /response\.writeHead\(206/);
+  assert.match(serverSource, /response\.writeHead\(range \? 206 : 200/);
   assert.match(serverSource, /"content-range": `bytes \$\{start\}-\$\{end\}\/\$\{size\}`/);
   assert.match(serverSource, /findProjectNarrationAudio/);
   assert.match(serverSource, /narrationSignature\(snapshot\) === currentSignature/);
@@ -1371,7 +1371,7 @@ test("caches keyed on a content signature evict the revision they replace", asyn
   assert.ok(prune, "pruneProjectCoverPreviews must exist");
   assert.match(prune, /\.filter\(\(name\) => name\.startsWith\(prefix\) && name !== keepFilename\)/);
 
-  const preview = /async function ensureProjectCoverPreview\(project: VideoProject\): Promise<string> \{[\s\S]*?\n\}/.exec(serverSource)?.[0];
+  const preview = /async function ensureProjectCoverPreview\(project: VideoProject\): Promise<Buffer> \{[\s\S]*?\n\}/.exec(serverSource)?.[0];
   assert.ok(preview, "ensureProjectCoverPreview must exist");
   assert.equal((preview.match(/pruneProjectCoverPreviews\(/g) ?? []).length, 2,
     "both the cache-hit and the regenerate path must evict the other signatures");
