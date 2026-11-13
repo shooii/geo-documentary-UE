@@ -147,6 +147,25 @@ test('真实子进程清理等待close事件，不遗留进程', async () => {
   assert.ok(process.exitCode !== null || process.signalCode !== null);
 });
 
+test('编码探测具有硬超时，探测被终止后即使打印过时长也不能发布', async () => {
+  const source = await readFile(new URL('../apps/ue-player/capture.ts', import.meta.url), 'utf8');
+  const probe = source.slice(source.indexOf('const probeSeconds='), source.indexOf('const tsx='))
+    .replace('const probeSeconds=async(file:string)=>', 'globalThis.probeSeconds=async(file)=>');
+  let options: Record<string, unknown> | undefined;
+  let result: { stdout: string; stderr: string; signal?: string; error?: Error } = { stdout: '', stderr: 'Duration: 00:00:12.00' };
+  const context = createContext({ ffmpeg: 'ffmpeg', spawnSync: (_exe: string, _args: string[], value: Record<string, unknown>) => { options = value; return result; } });
+  runInContext(probe, context);
+  assert.equal(await context.probeSeconds('map.mp4'), 12);
+  assert.equal(options?.timeout, 15_000);
+  result = { ...result, signal: 'SIGTERM' };
+  assert.equal(await context.probeSeconds('map.mp4'), null);
+  result = { stdout: '', stderr: 'Duration: 00:00:12.00', error: new Error('ETIMEDOUT') };
+  assert.equal(await context.probeSeconds('map.mp4'), null);
+  assert.match(source, /'-pix_fmt','yuv420p',pendingOutput/);
+  assert.ok(source.indexOf('await rename(pendingOutput,output)') > source.indexOf('if(encodedSeconds===null'));
+  assert.match(source, /await rm\(join\(frames,'encoded-map.mp4'\),\{force:true\}\)/);
+});
+
 test('录制入口保持整块try/finally、启动fetch超时和固定索引偏移契约', async () => {
   const source = await readFile(new URL('../apps/ue-player/capture.ts', import.meta.url), 'utf8');
   assert.match(source, /finally\s*\{\s*await scope\.close\(\)/);

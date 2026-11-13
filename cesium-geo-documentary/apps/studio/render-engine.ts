@@ -5,7 +5,7 @@ import { acquireExportLease, type ExportLease } from "../ue-player/export-lease.
 import { CAPTURE_CLEANUP_FATAL } from "../ue-player/capture-lifecycle.js";
 import { previewRendererMatches } from "../ue-player/runtime.js";
 import { existsSync } from "node:fs";
-import { copyFile, cp, lstat, mkdir, readFile, readdir, readlink, rm, rmdir, stat, symlink, unlink, writeFile } from "node:fs/promises";
+import { copyFile, cp, lstat, mkdir, readFile, readdir, readlink, rename, rm, rmdir, stat, symlink, unlink, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
 import { buildRenderSpec, parseSrt, planVisualClip, selectSceneAssetsForRender, updateProjectMeasuredDurations, type RenderSpec } from "../../packages/render-spec/index.js";
@@ -393,11 +393,13 @@ function command(callbacks: RenderCallbacks, cwd: string, executable: string, ar
       if (settled) return false;
       settled = true;
       clearTimeout(timer);
+      clearInterval(cancelPoll);
       if (killDeadline) clearTimeout(killDeadline);
       callbacks.registerProcess(null);
       return true;
     };
     const timer = setTimeout(() => {
+      if (settled || killDeadline) return;
       timedOut = true;
       callbacks.update({ logs: [`${stage} 超过 ${Math.round(timeoutMs / 60_000)} 分钟没有结束，已终止并清理进程树`] });
       killProcessTree(child);
@@ -407,7 +409,14 @@ function command(callbacks: RenderCallbacks, cwd: string, executable: string, ar
         if (settle()) reject(failure(`${stage} timed out after ${Math.round(timeoutMs / 1000)}s`));
       }, 15000);
     }, timeoutMs);
-    child.once("error", (error) => { if (settle()) reject(cleanupFatal ? failure(error.message) : error); });
+    const cancelPoll = setInterval(() => {
+      if (!callbacks.cancelled() || settled || killDeadline) return;
+      killProcessTree(child);
+      killDeadline = setTimeout(() => {
+        if (settle()) reject(new Error("Render cancelled"));
+      }, 15_000);
+    }, 100);
+    child.once("error", (error) => { if (settle()) reject(callbacks.cancelled() ? new Error("Render cancelled") : cleanupFatal ? failure(error.message) : error); });
     child.once("close", (code) => {
       if (!settle()) return;
       if (cleanupFatal) reject(failure(`${stage} exited with ${code}`));
@@ -744,6 +753,16 @@ async function usableMapClip(root: string, file: string, expectedSeconds = 0): P
   return true;
 }
 
+export async function publishMapCache(source: string, target: string): Promise<void> {
+  const temporary = `${target}.${randomUUID()}.partial`;
+  try {
+    await copyFile(source, temporary);
+    await rename(temporary, target);
+  } finally {
+    await rm(temporary, { force: true });
+  }
+}
+
 async function cacheMap(root: string, sandbox: string, project: VideoProject, spec: RenderSpec): Promise<boolean> {
   const cacheDir = join(root, "workspace", "render-cache", spec.cacheSignature.replace("sha256:", ""));
   const cached = join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`);
@@ -759,7 +778,7 @@ async function cacheMap(root: string, sandbox: string, project: VideoProject, sp
   const baselineExpected = Number(baselineSpec.timelineDurationSeconds) || 0;
   if (baselineSpec.cacheSignature === spec.cacheSignature && existsSync(legacy) && await usableMapClip(root, legacy, baselineExpected)) {
     await mkdir(cacheDir, { recursive: true });
-    await copyFile(legacy, cached); await copyFile(cached, target);
+    await publishMapCache(legacy, cached); await copyFile(cached, target);
     await writeFile(join(cacheDir, "cache.json"), JSON.stringify({ signature: spec.cacheSignature, seededFrom: legacy, createdAt: new Date().toISOString() }, null, 2), "utf8");
     await pruneSupersededMapCache(root, project.regionId, project.output.profile, spec.cacheSignature);
     return true;
@@ -834,32 +853,42 @@ export function summarizePreflightReport(report: PreflightReport | null | undefi
 
 /** Run a tool and keep its output, with a hard deadline. The preflight is a
  *  gate, not a render step: it must never be able to hang a job. */
-function runCaptured(executable: string, args: string[], options: { cwd: string; env?: Record<string, string>; timeoutMs: number }): Promise<{ code: number | null; stdout: string; stderr: string; timedOut: boolean }> {
-  return new Promise((resolvePromise) => {
+export function runCaptured(executable: string, args: string[], options: { cwd: string; env?: Record<string, string>; timeoutMs: number; lifecycle?: Pick<RenderCallbacks, "cancelled" | "registerProcess"> }): Promise<{ code: number | null; stdout: string; stderr: string; timedOut: boolean }> {
+  if (options.lifecycle?.cancelled()) return Promise.reject(new Error("Render cancelled"));
+  return new Promise((resolvePromise, reject) => {
     const child = spawn(executable, args, {
       cwd: options.cwd,
       shell: false,
       windowsHide: true,
       env: options.env ? { ...process.env, ...options.env } : process.env
     });
+    options.lifecycle?.registerProcess(child);
     let stdout = "";
     let stderr = "";
     let timedOut = false;
+    let cancelled = false;
     let settled = false;
     let killDeadline: ReturnType<typeof setTimeout> | undefined;
     const finish = (code: number | null) => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
+      clearInterval(poll);
       if (killDeadline) clearTimeout(killDeadline);
-      resolvePromise({ code, stdout, stderr, timedOut });
+      options.lifecycle?.registerProcess(null);
+      if (cancelled || options.lifecycle?.cancelled()) reject(new Error("Render cancelled"));
+      else resolvePromise({ code, stdout, stderr, timedOut });
     };
-    const timer = setTimeout(() => {
-      timedOut = true;
+    const stop = () => {
+      if (settled || killDeadline) return;
       killProcessTree(child);
       // 子进程继承的管道可能一直不关闭，清理宽限期后也必须结束预检。
       killDeadline = setTimeout(() => finish(null), 15_000);
-    }, options.timeoutMs);
+    };
+    const timer = setTimeout(() => { timedOut = true; stop(); }, options.timeoutMs);
+    const poll = setInterval(() => {
+      if (options.lifecycle?.cancelled()) { cancelled = true; stop(); }
+    }, 100);
     child.stdout?.on("data", (chunk) => { stdout += String(chunk); });
     child.stderr?.on("data", (chunk) => { stderr += String(chunk); });
     child.once("error", (error) => {
@@ -932,7 +961,8 @@ async function preflightComposition(
       PRODUCER_PAGE_NAVIGATION_TIMEOUT_MS: String(navigationTimeoutMs),
       PRODUCER_PLAYER_READY_TIMEOUT_MS: String(playerReadyTimeoutMs)
     },
-    timeoutMs
+    timeoutMs,
+    lifecycle: callbacks
   });
   const start = result.stdout.indexOf("{");
   const end = result.stdout.lastIndexOf("}");
@@ -1159,7 +1189,7 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
       }
       const cacheDir = join(root, "workspace", "render-cache", spec.cacheSignature.replace("sha256:", ""));
       await mkdir(cacheDir, { recursive: true });
-      await copyFile(capturedFile, join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`));
+      await publishMapCache(capturedFile, join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`));
       await pruneSupersededMapCache(root, project.regionId, project.output.profile, spec.cacheSignature);
     } finally {
       if (!await releaseCaptureLeaseWhenSafe(exportLease, sandbox, message => callbacks.update({ logs: [message] }))) {
@@ -1184,6 +1214,8 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   await preflightComposition(sandbox, callbacks, (message) => callbacks.update({ logs: [message] }));
   const compositorDir = join(sandbox, "apps", "video-compositor");
   const hyperframesCli = join(sandbox, "node_modules", "hyperframes", "dist", "cli.js");
+  // 重试必须证明本次编码确实生成了文件，不能让退出码0掩盖上次遗留的成片。
+  await rm(rendered, { force: true });
   await command(callbacks, compositorDir, process.execPath,
     [hyperframesCli, "render", ".", "--composition", `compositions/${project.regionId}-${project.output.profile}.html`, "--output", rendered, "--quality", quality, "--fps", "30", "--workers", String(renderWorkerCount()), "--strict", "--sdr", "--browser-timeout", "120", "--quiet"],
     "composing", "编码新的 MP4", 79,

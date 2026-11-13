@@ -2,12 +2,12 @@ import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import childProcess, { type ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { syncBuiltinESMExports } from "node:module";
 import { runQaCommand, runGoldenQa } from "../apps/studio/golden-qa.js";
-import { deliveryValidationFailure, DELIVERY_QA_DETERMINISTIC, isRetryableRenderFailure } from "../apps/studio/render-engine.js";
+import { deliveryValidationFailure, DELIVERY_QA_DETERMINISTIC, isRetryableRenderFailure, runCaptured, publishMapCache } from "../apps/studio/render-engine.js";
 
 function fakeChild(pid = 123): ChildProcess {
   return Object.assign(new EventEmitter(), { pid, exitCode: null, signalCode: null, stdout: new EventEmitter(), stderr: new EventEmitter(), kill: () => true }) as unknown as ChildProcess;
@@ -114,6 +114,54 @@ test("正式交付报告的确定性错误优先于进程与网络重试分类",
   await writeFile(reportPath, "不完整 JSON");
   assert.equal(await deliveryValidationFailure(original, reportPath, startedAt), original);
   assert.equal(await deliveryValidationFailure(original, join(dir, "missing.json"), startedAt), original);
+});
+
+test("预检取消后即使子进程成功退出也不会继续导出，进程注册只清理一次", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout", "setInterval"] });
+  const child = fakeChild();
+  mockSpawn(t, command => command === "taskkill" ? fakeChild(456) : child);
+  const registrations: Array<ChildProcess | null> = [];
+  let cancelled = false;
+  const work = runCaptured("preflight", [], { cwd: process.cwd(), timeoutMs: 480_000, lifecycle: { cancelled: () => cancelled, registerProcess: value => registrations.push(value) } });
+  const rejected = assert.rejects(work, /Render cancelled/);
+  cancelled = true;
+  t.mock.timers.tick(100);
+  child.emit("close", 0);
+  child.emit("error", new Error("迟到错误"));
+  await rejected;
+  assert.deepEqual(registrations, [child, null]);
+});
+
+test("预检取消不等待缺失close，超时报告保持有界且可继续队列", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout", "setInterval"] });
+  mockSpawn(t, () => fakeChild());
+  let cancelled = false;
+  const work = runCaptured("preflight", [], { cwd: process.cwd(), timeoutMs: 480_000, lifecycle: { cancelled: () => cancelled, registerProcess: () => {} } });
+  const rejected = assert.rejects(work, /Render cancelled/);
+  cancelled = true;
+  t.mock.timers.tick(100);
+  t.mock.timers.tick(15_000);
+  await rejected;
+  const timeout = runCaptured("preflight", [], { cwd: process.cwd(), timeoutMs: 1000 });
+  t.mock.timers.tick(1000);
+  t.mock.timers.tick(15_000);
+  assert.equal((await timeout).timedOut, true);
+  await assert.rejects(runCaptured("preflight", [], { cwd: process.cwd(), timeoutMs: 1000, lifecycle: { cancelled: () => true, registerProcess: () => { throw new Error("不应注册"); } } }), /Render cancelled/);
+});
+
+test("地图缓存失败发布保持旧文件并清理临时文件，成功才替换", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "map-cache-publish-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const target = join(dir, "map.mp4");
+  const source = join(dir, "source.mp4");
+  await writeFile(target, "原有完整产物");
+  await assert.rejects(publishMapCache(join(dir, "missing.mp4"), target));
+  assert.equal(await readFile(target, "utf8"), "原有完整产物");
+  assert.deepEqual(await readdir(dir), ["map.mp4"]);
+  await writeFile(source, "新的完整产物");
+  await publishMapCache(source, target);
+  assert.equal(await readFile(target, "utf8"), "新的完整产物");
+  assert.equal((await readdir(dir)).some(name => name.endsWith(".partial")), false);
 });
 
 test("引擎接入 QA 生命周期且 completed 紧前检查取消", async () => {

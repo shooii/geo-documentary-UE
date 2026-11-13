@@ -94,7 +94,8 @@ test("预检超时先清理树并在15秒宽限内settle，error和close幂等",
   const captured = runInNewContext(code, {
     spawn: () => child, process: { env: {} }, killProcessTree: () => { kills++; },
     setTimeout: (callback: () => void, ms: number) => { const id = ++nextTimer; timers.set(id, { callback, ms }); return id; },
-    clearTimeout: (id: number) => timers.delete(id)
+    clearTimeout: (id: number) => timers.delete(id),
+    setInterval: () => 0, clearInterval: () => {}
   }) as (exe: string, args: string[], options: object) => Promise<{ timedOut: boolean; code: number | null; stderr: string }>;
   const result = captured('mock', [], { cwd: '.', timeoutMs: 100 });
   timers.get(1)!.callback();
@@ -119,7 +120,8 @@ test("command跨输出分片保留fatal清理标记，优先于exit和watchdog�
     const command = runInNewContext(code, {
       spawn: () => child, process: { env: {} }, CAPTURE_CLEANUP_FATAL: 'UE_CAPTURE_CLEANUP_FATAL',
       commandTimeoutMs: () => 1000, killProcessTree: () => {},
-      setTimeout: (callback: () => void) => { timers.push(callback); return timers.length; }, clearTimeout: () => {}
+      setTimeout: (callback: () => void) => { timers.push(callback); return timers.length; }, clearTimeout: () => {},
+      setInterval: () => 0, clearInterval: () => {}
     });
     const result = command({ cancelled: () => false, update: () => {}, registerProcess: () => {} }, '.', 'mock', [], 'capturing', '录制', 42);
     const rejected = assert.rejects(result, /UE_CAPTURE_CLEANUP_FATAL/);
@@ -129,6 +131,33 @@ test("command跨输出分片保留fatal清理标记，优先于exit和watchdog�
     else child.emit('close', 1);
     await rejected;
   }
+});
+
+test("普通导出命令取消后无close也会释放注册并结束等待", async () => {
+  const engine = await readFile(resolve(root, 'apps/studio/render-engine.ts'), 'utf8');
+  const source = engine.slice(engine.indexOf('function command(callbacks:'), engine.indexOf('function relativeAssetPath('));
+  const { code } = transformSync(`${source}\ncommand;`, { loader: 'ts' });
+  const child = Object.assign(new EventEmitter(), { stdout: new EventEmitter(), stderr: new EventEmitter() });
+  const timers: Array<() => void> = [];
+  let poll!: () => void, cancelled = false, kills = 0;
+  const registrations: unknown[] = [];
+  const command = runInNewContext(code, {
+    spawn: () => child, process: { env: {} }, CAPTURE_CLEANUP_FATAL: 'UE_CAPTURE_CLEANUP_FATAL',
+    commandTimeoutMs: () => 1000, killProcessTree: () => { kills++; },
+    setTimeout: (callback: () => void) => { timers.push(callback); return timers.length; }, clearTimeout: () => {},
+    setInterval: (callback: () => void) => { poll = callback; return 1; }, clearInterval: () => {}
+  });
+  const result = command({ cancelled: () => cancelled, update: () => {}, registerProcess: (value: unknown) => registrations.push(value) }, '.', 'mock', [], 'composing', '编码', 79);
+  const rejected = assert.rejects(result, /Render cancelled/);
+  cancelled = true;
+  poll(); poll();
+  assert.equal(kills, 1);
+  timers[0]!();
+  assert.equal(kills, 1, '取消中的watchdog不再重复清理');
+  timers[1]!();
+  await rejected;
+  child.emit('close', 0);
+  assert.deepEqual(registrations, [child, null]);
 });
 
 test("the preflight runs before the encode and stays out of the way when it cannot run", async () => {

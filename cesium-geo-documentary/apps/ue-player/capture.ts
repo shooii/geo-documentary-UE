@@ -1,4 +1,4 @@
-import { readFile, mkdir, writeFile, readdir } from 'node:fs/promises';
+import { readFile, mkdir, writeFile, readdir, rename, rm } from 'node:fs/promises';
 import { dirname, resolve, join } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
@@ -70,7 +70,8 @@ const CHUNK = CHUNK_ENV > 0 ? Math.max(240, CHUNK_ENV) : 0;
 const BATCH = Math.max(4, Number(process.env.GEO_CAPTURE_BATCH ?? 16) | 0);
 const ffmpeg=join(root,'node_modules/ffmpeg-static',process.platform==='win32'?'ffmpeg.exe':'ffmpeg');
 const probeSeconds=async(file:string)=>{
-  const result=spawnSync(ffmpeg,['-hide_banner','-i',file],{encoding:'utf8',windowsHide:true,stdio:['ignore','pipe','pipe']});
+  const result=spawnSync(ffmpeg,['-hide_banner','-i',file],{encoding:'utf8',windowsHide:true,timeout:15_000,stdio:['ignore','pipe','pipe']});
+  if(result.error||result.signal)return null;
   const text=`${result.stdout??''}\n${result.stderr??''}`;
   const match=text.match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
   if(!match) return null;
@@ -196,13 +197,17 @@ try{
  const output=join(root,'renders/intermediate',`${region}-map-${profile}${qa?'-qa':''}.mp4`);await mkdir(resolve(output,'..'),{recursive:true});
  cancellation.signal.throwIfAborted();
  const written=assertCaptureFrames(await readdir(frames),total);
- const encoder=scope.track(spawn(ffmpeg,['-y','-framerate',String(fps),'-start_number','0','-i',join(frames,'frame-%06d.png'),'-frames:v',String(total),'-c:v','libx264','-crf','16','-pix_fmt','yuv420p',output],{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe']}), 'FFmpeg', true);
+ const pendingOutput=join(frames,'encoded-map.mp4');
+ const encoder=scope.track(spawn(ffmpeg,['-y','-framerate',String(fps),'-start_number','0','-i',join(frames,'frame-%06d.png'),'-frames:v',String(total),'-c:v','libx264','-crf','16','-pix_fmt','yuv420p',pendingOutput],{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe']}), 'FFmpeg', true);
  encoder.stdout?.on('data',x=>process.stdout.write(x)); encoder.stderr?.on('data',x=>process.stderr.write(x));
  await scope.wait(new Promise<void>((ok,no)=>{encoder.once('error',no);encoder.once('exit',code=>code===0?ok():no(new Error(`FFmpeg exited ${code}`)));}), 3_600_000);
  cancellation.signal.throwIfAborted();
- const encodedSeconds=await probeSeconds(output);
+ const encodedSeconds=await probeSeconds(pendingOutput);
  const expectedSeconds=total/fps;
- if(encodedSeconds===null||encodedSeconds<expectedSeconds-0.1)throw new Error(`Encoded ${encodedSeconds ?? 0}s, expected ${expectedSeconds.toFixed(2)}s`);
+ if(encodedSeconds===null||!Number.isFinite(encodedSeconds)||encodedSeconds<expectedSeconds-0.1)throw new Error(`Encoded ${encodedSeconds ?? 0}s, expected ${expectedSeconds.toFixed(2)}s`);
+ cancellation.signal.throwIfAborted();
+ // 只有完整编码并验证成功的文件才能替换可复用的地图成片。
+ await rename(pendingOutput,output);
  await writeFile(join(frames,'capture-report.json'),JSON.stringify({engine:'unreal',region,profile,imagery,fps,total,framesWritten:written,expectedDurationSeconds:expectedSeconds,encodedDurationSeconds:encodedSeconds,sourceDurationSeconds:seconds,capturedDurationSeconds:encodedSeconds,startTime,chunkFrames:CHUNK||total,batchFrames:BATCH,subtitleLayout:{clock:'map',windows:subtitleWindows},qualityReport,output},null,2));
 }catch(error){
  if(error instanceof CaptureCleanupError) console.error(CAPTURE_CLEANUP_FATAL, error.message);
@@ -211,6 +216,9 @@ try{
  try { await scope.close(); }
  finally {
    try { await browser?.close(); }
-   finally { process.removeListener('SIGINT', cancel); process.removeListener('SIGTERM', cancel); }
+   finally {
+     await rm(join(frames,'encoded-map.mp4'),{force:true}).catch(error => console.error('临时编码文件清理失败', error));
+     process.removeListener('SIGINT', cancel); process.removeListener('SIGTERM', cancel);
+   }
  }
 }
