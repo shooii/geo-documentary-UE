@@ -151,7 +151,7 @@ async function validateVideo(regionId: string, profile: string): Promise<Validat
   if (detection.code !== 0) throw new Error(`FFmpeg validation failed for ${relativePath}: ${detection.output.slice(-4000)}`);
   const blackEvents = detection.output.split(/\r?\n/).filter((line) => line.includes("black_start") || line.includes("black_end"));
   const silenceEvents = detection.output.split(/\r?\n/).filter((line) => line.includes("silence_start") || line.includes("silence_end"));
-  const unexpectedSilence = unexpectedSilenceEvents(silenceEvents, allowedCoverSilenceSeconds, outroSilenceWindow);
+  const unexpectedSilence = unexpectedSilenceEvents(silenceEvents, allowedCoverSilenceSeconds, outroSilenceWindow, duration);
   if (blackEvents.length > 0) errors.push("black-frame-event");
   if (unexpectedSilence.length > 0) errors.push("silence-event");
 
