@@ -1349,7 +1349,9 @@ test("a deleted export record cannot be written back by the render it belonged t
 
   const del = /async function deleteTerminalJob\(job: RenderJobRecord\): Promise<void> \{[\s\S]*?\n\}/.exec(serverSource)?.[0];
   assert.ok(del, "deleteTerminalJob must exist");
-  assert.match(del, /runningJobs\.get\(job\.id\)[\s\S]*?Promise\.race\(\[running, new Promise\(\(settle\) => setTimeout\(settle, 30_000\)\)\]\)/);
+  assert.match(del, /runningJobs\.get\(job\.id\)[\s\S]*?Promise\.race\(/);
+  assert.match(del, /reject\(new HttpError\(409,/);
+  assert.match(del, /finally \{ if \(timer\) clearTimeout\(timer\); \}/);
   assert.match(del, /persistChains\.get\(join\(job\.jobRoot, "job\.json"\)\)\?\.catch/);
   assert.ok(del.indexOf("deletedJobs.add(job.id)") < del.indexOf("await rm(jobPath"),
     "the job must be marked deleted before its directory is removed");

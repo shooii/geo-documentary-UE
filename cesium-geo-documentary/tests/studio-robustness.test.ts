@@ -165,6 +165,87 @@ test("媒体描述符在坏范围、断连和读流错误后全部关闭", async
   assert.match(server, /return await streamSeekableMedia\(audio, request, response\)/);
 });
 
+test("迟到的取消请求不会把已完成导出改为取消", async () => {
+  const source = await readFile(resolve(root, "apps/studio/server.ts"), "utf8");
+  const from = source.indexOf('    if (request.method === "POST" && cancelMatch)');
+  const to = source.indexOf('    if (request.method === "GET" && downloadMatch)', from);
+  const code = transformSync(`async function cancel() { ${source.slice(from, to)} }`, { loader: "ts" }).code;
+  for (const status of ["completed", "failed", "cancelled"]) {
+    const job = { id: "a", status, output: "film.mp4" };
+    const cancel = runInNewContext(`${code}\ncancel;`, {
+      request: { method: "POST" }, cancelMatch: ["", "a"], loadJob: async () => job,
+      response: {}, sendJson: (_response: unknown, _status: number, value: unknown) => value,
+      cancelledJobs: { add: () => assert.fail("终态任务不可取消") }
+    });
+    assert.equal(await cancel(), job);
+    assert.equal(job.status, status);
+  }
+});
+
+test("无效并发配置不会让导出队列永久停泵", async () => {
+  const source = await readFile(resolve(root, "apps/studio/server.ts"), "utf8");
+  const line = source.split("\n").find((line) => line.startsWith("const maxConcurrentExports ="));
+  assert.ok(line);
+  for (const [value, expected] of [["bad", 1], ["0", 1], ["1.5", 1], ["2", 2], ["99", 2]]) {
+    assert.equal(runInNewContext(`${line}\nmaxConcurrentExports;`, { process: { env: { STUDIO_EXPORT_CONCURRENCY: value } } }), expected);
+  }
+});
+
+test("取消任务仍未退出时拒绝删除且保留资源追踪", async () => {
+  const code = await serverFragment("async function deleteTerminalJob(", "async function findProjectNarrationAudio(");
+  const removed: string[] = [];
+  const job = { id: "a", status: "cancelled", jobRoot: resolve(root, "workspace/jobs/a") };
+  const jobsRoot = resolve(root, "workspace/jobs");
+  const activeJobIds = new Set([job.id]), cancelledJobs = new Set([job.id]);
+  const activeProcesses = new Map([[job.id, {}]]), jobs = new Map([[job.id, job]]);
+  const runningJobs = new Map([[job.id, new Promise(() => {})]]);
+  const remove = runInNewContext(`${code}\ndeleteTerminalJob;`, {
+    resolve, sep: (await import("node:path")).sep, join, jobsRoot, safeId: (id: string) => id,
+    runningJobs, activeJobIds, activeProcesses, jobs, cancelledJobs,
+    deletedJobs: new Set(), persistChains: new Map(), rm: async () => removed.push(job.id),
+    setTimeout: (fn: () => void) => { queueMicrotask(fn); return 1; }, clearTimeout() {},
+    HttpError: class extends Error { constructor(public status: number, message: string) { super(message); } }
+  });
+  await assert.rejects(remove(job), (error: any) => error.status === 409);
+  assert.equal(activeJobIds.has(job.id), true);
+  assert.equal(activeProcesses.has(job.id), true);
+  assert.equal(cancelledJobs.has(job.id), true);
+  assert.equal(jobs.has(job.id), true);
+  assert.deepEqual(removed, []);
+});
+
+test("启动恢复跳过本进程已接受的任务，不重复录制", async () => {
+  const code = await serverFragment("const MAX_RECOVERY_ATTEMPTS =", "async function loadJob(");
+  let enqueued = 0, persisted = 0;
+  const existing = { id: "a", projectId: "p", status: "capturing" };
+  const recover = runInNewContext(`${code}\nrecoverInterruptedJobs;`, {
+    mkdir: async () => {}, readdir: async () => [{ name: "a", isDirectory: () => true }],
+    jobsRoot: "jobs", join, existsSync: () => true,
+    readJsonResilient: async () => existing, jobs: new Map([[existing.id, existing]]),
+    activeJobIds: new Set(), queuedRenders: [],
+    persistJob: () => { persisted++; }, pumpRenderQueue: () => { enqueued++; },
+    process: { stdout: { write() {} } }
+  });
+  await recover();
+  assert.equal(enqueued, 0); assert.equal(persisted, 0);
+});
+
+test("任务外围异常也写入失败状态并释放队列槽", async () => {
+  const code = await serverFragment("function pumpRenderQueue()", "function enqueueRender(");
+  const job: any = { id: "a", status: "queued" };
+  const activeJobIds = new Set<string>(), runningJobs = new Map<string, Promise<void>>();
+  const pump = runInNewContext(`${code}\npumpRenderQueue;`, {
+    activeJobIds, maxConcurrentExports: 1, queuedRenders: [{ job, project: {} }],
+    cancelledJobs: new Set(), runningJobs,
+    updateJob: (target: any, patch: any) => Object.assign(target, patch),
+    runJob: async () => { throw new Error("setup failed"); }, refreshQueuePositions() {},
+    process: { stderr: { write() {} } }
+  });
+  pump(); await new Promise((done) => setImmediate(done));
+  assert.equal(job.status, "failed"); assert.match(job.error, /setup failed/);
+  assert.equal(activeJobIds.size, 0); assert.equal(runningJobs.size, 0);
+});
+
 /**
  * Robustness is a property of the seams, not of the happy path: a bad request
  * body, a stray rejection in a background task, a server that stopped answering.

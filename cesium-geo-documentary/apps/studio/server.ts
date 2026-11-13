@@ -283,7 +283,7 @@ const deletedJobs = new Set<string>();
 /** The in-flight render per job, so a delete can wait for the writes to stop. */
 const runningJobs = new Map<string, Promise<void>>();
 const queuedRenders: Array<{ job: RenderJobRecord; project: VideoProject }> = [];
-const maxConcurrentExports = Math.max(1, Math.min(2, Number(process.env.STUDIO_EXPORT_CONCURRENCY ?? 1)));
+const maxConcurrentExports = Math.max(1, Math.min(2, Math.floor(Number(process.env.STUDIO_EXPORT_CONCURRENCY ?? 1)) || 1));
 /**
  * Statuses in which an export still owns the render queue. Exports run on the
  * service, not in the browser tab, and they are not scoped to whichever project
@@ -1426,7 +1426,14 @@ function pumpRenderQueue(): void {
     activeJobIds.add(next.job.id);
     delete next.job.queuePosition;
     updateJob(next.job, { startedAt: new Date().toISOString(), status: "preparing", stage: "准备导出", progress: 1 });
-    const running = runJob(next.job, next.project).catch(() => undefined).finally(() => {
+    const running = runJob(next.job, next.project).catch((error) => {
+      // Includes failures outside executeRender's guarded loop (setup/finalize).
+      // Releasing the slot without a terminal record strands a phantom export.
+      if (!["completed", "failed", "cancelled"].includes(next.job.status)) {
+        updateJob(next.job, { status: cancelledJobs.has(next.job.id) ? "cancelled" : "failed", stage: "导出任务异常结束", error: error instanceof Error ? error.message : String(error) });
+      }
+      process.stderr.write(`JOB_RUN_FAILED ${next.job.id} ${error instanceof Error ? error.message : String(error)}\n`);
+    }).finally(() => {
       runningJobs.delete(next.job.id);
       activeJobIds.delete(next.job.id);
       refreshQueuePositions();
@@ -1465,6 +1472,9 @@ async function recoverInterruptedJobs(): Promise<void> {
     if (!existsSync(jobPath) || !existsSync(snapshotPath)) continue;
     try {
       const job = await readJsonResilient<RenderJobRecord>(jobPath);
+      // Startup recovery races with the first HTTP export. Never re-queue a
+      // task already accepted by this process (even if its disk write is old).
+      if (jobs.has(job.id) || activeJobIds.has(job.id) || queuedRenders.some((item) => item.job.id === job.id)) continue;
       if (terminal.has(job.status)) continue;
       const project = await readJsonResilient<VideoProject>(snapshotPath);
       if (!project?.id || project.id !== job.projectId) continue;
@@ -1534,7 +1544,15 @@ async function deleteTerminalJob(job: RenderJobRecord): Promise<void> {
   // so nothing writes into the directory after it is removed, but never let a
   // stuck render hold the request open.
   const running = runningJobs.get(job.id);
-  if (running) await Promise.race([running, new Promise((settle) => setTimeout(settle, 30_000))]);
+  if (running) {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        running,
+        new Promise<never>((_resolve, reject) => { timer = setTimeout(() => reject(new HttpError(409, "导出进程仍在退出，请稍后再删除记录")), 30_000); })
+      ]);
+    } finally { if (timer) clearTimeout(timer); }
+  }
   deletedJobs.add(job.id);
   jobs.delete(job.id);
   activeJobIds.delete(job.id);
@@ -2363,6 +2381,9 @@ const server = createServer(async (request, response) => {
     if (request.method === "GET" && jobMatch) { const job = await loadJob(jobMatch[1]!); return job ? sendJson(response, 200, job) : sendJson(response, 404, { error: "Job not found" }); }
     if (request.method === "POST" && cancelMatch) {
       const job = await loadJob(cancelMatch[1]!); if (!job) return sendJson(response, 404, { error: "Job not found" });
+      // Late/double clicks must not turn a delivered export into cancelled and
+      // make its valid download disappear. Terminal states are immutable here.
+      if (["completed", "failed", "cancelled"].includes(job.status)) return sendJson(response, 200, job);
       cancelledJobs.add(job.id);
       const queuedIndex = queuedRenders.findIndex((item) => item.job.id === job.id);
       if (queuedIndex >= 0) queuedRenders.splice(queuedIndex, 1);
