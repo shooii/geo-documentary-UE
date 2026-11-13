@@ -2800,10 +2800,8 @@ void AGeoHUD::DrawHUD()
     }
     FlushRun();
     const double Head = N(Trace, TEXT("progress")), TraceAlpha = N(Trace, TEXT("alpha"));
-    // The comet that traces the rim. A 6% tail on a village outline disappears into the
-    // little zig-zags of a real boundary, so the tail is a sixth of the perimeter and the
-    // head carries its own glow.
-    constexpr double TraceTail = .16;
+    // 光束尾迹占周长的 18%，略加宽的光晕与头部使巡游目标更醒目。
+    constexpr double TraceTail = .18;
     if (TraceAlpha > .01)
         for (int Pass = 0; Pass < 3; ++Pass)
             for (const auto &Stroke : Strokes)
@@ -2822,17 +2820,17 @@ void AGeoHUD::DrawHUD()
                     // The head itself, so the eye catches the front of the sweep.
                     if (Head - End > .022)
                         continue;
-                    AddBeamStroke(A, B, 9. * Scale, Trail.CopyWithNewOpacity(.45 * TraceAlpha),
+                    AddBeamStroke(A, B, 10.4 * Scale, Trail.CopyWithNewOpacity(.45 * TraceAlpha),
                                   Trail.CopyWithNewOpacity(.95 * TraceAlpha));
                     continue;
                 }
                 // A comet whose tail decays linearly is invisible for most of its length:
                 // two thirds of it sits under 30% and the white rim simply eats it. The
                 // tail now keeps most of its strength and only the very end thins out.
-                const double Opacity = TraceAlpha * (Pass == 0 ? .30 : 1.);
+                const double Opacity = TraceAlpha * (Pass == 0 ? .34 : 1.);
                 const double FadeStart = FMath::Pow(FMath::Clamp(1. - (Head - Start) / TraceTail, 0., 1.), .45);
                 const double FadeEnd = FMath::Pow(FMath::Clamp(1. - (Head - End) / TraceTail, 0., 1.), .45);
-                AddBeamStroke(A, B, (Pass == 0 ? 13. : 5.4) * Scale, Trail.CopyWithNewOpacity(FadeStart * Opacity),
+                AddBeamStroke(A, B, (Pass == 0 ? 15. : 6.2) * Scale, Trail.CopyWithNewOpacity(FadeStart * Opacity),
                               Trail.CopyWithNewOpacity(FadeEnd * Opacity));
             }
     if (BoundaryTriangles.Num())

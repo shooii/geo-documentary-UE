@@ -195,6 +195,6 @@ export function boundaryAnimation(mapTime:number,start:number,current:string) {
   // Ease back in after the first sweep rather than jumping from zero to full glow.
   const enter = Math.max(0, Math.min(1, orbit / .25));
   const settle = Math.max(0, Math.min(1, orbit / 3));
-  const alpha = (.55 - .23 * settle * settle * (3 - 2 * settle)) * enter * enter * (3 - 2 * enter);
+  const alpha = (.60 - .22 * settle * settle * (3 - 2 * settle)) * enter * enter * (3 - 2 * enter);
   return {target:current,progress:(orbit%ORBIT_PERIOD)/ORBIT_PERIOD,alpha};
 }
