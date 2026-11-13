@@ -182,7 +182,7 @@ test('部分信令端口被占用时不抢占并明确报告', async () => {
   f.runtime.stop();
 });
 
-test('退出和spawn错误采用有上限退避，error+exit只处理一次', async () => {
+test('退出采用有上限退避，error+exit只处理一次', async () => {
   const f = fixture();
   await f.runtime.start();
   f.launched[1]!.child.emit('error', new Error('ENOENT'));
@@ -198,6 +198,35 @@ test('退出和spawn错误采用有上限退避，error+exit只处理一次', as
   await f.tick(2000);
   assert.equal(f.launched.length, 4);
   f.runtime.stop();
+});
+
+test('活子进程的操作错误不丢失守护权，多次错误和停止后迟到错误均不崩溃', async () => {
+  const f = fixture();
+  await f.runtime.start();
+  const renderer = f.launched[1]!.child;
+  renderer.emit('error', new Error('kill EPERM'));
+  renderer.emit('error', new Error('send failed'));
+  await f.tick(60000);
+  assert.equal(f.launched.length, 2);
+  assert.equal(f.logs.filter(line => line.includes('FAILED renderer')).length, 0);
+  assert.equal(f.logs.filter(line => line.includes('CHILD_ERROR renderer')).length, 2);
+  f.runtime.stop();
+  assert.ok(f.killed.includes(renderer));
+  assert.doesNotThrow(() => renderer.emit('error', new Error('late error')));
+});
+
+test('spawn准备失败按退避重试，不留下子进程或未捕获异常', async () => {
+  let calls = 0;
+  const f = fixture({ launch: async () => { calls++; throw new Error('spawn ENOENT'); } });
+  await f.runtime.start();
+  assert.equal(calls, 2);
+  assert.equal(f.logs.filter(line => line.includes('FAILED')).length, 2);
+  await f.tick(1000);
+  assert.equal(calls, 2);
+  await f.tick(1000);
+  assert.equal(calls, 4);
+  f.runtime.stop();
+  assert.equal(f.killed.length, 0);
 });
 
 test('停止发生在异步端口探测期间时不启动或创建重试', async () => {

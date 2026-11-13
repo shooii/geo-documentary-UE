@@ -465,6 +465,7 @@ window.addEventListener('message',event => { if (event.source === parent && even
 window.addEventListener('pagehide', () => {
   suspended = true;
   leaseGeneration++;
+  probeBarrier?.();
   clearTimeout(recoveryTimer); recoveryTimer = undefined;
   clearInterval(healthTimer); healthTimer = undefined;
   closeStream();
@@ -479,8 +480,9 @@ window.addEventListener('pageshow', event => {
 document.addEventListener('visibilitychange', () => {
   resetVideoHealth();
   if (!document.hidden && !suspended) {
+    if (channelReady && !ready) connectedAt = performance.now();
     if (holdsSlot) void renewSlot();
-    else if (!recoveryTimer) void joinWithSlot();
+    else if (slotEnabled && !recoveryTimer) void joinWithSlot();
   }
 });
 window.addEventListener('online', () => {
@@ -681,9 +683,8 @@ async function renewSlot() {
   // A stream recovery starts a new lease epoch. Ignore its predecessor's reply so a
   // stale busy/offline response cannot dismantle the replacement connection.
   if (suspended || generation !== leaseGeneration || connectionGeneration !== streamGeneration) {
-    // pagehide invalidates the page's lease; a newer stream with the same viewer id
-    // may already own it, so only release for the page-level invalidation.
-    if (state === 'granted' && (suspended || generation !== leaseGeneration)) sendSlotRelease();
+    // BFCache 恢复后同一窗口可能已重新持有租约；旧续期不得释放新租约。
+    if (state === 'granted' && suspended) sendSlotRelease();
     return;
   }
   if (state === 'granted') {
@@ -718,12 +719,17 @@ async function joinWithSlot() {
   joining = true;
   const generation = leaseGeneration;
   await askPeers();
-  if (suspended || generation !== leaseGeneration) { joining = false; return; }
+  if (suspended || generation !== leaseGeneration) {
+    joining = false;
+    if (!suspended) void joinWithSlot();
+    return;
+  }
   if (peerOwnsStream() && !captureMode) { joining = false; waitForSlot('busy'); return; }
   const state = await claimSlot();
   joining = false;
   if (suspended || generation !== leaseGeneration) {
     if (state === 'granted') sendSlotRelease();
+    if (!suspended) void joinWithSlot();
     return;
   }
   if (state !== 'granted') { waitForSlot(state); return; }

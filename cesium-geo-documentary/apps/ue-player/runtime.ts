@@ -59,7 +59,10 @@ export function createPreviewRuntime(deps: RuntimeDependencies, ports: { player:
         if (deps.now() - born > 60000) failures[kind] = 0;
         failed(kind, reason);
       };
-      child.once('error', error => ended(error.message));
+      // 已返回的子进程已完成 spawn；kill/send 等操作错误不代表它已经退出。
+      child.on('error', error => {
+        if (children.get(kind) === child) deps.log(`UE_RUNTIME_CHILD_ERROR ${kind}: ${error.message}`);
+      });
       child.once('exit', (code, signal) => ended(signal || `exit ${code}`));
       if (kind === 'renderer') {
         try {

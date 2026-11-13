@@ -45,7 +45,7 @@ async function harness(search = '', sharedBus?: Bus) {
     for (;;) {
       const next = [...timers].filter(([, timer]) => timer.at <= target).sort((a, b) => a[1].at - b[1].at)[0];
       if (!next) break;
-      now = next[1].at; timers.delete(next[0]);
+      now = Math.max(now, next[1].at); timers.delete(next[0]);
       if (next[1].interval) timers.set(next[0], { ...next[1], at: now + next[1].interval });
       next[1].callback(); await flush();
     }
@@ -131,7 +131,8 @@ async function harness(search = '', sharedBus?: Bus) {
   if (!search.includes('slot=off')) await advance(800);
   const open = async (stream = instances.at(-1)!) => { stream.dispatch('dataChannelOpen'); await flush(); };
   return { instances, configs, claims, timers, document, window, video, elements, messages, beacons, parent, bus,
-    advance, flush, open, setLease: (handler: typeof lease) => { lease = handler; },
+    advance, flush, open, freeze: (milliseconds: number) => { now += milliseconds; },
+    setLease: (handler: typeof lease) => { lease = handler; },
     connections: () => instances.reduce((total, instance) => total + instance.connectCalls + instance.reconnectCalls, 0) };
 }
 
@@ -247,6 +248,32 @@ test('pagehide 取消恢复和心跳，BFCache pageshow 重新申请租约', asy
   assert.equal(h.claims.length, claims + 1); assert.equal(h.connections(), connects + 1);
 });
 
+test('重新申请租约期间进入BFCache，旧请求结束后仍能恢复连接', async () => {
+  const h = await harness(); await h.open();
+  h.instances[0]!.dispatch('dataChannelClose');
+  let settle!: (value: any) => void;
+  h.setLease(() => new Promise(resolve => { settle = resolve; }));
+  await h.advance(2800);
+  h.window.dispatch('pagehide');
+  h.window.dispatch('pageshow', { persisted: true });
+  h.setLease(async () => ({ granted: true }));
+  settle({ granted: true }); await h.flush();
+  await h.advance(800);
+  assert.equal(h.connections(), 2);
+  await h.open();
+  assert.equal(h.window.geoVideo.getStreamHealth().ready, true);
+});
+
+test('探测其他窗口期间退出页面立即取消探测定时器', async () => {
+  const h = await harness(); await h.open();
+  h.instances[0]!.dispatch('dataChannelClose');
+  await h.advance(2000);
+  h.window.dispatch('pagehide'); await h.flush();
+  assert.equal(h.timers.size, 0);
+  await h.advance(60000);
+  assert.equal(h.connections(), 1);
+});
+
 test('pagehide 后迟到的续期成功不得重新连接', async () => {
   const h = await harness(); await h.open();
   let settle!: (value: any) => void;
@@ -254,6 +281,21 @@ test('pagehide 后迟到的续期成功不得重新连接', async () => {
   await h.advance(4000); h.window.dispatch('pagehide'); settle({ granted: true }); await h.flush();
   await h.advance(60000);
   assert.equal(h.connections(), 1); assert.equal(h.timers.size, 0);
+});
+
+test('BFCache恢复后迟到的旧续租成功不能释放新流租约', async () => {
+  const h = await harness(); await h.open();
+  let settleOld!: (value: any) => void;
+  h.setLease(() => new Promise(resolve => { settleOld = resolve; }));
+  await h.advance(4000);
+  h.window.dispatch('pagehide');
+  h.setLease(async () => ({ granted: true }));
+  h.window.dispatch('pageshow', { persisted: true });
+  await h.advance(800); await h.open();
+  const releases = h.beacons.length;
+  settleOld({ granted: true }); await h.flush();
+  assert.equal(h.beacons.length, releases);
+  assert.equal(h.window.geoVideo.getStreamHealth().ready, true);
 });
 
 test('手动重试重新申请租约，不直接调用库重连', async () => {
@@ -350,6 +392,31 @@ test('页面从后台返回时重新确认租约，不把节流误判为断流',
   await h.advance(10000);
   assert.equal(h.instances.length, 1);
   assert.equal(h.window.geoVideo.getStreamHealth().ready, true);
+});
+
+test('无租约握手切回前台不会拆断正在协商的流', async () => {
+  for (const search of ['?slot=off', '?capture=1']) {
+    const h = await harness(search);
+    h.document.hidden = true; h.document.dispatch('visibilitychange');
+    h.document.hidden = false; h.document.dispatch('visibilitychange');
+    await h.flush();
+    assert.equal(h.connections(), 1, search);
+    assert.equal(h.instances[0]!.disconnectCalls, 0, search);
+    await h.open();
+    assert.equal(h.window.geoVideo.getStreamHealth().ready, true, search);
+  }
+});
+
+test('后台定时器完全冻结后切回前台，首帧等待重新获得完整预算', async () => {
+  const h = await harness('?slot=off'); h.video.readyState = 0;
+  await h.open();
+  h.document.hidden = true; h.document.dispatch('visibilitychange');
+  h.freeze(60000);
+  h.document.hidden = false; h.document.dispatch('visibilitychange');
+  await h.advance(10000);
+  assert.equal(h.connections(), 1);
+  await h.advance(15000);
+  assert.equal(h.connections(), 2);
 });
 
 test('重连恢复场景时保留时间、游览点与控制消息', async () => {
