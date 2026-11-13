@@ -76,7 +76,7 @@ function adjustView(pose: Camera, view: MapView | null | undefined, strength = 1
 // Scene 2 choreography shared by the exporter, the studio preview and the
 // standalone capture: the town settles first, the county is traced while the
 // camera pulls back, then the shot settles back on the town.
-const CONTEXT_INTRO = { town: 2.4, out: 3.2, hold: 1.9, lean: .8, back: 3, total: 10.5 };
+const CONTEXT_INTRO = { town: .12, out: .68, hold: .18, lean: .10, back: .82, total: 1.8 };
 function openingSeconds(scene: any) {
   const opening = scene?.region?.openingDescent;
   if (!opening || opening.enabled === false) return 0;
@@ -290,6 +290,9 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   }
 
   const closing = Math.max(returning?.progress ?? 0, overviewProgress === undefined ? 0 : smooth(overviewProgress));
+  // The final overview belongs to the villages: keep the town outline/fill, but
+  // never restore its large name above the village labels on either outro path.
+  if (stops.length && !openingOnly && (returnProgress !== null || overviewProgress !== undefined)) parentLabel = 0;
   // 收尾起始段让当前村的名牌与定位点淡出。旧实现靠 UE 端「current 从非空跳空」的跨帧
   // 检测启动 0.45s 淡出，跳转采样（QA 的 renderFrame 直接落帧）或收尾首帧会满强度残留。
   // 这里改为用收尾进度线性显式驱动，两条收尾路径（tour 返航 / outro 总览）都覆盖。

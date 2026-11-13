@@ -1133,7 +1133,7 @@ test("Studio playback synchronizes the generated narration audio with scene cue 
   assert.match(clientSource, /event\.data\.event === "opening-label-visible"/);
   assert.match(clientSource, /STUDIO_OPENING_PREVIEW_TIMING\.assetDelayAfterLabelSeconds \* 1000/);
   assert.match(playerSource, /event: "opening-label-visible"/);
-  assert.match(renderEngineSource, /const openingAssetDelayFromNarrationSeconds = 2\.8/);
+  assert.match(renderEngineSource, /const openingAssetDelayFromNarrationSeconds = 1\.7/);
   assert.match(renderEngineSource, /openingDelaySeconds: openingAssetDelayFromNarrationSeconds/);
   const visualTimelineSource = await readFile(resolve(root, "packages/render-spec/visual-timeline.ts"), "utf8");
   assert.match(visualTimelineSource, /scene\.id === input\.openingSceneId && range\s*\? range\.start \+ openingDelay/);

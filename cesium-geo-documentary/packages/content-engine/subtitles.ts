@@ -243,10 +243,11 @@ export function subtitleHighlightPoints(text: string, start: number, end: number
   const points = [{ time: start, progress: 0 }];
   for (const unit of units) {
     const at = start + (end - start) * elapsed / totalWeight;
-    // 标点在前一个词读完时一起变色，停顿期间不继续扫向下一个词。
+    // Include punctuation in the preceding spoken sweep instead of jumping its
+    // width in a zero-duration step. Hold the progress during the actual pause.
     if (/^[\p{P}\s]+$/u.test(unit.text)) {
       width += unit.width;
-      points.push({ time: at, progress: width / totalWidth });
+      points[points.length - 1]!.progress = width / totalWidth;
       elapsed += unit.weight;
       points.push({ time: start + (end - start) * elapsed / totalWeight, progress: width / totalWidth });
     } else {
@@ -311,11 +312,17 @@ export function buildSingleLineCues(
         lines: [chunk],
         highlight: subtitleHighlightPoints(chunk, start, end)
       };
-    }).map((display, index, displays) => ({
-      ...display,
-      start: index === 0 ? cue.start : display.start,
-      end: displays[index + 1]?.start ?? cue.end
-    }));
+    }).map((display, index, displays) => {
+      const start = index === 0 ? cue.start : display.start;
+      const end = displays[index + 1]?.start ?? cue.end;
+      // The line's actual on-screen window can differ from the source span when
+      // punctuation was removed at a split. Never let the yellow wash begin
+      // before this line is visible or finish after the next line has arrived.
+      const spokenStart = Math.max(start, display.highlight?.[0]?.time ?? start);
+      const spokenEnd = Math.max(spokenStart + .001, Math.min(end, display.highlight?.at(-1)?.time ?? end));
+      return { ...display, start, end,
+        highlight: subtitleHighlightPoints(display.text, spokenStart, spokenEnd) };
+    });
   });
 }
 

@@ -129,15 +129,52 @@ function poleOfInaccessibility(polygon: Polygon): PointResult | undefined {
   return { point: [best.x / xScale, best.y], distance: best.d };
 }
 
+function ringAreaCenter(ring: Ring): { area: number; center: Point } {
+  let twiceArea = 0, xMoment = 0, yMoment = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const [x, y] = ring[i]!, [nextX, nextY] = ring[(i + 1) % ring.length]!;
+    const cross = x! * nextY! - nextX! * y!;
+    twiceArea += cross;
+    xMoment += (x! + nextX!) * cross;
+    yMoment += (y! + nextY!) * cross;
+  }
+  const area = Math.abs(twiceArea) / 2;
+  return { area, center: twiceArea ? [xMoment / (3 * twiceArea), yMoment / (3 * twiceArea)] : [0, 0] };
+}
+
+function polygonAreaCenter(polygon: Polygon): { area: number; center: Point } {
+  let area = 0, xMoment = 0, yMoment = 0;
+  for (const [index, ring] of polygon.entries()) {
+    const part = ringAreaCenter(ring);
+    const signed = index === 0 ? part.area : -part.area;
+    area += signed;
+    xMoment += part.center[0] * signed;
+    yMoment += part.center[1] * signed;
+  }
+  return { area: Math.max(0, area), center: area > 0 ? [xMoment / area, yMoment / area] : [0, 0] };
+}
+
 export function interiorLabelPoint(input: any, preferred?: unknown): Point | undefined {
   const polygons = geometryPolygons(input);
   if (polygons.length) {
-    let best: PointResult | undefined;
-    for (const polygon of polygons) {
-      const result = poleOfInaccessibility(polygon);
-      if (result && (!best || result.distance > best.distance)) best = result;
+    // Largest land component owns the label. Maximum-clearance alone can select a
+    // remote island or a bulge near one edge, far from the visual centre of town.
+    const polygon = polygons.map(shape => ({ shape, ...polygonAreaCenter(shape) }))
+      .sort((a, b) => b.area - a.area)[0]!;
+    const pole = poleOfInaccessibility(polygon.shape);
+    if (pole) {
+      const center = polygon.center;
+      if (signedDistance(center[0], center[1], polygon.shape) >= pole.distance * .25) return center;
+      // For concave shapes / holes, move from the area centroid towards an
+      // interior safe point, stopping as soon as the pin has room to breathe.
+      for (let i = 1; i <= 20; i++) {
+        const fraction = i / 20;
+        const x = center[0] + (pole.point[0] - center[0]) * fraction;
+        const y = center[1] + (pole.point[1] - center[1]) * fraction;
+        if (signedDistance(x, y, polygon.shape) >= pole.distance * .25) return [x, y];
+      }
+      return pole.point;
     }
-    if (best) return best.point;
     if (Array.isArray(preferred) && Number.isFinite(preferred[0]) && Number.isFinite(preferred[1]))
       return [Number(preferred[0]), Number(preferred[1])];
   }

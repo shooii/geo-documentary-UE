@@ -51,6 +51,13 @@ test('label anchors stay inside a concave region instead of the bounding-box cen
  assert.ok(!(Math.abs(x - 3) < .25 && Math.abs(y - 3) < .25));
 });
 
+test('multipart region anchors the largest component, not a smaller wider island', () => {
+ const main = [[0,0],[10,0],[10,2],[0,2],[0,0]];
+ const island = [[20,0],[23,0],[23,3],[20,3],[20,0]];
+ const point = interiorLabelPoint({ type:'MultiPolygon', coordinates:[[main],[island]] });
+ assert.ok(point && point[0] > 3 && point[0] < 7 && point[1] > .5 && point[1] < 1.5);
+});
+
 test('triangulation fallback keeps a valid interior point for legacy callers', () => {
  const geometry = {
   type: 'Polygon',

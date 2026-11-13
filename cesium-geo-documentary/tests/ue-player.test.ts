@@ -30,7 +30,7 @@ test('UE tour starts at settled opening camera and returns to the same camera',(
  const returned=frameAt(scene,stops,30,'portrait',4.4).camera;
  assert.ok(Math.abs(returned.height-overview.height)<1e-8);
  assert.equal(returned.lon,overview.lon);
- assert.equal(frameAt(scene,stops,30,'portrait',4.4).parentLabel,frameAt(scene,stops,5,'portrait',4.4).parentLabel);
+ assert.equal(frameAt(scene,stops,30,'portrait',4.4).parentLabel,0);
  assert.deepEqual(frameAt(scene,stops,30,'portrait',4.4).visited,['one']);
 });
 test('UE camera heading takes the short path across north',()=>{
@@ -69,8 +69,12 @@ test('UE keeps the displayed camera and label when jumping to a nonadjacent vill
   assert.deepEqual(settled.camera, camera(stops[2]!.cameraPreset));
 
   const returned = frameAt(scene, stops, 45, 'portrait', 4.4);
-  assert.equal(returned.parentLabel, frameAt(scene, stops, 5, 'portrait', 4.4).parentLabel);
+  assert.equal(returned.parentLabel, 0);
+  assert.ok(returned.labels.c!.alpha > 0, 'ending retains the village name');
   assert.equal(returned.labels.c!.scale, .9 * .68);
+  const outro = frameAt(scene, stops, 45, 'portrait', 4.4, false, undefined, 1);
+  assert.equal(outro.parentLabel, 0, 'outro overview also hides the town name');
+  assert.ok(outro.labels.c!.alpha > 0);
 });
 
 test('UE opening hides every label inside the cloud and releases it when the boundary beam is halfway', () => {
@@ -95,6 +99,20 @@ test('UE opening hides every label inside the cloud and releases it when the bou
   const settled = at(5.6);
   assert.equal(settled.labelsReveal, 1);
   assert.ok(settled.parentLabel > .9);
+});
+
+test('county expands and retracts before 2 seconds and before the first image', () => {
+  const base = { longitude: 110, latitude: 20, height: 26000, pitch: -64, heading: 0 };
+  const scene = { region: { cameraPreset: base, openingDescent: { enabled: false } },
+    context: { cameraPreset: { ...base, height: 120000 } } };
+  const at = (time: number) => frameAt(scene, [], time, 'portrait', 4.4, true, undefined, undefined, null, true);
+  assert.equal(at(0).contextReveal, 0);
+  assert.ok(at(.6).contextReveal > 0);
+  assert.ok(at(.9).contextReveal > .9);
+  assert.ok(at(1.4).contextReveal < .5);
+  assert.equal(at(1.8).contextReveal, 0);
+  assert.equal(at(2).contextReveal, 0);
+  assert.deepEqual(at(1.8).camera, at(0).camera);
 });
 
 test('UE tour villages are not held back by the opening label gate', () => {

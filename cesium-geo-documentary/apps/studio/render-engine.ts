@@ -609,9 +609,10 @@ export { selectSceneAssetsForRender };
 async function writeVisualsManifest(sandbox: string, project: VideoProject, spec: RenderSpec, log?: (message: string) => void): Promise<void> {
   const rangeBySceneId = new Map(spec.sceneCueRanges.map((range) => [range.sceneId, range]));
   const openingSceneId = project.scenes.find((scene) => scene.section !== "cover")?.id;
-  // Narration begins with the boundary pen-down. Preserve enough uninterrupted
-  // map time to read the outline and parent name before evidence imagery enters.
-  const openingAssetDelayFromNarrationSeconds = 2.8;
+  // Narration starts after the 0.35 s boundary pen-down gate. The county wipe
+  // expands and retracts by map time 1.8 s; keep the first photo off screen until
+  // at least map time 2.05 s so the entire gesture finishes before the image.
+  const openingAssetDelayFromNarrationSeconds = 1.7;
   const visuals: Array<Record<string, unknown>> = [];
   for (const scene of project.scenes) {
     if (scene.section === "cover") continue;

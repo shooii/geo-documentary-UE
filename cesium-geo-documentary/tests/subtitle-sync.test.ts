@@ -28,6 +28,14 @@ test("标点处高亮暂停，句尾标点的停顿不拖慢已读文字", () =>
   assert.ok(points.find((point) => point.progress === 1)!.time < 3.65);
 });
 
+test("标点随前一字平滑点亮，不会在零时长节点突然跳黄", () => {
+  const points = subtitleHighlightPoints("甲，乙。", 0, 3.65);
+  for (let index = 1; index < points.length; index++) {
+    if (points[index]!.progress > points[index - 1]!.progress)
+      assert.ok(points[index]!.time > points[index - 1]!.time);
+  }
+});
+
 test("拆行保留原句标点停顿，末段400在句尾停顿前全部点亮", () => {
   const text = "馆和昌公书局，400。";
   const chunks = buildSingleLineCues([{ start: 10, end: 20, text }], 14, [], [{ cueIndex: 0, chunks: ["馆和昌公书局", "400"] }]);
