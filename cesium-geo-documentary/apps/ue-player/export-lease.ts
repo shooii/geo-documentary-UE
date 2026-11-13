@@ -86,10 +86,17 @@ export async function acquireExportLease(root: string, cancelled: () => boolean,
               clearInterval(heartbeat);
               try {
                 const owner = JSON.parse(await readFile(path, 'utf8')) as { token?: string; ownerPid?: number };
-                if (owner.token === token && owner.ownerPid === process.pid) await unlink(path);
-              } catch (error) {
-                if (!(error instanceof SyntaxError) && (error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-              } finally { await releaseGuard(); }
+                if (owner.token === token && owner.ownerPid === process.pid) {
+                  // The file is only a compatibility marker for old daemons; the
+                  // kernel guard (exclusive TCP port) released in `finally` is the
+                  // real mutual exclusion. A host safe-delete guard can refuse this
+                  // unlink, and a leftover version:1 file is never treated as an
+                  // active lock (legacyExportLockActive returns false for it), so a
+                  // failed delete must NEVER turn an otherwise completed export red.
+                  await unlink(path).catch(() => undefined);
+                }
+              } catch { /* Corrupt/missing lock text is harmless; guard is still released below. */ }
+              finally { await releaseGuard(); }
             })()
           };
         }
