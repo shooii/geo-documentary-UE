@@ -1217,10 +1217,16 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   const hyperframesCli = join(sandbox, "node_modules", "hyperframes", "dist", "cli.js");
   // 重试必须证明本次编码确实生成了文件，不能让退出码0掩盖上次遗留的成片。
   await rm(rendered, { force: true });
+  // A long portrait composition must decode a multi-hundred-MB map clip and
+  // dozens of scene assets before its first frame. Parallel workers then race
+  // each other on page.goto; a hard 120 s ceiling timed out every worker with
+  // zero navigation starts on this host. Make the ceiling configurable (and
+  // generous by default) so it can be raised without rebuilding the engine.
+  const renderNavigationTimeoutMs = Math.max(60_000, Number(process.env.STUDIO_RENDER_NAVIGATION_TIMEOUT_MS ?? 300_000) || 300_000);
   await command(callbacks, compositorDir, process.execPath,
-    [hyperframesCli, "render", ".", "--composition", `compositions/${project.regionId}-${project.output.profile}.html`, "--output", rendered, "--quality", quality, "--fps", "30", "--workers", String(renderWorkerCount()), "--strict", "--sdr", "--browser-timeout", "120", "--quiet"],
+    [hyperframesCli, "render", ".", "--composition", `compositions/${project.regionId}-${project.output.profile}.html`, "--output", rendered, "--quality", quality, "--fps", "30", "--workers", String(renderWorkerCount()), "--strict", "--sdr", "--browser-timeout", String(Math.ceil(renderNavigationTimeoutMs / 1000)), "--quiet"],
     "composing", "编码新的 MP4", 79,
-    { PATH: `${ffmpegToolDir}${pathDelimiter}${process.env.PATH ?? ""}` });
+    { PATH: `${ffmpegToolDir}${pathDelimiter}${process.env.PATH ?? ""}`, PRODUCER_PAGE_NAVIGATION_TIMEOUT_MS: String(renderNavigationTimeoutMs) });
   const compositionSeconds = secondsBetween(compositionStartedAt, Date.now());
   const qaStartedAt = Date.now();
   const outputDir = join(jobRoot, "output"); await mkdir(outputDir, { recursive: true });
