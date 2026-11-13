@@ -204,7 +204,9 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   // point of the sweep and lands just as the beam goes, so the two read as one beat.
   const labelsReveal = openingShot && descent > 0 ? smooth((mapTime - .98) / .5) : 1;
   const parentOverview = openingOnly ? 1 : 1 - smooth((mapTime - Number(stops[0]?.start ?? Infinity)) / .45);
-  let parentLabel = .98 * parentOverview * smooth((mapTime - .95) / .45) * labelsReveal;
+  // Return shots restore the same town name as the settled opening; the
+  // opening-only gate is already zero once the child tour has started.
+  let parentLabel = .98 * Math.max(parentOverview, returning?.progress ?? 0, overviewProgress === undefined ? 0 : smooth(overviewProgress)) * smooth((mapTime - .95) / .45) * labelsReveal;
   let parentAccent = returning?.progress ?? parentOverview;
   const labels: Record<string, LabelStyle> = {};
   const accents: Record<string, number> = {};
