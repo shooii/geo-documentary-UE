@@ -120,7 +120,7 @@ async function harness(search = '', sharedBus?: Bus) {
     },
     Config, PixelStreaming, DEFAULT_IMAGERY_PROVIDER: 'test',
     actions: new Set(['seek', 'prepare-tour', 'set-annotations', 'update-tour-labels', 'play-scene-range', 'stop-scene-playback']),
-    frameAt: (_scene: any, stops: any[], time: number) => ({ time, stops, accents: {} }),
+    frameAt: (_scene: any, stops: any[], time: number, _profile: string, _duration: number, _opening: boolean, _origin?: any, _overview?: number, _view?: any, contextIntro?: boolean) => ({ time, stops, accents: {}, contextIntro }),
     contextIntroSeconds: () => 0, configureOpening: (region: any) => region,
     subtitleBounds: (bounds: any) => bounds, activeSubtitleBounds: () => null
   };
@@ -380,6 +380,30 @@ test('控制通道打开但首帧未到时二十秒后恢复，不永久停在�
   h.video.readyState = 4; h.video.videoWidth = 720;
   await h.open();
   assert.equal(h.window.geoVideo.getStreamHealth().ready, true);
+});
+
+test('有巡游站点时单帧和批量导出仍启用第二场景县界介绍', async () => {
+  const h = await harness('?slot=off'); await h.open();
+  h.window.geoVideo.prepareStudioTour({ tourStops: [{ id: 'village', start: 50, end: 70 }] });
+  await h.window.geoVideo.renderFrame(9);
+  await h.window.geoVideo.renderBatch([9, 9.1]);
+  const sent = h.instances.at(-1)!.sent;
+  const single = sent.find(message => message.action === 'capture-frame')!.frame;
+  const batch = sent.find(message => message.action === 'capture-batch')!.frames;
+  assert.equal(single.contextIntro, true);
+  assert.equal(single.stops.length, 1);
+  assert.ok(batch.every((frame: any) => frame.contextIntro === true && frame.stops.length === 1));
+});
+
+test('按场景播放第二场景也启用县界介绍', async () => {
+  const h = await harness('?slot=off'); await h.open();
+  h.window.geoVideo.prepareStudioTour({ tourStops: [{ id: 'village', start: 50, end: 70 }] });
+  h.window.dispatch('message', { source: h.parent, origin: 'http://127.0.0.1:4180', data: {
+    type: 'geo-video-studio', action: 'play-scene-range', range: { start: 5, end: 20, sceneId: 'overview' }
+  } });
+  await h.advance(20);
+  const frames = h.instances.at(-1)!.sent.filter(message => message.action === 'apply-frame');
+  assert.equal(frames.at(-1)!.frame.contextIntro, true);
 });
 
 test('只有元数据不能宣布首帧就绪，loadeddata 到达后才加载场景', async () => {

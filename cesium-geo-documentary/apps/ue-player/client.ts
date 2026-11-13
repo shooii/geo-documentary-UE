@@ -143,7 +143,11 @@ function handle(data: any) {
     play(0,seconds,'opening-label-visible'); return;
   }
   if (data.action === 'play-scene-range') {
-    const r = data.range || {}; play(descent+Number(r.start || 0),descent+Number(r.end || 0),'scene-range-complete',{ sceneId:r.sceneId, childId:r.childId },Number(r.flightSeconds || 0)); return;
+    const r = data.range || {};
+    // The first narrated overview is scene 2; it uses the same county establishing
+    // shot as export. frameAt retires this layer before the first village begins.
+    contextIntro = true;
+    play(descent+Number(r.start || 0),descent+Number(r.end || 0),'scene-range-complete',{ sceneId:r.sceneId, childId:r.childId },Number(r.flightSeconds || 0)); return;
   }
   if (data.action === 'play-tour-outro') {
     const start = descent + Number(stops?.at(-1)?.end || 0);
@@ -494,7 +498,7 @@ Object.assign(window,{ geoVideo: {
   setSubtitleWindows: (windows: SubtitleWindow[]) => { subtitleWindows = windows; },
   /** 注记时间窗直接下发到 UE；验收脚本用它做「开/关」同帧对照。 */
   setAnnotationWindows: async (windows: { sceneId?: string; start: number; end: number }[]) => send('set-annotations', { annotationWindows: windows }),
-  renderFrame: async (t: number) => { stop(); time=t; openingOnly=false; if (!ready) throw new Error('UE renderer not ready'); return send('capture-frame',{ frame:{ ...frameAt(scene,stops ?? [],t,profile,duration,false), subtitleBounds: activeSubtitleBounds(subtitleWindows, t) ?? null } }); },
+  renderFrame: async (t: number) => { stop(); time=t; openingOnly=false; if (!ready) throw new Error('UE renderer not ready'); return send('capture-frame',{ frame:{ ...frameAt(scene,stops ?? [],t,profile,duration,false,undefined,undefined,undefined,true), subtitleBounds: activeSubtitleBounds(subtitleWindows, t) ?? null } }); },
   /**
    * Batch capture: compose N frames locally (frameAt is a pure function of t) and hand
    * the run to UE in one or more data-channel messages. UE walks them on its own Tick
@@ -515,7 +519,7 @@ Object.assign(window,{ geoVideo: {
       let i = base;
       while (i < times.length) {
         const t = times[i]!;
-        const frame = { ...frameAt(scene, stops ?? [], t, profile, duration, false), subtitleBounds: activeSubtitleBounds(subtitleWindows, t) ?? null };
+        const frame = { ...frameAt(scene, stops ?? [], t, profile, duration, false, undefined, undefined, undefined, true), subtitleBounds: activeSubtitleBounds(subtitleWindows, t) ?? null };
         const n = JSON.stringify(frame).length;
         if (frames.length && size + n > MAX_MESSAGE) break;
         frames.push(frame); size += n; i++;

@@ -98,3 +98,19 @@ test('closing pull-back shrinks village names whichever path drives the ending',
  assert.equal(outro.labels.a.rank,0);
  assert.equal(outro.labels.b.rank,1);
 });
+
+test('county establishing shot survives a nonempty export tour and retires before village travel',()=>{
+ const preset={longitude:110,latitude:20,height:30000,pitch:-64,heading:0};
+ const scene={region:{cameraPreset:preset,openingDescent:{enabled:true,seconds:3}},context:{cameraPreset:{...preset,height:180000}}};
+ const stops=[{id:'village',start:40,end:60,flightDuration:4,cameraPreset:{...preset,height:5000}}];
+ const at=(time:number)=>frameAt(scene,stops,time,'portrait',4.4,false,undefined,undefined,undefined,true);
+ assert.equal(at(4).contextReveal,0);
+ assert.ok(at(7).contextReveal>0 && at(7).contextReveal<1);
+ assert.equal(at(9).contextReveal,1);
+ assert.equal(at(9).contextOpacity,1);
+ assert.equal(at(9).camera.height,180000);
+ assert.equal(at(14).contextReveal,0);
+ assert.equal(at(14).contextOpacity,0);
+ assert.equal(at(45).current,'village');
+ assert.equal(at(45).contextOpacity,0);
+});
