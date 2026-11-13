@@ -9,6 +9,8 @@ export interface TimedCue {
   start: number;
   end: number;
   text: string;
+  /** Sentence-clock interpolation shared by preview and export (not measured word timing). */
+  highlight?: Array<{ time: number; progress: number }>;
 }
 
 export interface SceneCueRange {
@@ -290,7 +292,7 @@ export function buildRenderSpec(input: {
     subtitleProtectedPhrases(project),
     sceneSubtitleOverrides(project, ranges, cues, subtitleMaximum(project), subtitleProtectedPhrases(project))
   )
-    .map((cue, index) => ({ index, start: cue.start, end: cue.end, text: cue.text }));
+    .map((cue, index) => ({ index, start: cue.start, end: cue.end, text: cue.text, ...(cue.highlight ? { highlight: cue.highlight } : {}) }));
   const assetsById = new Map(project.assets.map((asset) => [asset.id, asset]));
   const assets: RenderSpecAsset[] = [];
   for (const scene of project.scenes) {

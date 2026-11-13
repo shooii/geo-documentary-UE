@@ -3,6 +3,7 @@ export interface SubtitleCue {
   end: number;
   text: string;
   lines?: string[];
+  highlight?: Array<{ time: number; progress: number }>;
 }
 
 export interface DisplayCue extends SubtitleCue {
@@ -203,6 +204,60 @@ export function splitSingleLineText(text: string, maximum: number, protectedPhra
   return chunks;
 }
 
+// 数字按中文读法估算音节，年份/编号保留逐位读法；这仍是句级时序内的插值。
+export function subtitleSpeechUnits(text: string): Array<{ text: string; weight: number; width: number }> {
+  return [...text.matchAll(/\d+(?:,\d{3})*(?:\.\d+)?|[^\d]/gu)].map((match) => {
+    const value = match[0];
+    const width = [...value].reduce((sum, char) => sum + (/[\x00-\xff]/.test(char) ? 0.5 : 1), 0);
+    if (/^\d/.test(value)) {
+      const digits = value.replaceAll(",", "");
+      const [integer = "", decimal] = digits.split(".");
+      const following = text.slice((match.index ?? 0) + value.length);
+      let weight = integer.length;
+      if (integer.length <= 4 && !/^年/.test(following) && !/^0/.test(integer)) {
+        let spoken = "";
+        const units = ["千", "百", "十", ""];
+        for (let index = 0; index < integer.length; index += 1) {
+          const digit = integer[index]!;
+          if (digit !== "0") spoken += `${digit}${units[4 - integer.length + index]}`;
+          else if (/[1-9]/.test(integer.slice(index + 1)) && !spoken.endsWith("零")) spoken += "零";
+        }
+        if (spoken.startsWith("1十")) spoken = spoken.slice(1);
+        weight = spoken.length;
+      }
+      return { text: value, weight: Math.max(1, weight + (decimal ? decimal.length + 1 : 0)), width };
+    }
+    const weight = /\s/.test(value) || /[“”‘’（）()《》]/.test(value) ? 0
+      : /[，、,:：]/.test(value) ? 0.65
+      : /[。！？；!?;…]/.test(value) ? 1 : 1;
+    return { text: value, weight, width };
+  });
+}
+
+export function subtitleHighlightPoints(text: string, start: number, end: number): Array<{ time: number; progress: number }> {
+  const units = subtitleSpeechUnits(text);
+  const totalWeight = units.reduce((sum, unit) => sum + unit.weight, 0) || 1;
+  const totalWidth = units.reduce((sum, unit) => sum + unit.width, 0) || 1;
+  let elapsed = 0;
+  let width = 0;
+  const points = [{ time: start, progress: 0 }];
+  for (const unit of units) {
+    const at = start + (end - start) * elapsed / totalWeight;
+    // 标点在前一个词读完时一起变色，停顿期间不继续扫向下一个词。
+    if (/^[\p{P}\s]+$/u.test(unit.text)) {
+      width += unit.width;
+      points.push({ time: at, progress: width / totalWidth });
+      elapsed += unit.weight;
+      points.push({ time: start + (end - start) * elapsed / totalWeight, progress: width / totalWidth });
+    } else {
+      elapsed += unit.weight;
+      width += unit.width;
+      points.push({ time: start + (end - start) * elapsed / totalWeight, progress: width / totalWidth });
+    }
+  }
+  return points;
+}
+
 export function buildSingleLineCues(
   cues: SubtitleCue[],
   maximum: number,
@@ -230,25 +285,37 @@ export function buildSingleLineCues(
     if (overrideChunks && normalizeSubtitleSemantics(chunks.join("")) !== normalizeSubtitleSemantics(cue.text)) {
       throw new Error(`Subtitle override for cue ${cueIndex} changes spoken semantic text`);
     }
-    const weights = chunks.map((chunk) => Math.max(1, normalizeSubtitleSemantics(chunk).length));
-    const totalCharacters = weights.reduce((sum, length) => sum + length, 0);
+    const speechWeight = (text: string) => subtitleSpeechUnits(text).reduce((sum, unit) => sum + unit.weight, 0);
+    const totalWeight = Math.max(1, speechWeight(cue.text));
     const duration = cue.end - cue.start;
-    let elapsedCharacters = 0;
-    let cursor = cue.start;
-    return chunks.map((chunk, index) => {
-      const start = cursor;
-      elapsedCharacters += weights[index] ?? 1;
-      const end = index === chunks.length - 1
-        ? cue.end
-        : cue.start + duration * elapsedCharacters / totalCharacters;
-      cursor = end;
+    let sourceCursor = 0;
+    return chunks.map((chunk) => {
+      const sourceStart = cue.text.indexOf(chunk, sourceCursor);
+      // 手工换行可能移除了内部标点：按语义字符匹配原句，保留原句里的停顿权重。
+      let from = sourceStart;
+      let to = sourceStart + chunk.length;
+      if (from < 0) {
+        from = sourceCursor;
+        while (from < cue.text.length && !normalizeSubtitleSemantics(cue.text[from]!)) from += 1;
+        to = from;
+        const target = normalizeSubtitleSemantics(chunk);
+        while (to < cue.text.length && normalizeSubtitleSemantics(cue.text.slice(from, to)).length < target.length) to += 1;
+      }
+      sourceCursor = to;
+      const start = cue.start + duration * speechWeight(cue.text.slice(0, from)) / totalWeight;
+      const end = cue.start + duration * speechWeight(cue.text.slice(0, to)) / totalWeight;
       return {
         start,
         end,
         text: chunk,
-        lines: [chunk]
+        lines: [chunk],
+        highlight: subtitleHighlightPoints(chunk, start, end)
       };
-    });
+    }).map((display, index, displays) => ({
+      ...display,
+      start: index === 0 ? cue.start : display.start,
+      end: displays[index + 1]?.start ?? cue.end
+    }));
   });
 }
 

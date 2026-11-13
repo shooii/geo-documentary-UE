@@ -1750,7 +1750,7 @@ function previewSubtitleEntries(scene) {
   if (!scene || scene.section === "cover") return [];
   const range = state.renderSpec?.sceneCueRanges?.find((item) => item.sceneId === scene.id);
   const timed = range ? (state.renderSpec.subtitleCues || []).filter((cue) => cue.end > range.start && cue.start < range.end) : [];
-  if (timed.length) return timed.map((cue) => ({ text: cue.text, start: cue.start, end: cue.end }));
+  if (timed.length) return timed.map((cue) => ({ text: cue.text, start: cue.start, end: cue.end, highlight: cue.highlight }));
   const maximum = previewSubtitleLimits[state.project?.output?.profile] || 14;
   const chunks = splitPreviewSubtitle(scene.narration, maximum);
   return chunks.map((text, index) => ({ text, start: index, end: index + 1 }));
@@ -1847,17 +1847,25 @@ function syncPreviewSubtitlesToAudio(scene, audio) {
     if (selectedScene()?.id !== scene.id || !state.playTimer || audio !== state.previewAudio) return;
     const audioTime = Number(audio.currentTime || 0);
     const activeIndex = entries.findIndex((entry) => audioTime + 0.015 >= entry.start && audioTime < entry.end);
+    if (activeIndex >= 0 && activeIndex !== displayedIndex) showPreviewSubtitle(scene, activeIndex);
     if (activeIndex >= 0) {
       // 正在讲这一句：把已讲比例写进 --subtitle-cut（右侧被裁掉的那部分）。
       const entry = entries[activeIndex];
-      const span = Math.max(0.08, Number(entry.end) - Number(entry.start));
-      const progress = Math.max(0, Math.min(1, (audioTime - Number(entry.start)) / span));
+      const points = entry.highlight || [{ time: entry.start, progress: 0 }, { time: entry.end, progress: 1 }];
+      let progress = audioTime >= entry.end ? 1 : 0;
+      for (let index = 1; index < points.length; index += 1) {
+        const previous = points[index - 1];
+        const next = points[index];
+        if (audioTime < previous.time) break;
+        const fraction = next.time <= previous.time ? 1 : Math.min(1, (audioTime - previous.time) / (next.time - previous.time));
+        progress = previous.progress + (next.progress - previous.progress) * fraction;
+        if (audioTime < next.time) break;
+      }
       preview.style.setProperty("--subtitle-cut", `${((1 - progress) * 100).toFixed(2)}%`);
     }
     if (activeIndex !== displayedIndex) {
       displayedIndex = activeIndex;
-      if (activeIndex >= 0) showPreviewSubtitle(scene, activeIndex);
-      else {
+      if (activeIndex < 0) {
         preview.innerHTML = "";
         preview.hidden = true;
         preview.setAttribute("aria-hidden", "true");

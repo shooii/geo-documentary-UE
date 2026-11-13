@@ -5,7 +5,38 @@ import { isRetryableRenderFailure } from "../apps/studio/render-engine.js";
 import { alignCueBoundaries, splitNarrationSentences } from "../packages/render-spec/narration-align.js";
 import type { TimedCue } from "../packages/render-spec/index.js";
 
+import { buildSingleLineCues, subtitleHighlightPoints, subtitleSpeechUnits } from "../packages/content-engine/subtitles.js";
+
 const cue = (start: number, end: number, text = "x"): TimedCue => ({ index: 0, start, end, text });
+
+test("数字使用朗读权重，半角显示宽度与音节分开计算", () => {
+  assert.equal(subtitleSpeechUnits("400")[0]!.weight, 2);
+  assert.equal(subtitleSpeechUnits("400")[0]!.width, 1.5);
+  assert.equal(subtitleSpeechUnits("1909年")[0]!.weight, 4);
+  assert.equal(subtitleSpeechUnits("1.44")[0]!.weight, 4);
+  assert.equal(subtitleSpeechUnits("8,000")[0]!.weight, 2);
+  assert.deepEqual(subtitleSpeechUnits("400,500").map((unit) => unit.text), ["400,500"]);
+  assert.deepEqual(subtitleSpeechUnits("400,人口").map((unit) => unit.text), ["400", ",", "人", "口"]);
+});
+
+test("标点处高亮暂停，句尾标点的停顿不拖慢已读文字", () => {
+  const points = subtitleHighlightPoints("甲，乙。", 0, 3.65);
+  const pauseStart = points.findIndex((point) => point.progress === 0.5);
+  assert.ok(pauseStart > 0);
+  assert.equal(points[pauseStart + 1]!.progress, 0.5);
+  assert.ok(points[pauseStart + 1]!.time > points[pauseStart]!.time);
+  assert.ok(points.find((point) => point.progress === 1)!.time < 3.65);
+});
+
+test("拆行保留原句标点停顿，末段400在句尾停顿前全部点亮", () => {
+  const text = "馆和昌公书局，400。";
+  const chunks = buildSingleLineCues([{ start: 10, end: 20, text }], 14, [], [{ cueIndex: 0, chunks: ["馆和昌公书局", "400"] }]);
+  assert.equal(chunks.length, 2);
+  assert.equal(chunks[1]!.start, chunks[0]!.end);
+  assert.equal(chunks[1]!.end, 20);
+  assert.equal(chunks[1]!.highlight!.at(-1)!.progress, 1);
+  assert.ok(chunks[1]!.highlight!.at(-1)!.time < chunks[1]!.end);
+});
 
 test("post 静音插在场景结束时，下一场第一句字幕跟着一起后移", () => {
   // A post-hold lands at range.end, which is exactly where the next scene's first cue

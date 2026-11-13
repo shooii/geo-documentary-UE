@@ -32,7 +32,10 @@ test("premium typography and mix tokens are enforced by the compositor", async (
   // 墨层必须显式声明纯白：早期靠从 body 继承，漏一处就是黑字（实测踩过）。
   assert.match(source, /\.subtitle-ink\{[^}]*color:#fff\}/);
   assert.match(source, /\.subtitle-wash\{position:absolute;z-index:1;[^}]*clip-path:inset\(0 100% 0 0\)/);
-  assert.match(source, /"#caption-wash-\$\{index\}",\{clipPath:"inset\(0 100% 0 0\)"\}/);
+  assert.match(source, /cue\.highlight \?\? subtitleHighlightPoints\(cue\.text, cue\.start, cue\.end\)/);
+  assert.match(source, /points\.map\(\(point, pointIndex\)/);
+  assert.match(source, /point\.time - previous\.time/);
+  assert.match(source, /immediateRender:false/);
   assert.doesNotMatch(source, /background:rgba\(4,10,15,\.72\)/);
   assert.match(source, /GeoSubtitle/);
   assert.match(source, /data-volume="0\.2"/);
