@@ -1808,6 +1808,16 @@ void AGeoHUD::DrawHUD()
                 if ((Current.IsEmpty() ? Ring.Parent : Ring.Id == Current) && Ring.Points.Num() >= 4 &&
                     (!TraceRing || Ring.Lengths.Last() > TraceRing->Lengths.Last()))
                     TraceRing = &Ring;
+        // HUD visibility must not reuse BoundaryVisited: that mesh-only list excludes
+        // FocusId, which can still be the outgoing village after `current` changes.
+        // Rebuild from this frame's timeline so direct seeks and reverse playback agree.
+        TSet<FString> VisibleVillages;
+        const TArray<TSharedPtr<FJsonValue>> *VisitedIds;
+        if (F->TryGetArrayField(TEXT("visitedIds"), VisitedIds))
+            for (const auto &Id : *VisitedIds)
+                VisibleVillages.Add(Id->AsString());
+        if (!Current.IsEmpty())
+            VisibleVillages.Add(Current);
         for (const auto &Ring : Map->Rings)
         {
             if (Ring.Parent && Reveal > .001 && Ring.Points.Num() >= 4)
@@ -1816,7 +1826,7 @@ void AGeoHUD::DrawHUD()
             // Visited villages keep a thin outline for the rest of the film, so the
             // accumulated green still reads as separate places instead of one blob.
             const bool Show = Ring.Parent ||
-                              (ChildReveal > .01 && (Ring.Id == Current || Map->BoundaryVisited.Contains(Ring.Id)));
+                              (ChildReveal > .01 && VisibleVillages.Contains(Ring.Id));
             if (!Show || Ring.Points.Num() < 2)
                 continue;
             FVector2D A;
@@ -2422,6 +2432,8 @@ void AGeoHUD::DrawHUD()
     // the village rim's 13 px halo plus its 3 px core swallowed the 4.2 px golden trail
     // whole — the triangles were built (the log counted them) and never seen. Drawn as a
     // second item it is guaranteed to sit on top of the white rim.
+    TArray<FCanvasUVTri> &RimHighlightTriangles = RimHighlightTriangleScratch;
+    RimHighlightTriangles.Reset();
     TArray<FCanvasUVTri> &BeamTriangles = BeamTriangleScratch;
     BeamTriangles.Reset();
     const auto AddStrokeTo = [](TArray<FCanvasUVTri> &Into, const FVector2D &A, const FVector2D &B, double Width,
@@ -2623,8 +2635,9 @@ void AGeoHUD::DrawHUD()
     {
         TArray<FVector2D> Points;
         TArray<FLinearColor> Colors;
-        int32 Style = 0; // 1 quiet village, 2 township, 3 hairline, 4 current village
+        int32 Style = 0; // 1 persistent village rim, 2 township, 3 hairline
         double Width = 0;
+        double Emphasis = 0;
     };
     FStrokeRun Run;
     const auto FlushRun = [&]() {
@@ -2655,14 +2668,24 @@ void AGeoHUD::DrawHUD()
                 Run.Points = Points;
                 Run.Colors = Colors;
             }
-            if (Run.Style == 1 || Run.Style == 4)
+            if (Run.Style == 1)
             {
-                const bool CurrentRim = Run.Style == 4;
-                const double WidthScale = CurrentRim ? 1. : InteriorWidth;
-                const float GlowScale = CurrentRim ? 1.f : float(InteriorGlow);
-                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 13. * Scale * RimHalo * WidthScale, 1.2 * Scale, .12f * GlowScale);
-                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 6.5 * Scale * RimMid * WidthScale, 1.1 * Scale, .32f * GlowScale);
-                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 3.0 * Scale * RimCore * WidthScale, .85 * Scale, .96f);
+                // Persistent structural rim: neither focus nor trace can extinguish it.
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 13. * Scale * RimHalo * InteriorWidth, 1.2 * Scale, .12f * float(InteriorGlow));
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 6.5 * Scale * RimMid * InteriorWidth, 1.1 * Scale, .32f * float(InteriorGlow));
+                EmitRim(BoundaryTriangles, Run.Points, Run.Colors, 3.0 * Scale * RimCore * InteriorWidth, .85 * Scale, .96f);
+                // Independent overlay cross-fades on BOTH outgoing and incoming rings.
+                // A zero accent skips only the overlay, never the base rim above.
+                if (Run.Emphasis > 0.)
+                {
+                    TArray<FLinearColor> &HighlightColors = RunHighlightColorScratch;
+                    HighlightColors.Reset();
+                    for (int32 I = 0; I < Run.Points.Num(); ++I)
+                        HighlightColors.Add(FLinearColor(.93, 1., .90, float(Run.Emphasis)));
+                    EmitRim(RimHighlightTriangles, Run.Points, HighlightColors, 13. * Scale * RimHalo, 1.2 * Scale, .12f);
+                    EmitRim(RimHighlightTriangles, Run.Points, HighlightColors, 6.5 * Scale * RimMid, 1.1 * Scale, .32f);
+                    EmitRim(RimHighlightTriangles, Run.Points, HighlightColors, 3.0 * Scale * RimCore, .85 * Scale, .96f);
+                }
             }
             else if (Run.Style == 2)
             {
@@ -2693,12 +2716,16 @@ void AGeoHUD::DrawHUD()
         const uint64 KA = Q(A), KB = Q(B);
         return KA < KB ? KA ^ (KB * 0x9E3779B97F4A7C15ull) : KB ^ (KA * 0x9E3779B97F4A7C15ull);
     };
-    // A shared edge belongs to the focus even if an older ring appears first in data.
-    TSet<uint64> &CurrentEdges = CurrentEdgeScratch;
-    CurrentEdges.Reset();
+    // Shared edges use the strongest of the two cross-fading accents, independent
+    // of ring order or the `current` hand-off. Base geometry is still drawn once.
+    TMap<uint64, double> &EdgeEmphasis = EdgeEmphasisScratch;
+    EdgeEmphasis.Reset();
     for (const auto &Stroke : Strokes)
-        if (Stroke.Touring && !Stroke.Parent)
-            CurrentEdges.Add(EdgeKey(Stroke.A, Stroke.B));
+        if (!Stroke.Parent)
+        {
+            double &Strength = EdgeEmphasis.FindOrAdd(EdgeKey(Stroke.A, Stroke.B));
+            Strength = FMath::Max(Strength, FMath::Clamp(Stroke.Accent, 0., 1.));
+        }
     double LastStart = -1;
     for (const auto &Stroke : Strokes)
     {
@@ -2706,18 +2733,12 @@ void AGeoHUD::DrawHUD()
         FLinearColor Tint = FLinearColor::White;
         FVector2D End = Stroke.B;
         double Width = 0;
+        double Emphasis = 0;
         if (!Stroke.Parent)
         {
-            // Current village owns the glow. Visited places keep their geometry and tint,
-            // but become quiet structure as the shot widens; the township stays stronger.
-            const float A = Stroke.Touring ? float(FMath::Clamp(Stroke.Accent, 0., 1.)) : 1.f;
-            if (A < .02)
-            {
-                FlushRun();
-                continue;
-            }
-            Style = Stroke.Touring ? 4 : 1;
-            Tint = FLinearColor(.93, 1., .90).CopyWithNewOpacity(A * (Stroke.Touring ? 1.f : float(InteriorAlpha)));
+            Style = 1;
+            Tint = FLinearColor(.93, 1., .90).CopyWithNewOpacity(float(InteriorAlpha));
+            Emphasis = EdgeEmphasis.FindRef(EdgeKey(Stroke.A, Stroke.B));
         }
         // While the county flood layer is up it already outlines the county rim;
         // stroking the same rim again doubled it into a heavy band.
@@ -2769,11 +2790,11 @@ void AGeoHUD::DrawHUD()
                 Width = 1.5 * Scale;
             }
         }
-        if (Style == 1 || Style == 4)
+        if (Style == 1)
         {
             // TSet::Add hands back an id, not a bool: test first, then claim.
             const uint64 Key = EdgeKey(Stroke.A, End);
-            if (ClaimedEdges.Contains(Key) || (Style == 1 && CurrentEdges.Contains(Key)))
+            if (ClaimedEdges.Contains(Key))
             {
                 FlushRun();
                 continue;
@@ -2783,7 +2804,7 @@ void AGeoHUD::DrawHUD()
         // A run ends wherever the style changes or the ring does. `Start` is the distance
         // along a ring and restarts at zero for the next one, which is the cheapest way to
         // tell that the polyline just ended.
-        if (Run.Style != Style || Run.Width != Width || Stroke.Start < LastStart)
+        if (Run.Style != Style || Run.Width != Width || Run.Emphasis != Emphasis || Stroke.Start < LastStart)
             FlushRun();
         LastStart = Stroke.Start;
         if (Run.Points.Num() && FVector2D::Distance(Run.Points.Last(), Stroke.A) > .75)
@@ -2792,6 +2813,7 @@ void AGeoHUD::DrawHUD()
         {
             Run.Style = Style;
             Run.Width = Width;
+            Run.Emphasis = Emphasis;
             Run.Points.Add(Stroke.A);
             Run.Colors.Add(Tint);
         }
@@ -2838,6 +2860,12 @@ void AGeoHUD::DrawHUD()
         FCanvasTriangleItem Lines(BoundaryTriangles, GWhiteTexture);
         Lines.BlendMode = SE_BLEND_Translucent;
         Canvas->DrawItem(Lines);
+    }
+    if (RimHighlightTriangles.Num())
+    {
+        FCanvasTriangleItem Highlight(RimHighlightTriangles, GWhiteTexture);
+        Highlight.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Highlight);
     }
     if (BeamTriangles.Num())
     {

@@ -1,6 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {triangulateFeature,boundaryAnimation,interiorLabelPoint} from '../apps/ue-player/boundary-style.js';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 test('boundary fills preserve polygon holes and multipart islands',()=>{
  const feature={geometry:{type:'MultiPolygon',coordinates:[[[[0,0],[4,0],[4,4],[0,4],[0,0]],[[1,1],[1,3],[3,3],[3,1],[1,1]]],[[[5,0],[6,0],[6,1],[5,1],[5,0]]]]}};
  const meshes=triangulateFeature(feature);assert.equal(meshes.length,2);
@@ -21,6 +23,23 @@ test('boundary light head makes one timed lap, then keeps orbiting a toured vill
  // The parent rim gets exactly one lap and then goes dark: there is no child to circle.
  assert.equal(boundaryAnimation(6.5,5,'').alpha,0);
  assert.equal(boundaryAnimation(8,5,'').alpha,0);
+});
+
+test('UE persistent rim visibility is independent of mesh focus, emphasis and sweep', async () => {
+ const source = (await readFile(resolve('unreal/GeoDocumentary/Source/GeoDocumentary/GeoMap.cpp'), 'utf8')).replace(/\r\n/g, '\n');
+ const visibility = source.slice(source.indexOf('TSet<FString> VisibleVillages;'), source.indexOf('for (const auto &Fill : Map->Fills)', source.indexOf('TSet<FString> VisibleVillages;')));
+ assert.match(visibility, /TryGetArrayField\(TEXT\("visitedIds"\)/);
+ assert.match(visibility, /VisibleVillages\.Add\(Current\)/);
+ assert.match(visibility, /VisibleVillages\.Contains\(Ring\.Id\)/);
+ assert.doesNotMatch(visibility, /BoundaryVisited\.Contains/);
+ const base = source.slice(source.indexOf('if (!Stroke.Parent)\n        {\n            Style = 1;'), source.indexOf('// While the county flood layer'));
+ assert.ok(base.length > 0);
+ assert.match(base, /CopyWithNewOpacity\(float\(InteriorAlpha\)\)/);
+ assert.doesNotMatch(base, /continue;|Stroke\.Touring|TraceAlpha/);
+ assert.match(source, /if \(Run\.Emphasis > 0\.\)/);
+ assert.match(source, /Strength = FMath::Max\(Strength, FMath::Clamp\(Stroke.Accent/);
+ assert.ok(source.indexOf('FCanvasTriangleItem Lines(') < source.indexOf('FCanvasTriangleItem Highlight('));
+ assert.ok(source.indexOf('FCanvasTriangleItem Highlight(') < source.indexOf('FCanvasTriangleItem Beam('));
 });
 
 test('label anchors use the interior center and never a point inside a hole', () => {

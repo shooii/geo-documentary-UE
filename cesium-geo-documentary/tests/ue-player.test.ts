@@ -115,14 +115,31 @@ test('village boundary stays continuous through the hand-off to the next village
  assert.ok(before.trace.alpha>0,'outgoing village keeps its orbiting beam');
  const handoff=at(10);
  assert.equal(handoff.current,'b');
- assert.ok((handoff.accents.b??0)>=.34,'incoming rim must not be dropped by UE (A < .02)');
- assert.ok(handoff.trace.alpha>0,'beam must not blank out on the first frame of the flight');
+ assert.equal(handoff.accents.b??0,0,'incoming accent begins at zero, independent of base rim');
+ assert.equal(handoff.focusId,'a','outgoing focus must remain visible even though current is b');
+ assert.deepEqual(handoff.visitedIds,['a','b']);
+ assert.equal(handoff.trace.alpha,0,'golden sweep waits for landing');
  const mid=at(12);
- assert.ok((mid.accents.b??0)>=.34);
- assert.ok(mid.trace.alpha>0);
+ assert.equal(mid.accents.a,.5);
+ assert.equal(mid.accents.b,.5);
+ assert.equal(mid.trace.alpha,0);
+ assert.equal(mid.fills.a,1,'previous green fill survives the hand-off');
  const landed=at(14.2);
- assert.ok(landed.trace.alpha>mid.trace.alpha,'landing sweep takes over at full strength');
- // The floor is a tour-only hold: the closing overview must still retire it.
+ assert.ok(landed.trace.alpha>0,'landing sweep starts independently of base rim');
+ assert.equal(landed.fills.a,1);
+ const nearBefore=at(10-1/3000),nearAfter=at(10+1/3000);
+ assert.ok(Math.abs(nearBefore.accents.a!-nearAfter.accents.a!)<.001);
+ assert.ok((nearAfter.accents.b??0)<.001,'no artificial accent floor');
+ for (let i=0;i<120;i++) {
+  const frame=at(10+i/30);
+  assert.ok(frame.visitedIds.includes('a') && frame.visitedIds.includes('b'));
+  assert.equal(frame.fills.a,1);
+  assert.equal(frame.trace.alpha,0,'no sweep during flight');
+ }
+ const direct=at(12);
+ at(18);at(2);
+ assert.deepEqual(at(12),direct,'seeking never accumulates stale future villages');
+ // Closing retires only the emphasis and sweep, not the persistent village set.
  const closing=at(20);
  assert.equal(closing.current,'');
  assert.equal(closing.trace.alpha,0);

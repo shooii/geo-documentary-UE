@@ -251,13 +251,15 @@ class AGeoHUD : public AHUD
      * memory flat; the Canvas API still copies the item, but nothing else churns.
      */
     TArray<FCanvasUVTri> BoundaryTriangleScratch;
+    TArray<FCanvasUVTri> RimHighlightTriangleScratch;
     TArray<FCanvasUVTri> BeamTriangleScratch;
     TArray<FCanvasUVTri> BatchTriangleScratch;
     TArray<FVector2D> RimOffsetScratch;
     TArray<FVector2D> RunPointScratch;
     TArray<FLinearColor> RunColorScratch;
+    TArray<FLinearColor> RunHighlightColorScratch;
     TSet<uint64> ClaimedEdgeScratch;
-    TSet<uint64> CurrentEdgeScratch;
+    TMap<uint64, double> EdgeEmphasisScratch;
     UPROPERTY() TObjectPtr<UFont> LabelFont;
     /** Township names. A second atlas, rasterised large: one 64 px font made every big
      *  name a 2x upscale of a small bitmap. */

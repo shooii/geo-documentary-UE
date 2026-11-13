@@ -104,13 +104,14 @@ test('county establishing shot survives a nonempty export tour and retires befor
  const scene={region:{cameraPreset:preset,openingDescent:{enabled:true,seconds:3}},context:{cameraPreset:{...preset,height:180000}}};
  const stops=[{id:'village',start:40,end:60,flightDuration:4,cameraPreset:{...preset,height:5000}}];
  const at=(time:number)=>frameAt(scene,stops,time,'portrait',4.4,false,undefined,undefined,undefined,true);
- assert.equal(at(4).contextReveal,0);
- assert.ok(at(7).contextReveal>0 && at(7).contextReveal<1);
- assert.equal(at(9).contextReveal,1);
- assert.equal(at(9).contextOpacity,1);
- assert.equal(at(9).camera.height,180000);
- assert.equal(at(14).contextReveal,0);
- assert.equal(at(14).contextOpacity,0);
+ // County choreography lasts 1.8 s after the 3 s descent, not the old 10.5 s.
+ assert.equal(at(3).contextReveal,0);
+ assert.ok(at(3.5).contextReveal>0 && at(3.5).contextReveal<1);
+ assert.equal(at(3.85).contextReveal,1);
+ assert.equal(at(3.85).contextOpacity,1);
+ assert.equal(at(3.85).camera.height,180000);
+ assert.equal(at(4.8).contextReveal,0);
+ assert.equal(at(4.8).contextOpacity,0);
  assert.equal(at(45).current,'village');
  assert.equal(at(45).contextOpacity,0);
 });
