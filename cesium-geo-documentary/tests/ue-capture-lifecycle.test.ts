@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
-import { spawn, type ChildProcess } from 'node:child_process';
+import childProcess, { spawn, type ChildProcess } from 'node:child_process';
+import { syncBuiltinESMExports } from 'node:module';
 import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
 import { createContext, runInContext } from 'node:vm';
@@ -145,6 +146,38 @@ test('真实子进程清理等待close事件，不遗留进程', async () => {
   await stopCaptureProcess(process);
   assert.equal(closed, true);
   assert.ok(process.exitCode !== null || process.signalCode !== null);
+});
+
+test('Windows大内存分段退出超过15秒仍等待整树与close，不提前放行', { skip: process.platform !== 'win32' }, async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const renderer = child(), killer = child();
+  t.mock.method(childProcess, 'spawn', () => killer);
+  syncBuiltinESMExports();
+  t.after(() => { t.mock.restoreAll(); syncBuiltinESMExports(); });
+  let settled = false;
+  const cleanup = stopCaptureProcess(renderer).then(() => { settled = true; });
+  t.mock.timers.tick(30_000);
+  await Promise.resolve(); await Promise.resolve();
+  assert.equal(settled, false);
+  killer.emit('close', 0);
+  for (let i = 0; i < 8; i++) await Promise.resolve();
+  assert.equal(settled, false, 'taskkill成功仍必须等待renderer close');
+  renderer.emit('close', 1);
+  await cleanup;
+  assert.equal(settled, true);
+});
+
+test('Windows清理超过有界期限仍失败，禁止重试且不伪造清理成功', { skip: process.platform !== 'win32' }, async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const renderer = child(), killer = child();
+  t.mock.method(childProcess, 'spawn', () => killer);
+  syncBuiltinESMExports();
+  t.after(() => { t.mock.restoreAll(); syncBuiltinESMExports(); });
+  const cleanup = stopCaptureProcess(renderer);
+  const rejected = assert.rejects(cleanup, /清理失败/);
+  t.mock.timers.tick(90_000);
+  await rejected;
+  assert.equal(renderer.listenerCount('close'), 0);
 });
 
 test('编码探测具有硬超时，探测被终止后即使打印过时长也不能发布', async () => {

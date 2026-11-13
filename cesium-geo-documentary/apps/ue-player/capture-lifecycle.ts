@@ -1,6 +1,9 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
 export const CAPTURE_CLEANUP_FATAL = 'UE_CAPTURE_CLEANUP_FATAL';
+// A full UE chunk can hold tens of GB of committed memory. Windows tree
+// termination must finish reclaiming it before the next renderer is launched.
+export const CAPTURE_PROCESS_CLEANUP_TIMEOUT_MS = 90_000;
 export class CaptureCleanupError extends AggregateError {
   constructor(errors: unknown[]) { super(errors, `${CAPTURE_CLEANUP_FATAL}: 录制资源未完全清理，禁止重试`); }
 }
@@ -51,13 +54,13 @@ export async function stopCaptureProcess(child: ChildProcess): Promise<void> {
         killer.once('close', code => code === 0 || child.exitCode !== null || child.signalCode !== null
           ? resolve() : reject(new Error(`taskkill 失败：${code}`)));
       });
-      await waitForCapture(killed, controller.signal, 15_000);
+      await waitForCapture(killed, controller.signal, CAPTURE_PROCESS_CLEANUP_TIMEOUT_MS);
     } else {
       child.kill('SIGTERM');
       try { await waitForCapture(closed, controller.signal, 5_000); }
       catch { child.kill('SIGKILL'); }
     }
-    await waitForCapture(closed, controller.signal, 15_000);
+    await waitForCapture(closed, controller.signal, CAPTURE_PROCESS_CLEANUP_TIMEOUT_MS);
   } catch (error) {
     throw new Error(`录制子进程 ${child.pid} 清理失败`, { cause: error });
   } finally {
