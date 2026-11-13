@@ -101,6 +101,33 @@ test('UE opening hides every label inside the cloud and releases it when the bou
   assert.ok(settled.parentLabel > .9);
 });
 
+test('village boundary stays continuous through the hand-off to the next village', () => {
+ const base={longitude:110,latitude:20,height:20000,pitch:-64,heading:0};
+ const scene={region:{cameraPreset:base}};
+ const stops=[
+  {id:'a',start:0,end:10,flightDuration:4,cameraPreset:{...base,longitude:110.04,height:6000}},
+  {id:'b',start:10,end:20,flightDuration:4,cameraPreset:{...base,longitude:110.08,height:6000}}
+ ];
+ const at=(time:number)=>frameAt(scene,stops,time,'portrait',4.4);
+ const before=at(9.9);
+ assert.equal(before.current,'a');
+ assert.ok((before.accents.a??0)>.9);
+ assert.ok(before.trace.alpha>0,'outgoing village keeps its orbiting beam');
+ const handoff=at(10);
+ assert.equal(handoff.current,'b');
+ assert.ok((handoff.accents.b??0)>=.34,'incoming rim must not be dropped by UE (A < .02)');
+ assert.ok(handoff.trace.alpha>0,'beam must not blank out on the first frame of the flight');
+ const mid=at(12);
+ assert.ok((mid.accents.b??0)>=.34);
+ assert.ok(mid.trace.alpha>0);
+ const landed=at(14.2);
+ assert.ok(landed.trace.alpha>mid.trace.alpha,'landing sweep takes over at full strength');
+ // The floor is a tour-only hold: the closing overview must still retire it.
+ const closing=at(20);
+ assert.equal(closing.current,'');
+ assert.equal(closing.trace.alpha,0);
+});
+
 test('county expands and retracts before 2 seconds and before the first image', () => {
   const base = { longitude: 110, latitude: 20, height: 26000, pitch: -64, heading: 0 };
   const scene = { region: { cameraPreset: base, openingDescent: { enabled: false } },

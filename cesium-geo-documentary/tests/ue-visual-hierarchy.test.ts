@@ -25,7 +25,7 @@ test('representative labels are stable, geographically spread and profile bounde
   assert.equal(overviewRepresentatives(stops.slice(0, 3), 'portrait').size, 3);
 });
 
-test('closing restores the town name and retains all village label candidates for UE collision layout', () => {
+test('closing keeps every village label and retires the town name', () => {
   const pose = {longitude: 110, latitude: 22, height: 10000, heading: 0, pitch: -64};
   const scene = {region: {cameraPreset: pose, openingDescent: {enabled: false}}};
   const stops = Array.from({length: 24}, (_, id) => ({id: String(id), start: id * 10, end: (id + 1) * 10,
@@ -34,7 +34,8 @@ test('closing restores the town name and retains all village label candidates fo
   assert.equal(Object.keys(end.fills).length, 24);
   assert.equal(end.visitedIds.length, 24);
   assert.equal(Object.values(end.labels).filter(style => style.alpha > .01).length, stops.length);
-  assert.ok(end.parentLabel > .9);
+  // 收尾总览只要行政村名字：乡镇大字在这里会让 24 个村名挤成一团。
+  assert.equal(end.parentLabel, 0);
   assert.equal(end.current, '');
   const direct = frameAt(scene, stops, 250, 'portrait', 4.4);
   frameAt(scene, stops, 80, 'portrait', 4.4);

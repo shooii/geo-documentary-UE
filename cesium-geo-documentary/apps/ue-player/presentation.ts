@@ -77,6 +77,13 @@ function adjustView(pose: Camera, view: MapView | null | undefined, strength = 1
 // standalone capture: the town settles first, the county is traced while the
 // camera pulls back, then the shot settles back on the town.
 const CONTEXT_INTRO = { town: .12, out: .68, hold: .18, lean: .10, back: .82, total: 1.8 };
+// A village hand-off used to blank both parts of the boundary at once: the new
+// village's accent starts at tour.progress 0 (UE drops any stroke under .02), and
+// the trace beam is scheduled to START at touchdown, so the whole flight ran with
+// alpha 0. Keep a quiet rim and a dim beam alive through the flight instead, then
+// let the normal sweep take over when the camera lands.
+const TOUR_RIM_FLOOR = .34;
+const TRACE_CARRY_ALPHA = .16;
 function openingSeconds(scene: any) {
   const opening = scene?.region?.openingDescent;
   if (!opening || opening.enabled === false) return 0;
@@ -243,7 +250,11 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
         rank: stopIndex
       };
       const accent = tourHighlightStrength(tour, returning, id);
-      if (accent > 0) accents[id] = accent;
+      // The incoming village owns `current` from the first frame of the flight, but
+      // its strength is still 0. Without a floor UE's rim pass discards the entire
+      // ring, so the boundary visibly pops out and back in at every hand-off.
+      const sustained = id === current && tour && !returning ? Math.max(TOUR_RIM_FLOOR, accent) : accent;
+      if (sustained > 0) accents[id] = sustained;
     });
   }
 
@@ -314,6 +325,14 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   // speck in the corner, so nobody ever saw it. It now starts on touchdown, so the
   // sweep travels the village rim while the plate and the name come in.
   const traceStart = stop ? Number(stop.start) + flightDuration : .35;
+  const rawTrace = boundaryAnimation(mapTime, traceStart, current);
+  // During a village-to-village flight `traceStart` is still in the future, so the
+  // raw animation reports alpha 0 and UE draws no rim beam at all. Hold a dim
+  // carried beam on the incoming village until the landing sweep takes over.
+  const inFlight = Boolean(stop && current && !tourFinished && mapTime < traceStart);
+  const trace = inFlight
+    ? { target: current, progress: rawTrace.progress, alpha: Math.max(rawTrace.alpha, TRACE_CARRY_ALPHA) }
+    : rawTrace;
   return {
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
@@ -325,6 +344,6 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     // map accumulates colour the way the reference reel does.
     visitedIds: stops.filter(item => mapTime >= Number(item.start)).map(item => String(item.id)),
     clouds: cloudStateAt(time, opening, pose.height),
-    trace: boundaryAnimation(mapTime, traceStart, current)
+    trace
   };
 }
