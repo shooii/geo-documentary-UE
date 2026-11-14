@@ -74,9 +74,13 @@ function adjustView(pose: Camera, view: MapView | null | undefined, strength = 1
 }
 
 // Scene 2 choreography shared by the exporter, the studio preview and the
-// standalone capture: the town settles first, the county is traced while the
-// camera pulls back, then the shot settles back on the town.
-const CONTEXT_INTRO = { town: .12, out: .68, hold: .18, lean: .10, back: .82, total: 1.8 };
+// standalone capture: the town draws its rim, the name lands and the shot HOLDS on
+// the settled town, and only then does the county flood out (1.5 s) while the
+// camera pulls back, before the shot settles back on the town.
+// `town` is when the county may start — the town rim (0.35–0.95 s) plus the name
+// settling on top of it, so the establishing order is always town-first.
+// `out × .92` is the county flood duration: 1.63 × .92 = 1.5 s as briefed.
+const CONTEXT_INTRO = { town: 2.2, out: 1.63, hold: 0.20, lean: .10, back: .82, total: 4.85 };
 function openingSeconds(scene: any) {
   const opening = scene?.region?.openingDescent;
   if (!opening || opening.enabled === false) return 0;
@@ -191,18 +195,21 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   const contextReveal = contextWipe;
   // The front itself clears the last sliver, so this only softens the very end.
   const contextOpacity = countyActive ? smooth(contextWipe / .06) : 0;
-  const reveal = smooth((mapTime - .35) / 1.25);
+  // The town rim is traced FIRST (0.35–0.95 s) and must be complete before the
+  // county flood starts at CONTEXT_INTRO.town — that ordering is the whole point
+  // of the establishing shot. The golden beam keeps its own 1.25 s sweep on top
+  // of the finished rim as a landing accent.
+  const reveal = smooth((mapTime - .35) / .6);
   // The opening has to read as one gesture: the camera drops out of the deck, the
   // rim is traced by the light beam, and only then may a name or a pin appear.
   // Anything drawn while the camera is still inside the cloud breaks the shot, so
-  // every label on the opening shot is gated by this single ramp. The beam fades
-  // out at mapTime 1.45; the gate opens just behind it.
+  // every label on the opening shot is gated by this single ramp.
   const openingShot = openingOnly || stops.length === 0 ||
     (Boolean(contextPose && contextPending) && time < contextIntro);
-  // The beam sweeps for 1.25 s starting at 0.35 s after the descent ends. The name used
-  // to wait for the beam to fade out entirely (1.45 s); it now starts at the halfway
-  // point of the sweep and lands just as the beam goes, so the two read as one beat.
-  const labelsReveal = openingShot && descent > 0 ? smooth((mapTime - .98) / .5) : 1;
+  // The rim finishes at 0.95 s; the name starts landing right there (parentLabel
+  // also keys off 0.95), so the rim, the name and the county flood read as one
+  // beat instead of three.
+  const labelsReveal = openingShot && descent > 0 ? smooth((mapTime - .65) / .5) : 1;
   const parentOverview = openingOnly ? 1 : 1 - smooth((mapTime - Number(stops[0]?.start ?? Infinity)) / .45);
   // Return shots restore the same town name as the settled opening; the
   // opening-only gate is already zero once the child tour has started.

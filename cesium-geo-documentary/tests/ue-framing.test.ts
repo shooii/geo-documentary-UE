@@ -104,14 +104,20 @@ test('county establishing shot survives a nonempty export tour and retires befor
  const scene={region:{cameraPreset:preset,openingDescent:{enabled:true,seconds:3}},context:{cameraPreset:{...preset,height:180000}}};
  const stops=[{id:'village',start:40,end:60,flightDuration:4,cameraPreset:{...preset,height:5000}}];
  const at=(time:number)=>frameAt(scene,stops,time,'portrait',4.4,false,undefined,undefined,undefined,true);
- // County choreography lasts 1.8 s after the 3 s descent, not the old 10.5 s.
- assert.equal(at(3).contextReveal,0);
- assert.ok(at(3.5).contextReveal>0 && at(3.5).contextReveal<1);
- assert.equal(at(3.85).contextReveal,1);
- assert.equal(at(3.85).contextOpacity,1);
- assert.equal(at(3.85).camera.height,180000);
- assert.equal(at(4.8).contextReveal,0);
- assert.equal(at(4.8).contextOpacity,0);
- assert.equal(at(45).current,'village');
- assert.equal(at(45).contextOpacity,0);
+ // County choreography lasts 4.85 s after the 3 s descent: the town rim draws first
+ // (0.35–0.95 s), the name settles on it until 2.2 s, then the county floods in
+ // over 1.5 s and rewinds before the first village starts.
+ assert.equal(at(3.5).contextReveal, 0);
+ assert.ok(at(3.5).parentReveal > 0 && at(3.5).parentReveal < 1, 'the town rim is still being traced at 3.5 s');
+ assert.equal(at(4.5).contextReveal, 0, 'the county waits for the settled town');
+ assert.ok(at(4.5).parentLabel > .5, 'the town name is up and holding during the settle');
+ assert.ok(at(5.6).contextReveal > 0 && at(5.6).contextReveal < 1, 'the 1.5 s flood starts at 5.2 s');
+ assert.equal(at(6.8).contextReveal, 1);
+ assert.equal(at(6.8).contextOpacity, 1);
+ assert.equal(at(6.9).camera.height, 180000);
+ assert.ok(at(7.3).contextReveal > 0 && at(7.3).contextReveal < 1, 'the rewind is watched, not skipped');
+ assert.equal(at(7.9).contextReveal, 0);
+ assert.equal(at(7.9).contextOpacity, 0);
+ assert.equal(at(45).current, 'village');
+ assert.equal(at(45).contextOpacity, 0);
 });

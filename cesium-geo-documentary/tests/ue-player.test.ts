@@ -88,11 +88,11 @@ test('UE opening hides every label inside the cloud and releases it when the bou
   assert.equal(insideCloud.labelsReveal, 0);
   assert.equal(insideCloud.parentLabel, 0);
   assert.equal(insideCloud.contextReveal, 0);
-  // 光束从 0.35 s 扫到 1.6 s；过半（mapTime≈0.98）时名字开始出现，不再等光束消失。
-  const beforeHalf = at(3.9);
+  // 镇域轮廓 0.35–0.95 s 先描完；光束中点（0.65 s）过后名字才开始出现，不再等光束消失。
+  const beforeHalf = at(3.5);
   assert.equal(beforeHalf.labelsReveal, 0);
   assert.equal(beforeHalf.parentLabel, 0);
-  const beamSweeping = at(4.2);
+  const beamSweeping = at(4.05);
   assert.ok(beamSweeping.labelsReveal > 0 && beamSweeping.labelsReveal < 1);
   assert.ok(beamSweeping.parentReveal > .5);
   assert.ok(beamSweeping.parentLabel > 0);
@@ -145,18 +145,25 @@ test('village boundary stays continuous through the hand-off to the next village
  assert.equal(closing.trace.alpha,0);
 });
 
-test('county expands and retracts before 2 seconds and before the first image', () => {
+test('town rim completes before the county expands, and the county retracts before the first image', () => {
   const base = { longitude: 110, latitude: 20, height: 26000, pitch: -64, heading: 0 };
   const scene = { region: { cameraPreset: base, openingDescent: { enabled: false } },
     context: { cameraPreset: { ...base, height: 120000 } } };
   const at = (time: number) => frameAt(scene, [], time, 'portrait', 4.4, true, undefined, undefined, null, true);
+  // 顺序契约：镇域轮廓 0.35–0.95 s 描完，镇名落在上面并稳定展示到 2.2 s，
+  // 县界 2.2 s 才开始 flood（1.5 s），回卷后回到镇域。
   assert.equal(at(0).contextReveal, 0);
-  assert.ok(at(.6).contextReveal > 0);
-  assert.ok(at(.9).contextReveal > .9);
-  assert.ok(at(1.4).contextReveal < .5);
-  assert.equal(at(1.8).contextReveal, 0);
-  assert.equal(at(2).contextReveal, 0);
-  assert.deepEqual(at(1.8).camera, at(0).camera);
+  assert.equal(at(.5).contextReveal, 0, 'county must not start while the town rim is still being traced');
+  assert.ok(at(.5).parentReveal > 0 && at(.5).parentReveal < 1, 'town rim is the one drawing at .5 s');
+  assert.equal(at(1.5).contextReveal, 0, 'the county waits for the settled town, not just the finished rim');
+  assert.ok(at(1.5).parentLabel > .5, 'the town name is up and holding during the settle');
+  assert.ok(at(2.8).contextReveal > 0 && at(2.8).contextReveal < 1, 'the 1.5 s flood starts at 2.2 s');
+  assert.ok(at(3.5).contextReveal > .9);
+  assert.ok(at(4.2).contextReveal < 1 && at(4.2).contextReveal > 0, 'rewind has started but the county lingers');
+  assert.equal(at(4.9).contextReveal, 0);
+  assert.equal(at(4.9).contextOpacity, 0);
+  assert.deepEqual(at(4.9).camera, at(0).camera);
+  assert.ok(at(5.2).contextReveal === 0, 'county is gone well before the first image');
 });
 
 test('UE tour villages are not held back by the opening label gate', () => {
