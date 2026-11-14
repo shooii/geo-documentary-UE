@@ -15,6 +15,7 @@ import { snapshotFile } from "./boundary-snapshot.js";
 import { runGoldenQa } from "./golden-qa.js";
 import { applyProjectTiming, writeSubtitleOverrides } from "./render-timing.js";
 import { stageNarrationCache } from "../../packages/narration-cache/index.js";
+import { openingClipMapSeconds, parseOpeningClipDuration, runOpeningClipQa } from "./opening-clip.js";
 
 export type RenderJobStatus = "queued" | "preparing" | "synthesizing" | "capturing" | "composing" | "validating" | "completed" | "failed" | "cancelled";
 /**
@@ -49,6 +50,8 @@ export interface RenderJobRecord {
   logs: string[];
   jobRoot: string;
   renderSpecPath?: string;
+  /** Render the opening prefix from this job's frozen project, never an old MP4. */
+  openingClipSeconds?: number;
   output?: string;
   qaReport?: string;
   error?: string;
@@ -1098,6 +1101,8 @@ export async function releaseCaptureLeaseWhenSafe(
 
 export async function executeRender(root: string, job: RenderJobRecord, projectInput: VideoProject, callbacks: RenderCallbacks): Promise<void> {
   validateVideoProject(projectInput);
+  const openingClipSeconds = parseOpeningClipDuration(job.openingClipSeconds);
+  const clipComposeArgs = openingClipSeconds === undefined ? [] : ["--opening-clip-seconds", String(openingClipSeconds)];
   const project = structuredClone(projectInput);
   const jobRoot = job.jobRoot;
   // Stage stopwatch. Wall time is what the operator waits for, so that is what
@@ -1141,6 +1146,8 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
     timelineNarrationStartSeconds: Number(timeline.narrationStartSeconds ?? NaN),
     timelineOpeningGateSeconds: Number(timeline.openingGateSeconds ?? 0)
   });
+  if (openingClipSeconds !== undefined && openingClipSeconds > spec.totalDurationSeconds) throw new Error("片段时长不能超过方案总时长");
+  if (openingClipSeconds !== undefined) callbacks.update({ logs: [`OPENING_CLIP project=${project.id} revision=${project.revision} seconds=${openingClipSeconds} fresh-map=true`] });
   await writeRegionAnnotationWindows(sandbox, project.regionId, spec);
   updateProjectMeasuredDurations(project, spec);
   await writeSubtitleOverrides(sandbox, project, spec);
@@ -1158,7 +1165,7 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
      that one is the authoritative one against the real map. */
   // 字幕真实排版是地图捕获的输入，即使关闭预检也必须先生成，不能复用旧合成页。
   await ensureFfmpegTools(sandbox);
-  await runTsx(".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts", ["--region", project.regionId, "--profile", project.output.profile, "--cover-intro-seconds", String(project.cover.introSeconds), "--map-fallback"], "composing", "录制前生成字幕排版与合成预演", 36);
+  await runTsx(".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts", ["--region", project.regionId, "--profile", project.output.profile, "--cover-intro-seconds", String(project.cover.introSeconds), "--map-fallback", ...clipComposeArgs], "composing", "录制前生成字幕排版与合成预演", 36);
   if (preflightEnabled()) {
     await preflightComposition(sandbox, callbacks, (message) => callbacks.update({ logs: [message] }), {
       stage: "录制前预检成片",
@@ -1169,29 +1176,40 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
     callbacks.update({ logs: ["PREFLIGHT_SKIPPED STUDIO_PREFLIGHT=off（录制前的预检已按配置关闭）"] });
   }
   const mapStartedAt = Date.now();
-  const hit = await cacheMap(root, sandbox, project, spec);
+  // A short take must neither reuse an older map nor enter the full-film cache.
+  const hit = openingClipSeconds === undefined && await cacheMap(root, sandbox, project, spec);
   if (hit) callbacks.update({ status: "capturing", stage: "复用完整签名匹配的 Cesium 地图缓存", progress: 48, logs: [`MAP_CACHE_HIT ${spec.cacheSignature}`] });
   else {
     const port = 4600 + Number.parseInt(job.id.replaceAll("-", "").slice(0, 4), 16) % 1000;
     // 录制 UE 与预览 UE 同抢显存/内存会 OOM；录制前停掉预览渲染器，录完（无论成败）恢复。
     const exportLease = await pausePreviewRenderer(root, callbacks.cancelled);
     try {
-      await runTsx(join(sandbox, "apps/ue-player/capture.ts"), ["--region", project.regionId, "--profile", project.output.profile, "--port", String(port), "--imagery", project.imagery.provider, "--subtitle-composition", "apps/video-compositor/index.html"], "capturing", "录制 UE 地图、行政区巡游和返回镜头", 42);
+      await runTsx(join(sandbox, "apps/ue-player/capture.ts"), ["--region", project.regionId, "--profile", project.output.profile, "--port", String(port), "--imagery", project.imagery.provider, "--subtitle-composition", "apps/video-compositor/index.html", ...(openingClipSeconds === undefined ? [] : ["--frames", String(Math.round(openingClipMapSeconds(openingClipSeconds, project.cover.introSeconds) * 30))])], "capturing", "录制 UE 地图、行政区巡游和返回镜头", 42);
       // Verify the take before it becomes the cache: a short capture used to be written to
       // the cache unconditionally, so one bad take poisoned every later export of this
       // signature. capture.ts already checks frame count and encoded duration; this is the
       // second pair of eyes that catches a truncated copy or a stale file.
       const capturedFile = join(sandbox, "renders", "intermediate", `${project.regionId}-map-${project.output.profile}.mp4`);
       const capturedSeconds = await mapVideoSeconds(root, capturedFile);
-      const expectedMapSeconds = Number(spec.timelineDurationSeconds) || 0;
+      const expectedMapSeconds = openingClipSeconds === undefined ? Number(spec.timelineDurationSeconds) || 0 : openingClipMapSeconds(openingClipSeconds, project.cover.introSeconds);
       if (capturedSeconds <= 0) throw new Error("地图录制没有产出可用的视频文件");
       if (expectedMapSeconds > 0 && capturedSeconds < expectedMapSeconds * 0.98) {
         throw new Error(`地图录制只有 ${capturedSeconds.toFixed(1)}s，时间轴需要 ${expectedMapSeconds.toFixed(1)}s`);
       }
-      const cacheDir = join(root, "workspace", "render-cache", spec.cacheSignature.replace("sha256:", ""));
-      await mkdir(cacheDir, { recursive: true });
-      await publishMapCache(capturedFile, join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`));
-      await pruneSupersededMapCache(root, project.regionId, project.output.profile, spec.cacheSignature);
+      if (openingClipSeconds !== undefined) {
+        const frameRoot = join(sandbox, "renders", "ue-frames");
+        const takes = (await readdir(frameRoot, { withFileTypes: true })).filter(entry => entry.isDirectory()).map(entry => entry.name).sort().reverse();
+        const report = takes.map(name => join(frameRoot, name, "capture-report.json")).find(path => existsSync(path));
+        if (!report) throw new Error("片段缺少本次地图录制报告");
+        await mkdir(join(jobRoot, "qa"), { recursive: true });
+        await copyFile(report, join(jobRoot, "qa", "capture-report.json"));
+      }
+      if (openingClipSeconds === undefined) {
+        const cacheDir = join(root, "workspace", "render-cache", spec.cacheSignature.replace("sha256:", ""));
+        await mkdir(cacheDir, { recursive: true });
+        await publishMapCache(capturedFile, join(cacheDir, `${project.regionId}-map-${project.output.profile}.mp4`));
+        await pruneSupersededMapCache(root, project.regionId, project.output.profile, spec.cacheSignature);
+      }
     } finally {
       if (!await releaseCaptureLeaseWhenSafe(exportLease, sandbox, message => callbacks.update({ logs: [message] }))) {
         throw new Error(`${CAPTURE_CLEANUP_FATAL}: 本任务录制进程退出尚未确认，禁止重试`);
@@ -1205,7 +1223,7 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   const narrationSeconds = secondsBetween(narrationStartedAt, narrationEndedAt);
   const mapSeconds = secondsBetween(mapStartedAt, mapEndedAt);
   const compositionStartedAt = Date.now();
-  await runTsx(".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts", ["--region", project.regionId, "--profile", project.output.profile, "--cover-intro-seconds", String(project.cover.introSeconds)], "composing", "合成素材、字幕、配音与地图", 68);
+  await runTsx(".agents/skills/cesium-geo-documentary/scripts/compose-hyperframes.ts", ["--region", project.regionId, "--profile", project.output.profile, "--cover-intro-seconds", String(project.cover.introSeconds), ...clipComposeArgs], "composing", "合成素材、字幕、配音与地图", 68);
   const quality = project.output.quality === "draft" ? "draft" : "high";
   const rendered = join(sandbox, "renders", quality === "high" ? "final" : "previews", `${project.regionId}-${project.output.profile}-${quality === "high" ? "final" : "draft"}.mp4`);
   await mkdir(dirname(rendered), { recursive: true });
@@ -1232,6 +1250,14 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   const outputDir = join(jobRoot, "output"); await mkdir(outputDir, { recursive: true });
   const output = join(outputDir, `${project.regionId}-${project.output.profile}-${job.id.slice(0, 8)}.mp4`);
   await copyFile(rendered, output);
+  if (openingClipSeconds !== undefined) {
+    callbacks.update({ status: "validating", stage: "验收开头片段规格、黑帧与新生成证据", progress: 89 });
+    await runOpeningClipQa({ root, jobRoot, output, spec, durationSeconds: openingClipSeconds, jobCreatedAt: job.createdAt, lifecycle: { cancelled: callbacks.cancelled, registerProcess: callbacks.registerProcess } });
+    const outputInfo = await stat(output);
+    if (callbacks.cancelled()) throw new Error("Render cancelled");
+    callbacks.update({ status: "completed", stage: `开头 ${openingClipSeconds} 秒片段导出与专项 QA 已通过`, progress: 100, output, qaReport: join(jobRoot, "qa", "opening-clip-report.json"), videoDurationSeconds: openingClipSeconds, outputBytes: outputInfo.size });
+    return;
+  }
   const deliveryStage = quality === "high" ? "final" : "draft";
   const deliveryStartedAt = Date.now();
   try {
@@ -1329,12 +1355,12 @@ export async function collectJobDiagnostics(
     const names = await readdir(source, { withFileTypes: true }).catch(() => []);
     return names.filter(entry => entry.isFile()
       && (sourceIndex < candidates.length - 2
-        || (sourceIndex === candidates.length - 1 ? entry.name === "golden-report.json"
+        || (sourceIndex === candidates.length - 1 ? ["golden-report.json", "opening-clip-report.json"].includes(entry.name)
           : /(?:delivery-validation|preflight|visual-sync).*\.json$/i.test(entry.name))))
       .map(entry => ({ name: entry.name, from: join(source, entry.name), sourceIndex }));
   }))).flat();
   // 核心成片 QA 先于捕获日志进入同一份12文件/8MiB预算。
-  const rank = (name: string) => (/^(?:golden-report\.json)$|(?:delivery-validation|preflight|visual-sync).*\.json$/i.test(name) ? 0 : /^capture-report/.test(name) ? 1 : name.endsWith(".json") ? 2 : name.endsWith(".log") ? 3 : name.endsWith(".png") ? 4 : 5);
+  const rank = (name: string) => (/^(?:(?:golden|opening-clip)-report\.json)$|(?:delivery-validation|preflight|visual-sync).*\.json$/i.test(name) ? 0 : /^capture-report/.test(name) ? 1 : name.endsWith(".json") ? 2 : name.endsWith(".log") ? 3 : name.endsWith(".png") ? 4 : 5);
   const ordered = entries.sort((a, b) => rank(a.name) - rank(b.name) || a.sourceIndex - b.sourceIndex || b.name.localeCompare(a.name, undefined, { numeric: true }));
   const outDir = join(job.jobRoot, "diagnostics");
   const files: string[] = [];

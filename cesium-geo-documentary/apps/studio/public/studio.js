@@ -3509,6 +3509,7 @@ function measuredExportRates(profile, quality) {
   const jobs = [...(state.exportJobs || [])]
     .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
     .filter((job) => job.status === "completed"
+    && job.openingClipSeconds === undefined
     && job.profile === profile
     && (job.quality === "draft" ? "draft" : "high") === quality
     && Number(job.videoDurationSeconds) > 0
@@ -3757,7 +3758,7 @@ async function loadExportHistory() {
        project's settings would mislabel it. */
     const profile = job.profile || (foreign ? "landscape" : state.project.output.profile);
     const quality = job.quality || (foreign ? "high" : state.project.output.quality);
-    const title = `${foreign ? `${job.projectTitle || "其它方案"} · ` : ""}${exportProfileLabel(profile)} · ${exportQualityLabel(quality)}`;
+    const title = `${foreign ? `${job.projectTitle || "其它方案"} · ` : ""}${exportProfileLabel(profile)} · ${exportQualityLabel(quality)}${job.openingClipSeconds === undefined ? "" : ` · 开头 ${job.openingClipSeconds} 秒`}`;
     const detail = exportDetailLine(job);
     /* Only cancel is project-agnostic. Download, reveal-in-folder and delete all
        require the export to belong to the project open in the editor, so a
@@ -4309,7 +4310,7 @@ function bind() {
         await saveProject();
         if (state.project !== project) return;
         if (!state.readiness?.ready || state.renderSpecStale) return toastError("当前方案导出前检查未通过，请先修复清单中的问题");
-        const next = await api(`/api/projects/${encodeURIComponent(project.id)}/render`, { method: "POST", body: "{}" });
+        const next = await api(`/api/projects/${encodeURIComponent(project.id)}/render`, { method: "POST", body: JSON.stringify({ projectRevision: project.revision, ...(job.openingClipSeconds === undefined ? {} : { openingClipSeconds: job.openingClipSeconds }) }) });
         if (state.project !== project) return;
         if (next.projectId !== project.id) throw new Error("导出任务与当前方案不一致");
         state.exportJobStates[next.id] = next.status;

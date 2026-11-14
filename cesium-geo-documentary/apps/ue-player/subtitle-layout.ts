@@ -35,7 +35,7 @@ export async function measureSubtitleWindows(page: Page): Promise<SubtitleWindow
     const offset = Number(root.dataset.mapClockOffset);
     const frame = root.getBoundingClientRect();
     if (!Number.isFinite(offset) || !frame.width || !frame.height) throw new Error('合成页坐标无效');
-    return Array.from(root.querySelectorAll<HTMLElement>('.subtitle')).map(box => {
+    return Array.from(root.querySelectorAll<HTMLElement>('.subtitle[data-start][data-duration]')).map(box => {
       const inner = box.querySelector<HTMLElement>('.subtitle-inner');
       if (!inner) throw new Error('合成字幕缺少文字布局');
       // 清除GSAP入场位移，测量稳定位置；下边再覆盖8px入场运动包络。

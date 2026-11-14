@@ -97,6 +97,16 @@ const requested = valueAfter("--region");
 const profileName = valueAfter("--profile", "landscape")!;
 const requestedCoverImagePath = valueAfter("--cover-image");
 const requestedCoverIntroSeconds = valueAfter("--cover-intro-seconds");
+function parseOpeningClipSeconds(args: string[]): number | undefined {
+  const index = args.indexOf("--opening-clip-seconds");
+  if (index < 0) return undefined;
+  const seconds = Number(args[index + 1]);
+  if (!Number.isFinite(seconds) || seconds < 1 || seconds > 60) {
+    throw new Error("--opening-clip-seconds 必须为 1-60 秒");
+  }
+  return seconds;
+}
+const openingClipSeconds = parseOpeningClipSeconds(args);
 /**
  * Build the composition even when the recorded map does not exist yet, using a
  * black stand-in in its slot.
@@ -410,6 +420,44 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
 </body></html>`;
 }
 
+function openingClipHtml(html: string, durationSeconds: number): string {
+  // 只裁媒体元数据，不改 GSAP 时长/缓动/出场点，跨截点的动画仍与完整方案逐帧一致。
+  // 未来节点保留 id，避免 GSAP missing target；未来媒体改成占位节点，避免被自动探测进音视频轨。
+  const untimed = (tag: string) => tag
+    .replace(/\sdata-(?:start|duration|end|active-end|track-index|has-audio|volume)="[^"]*"/g, "")
+    .replace(/class="([^"]*)"/g, (_, classes: string) => `class="${classes.split(/\s+/).filter((name) => name !== "clip").join(" ")}"`);
+  const withoutFutureVideoClips = html.replace(/<figure\b[^>]*>[\s\S]*?<\/figure>/g, (figure) => {
+    const videoStart = figure.match(/<video\b[^>]*\bdata-start="([^"]*)"/);
+    return videoStart && Number(videoStart[1]) >= durationSeconds
+      ? figure.replace(/<figure\b[^>]*>/, (tag) => untimed(tag).replace(/>$/, " hidden>")) : figure;
+  });
+  const withoutFutureMedia = withoutFutureVideoClips.replace(/<(audio|video)\b([^>]*)><\/\1>/g, (element, _kind: string, attributes: string) => {
+    const start = attributes.match(/\bdata-start="([^"]*)"/);
+    if (!start || Number(start[1]) < durationSeconds) return element;
+    const id = attributes.match(/\bid="[^"]*"/)?.[0] ?? "";
+    const classes = attributes.match(/\bclass="[^"]*"/)?.[0] ?? "";
+    return `<div ${id} ${untimed(classes)} hidden></div>`;
+  });
+  const clipped = withoutFutureMedia.replace(/<[a-z][^>]*>/gi, (tag) => {
+    const start = tag.match(/\bdata-start="([^"]*)"/);
+    const duration = tag.match(/\bdata-duration="([^"]*)"/);
+    if (!start || !duration) return tag;
+    const startSeconds = Number(start[1]);
+    if (startSeconds >= durationSeconds) return untimed(tag).replace(/>$/, " hidden>");
+    const clipped = tag.replace(/\bdata-duration="[^"]*"/, `data-duration="${Math.min(Number(duration[1]), durationSeconds - startSeconds).toFixed(3)}"`);
+    return clipped.replace(/\bdata-active-end="([^"]*)"/, (_, end: string) => `data-active-end="${Math.min(Number(end), durationSeconds).toFixed(3)}"`);
+  });
+  // HF 实测取 GSAP 时长而非 root 的 data-duration；用独立时钟驱动原时间轴，不能缩放其时间或截短跨边界 tween。
+  return clipped.replace("</body>", `<script>
+  const openingRoot = document.querySelector("[data-composition-id]");
+  const openingId = openingRoot.getAttribute("data-composition-id");
+  const fullTimeline = window.__timelines[openingId];
+  const openingTimeline = gsap.timeline({paused:true});
+  openingTimeline.fromTo(fullTimeline,{time:0},{time:${durationSeconds.toFixed(3)},duration:${durationSeconds.toFixed(3)},ease:"none",immediateRender:false},0);
+  window.__timelines[openingId] = openingTimeline;
+</script>\n</body>`);
+}
+
 function captionStamp(value: number, comma: boolean): string {
   const milliseconds = Math.max(0, Math.round(value * 1000));
   const hour = Math.floor(milliseconds / 3_600_000);
@@ -615,6 +663,8 @@ async function writeVisualSyncReport(
   narrationStartSeconds: number
 ): Promise<void> {
   const report = visuals.map((visual) => {
+    const clipDisplaySeconds = openingClipSeconds === undefined ? undefined
+      : Math.max(0, Math.min(visual.end + coverSeconds, openingClipSeconds) - (visual.start + coverSeconds));
     const cueDuration = visual.cueStart === undefined || visual.cueEnd === undefined ? 0 : visual.cueEnd - visual.cueStart;
     const audioRelativeStart = visual.start - narrationStartSeconds;
     const audioRelativeEnd = visual.end - narrationStartSeconds;
@@ -644,10 +694,17 @@ async function writeVisualSyncReport(
       finalCompositionStart: visual.start + coverSeconds,
       finalCompositionEnd: visual.end + coverSeconds,
       displayDurationSeconds,
-      renderedForAtLeastOneFrame,
+      renderedForAtLeastOneFrame: clipDisplaySeconds === undefined ? renderedForAtLeastOneFrame : clipDisplaySeconds >= 1 / 30,
       staysInsideScene,
       cueCoverageRatio: overlapRatio,
-      pass: renderedForAtLeastOneFrame && staysInsideScene
+      ...(clipDisplaySeconds === undefined ? {} : {
+        clipDisplaySeconds,
+        includedInOpeningClip: clipDisplaySeconds > 0,
+        validationScope: "opening-clip-timing-only",
+        fullTimelineRenderable: renderedForAtLeastOneFrame && staysInsideScene
+      }),
+      pass: clipDisplaySeconds === undefined ? renderedForAtLeastOneFrame && staysInsideScene
+        : clipDisplaySeconds > 0 ? staysInsideScene : null
     };
   });
   await mkdir(resolve(root, "renders/diagnostics"), { recursive: true });
@@ -659,7 +716,13 @@ async function writeVisualSyncReport(
     narrationStartSeconds,
     selectedVisualCount: visuals.length,
     renderedVisualCount: report.filter((item) => item.pass).length,
-    pass: report.every((item) => item.pass),
+    ...(openingClipSeconds === undefined ? {} : {
+      validationScope: "opening-clip-timing-only",
+      openingClipSeconds,
+      fullFilmValidated: false,
+      excludedVisualCount: report.filter((item) => item.pass === null).length
+    }),
+    pass: report.every((item) => item.pass !== false),
     visuals: report
   }, null, 2), "utf8");
 }
@@ -684,7 +747,8 @@ async function writeOffsetCaptions(regionId: string, displayCues: Cue[], offset:
     ...cue,
     start: Math.max(offset, cue.start + narrationOffset + subtitleLeadSeconds),
     end: Math.max(offset + 0.08, cue.end + narrationOffset + subtitleLeadSeconds)
-  }));
+  })).filter((cue) => openingClipSeconds === undefined || cue.start < openingClipSeconds)
+    .map((cue) => openingClipSeconds === undefined ? cue : { ...cue, end: Math.min(cue.end, openingClipSeconds) });
   const srt = shifted.map((cue, index) => `${index + 1}\n${captionStamp(cue.start, true)} --> ${captionStamp(cue.end, true)}\n${cue.text}`).join("\n\n") + "\n";
   const vtt = `WEBVTT\n\n${shifted.map((cue) => `${captionStamp(cue.start, false)} --> ${captionStamp(cue.end, false)}\n${cue.text}`).join("\n\n")}\n`;
   const captionBase = resolve(compositor, `captions/${regionId}-${profileName}-with-cover`);
@@ -737,7 +801,8 @@ for (const id of ids) {
   // not exist yet (the Studio lints it before spending ~40 minutes on the map),
   // and the map slot gets a black stand-in so every referenced file exists.
   if (!mapRecorded) {
-    await writeMapFallbackStub(mapTarget, profile, timelineData.duration);
+    await writeMapFallbackStub(mapTarget, profile, openingClipSeconds === undefined
+      ? timelineData.duration : Math.max(0, Math.min(timelineData.duration, openingClipSeconds - cover.introSeconds)));
     process.stdout.write(`MAP_STUB_USED ${mapTarget}\n`);
   }
   const captionData = JSON.parse(await readFile(resolve(compositor, `captions/${id}.json`), "utf8")) as { cues: Cue[]; protectedPhrases?: string[] };
@@ -782,7 +847,10 @@ for (const id of ids) {
     protectedPhrases,
     overrideData.cues ?? []
   );
-  const html = compositionHtml(id, "media", displayCues, durationData.durationSeconds, timelineData.duration, narrationStartSeconds, openingGateSeconds, visuals, cover);
+  const fullCompositionDuration = timelineData.duration + cover.introSeconds;
+  const compositionDuration = Math.min(fullCompositionDuration, openingClipSeconds ?? fullCompositionDuration);
+  const fullHtml = compositionHtml(id, "media", displayCues, durationData.durationSeconds, timelineData.duration, narrationStartSeconds, openingGateSeconds, visuals, cover);
+  const html = openingClipSeconds === undefined ? fullHtml : openingClipHtml(fullHtml, compositionDuration);
   await writeVisualSyncReport(id, visuals, cover.introSeconds, narrationStartSeconds);
   await Promise.all([
     writeFile(resolve(compositionDir, `${id}-${profileName}.html`), html, "utf8"),
@@ -793,11 +861,12 @@ for (const id of ids) {
       timelineDuration: timelineData.duration,
       narrationStartSeconds,
       coverIntroSeconds: cover.introSeconds,
-      compositionDuration: timelineData.duration + cover.introSeconds,
+      compositionDuration,
+      ...(openingClipSeconds === undefined ? {} : { fullCompositionDuration, openingClipSeconds, exportScope: "opening-clip" }),
       coverImagePath: cover.imagePath,
       hierarchicalTitle: cover.hierarchicalTitle
     }, null, 2), "utf8")
   ]);
   if (id === (requested ?? "440802")) await writeFile(resolve(compositor, "index.html"), html, "utf8");
-  process.stdout.write(`COMPOSITION_READY ${id} ${profileName} cover=${cover.introSeconds.toFixed(3)}s total=${(timelineData.duration + cover.introSeconds).toFixed(3)}s\n`);
+  process.stdout.write(`COMPOSITION_READY ${id} ${profileName} cover=${cover.introSeconds.toFixed(3)}s total=${compositionDuration.toFixed(3)}s${openingClipSeconds === undefined ? "" : ` full=${fullCompositionDuration.toFixed(3)}s scope=opening-clip`}\n`);
 }

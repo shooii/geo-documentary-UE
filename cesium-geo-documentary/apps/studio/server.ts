@@ -14,6 +14,7 @@ import { findVisualAnchorIssues } from "../../packages/content-engine/visual-anc
 import { buildProjectRenderSpec, makeProject, normalizeProject, readRegions } from "./project-service.js";
 import { captureBoundarySnapshot, deleteBoundarySnapshot, listBoundarySnapshotProjects, readBoundarySnapshotManifest } from "./boundary-snapshot.js";
 import { collectJobDiagnostics, executeRender, isRetryableRenderFailure, killProcessTree, newRenderJob, pruneJobIntermediates, type RenderJobRecord, type RenderJobStatus } from "./render-engine.js";
+import { parseOpeningClipDuration } from "./opening-clip.js";
 import { listAdminDivisions, locateAdminDivision, searchAdminDivisions, type AdminLevel } from "./admin-catalog.js";
 import { ensureTownPlan, warnIfSourceDataMovedOn } from "./town-bootstrap.js";
 import { suggestTourRoute } from "./tour-route.js";
@@ -2366,9 +2367,15 @@ const server = createServer(async (request, response) => {
     }
     if (request.method === "POST" && validateMatch) return sendJson(response, 200, await validateProjectReadiness(await readProject(validateMatch[1]!)));
     if (request.method === "POST" && renderMatch) {
-      const project = await readProject(renderMatch[1]!); const readiness = await validateProjectReadiness(project);
+      const input = await bodyJson(request) as { openingClipSeconds?: unknown; projectRevision?: unknown };
+      const openingClipSeconds = parseOpeningClipDuration(input.openingClipSeconds);
+      const project = await readProject(renderMatch[1]!);
+      if (input.projectRevision !== undefined && input.projectRevision !== project.revision) throw new HttpError(409, "方案已更新，请读取最新方案后再导出");
+      const readiness = await validateProjectReadiness(project);
       if (!readiness.ready) throw new Error(`导出前检查未通过：${readiness.checks.filter((item) => !item.pass && !item.advisory).map((item) => item.name).join("、")}`);
-      const job = newRenderJob(project.id, jobsRoot, project); persistJob(job); enqueueRender(job, project); return sendJson(response, 202, job);
+      const job = newRenderJob(project.id, jobsRoot, project);
+      if (openingClipSeconds !== undefined) job.openingClipSeconds = openingClipSeconds;
+      persistJob(job); enqueueRender(job, project); return sendJson(response, 202, job);
     }
     if (request.method === "DELETE" && jobMatch) {
       const job = await loadJob(jobMatch[1]!);

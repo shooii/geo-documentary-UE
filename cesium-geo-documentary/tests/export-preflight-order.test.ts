@@ -43,7 +43,7 @@ test("the composition is linted before the map is recorded, and again after it",
   assert.match(compositor, /const mapFallbackAllowed = args\.includes\("--map-fallback"\);/);
   assert.match(compositor, /if \(!mapRecorded && !mapFallbackAllowed\) throw new Error\(`Missing map video \$\{mapSource\}; run capture first`\);/);
   assert.match(compositor, /async function writeMapFallbackStub\(target: string, profile: RenderProfile, durationSeconds: number\)/);
-  assert.match(compositor, /await writeMapFallbackStub\(mapTarget, profile, timelineData\.duration\);/);
+  assert.match(compositor, /await writeMapFallbackStub\(mapTarget, profile, openingClipSeconds === undefined\r?\n\s*\? timelineData\.duration/);
   assert.match(compositor, /process\.stdout\.write\(`MAP_STUB_USED \$\{mapTarget\}\\n`\);/);
   assert.match(compositor, /const mapTarget = resolve\(mediaDir, `maps\/\$\{id\}-map-\$\{profileName\}\.mp4`\);/);
 });
