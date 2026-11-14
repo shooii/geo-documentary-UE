@@ -1776,7 +1776,7 @@ void AGeoHUD::DrawHUD()
     // beam has swept the rim, so no label can leak into the descent.
     const double LabelsReveal = FMath::Clamp(N(F, TEXT("labelsReveal"), 1), 0., 1.);
     const double ContextAlpha = Map->HasContext && ContextSpanMeters > 1
-        ? FMath::SmoothStep(.55, 1.25, CameraHeight / ContextSpanMeters) * ContextOpacity
+        ? FMath::SmoothStep(.45, 1.10, CameraHeight / ContextSpanMeters) * ContextOpacity
         : 0;
     if (LabelGeneration != Map->Generation || CachedSize != Size)
     {
@@ -2250,8 +2250,8 @@ void AGeoHUD::DrawHUD()
         // Scanline fill of the projected county, clipped to the distance field. The
         // even/odd parity pass is the same one the dim mask uses, so holes and islands
         // come out right without going through earcut again.
-        const FLinearColor FloodBody(.05, .28, .66, .30 * ContextAlpha);
-        const FLinearColor WetLip(.44, .74, .98, (Erasing > .01 ? .09 : .17) * ContextAlpha);
+        const FLinearColor FloodBody(.05, .28, .66, .42 * ContextAlpha);
+        const FLinearColor WetLip(.44, .74, .98, (Erasing > .01 ? .13 : .26) * ContextAlpha);
         const int Band = 2, Rows = FMath::CeilToInt(double(Size.Y) / Band);
         struct FFloodSpan
         {
@@ -2615,10 +2615,11 @@ void AGeoHUD::DrawHUD()
                 const double Crest = FMath::Clamp(
                     1. - FMath::Abs(FVector2D::Distance(Middle, Seed) - FrontAt(Middle)) / (42. * Scale), 0., 1.);
                 const FLinearColor Line = ParentLine + (CrestLine - ParentLine) * float(Crest);
-                // Keep the county rim at the same hairline weight as the town outline
-                // (pre-4fcd4ef look). A wide dark underlay read as a grey wall.
-                AddStroke(A, B, 1.6 * Scale, FLinearColor(Line.R, Line.G, Line.B, .78 * ContextAlpha),
-                          FLinearColor(Line.R, Line.G, Line.B, .78 * ContextAlpha));
+                // Readable over the flooded imagery: a slightly heavier stroke than the
+                // town's own hairline, at near-full opacity — the county outline is the
+                // second-biggest shape on screen and was reading as a whisper.
+                AddStroke(A, B, 2.4 * Scale, FLinearColor(Line.R, Line.G, Line.B, .90 * ContextAlpha),
+                          FLinearColor(Line.R, Line.G, Line.B, .90 * ContextAlpha));
             }
         }
     }
@@ -3295,35 +3296,38 @@ void AGeoHUD::DrawHUD()
         }
         if (Label.Parent)
         {
-            // A name that spills over the boundary is worse than a small name — and the
-            // county shot zooms out until the town is a thumbnail. Everything scales
-            // linearly, so the largest box that still fits is the one whose half-diagonal
-            // fits the circle inscribed at the label point.
-            // Room is a radius, so doubling it lets the name take twice the circle. This is
-            // the knob that actually decides the on-screen size on the wide shots; the
-            // nominal size above only binds once the town fills more of the frame.
+            // The opening title is the hero of the establishing shot. Once the camera
+            // has started pulling back the township is a thumbnail on screen, so the
+            // inscribed-circle guard below shrinks the name to its 24 px floor — which
+            // is exactly the "small label" regression against the older, longer county
+            // intro (a24) where the camera sat on the town and the name read as a large
+            // title. While it is still the settled opening shot (no village current,
+            // county flood not up yet) keep the nominal title size instead of letting
+            // Room crush it. The county shot and the village tour keep the normal rule.
+            const bool OpeningTitle = Current.IsEmpty() && ContextReveal < .02 && ContextAlpha < .02;
             const double Room = TownRoom(Point) * TownNameScale * FaceInkCompensation;
-            if (Room > 4)
+            if (OpeningTitle)
+            {
+                // Same floor the old film reached on a full-frame township, in ink px.
+                TextScale = FMath::Max(TextScale, 72.f * FaceInkCompensation / FMath::Max(1.f, GlyphH));
+            }
+            else if (Room > 4)
             {
                 const float Diagonal = FMath::Sqrt(FMath::Square(Width + TrackingTotal) + FMath::Square(Height));
                 TextScale = FMath::Min(TextScale, float(2. * Room / FMath::Max(1.f, Diagonal)));
                 // A floor: honouring the boundary at county zoom would make the name
                 // unreadable. Below this it is allowed to spill rather than disappear.
-                // Floor raised from 16 px: at the county framing the township is a
-                // thumbnail, and 16 px on a phone is a smear.
-                // It deliberately does NOT follow TownNameScale. At the county framing the
-                // township is a thumbnail and the name has to stay subordinate to the
-                // county name (52 px): a doubled floor put it at 48 px, i.e. the same size
-                // as 雷州市, which flattened the hierarchy. Doubling the circle above is
-                // already enough to lift this shot from 24 px to ~42 px.
+                // It deliberately does NOT follow TownNameScale: at the county framing
+                // the township is a thumbnail and must stay subordinate to the county
+                // name (52 px).
                 TextScale = FMath::Max(TextScale, 24.f * FaceInkCompensation / FMath::Max(1.f, GlyphH));
-                if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_METRICS")).Len())
-                {
-                    static int32 TownReports = 0;
-                    if (++TownReports % 45 == 0)
-                        UE_LOG(LogTemp, Display, TEXT("GEO_LABEL town=%s sizePx=%.1f glyphH=%.1f glyphW=%.1f room=%.1f finalScale=%.3f glyph=%.1f"),
-                               *Label.Name, SizePx, GlyphH, GlyphW, Room, TextScale, GlyphH * TextScale);
-                }
+            }
+            if (FPlatformMisc::GetEnvironmentVariable(TEXT("GEO_LABEL_METRICS")).Len())
+            {
+                static int32 TownReports = 0;
+                if (++TownReports % 45 == 0)
+                    UE_LOG(LogTemp, Display, TEXT("GEO_LABEL town=%s sizePx=%.1f glyphH=%.1f glyphW=%.1f room=%.1f finalScale=%.3f glyph=%.1f"),
+                           *Label.Name, SizePx, GlyphH, GlyphW, Room, TextScale, GlyphH * TextScale);
             }
         }
         // A village that has already been toured. Cesium painted these white and
