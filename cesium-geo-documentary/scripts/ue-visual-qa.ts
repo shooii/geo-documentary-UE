@@ -6,6 +6,9 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
+import { buildProjectRenderSpec } from '../apps/studio/project-service.js';
+import { parseSrt, type RenderSpec } from '../packages/render-spec/index.js';
+import { assertTourPlanExportable } from '../packages/render-spec/tour-plan.js';
 import ffmpeg from 'ffmpeg-static';
 
 const root = resolve(process.cwd());
@@ -57,17 +60,22 @@ async function run() {
   const projectPath = resolve(root, option('project', 'workspace/projects/project-mw9i0ssu.v000013.json'));
   const project = JSON.parse(await readFile(projectPath, 'utf8'));
   const runtime = JSON.parse((await readFile(join(root, 'workspace/ue-runtime.json'), 'utf8')).replace(/^\uFEFF/, ''));
-  const region = option('region', '440882112');
-  const width = Number(option('width', '1080')), height = Number(option('height', '1920'));
-  const returnDuration = Number(option('return-duration', '4.4'));
-  let cursor = 0;
-  const stops = project.scenes.filter((scene: any) => scene.section === 'child' && scene.childId && scene.camera).map((scene: any) => {
-    const duration = Math.max(.001, Number(scene.duration) || .001);
-    const start = cursor; cursor += duration;
-    return { id: scene.childId, name: scene.childName || scene.title, start, end: cursor,
-      flightDuration: Math.min(4.2, Math.max(3.2, duration - Number(scene.timing?.mapHoldSeconds || 0))),
-      cameraPreset: scene.camera, cameraProfiles: { portrait: scene.camera } };
-  });
+  const region = option('region', project.regionId);
+  const width = Number(option('width', String(project.output.width))), height = Number(option('height', String(project.output.height)));
+  const returnDuration = Number(option('return-duration', String(project.template.tourReturnSeconds)));
+  const frozenSpecPath = option('render-spec', '');
+  const measuredCuesPath = option('cues', '');
+  const timingSource = frozenSpecPath ? 'frozen-render-spec' : measuredCuesPath ? 'measured-cues' : 'estimated';
+  const spec: RenderSpec = frozenSpecPath
+    ? JSON.parse(await readFile(resolve(root, frozenSpecPath), 'utf8'))
+    : await buildProjectRenderSpec(root, project, measuredCuesPath ? parseSrt(await readFile(resolve(root, measuredCuesPath), 'utf8')) : undefined);
+  if (spec.projectId !== project.id || spec.projectRevision !== project.revision || spec.regionId !== region) throw new Error('QA计划与项目快照的ID、修订或区域不一致');
+  if (!spec.tourPlan) throw new Error('冻结RenderSpec缺少共享巡游计划，请重新导出');
+  if (timingSource !== 'estimated') assertTourPlanExportable(spec.tourPlan);
+  if (args.includes('--formal') && timingSource === 'estimated') throw new Error('正式QA必须提供--render-spec或--cues实测文件，不接受估算计划');
+  const stops = spec.tourPlan.tourStops;
+  const cursor = stops.at(-1)?.end ?? 0;
+  await writeFile(join(output, 'tour-plan.json'), JSON.stringify(spec.tourPlan, null, 2), 'utf8');
   if (!stops.length) throw new Error('项目无可捕获的巡游站点');
   const focus = stops[Math.min(5, stops.length - 1)]!;
   const samples: { name: string; time: number; subtitleBounds?: { left: number; top: number; right: number; bottom: number }; annotationWindows?: { sceneId: string; start: number; end: number }[] }[] = [
@@ -96,7 +104,7 @@ async function run() {
     samples.push({ name: 'annotation-off', time: probeTime, annotationWindows: [] });
   }
   const imageryProvider = option('imagery', 'tianditu-imagery');
-  const manifest: any = { phase, region, project: projectPath, imagery: imageryProvider, width, height, playerAsset,
+  const manifest: any = { phase, region, project: projectPath, timingSource, formalParity: timingSource !== 'estimated', renderSpecPath: frozenSpecPath || null, measuredCuesPath: measuredCuesPath || null, profile: spec.output.profile, imagery: imageryProvider, width, height, playerAsset,
     createdAt: new Date().toISOString(), tourEnd: cursor, returnDuration, stops, samples: [], status: 'running' };
   const saveManifest = () => writeFile(join(output, 'manifest.json'), JSON.stringify(manifest, null, 2));
   await saveManifest();
@@ -145,7 +153,7 @@ async function run() {
     }, 240000, 'UE串流启动超时');
     browser = await chromium.launch({ headless: true });
     const page = await browser.newPage({ viewport: { width, height } });
-    await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=portrait&imagery=${imageryProvider}&capture=1`);
+    await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=${spec.output.profile}&imagery=${imageryProvider}&capture=1`);
     await page.waitForFunction(() => Boolean((window as any).geoVideo?.getDiagnostics().ready), {}, { timeout: 240000 });
     await page.evaluate(payload => (window as any).geoVideo.prepareStudioTour(payload), { tourStops: stops, returnDuration });
     for (const sample of samples) {

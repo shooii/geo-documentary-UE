@@ -5,7 +5,7 @@ import { cloudStateAt } from './opening.js';
 import { boundaryAnimation } from './boundary-style.js';
 import { visualHierarchy, overviewRepresentatives } from './visual-hierarchy.js';
 
-export const actions = new Set(['prepare-tour', 'play-opening', 'set-annotations', 'show-tour-frame', 'play-tour-segment', 'play-scene-range', 'stop-scene-playback', 'update-tour-labels', 'play-tour-outro', 'play-parent-overview', 'preview-child-camera', 'set-map-view', 'switch-imagery']);
+export const actions = new Set(['prepare-tour', 'play-opening', 'set-annotations', 'show-tour-frame', 'play-tour-segment', 'play-scene-range', 'stop-scene-playback', 'pause-scene-playback', 'resume-scene-playback', 'update-tour-labels', 'play-tour-outro', 'play-parent-overview', 'preview-child-camera', 'set-map-view', 'switch-imagery']);
 export const clamp = (x: number) => Math.max(0, Math.min(1, x));
 export const smooth = (x: number) => { x = clamp(x); return x*x*x*(x*(x*6-15)+10); };
 const lerp = (from: number, to: number, progress: number) => from + (to - from) * progress;

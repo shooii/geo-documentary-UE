@@ -780,7 +780,7 @@ test("Studio keeps one task-first export history with explicit output actions", 
   assert.match(clientSource, /state\.renderSpec\.subtitleCues/);
   assert.match(clientSource, /function splitPreviewSubtitle/);
   assert.match(clientSource, /function syncPreviewSubtitlesToAudio\(scene, audio\)/);
-  assert.match(clientSource, /const audioTime = Number\(audio\.currentTime \|\| 0\)/);
+  assert.match(clientSource, /const audioTime = hasAudioClock \? Number\(audio\.currentTime \|\| 0\) : cueStart \+ fallback/);
   // 预览字幕与成片一致：思源黑体 Medium、无底纹、单行不折行（折行会切断逐字着色），
   // 放不下时按比例缩字号，而不是换成两行。
   assert.match(css, /\.preview-copy\.subtitle-only p[^}]*white-space:nowrap/);
@@ -844,7 +844,8 @@ test("Studio keeps one task-first export history with explicit output actions", 
   assert.match(css, /\.preview-asset-frame\.is-visible\{[^}]*opacity:1[^}]*filter:blur\(0\)/);
   const visualTimelineSource = await readFile(resolve(root, "packages/render-spec/visual-timeline.ts"), "utf8");
   assert.match(engineSource, /const plan = planVisualClip\(\{/);
-  assert.match(visualTimelineSource, /scene\.section === "child" && range\s*\? range\.start \+ plateSettleSeconds\(flight\)/);
+  assert.match(visualTimelineSource, /scene\.section === "child" && range\s*\? range\.start \+ \(input\.childVisualReadySeconds \?\? plateSettleSeconds\(flight\)\)/);
+  assert.match(engineSource, /childVisualReadySeconds: tourStop\.visualReadySeconds/);
   // 共享计划仍限制所有场景的结束边界，并将相同字段写入正式导出清单。
   assert.match(visualTimelineSource, /\.\.\.\(range \? \{ notAfterNarrationSeconds: range\.end \} : \{\}\)/);
   assert.match(visualTimelineSource, /clampMinimumDisplaySeconds\(configuredMinimumSeconds, availableSeconds\)/);
@@ -1026,14 +1027,14 @@ test("play scope label resolves the selected scene without leaking a map callbac
 test("clicking a scene moves playback to that scene instead of returning to the head", async () => {
   const source = await readFile(resolve(root, "apps/studio/public/studio.js"), "utf8");
   assert.match(source, /function selectSceneFromUi\(sceneId\)/);
-  assert.match(source, /const continuePlaying = Boolean\(state\.playTimer\)/);
+  assert.match(source, /const continuePlaying = state\.playbackStatus === "playing"/);
   assert.match(source, /selectScene\(sceneId, false\);[\s\S]*?previewSelectedScene\(\)/);
   // 连播中点到另一场 = 快进，不是切去单场试听，所以要把状态带过去。
   assert.match(source, /if \(continuePlaying\) startPlaybackFromSelected\(\{ continuous \}\)/);
   assert.match(source, /\.scene-item\[data-scene-id\], \.timeline-clip\[data-scene-id\]/);
   assert.match(source, /state\.playheadSeconds = sceneStartSeconds\(selectedScene\(\)\)/);
   assert.match(source, /function startPlaybackFromSelected\(\{ continuous = false \} = \{\}\)/);
-  assert.match(source, /function togglePlayback\(\) \{ if \(state\.playTimer\) return stopPlayback\(\); startPlaybackFromSelected\(\); \}/);
+  assert.match(source, /function togglePlayback\(\)[\s\S]*?state\.playbackStatus === "playing"\) return pausePlayback\(\)[\s\S]*?state\.playbackStatus === "paused"\) return resumePlayback\(\)/);
 });
 
 test("clicking a child scene previews its complete administrative camera segment", async () => {
@@ -1118,7 +1119,7 @@ test("Studio playback synchronizes the generated narration audio with scene cue 
   assert.match(clientSource, /audio\.muted = false;[\s\S]*?playAudioElement\(audio\)/);
   assert.match(clientSource, /if \(delaySeconds > 0\)[\s\S]*?audio\.pause\(\);[\s\S]*?audio\.currentTime = target/);
   assert.match(clientSource, /function syncPreviewSubtitlesToAudio\(scene, audio\)/);
-  assert.match(clientSource, /const audioTime = Number\(audio\.currentTime \|\| 0\)/);
+  assert.match(clientSource, /const audioTime = hasAudioClock \? Number\(audio\.currentTime \|\| 0\) : cueStart \+ fallback/);
   assert.match(clientSource, /audioTime \+ 0\.015 >= entry\.start && audioTime < entry\.end/);
   assert.match(clientSource, /function schedulePlaybackAdvance\(\)[\s\S]*?pollAudioClock/);
   assert.match(clientSource, /audio\.currentTime \|\| 0\) \+ 0\.02 >= Number\(range\.end \|\| 0\)/);

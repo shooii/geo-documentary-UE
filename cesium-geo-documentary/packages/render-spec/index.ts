@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { buildTourPlan, TOUR_PLAN_VERSION, type TourPlan } from "./tour-plan.js";
 import { buildSingleLineCues, normalizeSubtitleSemantics, splitSingleLineText, type SingleLineCueOverride } from "../content-engine/subtitles.js";
 import { effectiveMapView, normalizeSemanticText, type AssetPlacement, type MapView, type StudioScene, type VideoProject } from "../project-schema/index.js";
 import { MINIMUM_RENDERED_VISUAL_SECONDS, planVisualClip, resolveVisualClipWindow } from "./visual-timeline.js";
@@ -85,6 +86,7 @@ export interface RenderSpec {
   sceneCueRanges: SceneCueRange[];
   assets: RenderSpecAsset[];
   childTourOrder: string[];
+  tourPlan: TourPlan;
   outro: { action: "pullBackToParent"; target: string; duration: number; text: string };
   narrationDurationSeconds: number;
   timelineDurationSeconds: number;
@@ -276,6 +278,7 @@ export function buildRenderSpec(input: {
    * configuration.
    */
   rendererSignature?: string;
+  parentCamera?: import("./tour-plan.js").TourCamera | undefined;
   /**
    * 区域 timeline.json 里实测的旁白起拍偏移。成片用它定位旁白与字幕，预览也用它
    * 算时间码；不传就按"巡游方案 = 下降 + 0.35 s，其它方案 = 0"推算。
@@ -331,7 +334,10 @@ export function buildRenderSpec(input: {
     : undefined;
   const narrationDurationSeconds = input.narrationDurationSeconds ?? cues.at(-1)?.end ?? 0;
   const timelineDurationSeconds = input.timelineDurationSeconds ?? Math.ceil(narrationDurationSeconds + project.template.openingDescentSeconds);
+  const tourPlan = buildTourPlan({ scenes: project.scenes, ranges, parentCamera: input.parentCamera });
   const signatureInput = {
+    tourPlanVersion: TOUR_PLAN_VERSION,
+    tourPlan,
     mapRendererVersion: input.rendererSignature ?? MAP_RENDERER_CACHE_VERSION,
     geometrySignature: input.geometrySignature,
     output: project.output,
@@ -394,6 +400,7 @@ export function buildRenderSpec(input: {
     subtitleCues,
     sceneCueRanges: ranges,
     assets,
+    tourPlan,
     childTourOrder: project.scenes.filter((scene) => scene.section === "child").map((scene) => scene.childId!),
     outro: { action: "pullBackToParent", target: project.regionId, duration: project.template.tourReturnSeconds, text: project.scenes.find((scene) => scene.section === "outro")?.subtitle ?? "" },
     narrationDurationSeconds,
@@ -560,6 +567,7 @@ export function planVisualTimeline(project: VideoProject, spec: RenderSpec): Vis
         scene,
         placement: asset,
         sequenceIndex,
+        ...(spec.tourPlan?.tourStops.find(stop => stop.sceneId === scene.id) ? { childVisualReadySeconds: spec.tourPlan.tourStops.find(stop => stop.sceneId === scene.id)!.visualReadySeconds } : {}),
         ...(openingSceneId !== undefined ? { openingSceneId } : {}),
         ...(range ? {
           range,

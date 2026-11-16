@@ -1,6 +1,9 @@
 import { selectSceneAssetsForNarration } from "./scene-asset-match.js?v=20260918-3";
 import { sceneRenderPlacementIndex, selectSceneRenderPlacements } from "./scene-render-placements.js?v=20261021-2";
 import { previewOrigin as CESIUM_PREVIEW_ORIGIN } from "./studio-config.js";
+import { buildTourPlan } from "/shared/tour-plan.js";
+import { createPlaybackClock } from "./playback-clock.js";
+const playbackClock = createPlaybackClock();
 
 const $ = (id) => document.getElementById(id);
 const DEFAULT_IMAGERY_PROVIDER = "cesium-ion-world-imagery";
@@ -17,7 +20,7 @@ const state = {
   previewAudio: null, previewAudioProjectId: null, previewAudioErrorShown: false, previewAudioSeekToken: 0, narrationStartTimer: null,
   narrationNotice: null,
   /** ▶ = one scene; ↺ 从头 = the whole film. See `startPlaybackFromSelected`. */
-  playbackContinuous: false,
+  playbackContinuous: false, playbackStatus: "idle", playbackEpoch: 0, deferredPlaybackCallbacks: [],
   uploadTargetSceneId: null, sceneAssetPickerOpen: false, sceneAssetPickerReplaceId: null,
   sceneAssetSearch: "", sceneAssetGroup: "all", sceneAssetScope: "current", sceneAssetSort: "relevance", sceneAssetUnboundOnly: false,
   sceneAssetReplaceCandidateId: null, sceneAssetApplyRecommended: false,
@@ -479,7 +482,7 @@ function setPreviewAssetVisible(visible, entrance) {
   // 入场动画变体与成片 compose-hyperframes.ts 的 entranceMotion 对齐；
   // rise 是默认（frame 基础样式的上浮），其余按 data-entrance 切换。
   previewAssetFrame.dataset.entrance = entrance || "bloom";
-  if (!visible) clearTimeout(state.previewAssetHideTimer);
+  if (!visible) playbackClock.clearTimeout(state.previewAssetHideTimer);
   previewAssetFrame.classList.toggle("is-visible", visible);
   previewAsset.classList.toggle("is-visible", visible);
   previewAssetCaption.classList.toggle("is-visible", visible);
@@ -507,6 +510,7 @@ function setPreviewAssetVisible(visible, entrance) {
 }
 
 function revealSelectedSceneAsset(placement = state.playbackStageActive ? state.playbackStagePlacement : selectedPlacement()) {
+  if (state.playbackStatus === "paused") return;
   const scene = selectedScene();
   const asset = placement ? assetById(placement.assetId) : null;
   if (!scene || !asset || scene.section === "cover") return setPreviewAssetVisible(false);
@@ -515,11 +519,11 @@ function revealSelectedSceneAsset(placement = state.playbackStageActive ? state.
   const show = cameraLocked && previewMediaReady(previewMediaElement());
   // 与成片一致：图片出现 target 秒后自动退场，不再挂到旁白讲完才消失。
   // 0 表示显式关闭封顶（挂到场景结束），与合成器的 targetDisplaySeconds 同义。
-  clearTimeout(state.previewAssetHideTimer);
+  playbackClock.clearTimeout(state.previewAssetHideTimer);
   setPreviewAssetVisible(show, placement.entrance);
   if (show) {
     const target = Number(asset.targetDisplaySeconds ?? 5.5);
-    if (target > 0) state.previewAssetHideTimer = setTimeout(() => setPreviewAssetVisible(false), target * 1000);
+    if (target > 0) state.previewAssetHideTimer = playbackClock.setTimeout(() => setPreviewAssetVisible(false), target * 1000);
   }
 }
 
@@ -540,6 +544,11 @@ function handleCesiumPreviewMessage(event) {
     state.pendingImagery = null;
     return;
   }
+  if (event.data.playbackEpoch !== state.playbackEpoch) return;
+  if (state.playbackStatus === "paused") {
+    state.deferredPlaybackCallbacks.push(playbackCallback(() => handleCesiumPreviewMessage(event)));
+    return;
+  }
   const scene = selectedScene();
   const openingLabelVisible = event.data.event === "opening-label-visible" && isOpeningScene(scene);
   const childFlightComplete = event.data.event === "tour-flight-complete"
@@ -548,16 +557,21 @@ function handleCesiumPreviewMessage(event) {
   if (!openingLabelVisible && !childFlightComplete) return;
   if (openingLabelVisible) {
     const sceneId = scene.id;
-    clearTimeout(state.previewAssetRevealTimer);
-    state.previewAssetRevealTimer = setTimeout(() => {
+    playbackClock.clearTimeout(state.previewAssetRevealTimer);
+    state.previewAssetRevealTimer = playbackClock.setTimeout(() => {
       if (selectedScene()?.id !== sceneId) return;
       state.previewAssetReadySceneId = sceneId;
       revealSelectedSceneAsset();
     }, STUDIO_OPENING_PREVIEW_TIMING.assetDelayAfterLabelSeconds * 1000);
     return;
   }
-  state.previewAssetReadySceneId = scene.id;
-  revealSelectedSceneAsset();
+  const stop = tourPreviewPayload()?.tourStops.find(item => String(item.id) === String(scene.childId));
+  const visualDelay = Math.max(0, Number(stop?.visualReadySeconds ?? stop?.flightDuration ?? 0) - Number(stop?.flightDuration ?? 0));
+  playbackClock.setTimeout(playbackCallback(() => {
+    if (selectedScene()?.id !== scene.id) return;
+    state.previewAssetReadySceneId = scene.id;
+    revealSelectedSceneAsset();
+  }), visualDelay * 1000);
 }
 
 function ensurePreviewAudio() {
@@ -841,6 +855,7 @@ function seekPreviewAudio(audio, target, onReady) {
 }
 
 function playPreviewNarration(scene, preserveContinuity = false, delaySeconds = 0) {
+  const epoch = state.playbackEpoch;
   const audio = ensurePreviewAudio();
   if (!audio || !scene) return;
   if (scene.section === "cover") {
@@ -852,19 +867,26 @@ function playPreviewNarration(scene, preserveContinuity = false, delaySeconds = 
     return;
   }
   const range = sceneNarrationRange(scene);
-  if (!range) return;
+  if (!range) {
+    state.subtitleFallbackStart = playbackClock.now() + Math.max(0, delaySeconds) * 1000;
+    syncPreviewSubtitlesToAudio(scene, audio);
+    return;
+  }
+  state.subtitleFallbackStart = playbackClock.now() + Math.max(0, delaySeconds) * 1000;
+  syncPreviewSubtitlesToAudio(scene, audio);
   const target = Math.max(0, Number(range.start || 0));
-  const start = () => {
-    const resume = () => {
+  const start = playbackCallback(() => {
+    if (selectedScene()?.id !== scene.id || audio !== state.previewAudio || state.playbackStatus !== "playing") return;
+    const resume = playbackCallback(() => {
       if (selectedScene()?.id !== scene.id || !state.playTimer) return;
       audio.muted = false;
       playAudioElement(audio);
       syncPreviewSubtitlesToAudio(scene, audio);
-    };
+    }, epoch);
     if (!preserveContinuity || audio.paused || Math.abs(audio.currentTime - target) > 0.9) seekPreviewAudio(audio, target, resume);
     else resume();
-  };
-  clearTimeout(state.narrationStartTimer);
+  }, epoch);
+  playbackClock.clearTimeout(state.narrationStartTimer);
   if (delaySeconds > 0) {
     audio.muted = true;
     // The gesture-unlock play call may already have started the media clock.
@@ -873,7 +895,7 @@ function playPreviewNarration(scene, preserveContinuity = false, delaySeconds = 
     try { audio.currentTime = target; }
     catch { /* seekPreviewAudio will apply the exact target when metadata is ready. */ }
   }
-  state.narrationStartTimer = setTimeout(() => {
+  state.narrationStartTimer = playbackClock.setTimeout(() => {
     if (selectedScene()?.id !== scene.id || !state.playTimer) return;
     if (audio.readyState >= 1) start();
     else audio.addEventListener("loadedmetadata", start, { once: true });
@@ -1753,7 +1775,9 @@ function previewSubtitleEntries(scene) {
   if (timed.length) return timed.map((cue) => ({ text: cue.text, start: cue.start, end: cue.end, highlight: cue.highlight }));
   const maximum = previewSubtitleLimits[state.project?.output?.profile] || 14;
   const chunks = splitPreviewSubtitle(scene.narration, maximum);
-  return chunks.map((text, index) => ({ text, start: index, end: index + 1 }));
+  const start = Number(range?.start || 0);
+  const step = Math.max(0.001, Number(range ? range.end - range.start : sceneDuration(scene))) / Math.max(1, chunks.length);
+  return chunks.map((text, index) => ({ text, start: start + index * step, end: start + (index + 1) * step }));
 }
 
 function escapePreviewText(text) {
@@ -1826,7 +1850,7 @@ function showPreviewSubtitle(scene, index = 0) {
 }
 
 function clearPreviewSubtitleTimers() {
-  state.subtitleTimers.forEach(clearTimeout);
+  state.subtitleTimers.forEach((timer) => playbackClock.clearTimeout(timer));
   state.subtitleTimers = [];
 }
 
@@ -1845,7 +1869,11 @@ function syncPreviewSubtitlesToAudio(scene, audio) {
   let displayedIndex = -2;
   const tick = () => {
     if (selectedScene()?.id !== scene.id || !state.playTimer || audio !== state.previewAudio) return;
-    const audioTime = Number(audio.currentTime || 0);
+    const range = sceneNarrationRange(scene);
+    const cueStart = Number(range?.start || 0);
+    const hasAudioClock = !audio.error && audio.readyState > 0 && !audio.muted && Number(audio.currentTime || 0) > cueStart;
+    const fallback = (playbackClock.now() - state.subtitleFallbackStart) / 1000;
+    const audioTime = hasAudioClock ? Number(audio.currentTime || 0) : cueStart + fallback;
     const activeIndex = entries.findIndex((entry) => audioTime + 0.015 >= entry.start && audioTime < entry.end);
     if (activeIndex >= 0 && activeIndex !== displayedIndex) showPreviewSubtitle(scene, activeIndex);
     if (activeIndex >= 0) {
@@ -1874,7 +1902,7 @@ function syncPreviewSubtitlesToAudio(scene, audio) {
         safeArea.setAttribute("aria-hidden", "true");
       }
     }
-    state.subtitleTimers = [setTimeout(tick, 30)];
+    state.subtitleTimers = [playbackClock.setTimeout(tick, 30)];
   };
   tick();
 }
@@ -1925,11 +1953,11 @@ function playSelectedScenePreview() {
   // opening preview (clicking the preview frame, re-opening the panel) also
   // lands on this camera and must not fall back to the raw preset range.
   pushTourContext();
-  clearTimeout(state.previewAssetRevealTimer);
+  playbackClock.clearTimeout(state.previewAssetRevealTimer);
   state.previewAssetReadySceneId = null;
   setPreviewAssetVisible(false);
   const opening = openingPreviewSettings();
-  $("cesiumPreview").contentWindow?.postMessage({ type: "geo-video-studio", action: "play-opening", opening, mapView: effectiveSceneMapView(scene) }, CESIUM_PREVIEW_ORIGIN);
+  $("cesiumPreview").contentWindow?.postMessage({ type: "geo-video-studio", action: "play-opening", playbackEpoch: state.playbackEpoch, opening, mapView: effectiveSceneMapView(scene) }, CESIUM_PREVIEW_ORIGIN);
 }
 
 // The child-tour payload the preview needs. Studio builds it once and uses it
@@ -1937,30 +1965,12 @@ function playSelectedScenePreview() {
 // preview messages.
 function tourPreviewPayload() {
   if (!state.project) return null;
-  const childScenes = state.project.scenes.filter((item) => item.section === "child" && item.childId && item.camera);
-  // A project that has not produced a render spec yet (no narration audio) still
-  // has to preview a village: without ranges the payload used to bail out and a
-  // clip click left the camera on the overview. Fall back to cumulative scene
-  // durations so the preview keeps the film's slow flight into the village.
-  const ranges = state.renderSpec?.sceneCueRanges || null;
-  let cursor = 0;
-  const tourStops = childScenes.map((item) => {
-    const range = ranges?.find((candidate) => candidate.sceneId === item.id);
-    const span = range ? Number(range.end) - Number(range.start) : sceneDuration(item);
-    const duration = Math.max(0.001, Number(span) || 0.001);
-    const start = range ? Number(range.start) || 0 : cursor;
-    const end = range ? Number(range.end) || start + duration : start + duration;
-    cursor = Math.max(cursor, end);
-    return {
-      id: item.childId,
-      name: item.childName || item.title,
-      start,
-      end,
-      flightDuration: Math.min(4.2, Math.max(3.2, duration - Number(item.timing?.mapHoldSeconds || 0))),
-      cameraPreset: item.camera,
-      cameraProfiles: { portrait: item.camera }
-    };
-  });
+  // 离线估算与服务端复用同一纯函数，累计包含全部开场场景而非只累计村落。
+  const sameProject = state.renderSpec?.projectId === state.project.id;
+  const plan = sameProject && !state.renderSpecStale && state.renderSpec?.tourPlan
+    ? state.renderSpec.tourPlan
+    : buildTourPlan({ scenes: state.project.scenes.map(scene => ({ ...scene, duration: sceneDuration(scene) })), ranges: sameProject && !state.renderSpecStale ? state.renderSpec?.sceneCueRanges : undefined, parentCamera: sameProject ? state.renderSpec?.tourPlan?.parentCamera : undefined });
+  const tourStops = plan.tourStops;
   if (!tourStops.length) return null;
   // No `openingSeconds` here on purpose. The player owns the descent offset
   // (see `showSelectedTourFrame`); exporting the render spec's descent from
@@ -1968,6 +1978,11 @@ function tourPreviewPayload() {
   return {
     tourStops,
     returnDuration: Number(state.project.template.tourReturnSeconds || 4.4),
+    planVersion: plan.version,
+    planIdentity: sameProject && !state.renderSpecStale && plan === state.renderSpec?.tourPlan && state.renderSpec?.cacheSignature
+      ? state.renderSpec.cacheSignature
+      : "estimated",
+    diagnostics: plan.diagnostics,
     annotationWindows: sceneAnnotationWindows()
   };
 }
@@ -2022,6 +2037,7 @@ function showSelectedTourFrame() {
   $("cesiumPreview").contentWindow?.postMessage({
     type: "geo-video-studio",
     action,
+    playbackEpoch: state.playbackEpoch,
     mapView: effectiveSceneMapView(scene),
     preview: { tourStops, time, returnDuration, annotationWindows, targetId: scene.childId, segmentDuration: sceneDuration(scene) }
   }, CESIUM_PREVIEW_ORIGIN);
@@ -2037,7 +2053,11 @@ function previewSelectedScene() {
 }
 
 function selectScene(sceneId, preview = false) {
-  clearTimeout(state.previewAssetRevealTimer);
+  playbackClock.clear();
+  state.playbackEpoch += 1;
+  state.previewAudioSeekToken += 1;
+  state.deferredPlaybackCallbacks = [];
+  playbackClock.clearTimeout(state.previewAssetRevealTimer);
   // Clear the outgoing scene's photo before changing selection. In particular,
   // a child-tour photo must never remain visible while the next administrative
   // area is flying into view or waiting for its own photo to load.
@@ -2051,15 +2071,15 @@ function selectScene(sceneId, preview = false) {
   state.sceneAssetPickerReplaceId = null; state.sceneAssetReplaceCandidateId = null;
   state.playheadSeconds = sceneStartSeconds(selectedScene());
   render();
-  if (preview) setTimeout(previewSelectedScene, 80);
+  if (preview) playbackClock.setTimeout(playbackCallback(previewSelectedScene), 80);
 }
 
 function selectSceneFromUi(sceneId) {
-  const continuePlaying = Boolean(state.playTimer);
+  const continuePlaying = state.playbackStatus === "playing";
   // Picking a scene while the film is rolling keeps rolling (the operator is
   // skipping ahead, not switching to a one-scene audition).
   const continuous = state.playbackContinuous;
-  if (continuePlaying) stopPlayback();
+  stopPlayback();
   selectScene(sceneId, false);
   if (continuePlaying) startPlaybackFromSelected({ continuous });
   else previewSelectedScene();
@@ -2757,10 +2777,10 @@ function applyPreviewStagePlacement(scene, placement) {
   const previewSceneId = scene.id;
   const previewAssetId = asset.id;
   const painted = state.previewStageSceneId === previewSceneId && state.previewStageAssetId === previewAssetId;
-  const revealLoadedAsset = () => {
+  const revealLoadedAsset = playbackCallback(() => {
     if (selectedScene()?.id !== previewSceneId || state.previewStageAssetId !== previewAssetId) return;
     revealSelectedSceneAsset();
-  };
+  });
   if (!painted) {
     state.previewStageSceneId = previewSceneId;
     state.previewStageAssetId = previewAssetId;
@@ -4475,11 +4495,67 @@ function playFromBeginning() {
   // The only entry point that rolls through the whole film. ▶ previews one scene.
   startPlaybackFromSelected({ continuous: true });
 }
-/* Stop playback. `completed` distinguishes "the scene finished" from "the
- * operator pressed pause": a finished single-scene preview should keep the last
- * subtitle line it ended on, while pausing rewinds the caption to the scene's
- * first line so the frame reads as "not playing yet". */
-function stopPlayback({ completed = false } = {}) { clearTimeout(state.playTimer); clearTimeout(state.narrationStartTimer); clearPreviewSubtitleTimers(); state.previewAudio?.pause(); if (state.previewAudio) state.previewAudio.muted = false; $("previewAssetVideo")?.pause(); state.playTimer = null; $("playButton").textContent = "▶"; if (state.playbackStageActive) { /* The rotation only exists while the film rolls: drop it and put the operator's own selection back on the stage. */ state.playbackStageActive = false; state.playbackStagePlacement = null; applyPreviewStagePlacement(selectedScene(), selectedPlacement()); revealSelectedSceneAsset(); } if (!completed) showPreviewSubtitle(selectedScene()); }
+/* 停止与完成会取消整段调度；暂停另走pausePlayback，保留字幕、素材与播放位置。 */
+function sendPlaybackControl(action) {
+  $("cesiumPreview").contentWindow?.postMessage({ type: "geo-video-studio", action }, CESIUM_PREVIEW_ORIGIN);
+}
+function stopPlayback({ completed = false } = {}) {
+  playbackClock.clear();
+  playbackClock.resume();
+  state.playbackEpoch += 1;
+  state.previewAudioSeekToken += 1;
+  state.deferredPlaybackCallbacks = [];
+  state.playbackStatus = completed ? "completed" : "idle";
+  state.pausedAssetAnimations?.forEach((animation) => animation.cancel());
+  state.pausedAssetAnimations = [];
+  sendPlaybackControl("stop-scene-playback");
+  clearPreviewSubtitleTimers();
+  state.previewAudio?.pause();
+  if (state.previewAudio) state.previewAudio.muted = false;
+  $("previewAssetVideo")?.pause();
+  state.playTimer = null;
+  $("playButton").textContent = "▶";
+  if (!completed && state.playbackStageActive) {
+    state.playbackStageActive = false;
+    state.playbackStagePlacement = null;
+    applyPreviewStagePlacement(selectedScene(), selectedPlacement());
+  }
+  if (!completed) showPreviewSubtitle(selectedScene());
+}
+function pausePlayback() {
+  if (state.playbackStatus !== "playing") return;
+  state.playbackStatus = "paused";
+  playbackClock.pause();
+  state.resumePreviewAudio = Boolean(state.previewAudio && !state.previewAudio.paused);
+  state.previewAudio?.pause();
+  const video = $("previewAssetVideo");
+  state.resumeAssetVideo = Boolean(video && !video.paused);
+  video?.pause();
+  state.pausedAssetAnimations = ["previewAssetFrame", "previewAssetCaption", "previewShade", "previewSubtitle", "safeAreaSubtitle", "timecode"].flatMap((id) => $(id)?.getAnimations({ subtree: true }) || []);
+  state.pausedAssetAnimations.forEach((animation) => animation.pause());
+  sendPlaybackControl("pause-scene-playback");
+  $("playButton").textContent = "▶";
+}
+function resumePlayback() {
+  if (state.playbackStatus !== "paused") return;
+  state.playbackStatus = "playing";
+  sendPlaybackControl("resume-scene-playback");
+  playbackClock.resume();
+  const callbacks = state.deferredPlaybackCallbacks.splice(0);
+  callbacks.forEach((callback) => callback());
+  if (state.resumePreviewAudio && state.previewAudio) playAudioElement(state.previewAudio);
+  if (state.resumeAssetVideo) $("previewAssetVideo")?.play().catch(() => {});
+  state.pausedAssetAnimations?.forEach((animation) => animation.play());
+  state.pausedAssetAnimations = [];
+  $("playButton").textContent = "Ⅱ";
+}
+function playbackCallback(callback, epoch = state.playbackEpoch) {
+  return () => {
+    if (epoch !== state.playbackEpoch) return;
+    if (state.playbackStatus === "paused") state.deferredPlaybackCallbacks.push(playbackCallback(callback, epoch));
+    else callback();
+  };
+}
 /* The export splits a scene's narration window equally between the pictures the
  * operator marked 用于成片, walking `placements` in saved order (`render-engine`).
  * The still preview used to show whichever picture the right-hand panel was on,
@@ -4510,7 +4586,7 @@ function playbackProgress(range, audio, startedAt, estimatedMs) {
   if (audio && !audio.error && position > start) return Math.min(1, (position - start) / span);
   // Narration that never loads (404 until it is regenerated) still has to move
   // the pictures, otherwise the preview freezes on photo one and reads as broken.
-  return Math.min(1, Math.max(0, (Date.now() - startedAt) / Math.max(1, estimatedMs)));
+  return Math.min(1, Math.max(0, (playbackClock.now() - startedAt) / Math.max(1, estimatedMs)));
 }
 
 function syncPlaybackStage(scene, progress) {
@@ -4544,8 +4620,20 @@ function schedulePlaybackAdvance() {
     playPreviewNarration(nextScene, true, openingNarrationDelaySeconds(nextScene));
     schedulePlaybackAdvance();
   };
-  if (!range || scene.section === "cover") {
-    state.playTimer = setTimeout(advance, Math.max(1.6, sceneDuration(scene) + narrationDelay) * 1000);
+  if (scene.section === "cover") {
+    state.playTimer = playbackClock.setTimeout(advance, Math.max(1.6, sceneDuration(scene) + narrationDelay) * 1000);
+    return;
+  }
+  if (!range) {
+    const startedAt = playbackClock.now();
+    const estimatedMs = Math.max(1.6, sceneDuration(scene) + narrationDelay) * 1000;
+    const poll = () => {
+      const elapsed = playbackClock.now() - startedAt;
+      syncPlaybackStage(scene, Math.min(1, Math.max(0, elapsed - narrationDelay * 1000) / Math.max(1, estimatedMs - narrationDelay * 1000)));
+      if (elapsed >= estimatedMs) return advance();
+      state.playTimer = playbackClock.setTimeout(poll, 30);
+    };
+    state.playTimer = playbackClock.setTimeout(poll, 30);
     return;
   }
   // Audio that never starts would otherwise poll forever: the button stays on Ⅱ,
@@ -4554,27 +4642,24 @@ function schedulePlaybackAdvance() {
   // text, so `narration-audio` answers 404 until it is regenerated. Fall back to
   // the scene's estimated duration so a mute preview still runs to its end.
   const estimatedMs = Math.max(1.6, sceneDuration(scene) + narrationDelay) * 1000;
-  const startedAt = Date.now();
-  let muteFallbackArmed = false;
+  const startedAt = playbackClock.now();
+  const epoch = state.playbackEpoch;
   const pollAudioClock = () => {
-    if (selectedScene()?.id !== scene.id || !state.playTimer) return;
+    if (selectedScene()?.id !== scene.id || !state.playTimer || epoch !== state.playbackEpoch) return;
     const audio = state.previewAudio;
+    const elapsed = playbackClock.now() - startedAt;
+    state.playheadSeconds = sceneStartSeconds(scene) + elapsed / 1000;
+    if ($("timecode")) $("timecode").textContent = `${formatTime(state.playheadSeconds)} / ${formatTime(totalDuration())}`;
     if (audio && !audio.error && Number(audio.currentTime || 0) + 0.02 >= Number(range.end || 0)) return advance();
     syncPlaybackStage(scene, playbackProgress(range, audio, startedAt, estimatedMs));
     const stalled = !audio
       || Boolean(audio.error)
       || audio.readyState === 0
-      || (Number(audio.currentTime || 0) === 0 && Date.now() - startedAt >= 2500);
-    if (stalled && !muteFallbackArmed) {
-      muteFallbackArmed = true;
-      // Give the visual side the remaining time, not a fresh copy of it.
-      const remaining = Math.max(800, estimatedMs - (Date.now() - startedAt));
-      state.playTimer = setTimeout(advance, remaining);
-      return;
-    }
-    state.playTimer = setTimeout(pollAudioClock, 30);
+      || (Number(audio.currentTime || 0) <= Number(range.start || 0) && elapsed >= 2500);
+    if (stalled && elapsed >= estimatedMs) return advance();
+    state.playTimer = playbackClock.setTimeout(pollAudioClock, 30);
   };
-  state.playTimer = setTimeout(pollAudioClock, 30);
+  state.playTimer = playbackClock.setTimeout(pollAudioClock, 30);
 }
 /* Playback is a *still preview* on purpose: the map parks on the scene's
  * establishing frame and only the narration and subtitles advance.
@@ -4592,7 +4677,9 @@ function schedulePlaybackAdvance() {
  * without touching runtime.js.
  */
 function startPlaybackFromSelected({ continuous = false } = {}) {
+  stopPlayback();
   const scene = selectedScene(); if (!scene) return;
+  state.playbackStatus = "playing";
   state.playbackContinuous = continuous;
   updatePlayhead(scene);
   unlockPreviewAudioFromGesture(scene);
@@ -4605,7 +4692,11 @@ function startPlaybackFromSelected({ continuous = false } = {}) {
   playPreviewNarration(scene, false, openingNarrationDelaySeconds(scene));
   schedulePlaybackAdvance();
 }
-function togglePlayback() { if (state.playTimer) return stopPlayback(); startPlaybackFromSelected(); }
+function togglePlayback() {
+  if (state.playbackStatus === "playing") return pausePlayback();
+  if (state.playbackStatus === "paused") return resumePlayback();
+  startPlaybackFromSelected();
+}
 
 async function boot() {
   try {

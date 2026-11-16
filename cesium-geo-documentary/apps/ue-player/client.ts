@@ -1,6 +1,7 @@
 import { Config, PixelStreaming } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.7';
 import { actions, contextIntroSeconds, frameAt, type PreviewFlightOrigin } from './presentation.js';
 import { configureOpening } from './opening.js';
+import { createFramePlayback } from './playback.js';
 import { activeSubtitleBounds, subtitleBounds, type SubtitleBounds, type SubtitleWindow } from './subtitle-layout.js';
 
 let previewSubtitleBounds: SubtitleBounds | undefined;
@@ -43,10 +44,12 @@ async function fetchScene(url: string, signal?: AbortSignal) {
 let preloadedScene = query.has('studioPreview') ? fetchScene(`${sceneUrl()}&warm=1`).catch(() => undefined) : undefined;
 const overlay = document.getElementById('connection')!;
 const status = document.getElementById('status')!;
-let scene: any, stops: any[] | undefined, duration = 4.4, time = 0, raf = 0, ready = false, openingOnly = false, contextIntro = false;
+let scene: any, stops: any[] | undefined, duration = 4.4, time = 0, ready = false, openingOnly = false, contextIntro = false;
 let channelReady = false;
 let sceneLoad: AbortController | undefined;
 let queuedMotion: any;
+let queuedPlaybackPaused = false;
+let replayPausedMotion: any;
 let displayedFrame: ReturnType<typeof frameAt> | undefined;
 let flightOrigin: (PreviewFlightOrigin & { overviewStart?: number }) | undefined;
 let previewView: MapView | null | undefined;
@@ -87,14 +90,16 @@ function draw(force=false) {
   const frame = frameAt(scene, stops ?? [], time, profile, duration, openingOnly, flightOrigin, overviewProgress, previewView, contextIntro);
   if (stream.emitUIInteraction({ type: 'geo-video-ue', version: 1, action: 'apply-frame', frame: { ...frame, subtitleBounds: previewSubtitleBounds ?? null } })) displayedFrame = frame;
 }
-function stop() { cancelAnimationFrame(raf); raf = 0; }
+let playbackEpoch: number | undefined;
+const playback = createFramePlayback({
+  now: () => performance.now(),
+  request: callback => window.requestAnimationFrame(callback),
+  cancel: id => window.cancelAnimationFrame(id),
+  draw: (position, force) => { time = position; draw(force); }, notify,
+});
+function stop() { playback.stop(); }
 function play(start: number, end: number, done: string, details = {}, flightSeconds = 0) {
-  stop(); time = start; draw(true); const started = performance.now(); let flightSent = false;
-  const tick = () => {
-    time = Math.min(end,start+(performance.now()-started)/1000); draw(time>=end);
-    if (flightSeconds && !flightSent && time >= start+flightSeconds) { flightSent = true; notify('tour-flight-complete',details); }
-    if (time < end) raf = requestAnimationFrame(tick); else { raf = 0; notify(done,details); }
-  }; raf = requestAnimationFrame(tick);
+  playback.play(start, end, done, { ...details, playbackEpoch }, flightSeconds);
 }
 function handle(data: any) {
   if (data.action === 'set-subtitle-bounds') {
@@ -123,12 +128,23 @@ function handle(data: any) {
     }
     return;
   }
-  if (!ready) { queuedMotion = data; return; }
+  if (data.action === 'pause-scene-playback') { queuedPlaybackPaused = true; playback.pause(); return; }
+  if (data.action === 'resume-scene-playback') {
+    queuedPlaybackPaused = false;
+    const motion = replayPausedMotion;
+    replayPausedMotion = undefined;
+    if (motion) handle(motion); else playback.resume();
+    return;
+  }
+  if (data.action === 'stop-scene-playback') { queuedMotion = undefined; replayPausedMotion = undefined; queuedPlaybackPaused = false; stop(); return; }
+  if (!ready) { queuedMotion = data; replayPausedMotion = undefined; queuedPlaybackPaused = false; return; }
+  replayPausedMotion = undefined;
+  queuedPlaybackPaused = false;
   if (data.action === 'switch-imagery') { void switchImagery(String(data.imagery || '')).catch(error => loadFailed(error)); return; }
   const descent = scene.region.openingDescent?.enabled === false ? 0 : Number(scene.region.openingDescent?.seconds || 0);
-  const wasPlaying = raf !== 0;
+  const wasPlaying = playback.active;
   stop();
-  if (data.action === 'stop-scene-playback') return;
+  playbackEpoch = data.playbackEpoch;
   openingOnly = false;
   contextIntro = false;
   flightOrigin = undefined;
@@ -230,8 +246,11 @@ async function load(signal: AbortSignal) {
   draw(true);
   controls.forEach(handle);
   const motion = queuedMotion;
+  const pauseQueuedMotion = queuedPlaybackPaused;
   queuedMotion = undefined;
-  if (motion) handle(motion);
+  if (motion && pauseQueuedMotion) replayPausedMotion = motion;
+  else if (motion) handle(motion);
+  else playback.reconnect();
   notify('engine-ready');
 }
 function receiveResponse(raw: string) {
@@ -258,7 +277,7 @@ function teardown() {
   connectedAt = 0;
   channelReady = false;
   ready = false;
-  stop();
+  playback.disconnect();
   sceneLoad?.abort();
   sceneLoad = undefined;
   for (const request of pending.values()) {

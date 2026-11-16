@@ -25,6 +25,7 @@ interface RegionContent {
 
 interface RegionData {
   id?: string;
+  cameraPreset?: import("../../packages/render-spec/tour-plan.js").TourCamera;
   name?: string;
   parentId?: string;
   geometryPath?: string;
@@ -234,7 +235,10 @@ export const RENDERED_MAP_SOURCES = [
   "apps/cesium-player/public/imagery-config.json",
   "apps/cesium-player/public/tour-presentation.js",
   ".agents/skills/cesium-geo-documentary/scripts/capture-frames.ts",
-  ".agents/skills/cesium-geo-documentary/scripts/build-cesium-scenes.ts"
+  ".agents/skills/cesium-geo-documentary/scripts/build-cesium-scenes.ts",
+  ".agents/skills/cesium-geo-documentary/scripts/build-child-tour.ts",
+  "packages/render-spec/tour-plan.ts",
+  "packages/render-spec/visual-timeline.ts"
 ];
 
 export async function mapRendererSignature(root: string): Promise<string> {
@@ -424,11 +428,9 @@ export async function normalizeProject(root: string, input: VideoProject | Recor
       // stable defaults such as `transition: "fly"`. Omitting that declarative
       // default previously produced a different cache signature even though the
       // Cesium camera path was identical.
-      // The scheme's frozen boundary owns canonical framing; retain only the
-      // saved motion preference so reopening a scheme never re-fits it to a
-      // boundary it was not authored against.
+      // 已保存的场景相机是用户镜头，冻结边界只提供缺省字段，不能覆盖自定义取景。
       camera: scene.camera
-        ? { ...(previous.camera ?? {}), ...scene.camera, transition: previous.camera?.transition ?? scene.camera.transition }
+        ? { ...scene.camera, ...(previous.camera ?? {}), transition: previous.camera?.transition ?? scene.camera.transition }
         : previous.camera
     } as StudioScene;
   });
@@ -522,6 +524,7 @@ export async function buildProjectRenderSpec(root: string, project: VideoProject
   return buildRenderSpec({
     project,
     cues: resolvedCues,
+    parentCamera: (await json<RegionData>(await regionRecordPath(root, project.regionId, project.id))).cameraPreset,
     geometrySignature: await geometrySignature(root, project.regionId, project.id),
     rendererSignature: await mapRendererSignature(root),
     // The editor's timecode has to start the narration where the export does; the
