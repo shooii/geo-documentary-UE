@@ -334,7 +334,7 @@ export function buildRenderSpec(input: {
     : undefined;
   const narrationDurationSeconds = input.narrationDurationSeconds ?? cues.at(-1)?.end ?? 0;
   const timelineDurationSeconds = input.timelineDurationSeconds ?? Math.ceil(narrationDurationSeconds + project.template.openingDescentSeconds);
-  const tourPlan = buildTourPlan({ scenes: project.scenes, ranges, parentCamera: input.parentCamera });
+  const tourPlan = buildTourPlan({ scenes: project.scenes, ranges, parentCamera: input.parentCamera, output: project.output });
   const signatureInput = {
     tourPlanVersion: TOUR_PLAN_VERSION,
     tourPlan,

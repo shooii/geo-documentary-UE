@@ -1,8 +1,9 @@
-export const TOUR_PLAN_VERSION = "distance-budget-v2";
+import { fitBoundaryCamera, isAutomaticCamera, type FramedCamera } from '../geo-camera/index.js';
+export const TOUR_PLAN_VERSION = "safe-frame-distance-v3";
 export const TOUR_FILL_SECONDS = 1.15;
 export const TOUR_SETTLE_SECONDS = 0.4;
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
-export interface TourCamera { longitude: number; latitude: number; height: number; heading: number; pitch: number; roll?: number }
+export interface TourCamera extends FramedCamera {}
 export interface TourScene {
   id: string; section?: string | undefined; childId?: string | undefined; childName?: string | undefined;
   title?: string | undefined; narration?: string | undefined; duration: number; camera?: TourCamera | undefined;
@@ -13,11 +14,11 @@ export interface TourDiagnostic { sceneId: string; childId: string; code: "missi
 export interface TourStop {
   id: string; sceneId: string; name: string; start: number; end: number; flightDuration: number;
   groundDistanceMeters: number; requestedHoldSeconds: number; visualReadySeconds: number;
-  cameraPreset: TourCamera; cameraProfiles: { portrait: TourCamera };
+  cameraPreset: TourCamera; cameraProfiles: { portrait: TourCamera; landscape?: TourCamera; square?: TourCamera };
 }
 export interface TourPlan { version: typeof TOUR_PLAN_VERSION; parentCamera?: TourCamera; narrationOffsetSeconds: number; tourStops: TourStop[]; diagnostics: TourDiagnostic[] }
 export function normalizeTourCamera(camera: TourCamera): TourCamera {
-  return { longitude: camera.longitude, latitude: camera.latitude, height: camera.height, heading: camera.heading, pitch: camera.pitch, ...(camera.roll === undefined ? {} : { roll: camera.roll }) };
+  return { longitude: camera.longitude, latitude: camera.latitude, height: camera.height, heading: camera.heading, pitch: camera.pitch, ...(camera.roll === undefined ? {} : { roll: camera.roll }), ...(camera.framing ? { framing: camera.framing } : {}) };
 }
 function validCamera(camera: TourCamera): boolean {
   return [camera.longitude, camera.latitude, camera.height, camera.heading, camera.pitch, camera.roll ?? 0].every(Number.isFinite)
@@ -33,7 +34,8 @@ export function groundDistanceMeters(from: TourCamera, to: TourCamera): number {
 export function tourVisualReadySeconds(flight: number): number {
   return Math.max(flight + TOUR_FILL_SECONDS, flight * .55 + Math.max(.45, flight * .35)) + TOUR_SETTLE_SECONDS;
 }
-export function buildTourPlan(input: { scenes: readonly TourScene[]; ranges?: readonly TourRange[] | undefined; parentCamera?: TourCamera | undefined; narrationOffsetSeconds?: number; flightPreferenceSeconds?: number }): TourPlan {
+export interface TourOutput { profile: 'portrait' | 'landscape' | 'square'; width: number; height: number }
+export function buildTourPlan(input: { scenes: readonly TourScene[]; ranges?: readonly TourRange[] | undefined; parentCamera?: TourCamera | undefined; narrationOffsetSeconds?: number; flightPreferenceSeconds?: number; output?: TourOutput | undefined }): TourPlan {
   const tourStops: TourStop[] = [];
   const diagnostics: TourDiagnostic[] = [];
   const report = (scene: Pick<TourScene, "id" | "childId">, code: TourDiagnostic["code"], message: string, availableSeconds = 0, requiredSeconds = 0) => diagnostics.push({ sceneId: scene.id, childId: scene.childId ?? "", code, availableSeconds, requiredSeconds, message: `[${scene.id}] ${message}` });
@@ -79,7 +81,22 @@ export function buildTourPlan(input: { scenes: readonly TourScene[]; ranges?: re
     const flight = Math.min(duration, Math.max(2.4, Math.min(preferred, duration - hold)));
     const required = 2.4 + hold;
     if (duration + 1e-6 < required) report(scene, "short-cue", `${scene.title ?? scene.childId}旁白窗口${duration.toFixed(2)}秒不足：飞行、落稳及填色至少需要${required.toFixed(2)}秒`, duration, required);
-    tourStops.push({ id: scene.childId!, sceneId: scene.id, name: scene.childName ?? scene.title ?? scene.childId!, start: start + offset, end: end + offset, flightDuration: flight, groundDistanceMeters: Math.round(distance), requestedHoldSeconds: hold, visualReadySeconds: tourVisualReadySeconds(flight), cameraPreset: normalizeTourCamera(scene.camera), cameraProfiles: { portrait: normalizeTourCamera(scene.camera) } });
+    const cameraProfiles: TourStop['cameraProfiles'] = { portrait: normalizeTourCamera(scene.camera) };
+    if (isAutomaticCamera(scene.camera)) {
+      const framing = scene.camera.framing;
+      try {
+        if (input.output && (![input.output.width, input.output.height].every(Number.isFinite) || input.output.width <= 0 || input.output.height <= 0)) throw new Error('输出尺寸必须为正有限数');
+        for (const [profile, defaultAspect] of [['portrait', 9 / 16], ['landscape', 16 / 9], ['square', 1]] as const) {
+          const aspect = input.output?.profile === profile ? input.output.width / input.output.height : defaultAspect;
+          const fitted = fitBoundaryCamera(scene.camera, framing.bounds, aspect, framing.points, framing.safeFrame);
+          cameraProfiles[profile] = normalizeTourCamera({ ...fitted, framing: { ...framing, reference: normalizeTourCamera({ ...fitted, framing: undefined }) } });
+        }
+      } catch (error) {
+        report(scene, 'invalid-camera', `自动取景失败：${error instanceof Error ? error.message : String(error)}`, duration);
+        continue;
+      }
+    }
+    tourStops.push({ id: scene.childId!, sceneId: scene.id, name: scene.childName ?? scene.title ?? scene.childId!, start: start + offset, end: end + offset, flightDuration: flight, groundDistanceMeters: Math.round(distance), requestedHoldSeconds: hold, visualReadySeconds: tourVisualReadySeconds(flight), cameraPreset: normalizeTourCamera(scene.camera), cameraProfiles });
     previous = scene.camera;
   }
   return { version: TOUR_PLAN_VERSION, ...(parentCamera && validCamera(parentCamera) ? { parentCamera: normalizeTourCamera(parentCamera) } : {}), narrationOffsetSeconds: offset, tourStops, diagnostics };

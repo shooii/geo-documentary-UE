@@ -1963,11 +1963,10 @@ async function serveStatic(pathname: string, response: ServerResponse): Promise<
     return streamFile(file, response, undefined, IMMUTABLE_ASSET_CACHE);
   }
   if (pathname === "/shared/tour-plan.js") {
-    const { transform } = await import("esbuild");
-    const source = await readFileResilient(join(root, "packages/render-spec/tour-plan.ts"), "utf8");
-    const result = await transform(source, { loader: "ts", format: "esm", target: "es2022" });
+    const { build } = await import("esbuild");
+    const result = await build({ entryPoints: [join(root, "packages/render-spec/tour-plan.ts")], bundle: true, write: false, platform: "browser", format: "esm", target: "es2022" });
     response.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-cache" });
-    response.end(result.code);
+    response.end(result.outputFiles[0]!.text);
     return;
   }
   const relativePath = pathname === "/" ? "index.html" : pathname.replace(/^\//, "");

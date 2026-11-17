@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { buildRenderSpec, mapScenesToCues, parseSrt, updateProjectMeasuredDurations, type RenderSpec, type TimedCue } from "../../packages/render-spec/index.js";
 import { mediaKindForPath } from "../../packages/content-engine/media.js";
 import { DEFAULT_IMAGERY_PROVIDER, outputSize, type AssetFit, type AssetPlacement, type StudioAsset, type StudioScene, type VideoProject } from "../../packages/project-schema/index.js";
-import { portraitChildCameraPreset, type GeoBounds } from "../../packages/geo-camera/index.js";
+import { automaticChildCamera, boundaryCameraPoints, type GeoBounds } from "../../packages/geo-camera/index.js";
 import { snapshotFile } from "./boundary-snapshot.js";
 import { readFileResilient, readJsonResilient } from "./fs-resilience.js";
 
@@ -205,6 +205,7 @@ export async function geometrySignature(root: string, regionId: string, projectI
  * shipped without a bump. Hashing the actual files removes the class of bug.
  */
 export const RENDERED_MAP_SOURCES = [
+  "packages/geo-camera/index.ts",
   "apps/ue-player/presentation.ts",
   "apps/ue-player/client.ts",
   "apps/ue-player/scene.ts",
@@ -229,6 +230,7 @@ export const RENDERED_MAP_SOURCES = [
   "apps/ue-player/capture.ts",
   "unreal/GeoDocumentary/Source/GeoDocumentary/GeoMap.cpp",
   "unreal/GeoDocumentary/Source/GeoDocumentary/GeoMap.h",
+  "unreal/GeoDocumentary/Source/GeoDocumentary/GeoFocusLabelLayout.h",
   "unreal/GeoDocumentary/Config/DefaultEngine.ini",
   "apps/cesium-player/public/runtime.js",
   "apps/cesium-player/public/index.html",
@@ -272,6 +274,15 @@ export async function makeProject(root: string, regionId?: string, options: { pr
   const regionPath = await regionRecordPath(root, selected.id, options.projectId);
   const data = await json<RegionData>(regionPath);
   const children = data.childRegions ?? [];
+  const geometryPath = data.childGeometryPath;
+  const geometryFile = geometryPath ? await snapshotFile(root, options.projectId, geometryPath) ?? join(root, geometryPath) : undefined;
+  const childGeometry = geometryFile && existsSync(geometryFile) ? await json<{ features?: Array<{ id?: string; properties?: Record<string, unknown>; geometry?: any }> }>(geometryFile) : undefined;
+  const childPoints = new Map<string, Array<readonly [number, number]>>();
+  for (const feature of childGeometry?.features ?? []) {
+    const id = String(feature.properties?.id ?? feature.id ?? '');
+    const points = boundaryCameraPoints({ type: 'Feature', geometry: feature.geometry });
+    childPoints.set(id, [...(childPoints.get(id) ?? []), ...points]);
+  }
   if (!children.length) throw new Error(`${selected.name}没有可用的直接下级行政区边界，暂不能使用新寮镇巡游模板`);
   const childMap = new Map(children.map((child) => [String(child.id), child]));
   // The narrated tour follows `tourChildIds`; `childRegions` additionally holds
@@ -319,7 +330,7 @@ export async function makeProject(root: string, regionId?: string, options: { pr
         childName: child.name,
         ...(child.cameraPreset ? {
           camera: {
-            ...portraitChildCameraPreset(child.cameraProfiles?.portrait ?? child.cameraPreset, child.bbox),
+            ...automaticChildCamera(child.cameraProfiles?.portrait ?? child.cameraPreset, child.bbox, childPoints.get(String(child.id))),
             transition: "fly" as const
           }
         } : {})

@@ -9,7 +9,7 @@ import { newRenderJob, selectSceneAssetsForRender } from "../apps/studio/render-
 import { normalizeTimedCueOverlaps } from "../apps/studio/render-timing.js";
 import { normalizeSemanticText, validateVideoProject, type AssetPlacement, type VideoProject } from "../packages/project-schema/index.js";
 import { allChildrenPresent, goldenDurationIsComparable } from "../apps/studio/golden-qa.js";
-import { portraitChildCameraHeight, portraitChildCameraPreset } from "../packages/geo-camera/index.js";
+import { portraitChildCameraHeight, portraitChildCameraPreset, fitBoundaryCamera, isAutomaticCamera } from "../packages/geo-camera/index.js";
 import type { RenderSpec } from "../packages/render-spec/index.js";
 
 const root = resolve(process.cwd());
@@ -185,8 +185,14 @@ test("Xilian follows editorial tourOrder and fits small villages for a portrait 
   const boundsById = new Map(region.childRegions.map((child) => [child.id, child.bbox]));
   for (const scene of childScenes) {
     const bounds = boundsById.get(String(scene.childId))!;
-    assert.equal(scene.camera?.longitude, (bounds[0] + bounds[2]) / 2);
-    assert.equal(scene.camera?.latitude, (bounds[1] + bounds[3]) / 2);
+    const camera = scene.camera!;
+    assert.ok(isAutomaticCamera(camera));
+    assert.deepEqual(camera.framing.bounds, bounds);
+    assert.ok(camera.framing.points?.length);
+    const fitted = fitBoundaryCamera(camera, bounds, 9 / 16, camera.framing.points);
+    assert.equal(camera.longitude, fitted.longitude);
+    assert.equal(camera.latitude, fitted.latitude);
+    assert.equal(camera.height, fitted.height);
   }
 });
 
@@ -454,8 +460,8 @@ test("portrait child framing responds to boundary width and height", () => {
     { longitude: 109.8954, latitude: 20.3855, height: 11_500, heading: 0, pitch: -64 },
     [109.8900226, 20.3434288, 109.9372462, 20.3901876]
   );
-  assert.equal(asymmetric.longitude, (109.8900226 + 109.9372462) / 2);
-  assert.equal(asymmetric.latitude, (20.3434288 + 20.3901876) / 2);
+  assert.ok(Math.abs(asymmetric.longitude - (109.8900226 + 109.9372462) / 2) < 1e-10);
+  assert.ok(asymmetric.latitude > 20.3434288 && asymmetric.latitude < 20.3901876);
   assert.ok(asymmetric.height > 9_000);
 });
 

@@ -480,6 +480,7 @@ export async function materializeProject(sandbox: string, project: VideoProject,
   const outroParagraphIndex = spokenParagraphs.findIndex((scene) => scene.section === "outro");
   if (outroParagraphIndex >= 0) current.outroParagraphIndex = outroParagraphIndex;
   current.tourOrder = spec.childTourOrder;
+  current.tourOutput = project.output;
   // Counts every paragraph that precedes the child tour, not just `overview`:
   // an outro-lead block sits *after* the tour, so it must not inflate this.
   current.tourIntroSentences = project.scenes

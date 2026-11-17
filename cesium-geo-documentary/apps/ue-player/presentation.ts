@@ -50,7 +50,8 @@ export function flight(from: Camera, to: Camera, progress: number): Camera {
   const eased = smooth(progress);
   const { geodesic } = lastLeg;
   const point = geodesic.interpolateUsingFraction(eased);
-  const apex = Math.max(500, Math.min(2800, geodesic.surfaceDistance * .08));
+  const framingScale = Math.min(from.height, to.height);
+  const apex = Math.min(2800, framingScale * .18) * (1 - Math.exp(-geodesic.surfaceDistance / Math.max(1, framingScale * 2.25)));
   const headingDelta = wrapAngle(to.heading - from.heading);
   return {
     lon: point.longitude * 180 / Math.PI,
@@ -96,7 +97,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   const preset = camera(region.cameraProfiles?.[profile] || region.cameraPreset);
   const contextPreset = scene.context?.cameraProfiles?.[profile] || scene.context?.cameraPreset;
   const contextPose = contextPreset ? camera(contextPreset) : undefined;
-  const overview = { ...preset, height: preset.height * (stops.length ? .9 : 1) };
+  const overview = preset;
   const labelReferenceDistance = preset.height / Math.max(.35, Math.sin(Math.abs(preset.pitch * Math.PI / 180)));
   const opening = region.openingDescent?.enabled === false ? null : region.openingDescent;
   const descent = opening ? Math.max(2, Math.min(16, Number(opening.seconds ?? 3))) : 0;

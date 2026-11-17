@@ -1969,7 +1969,7 @@ function tourPreviewPayload() {
   const sameProject = state.renderSpec?.projectId === state.project.id;
   const plan = sameProject && !state.renderSpecStale && state.renderSpec?.tourPlan
     ? state.renderSpec.tourPlan
-    : buildTourPlan({ scenes: state.project.scenes.map(scene => ({ ...scene, duration: sceneDuration(scene) })), ranges: sameProject && !state.renderSpecStale ? state.renderSpec?.sceneCueRanges : undefined, parentCamera: sameProject ? state.renderSpec?.tourPlan?.parentCamera : undefined });
+    : buildTourPlan({ scenes: state.project.scenes.map(scene => ({ ...scene, duration: sceneDuration(scene) })), ranges: sameProject && !state.renderSpecStale ? state.renderSpec?.sceneCueRanges : undefined, parentCamera: sameProject ? state.renderSpec?.tourPlan?.parentCamera : undefined, output: state.project.output });
   const tourStops = plan.tourStops;
   if (!tourStops.length) return null;
   // No `openingSeconds` here on purpose. The player owns the descent offset

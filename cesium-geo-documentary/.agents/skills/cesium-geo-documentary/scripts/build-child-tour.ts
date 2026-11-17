@@ -1,9 +1,9 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { buildTourPlan, assertTourPlanExportable } from "../../../../packages/render-spec/tour-plan.js";
+import { buildTourPlan, assertTourPlanExportable, type TourCamera, type TourOutput } from "../../../../packages/render-spec/tour-plan.js";
 import { resolve } from "node:path";
 import { SceneTimelineSchema } from "../../../../packages/timeline-schema/index.js";
 import { normalizeTourReturnSeconds, parseSrt } from "./narration-timing.js";
-import { portraitChildCameraPreset, type GeoBounds } from "../../../../packages/geo-camera/index.js";
+import { type GeoBounds } from "../../../../packages/geo-camera/index.js";
 import { PARENT_BOUNDARY_REVEAL_START_SECONDS } from "../../../../packages/render-spec/opening-timing.js";
 
 interface ChildRegion {
@@ -11,7 +11,7 @@ interface ChildRegion {
   name: string;
   labelPoint: [number, number];
   bbox: GeoBounds;
-  cameraPreset: { longitude: number; latitude: number; height: number; heading: number; pitch: number; roll: number };
+  cameraPreset: TourCamera;
   cameraProfiles?: { portrait?: ChildRegion["cameraPreset"] };
 }
 interface RegionRecord {
@@ -30,6 +30,7 @@ interface TourContent {
   tourFlightSeconds?: number;
   tourReturnSeconds?: number;
   tourMapHoldSeconds?: Record<string, number>;
+  tourOutput?: TourOutput;
   /** Exact per-child sentence-cue ranges written by the render engine after
    *  the real narration SRT was measured. A child paragraph may be split into
    *  several TTS sentence cues; when present this mapping replaces the legacy
@@ -122,12 +123,14 @@ const tourStops = content.tourOrder.map((id, index) => {
   const cueStart = firstCue.start;
   const cueEnd = lastCue.end;
   const cueDuration = cueEnd - cueStart;
-  const previousCamera = index === 0 ? region.cameraPreset : childMap.get(String(content.tourOrder[index - 1]))?.cameraPreset ?? region.cameraPreset;
+  const previousChild = index > 0 ? childMap.get(String(content.tourOrder[index - 1])) : undefined;
+  const previousCamera = previousChild?.cameraProfiles?.portrait ?? previousChild?.cameraPreset ?? region.cameraPreset;
   const plan = buildTourPlan({
     parentCamera: previousCamera,
     narrationOffsetSeconds: narrationSyncOffsetSeconds,
     flightPreferenceSeconds: content.tourFlightSeconds ?? 4.2,
-    scenes: [{ id: String(id), childId: String(id), section: "child", title: child.name, duration: cueDuration, camera: child.cameraPreset, timing: { mapHoldSeconds: Number(content.tourMapHoldSeconds?.[String(id)] ?? 2) } }],
+    output: content.tourOutput,
+    scenes: [{ id: String(id), childId: String(id), section: "child", title: child.name, duration: cueDuration, camera: child.cameraProfiles?.portrait ?? child.cameraPreset, timing: { mapHoldSeconds: Number(content.tourMapHoldSeconds?.[String(id)] ?? 2) } }],
     ranges: [{ sceneId: String(id), start: cueStart, end: cueEnd }]
   });
   assertTourPlanExportable(plan);
@@ -140,11 +143,8 @@ const tourStops = content.tourOrder.map((id, index) => {
     flightDuration: planned.flightDuration,
     visualReadySeconds: planned.visualReadySeconds,
     groundDistanceMeters: planned.groundDistanceMeters,
-    cameraPreset: child.cameraPreset,
-    cameraProfiles: {
-      ...(child.cameraProfiles ?? {}),
-      portrait: child.cameraProfiles?.portrait ?? portraitChildCameraPreset(child.cameraPreset, child.bbox)
-    },
+    cameraPreset: planned.cameraPreset,
+    cameraProfiles: planned.cameraProfiles,
     narration: rawCues.slice(firstCueIndex, lastCueIndex + 1).map((cue) => cue.text).join(""),
     requestedHoldSeconds: planned.requestedHoldSeconds
   };

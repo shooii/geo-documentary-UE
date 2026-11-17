@@ -126,6 +126,7 @@ export interface StudioScene {
   imageryAnnotation?: boolean;
   mapView?: MapView;
   camera?: {
+    framing?: import('../geo-camera/index.js').FramedCamera['framing'];
     longitude: number;
     latitude: number;
     height: number;

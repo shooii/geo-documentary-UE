@@ -1,4 +1,5 @@
 #include "GeoMap.h"
+#include "GeoFocusLabelLayout.h"
 #include "GeoSky.h"
 #include "Async/Async.h"
 #include "Engine/PostProcessVolume.h"
@@ -1782,6 +1783,7 @@ void AGeoHUD::DrawHUD()
     {
         LabelGeneration = Map->Generation;
         LabelPlacements.Reset();
+        FocusLabelWarnings.Reset();
         LabelPlates.Reset();
     }
     if (CachedFrame != F || CachedSize != Size)
@@ -3190,8 +3192,20 @@ void AGeoHUD::DrawHUD()
             continue;
         FVector2D Point;
         if (!ToScreen(Label.Position, Point))
+        {
+            if (!Current.IsEmpty() && !Label.Parent && Label.Id == Current)
+            {
+                const FString Warning = Label.Id + TEXT(":projection");
+                if (!FocusLabelWarnings.Contains(Warning))
+                {
+                    FocusLabelWarnings.Add(Warning);
+                    UE_LOG(LogTemp, Warning, TEXT("GEO_LABEL focus=%s fallback=projection-unavailable"), *Label.Id);
+                }
+            }
             continue;
-        if (Point.X < 0 || Point.X > Size.X || Point.Y < 0 || Point.Y > Size.Y)
+        }
+        if ((Point.X < 0 || Point.X > Size.X || Point.Y < 0 || Point.Y > Size.Y)
+            && (Current.IsEmpty() || Label.Parent || Label.Id != CurrentId))
             continue;
 
         // The shader's NearFarScalar uses squared eye distance and a fifth-root ease.
@@ -3430,7 +3444,7 @@ void AGeoHUD::DrawHUD()
         const double BaseY = Pinned ? -(Label.IconSize + Gap + Label.Extent.Y) : 0;
         // 保持原锚点；安全检测覆盖整行字形、描边及动画最大起伏，不截掉半字。
         const FVector2D Point = Label.Anchor + FVector2D(0, BaseY);
-        const FBox2D Bounds(Point - Label.Extent, Point + Label.Extent);
+        FBox2D Bounds(Point - Label.Extent, Point + Label.Extent);
         const double LayoutHalo = FMath::Max(2. * Scale, Label.Ink * .08);
         const FVector2D FullExtent(FMath::Max(double(Label.Extent.X), double(Label.UnitWidth) * .5) + LayoutHalo,
             FMath::Max(double(Label.Extent.Y), double(Label.Ink) * (Label.Animated ? .55 : .5)) + LayoutHalo);
@@ -3448,11 +3462,112 @@ void AGeoHUD::DrawHUD()
                                                 FMath::Max(Other.Min.Y - Footprint.Max.Y, Footprint.Min.Y - Other.Max.Y));
             Clearance = FMath::Min(Clearance, Separation);
         }
+        bool Fallback = false;
+        double BadgeIconSize = 0;
+        int32 Candidate = 0;
+        TArray<GeoFocusLabel::Rect> FocusObstacles;
+        const auto LayoutRect = [](const FBox2D &Box) {
+            return GeoFocusLabel::Rect{Box.Min.X, Box.Min.Y, Box.Max.X, Box.Max.Y};
+        };
+        if (Label.Priority == 2 && !Current.IsEmpty())
+        {
+            for (const FBox2D &Other : Occupied)
+                FocusObstacles.Add(LayoutRect(Other));
+            const FVector2D PlateExtent = Label.PlateTexture ? Label.Extent : FullExtent;
+            auto Badge = GeoFocusLabel::WithIcon({PlateExtent.X, PlateExtent.Y}, 64 * Scale, 8 * Scale);
+            auto Placement = GeoFocusLabel::Place(LayoutRect(Footprint),
+                Badge.Half, LayoutRect(LabelSafe),
+                FocusObstacles.GetData(), FocusObstacles.Num(), SoftDistance);
+            if (!Placement.Valid && Label.PlateTexture)
+            {
+                // 超宽名牌放不下时保留完整名称，使用原字号的纯文字兜底。
+                Label.PlateTexture = nullptr;
+                Label.Extent = FVector2D(Label.UnitWidth * .5 + LayoutHalo + 12 * Scale,
+                                          Label.Ink * .5 + LayoutHalo + 6 * Scale);
+                Badge = GeoFocusLabel::WithIcon({Label.Extent.X, Label.Extent.Y}, 64 * Scale, 8 * Scale);
+                Placement = GeoFocusLabel::Place(LayoutRect(Footprint),
+                    Badge.Half, LayoutRect(LabelSafe),
+                    FocusObstacles.GetData(), FocusObstacles.Num(), SoftDistance);
+            }
+            if (!Placement.Valid)
+            {
+                Placements.Add(Label.Id, -1);
+                const FString Warning = Label.Id + TEXT(":no-space");
+                if (!FocusLabelWarnings.Contains(Warning))
+                {
+                    FocusLabelWarnings.Add(Warning);
+                    UE_LOG(LogTemp, Warning, TEXT("GEO_LABEL focus=%s fallback=no-space viewport=%.0fx%.0f"),
+                           *Label.Id, double(Size.X), double(Size.Y));
+                }
+                continue;
+            }
+            Candidate = Placement.Candidate;
+            Fallback = Candidate != 0;
+            if (Fallback)
+            {
+                Footprint = FBox2D(FVector2D(Placement.Bounds.Left, Placement.Bounds.Top),
+                                  FVector2D(Placement.Bounds.Right, Placement.Bounds.Bottom));
+                BadgeIconSize = Badge.IconSize;
+                const FVector2D Center = Footprint.GetCenter() + FVector2D(Badge.TextOffset, 0);
+                Bounds = FBox2D(Center - Label.Extent, Center + Label.Extent);
+                Clearance = SoftDistance;
+            }
+        }
         const double LayoutAlpha = ClearanceAlpha(Clearance);
         if (LayoutAlpha <= 0)
             continue;
         Label.Color.A *= LayoutAlpha;
-        if (Pinned && LabelPin)
+        if (Fallback)
+        {
+            const GeoFocusLabel::Point Anchor{Label.Anchor.X, Label.Anchor.Y};
+            const auto End = GeoFocusLabel::Nearest(LayoutRect(LabelSafe), Anchor);
+            const auto Start = GeoFocusLabel::Nearest(LayoutRect(Footprint), End);
+            const auto Clipped = GeoFocusLabel::ClipLeader(Start, End,
+                FocusObstacles.GetData(), FocusObstacles.Num(), 4 * Scale);
+            // FCanvasLineItem 只支持不透明混合；用细四边形保留标签淡入淡出。
+            const auto DrawAlphaLine = [this](const FVector2D &A, const FVector2D &B, double Width, const FLinearColor &Color) {
+                const FVector2D Delta = B - A;
+                const double Length = Delta.Size();
+                if (Length <= KINDA_SMALL_NUMBER)
+                    return;
+                const FVector2D Side(-Delta.Y * Width * .5 / Length, Delta.X * Width * .5 / Length);
+                FCanvasUVTri First, Second;
+                First.V0_Pos = A - Side; First.V1_Pos = B - Side; First.V2_Pos = B + Side;
+                Second.V0_Pos = A - Side; Second.V1_Pos = B + Side; Second.V2_Pos = A + Side;
+                First.V0_UV = First.V1_UV = First.V2_UV = FVector2D(.5, .5);
+                Second.V0_UV = Second.V1_UV = Second.V2_UV = FVector2D(.5, .5);
+                First.V0_Color = First.V1_Color = First.V2_Color = Color;
+                Second.V0_Color = Second.V1_Color = Second.V2_Color = Color;
+                BatchTriangleScratch.Reset();
+                BatchTriangleScratch.Add(First);
+                BatchTriangleScratch.Add(Second);
+                FCanvasTriangleItem Line(BatchTriangleScratch, GWhiteTexture);
+                Line.BlendMode = SE_BLEND_Translucent;
+                Canvas->DrawItem(Line);
+            };
+            DrawAlphaLine(FVector2D(Start.X, Start.Y), FVector2D(Clipped.X, Clipped.Y), 1.5 * Scale,
+                          Label.Color.CopyWithNewOpacity(Label.Color.A * Label.Fade * .7f));
+            const FVector2D IconMin(Footprint.Min.X, Footprint.GetCenter().Y - BadgeIconSize * .5);
+            const FLinearColor BadgeColor = FLinearColor::White.CopyWithNewOpacity(Label.Color.A * Label.Fade);
+            if (LabelPin)
+            {
+                FCanvasTileItem BadgeIcon(IconMin, FVector2D(BadgeIconSize, BadgeIconSize), BadgeColor);
+                BadgeIcon.Texture = LabelPin->GetResource();
+                BadgeIcon.BlendMode = SE_BLEND_Translucent;
+                Canvas->DrawItem(BadgeIcon);
+            }
+            else
+            {
+                // 资源缺失仍保留可识别定位符，不把备用目标降为只有文字。
+                const FVector2D Center = IconMin + FVector2D(BadgeIconSize * .5, BadgeIconSize * .4);
+                const double Radius = BadgeIconSize * .22;
+                const FVector2D Points[] = {{Center.X, Center.Y - Radius}, {Center.X + Radius, Center.Y},
+                    {Center.X, Center.Y + Radius * 1.8}, {Center.X - Radius, Center.Y}, {Center.X, Center.Y - Radius}};
+                for (int32 I = 1; I < 5; ++I)
+                    DrawAlphaLine(Points[I - 1], Points[I], 2 * Scale, BadgeColor);
+            }
+        }
+        if (!Fallback && Pinned && LabelPin)
         {
             const float IconSize = Label.IconSize;
             const FVector2D IconMin(Label.Anchor.X - IconSize * .5f, Label.Anchor.Y - IconSize);
@@ -3463,7 +3578,7 @@ void AGeoHUD::DrawHUD()
             Canvas->DrawItem(Icon);
         }
         Occupied.Add(Footprint.ExpandBy(3 * Scale));
-        Placements.Add(Label.Id, 0);
+        Placements.Add(Label.Id, Candidate);
         const FVector2D Position = Bounds.GetCenter();
         if (Label.PlateTexture)
         {
