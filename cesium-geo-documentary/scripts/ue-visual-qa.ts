@@ -6,12 +6,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
-import { parseSrt, type RenderSpec } from '../packages/render-spec/index.js';
-import { assertTourPlanExportable } from '../packages/render-spec/tour-plan.js';
 import ffmpeg from 'ffmpeg-static';
-import { hostname, platform, arch, cpus } from 'node:os';
-import { performance } from 'node:perf_hooks';
-import { buildQaSampling, captureMetrics, comparableRuns, identity, mapQaSamples, qaClock, qaProfileSupport, targetShapes, type QaProfile, type QaSample } from './ue-visual-qa-plan.js';
 
 const root = resolve(process.cwd());
 const args = process.argv.slice(2);
@@ -46,39 +41,41 @@ async function run() {
   const phase = option('phase', 'before');
   if (!['before', 'after'].includes(phase)) throw new Error('--phase仅支持before或after');
   const output = resolve(root, option('output', `outputs/visual-qa/${phase}`));
-  const projectOption = option('project', '');
-  if (!projectOption) throw new Error('请用--project显式选择正式job对应的项目快照');
-  const projectPath = resolve(root, projectOption);
+  await mkdir(dirname(output), { recursive: true });
+  await mkdir(output); // 独立槽：已有目录直接失败，不覆盖任何旧图。
+  const frames = join(output, 'frames');
+  await mkdir(frames);
+  const publicRoot = join(output, 'player');
+  await mkdir(publicRoot);
+  await copyFile(join(root, 'apps/ue-player/public/index.html'), join(publicRoot, 'index.html'));
+  if (phase === 'after') {
+    const { build } = await import('esbuild');
+    await build({ entryPoints: [join(root, 'apps/ue-player/client.ts')], outfile: join(publicRoot, 'player.js'), bundle: true, format: 'esm', sourcemap: true, target: 'es2022' });
+  } else await copyFile(join(root, 'apps/ue-player/public/player.js'), join(publicRoot, 'player.js'));
+  const playerBytes = await readFile(join(publicRoot, 'player.js'));
+  const playerAsset = { path: join(publicRoot, 'player.js'), sha256: createHash('sha256').update(playerBytes).digest('hex'), sourceMtime: (await stat(join(root, 'apps/ue-player/public/player.js'))).mtime.toISOString(), compiledInQa: phase === 'after' };
+  const projectPath = resolve(root, option('project', 'workspace/projects/project-mw9i0ssu.v000013.json'));
   const project = JSON.parse(await readFile(projectPath, 'utf8'));
-  const region = option('region', project.regionId);
-  const frozenSpecPath = option('render-spec', '');
-  const measuredCuesPath = option('cues', '');
-  const timingSource = frozenSpecPath ? 'frozen-render-spec' : measuredCuesPath ? 'measured-cues' : 'estimated';
-  if (args.includes('--formal') && timingSource === 'estimated') throw new Error('正式QA必须提供--render-spec或--cues实测文件，不接受估算计划');
-  const spec: RenderSpec = frozenSpecPath
-    ? JSON.parse(await readFile(resolve(root, frozenSpecPath), 'utf8'))
-    : await (await import('../apps/studio/project-service.js')).buildProjectRenderSpec(root, project, measuredCuesPath ? parseSrt(await readFile(resolve(root, measuredCuesPath), 'utf8')) : undefined);
-  if (spec.projectId !== project.id || spec.projectRevision !== project.revision || spec.regionId !== region) throw new Error('QA计划与项目快照的ID、修订或区域不一致');
-  if (!spec.tourPlan) throw new Error('冻结RenderSpec缺少共享巡游计划，请重新导出');
-  if (args.includes('--formal') || (timingSource !== 'estimated' && !args.includes('--plan-only'))) assertTourPlanExportable(spec.tourPlan);
-  const profile = option('profile', spec.output.profile);
-  if (!['portrait', 'landscape', 'square'].includes(profile)) throw new Error('--profile仅支持portrait/landscape/square');
-  const width = Number(option('width', String(profile === spec.output.profile ? spec.output.width : profile === 'landscape' ? 1920 : 1080)));
-  const height = Number(option('height', String(profile === spec.output.profile ? spec.output.height : profile === 'portrait' ? 1920 : 1080)));
-  if (![width, height].every(value => Number.isInteger(value) && value > 0)) throw new Error('截图尺寸必须为正整数');
-  const returnDuration = Number(option('return-duration', String(spec.outro.duration)));
-  if (frozenSpecPath && returnDuration !== spec.outro.duration) throw new Error('冻结计划不允许覆盖收尾时长');
-  const stops = spec.tourPlan.tourStops;
-  const cursor = stops.at(-1)?.end ?? 0;
+  const runtime = JSON.parse((await readFile(join(root, 'workspace/ue-runtime.json'), 'utf8')).replace(/^\uFEFF/, ''));
+  const region = option('region', '440882112');
+  const width = Number(option('width', '1080')), height = Number(option('height', '1920'));
+  const returnDuration = Number(option('return-duration', '4.4'));
+  let cursor = 0;
+  const stops = project.scenes.filter((scene: any) => scene.section === 'child' && scene.childId && scene.camera).map((scene: any) => {
+    const duration = Math.max(.001, Number(scene.duration) || .001);
+    const start = cursor; cursor += duration;
+    return { id: scene.childId, name: scene.childName || scene.title, start, end: cursor,
+      flightDuration: Math.min(4.2, Math.max(3.2, duration - Number(scene.timing?.mapHoldSeconds || 0))),
+      cameraPreset: scene.camera, cameraProfiles: { portrait: scene.camera } };
+  });
   if (!stops.length) throw new Error('项目无可捕获的巡游站点');
   const focus = stops[Math.min(5, stops.length - 1)]!;
-  const geometryPath = option('geometry', '');
-  const geometry = geometryPath ? JSON.parse(await readFile(resolve(root, geometryPath), 'utf8')) : null;
-  const plannedRegion = { openingDescent: { enabled: spec.opening.descentSeconds > 0, seconds: spec.opening.descentSeconds } };
-  const sampling = buildQaSampling(spec.tourPlan, returnDuration, geometry ? targetShapes(geometry) : [], plannedRegion);
-  const profileSupport = qaProfileSupport(spec.tourPlan, profile as QaProfile);
-  if (profileSupport.status === 'unsupported' && !args.includes('--plan-only')) throw new Error(`画幅${profile} unsupported：缺少冻结相机${profileSupport.missingStopIds.join('、')}`);
-  const samples: QaSample[] = [...sampling.samples];
+  const samples: { name: string; time: number; subtitleBounds?: { left: number; top: number; right: number; bottom: number }; annotationWindows?: { sceneId: string; start: number; end: number }[] }[] = [
+    { name: 'tour-near', time: focus.start + focus.flightDuration + .9 },
+    { name: 'tour-mid', time: focus.start + focus.flightDuration * .5 },
+    { name: 'closing-mid', time: cursor + returnDuration * .5 },
+    { name: 'closing-end', time: cursor + returnDuration }
+  ];
   const customTimes = option('times', '');
   if (customTimes) samples.splice(0, samples.length, ...customTimes.split(',').map((time, i) => ({ name: `custom-${i}`, time: Number(time) })));
   if (samples.some(sample => !Number.isFinite(sample.time) || sample.time < 0)) throw new Error('截图时间必须为非负有限数');
@@ -93,51 +90,17 @@ async function run() {
   const annotationWindow = option('annotation-window', '');
   if (annotationWindow) {
     const [start, end] = annotationWindow.split(',').map(Number);
-    if (![start, end].every(value => value !== undefined && Number.isFinite(value)) || start! < 0 || end! <= start!) throw new Error('--annotation-window需提供start,end两个递增秒数');
+    if (![start, end].every(value => value !== undefined && Number.isFinite(value)) || end! <= start!) throw new Error('--annotation-window需提供start,end两个递增秒数');
     const probeTime = Number(option('annotation-time', String(start! + 1)));
     samples.push({ name: 'annotation-on', time: probeTime, annotationWindows: [{ sceneId: 'probe', start: start!, end: end! }] });
     samples.push({ name: 'annotation-off', time: probeTime, annotationWindows: [] });
   }
-  if (samples.some(sample => !Number.isFinite(sample.time) || sample.time < 0)) throw new Error('截图时间必须为非负有限数');
   const imageryProvider = option('imagery', 'tianditu-imagery');
-  if (!['tianditu-imagery', 'tianditu-vector'].includes(imageryProvider)) throw new Error('QA截图只允许现有天地图影像或矢量代理');
-  const portOption = Number(option('port', '5674'));
-  if (!Number.isInteger(portOption) || portOption < 1 || portOption > 65233) throw new Error('--port必须为1到65233的整数');
-  samples.splice(0, samples.length, ...mapQaSamples(samples, sampling.clock));
-  await mkdir(dirname(output), { recursive: true });
-  await mkdir(output); // 校验通过后排他创建，不覆盖已有目录。
-  await writeFile(join(output, 'tour-plan.json'), JSON.stringify(spec.tourPlan, null, 2), 'utf8');
-  const manifest: any = { phase, region, project: projectPath, projectId: spec.projectId, projectRevision: spec.projectRevision,
-    timingSource, formalParity: false, parity: { status: 'not-measured', reason: '计划输入不等于运行场景；真实scene仍由实时接口加载，且没有正式合成字幕覆盖证据' }, sceneSource: 'live-api/scene', sceneIdentity: null, profileSupport, renderSpecPath: frozenSpecPath || null, measuredCuesPath: measuredCuesPath || null, profile, imagery: imageryProvider, width, height,
-    planIdentity: identity(spec.tourPlan), renderSpecIdentity: identity(spec), cacheSignature: spec.cacheSignature,
-    samplingIdentity: identity(samples), geometryPath: geometryPath || null, geometryIdentity: geometry ? identity(geometry) : null, frozenGeometrySignature: spec.geometrySignature,
-    machine: { id: identity({ host: hostname(), platform: platform(), arch: arch(), cpu: cpus()[0]?.model }), platform: platform(), arch: arch(), cpu: cpus()[0]?.model },
-    clock: { map: '共享tourPlan秒坐标（已含narrationOffsetSeconds，不重复加偏移）', capture: 'mapTime + 实际场景descentSeconds', ...sampling.clock, source: 'render-spec-planned-not-measured', wall: 'UTC ISO-8601', elapsed: 'node performance.now 单调毫秒' },
-    coverage: { ...sampling.coverage, sceneParity: 'not-measured', subtitleOverlay: 'not-measured' }, measurement: captureMetrics(null), formalGate: { status: 'not-measured', reason: '尚无截图、逐帧p95/p99、UE内存和三画幅人工验收证据' },
-    createdAt: new Date().toISOString(), tourEnd: cursor, returnDuration, stops, plannedSamples: samples,
-    matrix: sampling.matrix.map(item => ({ ...item, samples })), samples: [], status: args.includes('--plan-only') ? 'planned' : 'running' };
+  const manifest: any = { phase, region, project: projectPath, imagery: imageryProvider, width, height, playerAsset,
+    createdAt: new Date().toISOString(), tourEnd: cursor, returnDuration, stops, samples: [], status: 'running' };
   const saveManifest = () => writeFile(join(output, 'manifest.json'), JSON.stringify(manifest, null, 2));
   await saveManifest();
-  if (args.includes('--plan-only')) return;
-  const runtime = JSON.parse((await readFile(join(root, 'workspace/ue-runtime.json'), 'utf8')).replace(/^\uFEFF/, ''));
-  const frames = join(output, 'frames');
-  await mkdir(frames);
-  const publicRoot = join(output, 'player');
-  await mkdir(publicRoot);
-  await copyFile(join(root, 'apps/ue-player/public/index.html'), join(publicRoot, 'index.html'));
-  if (phase === 'after') {
-    const { build } = await import('esbuild');
-    await build({ entryPoints: [join(root, 'apps/ue-player/client.ts')], outfile: join(publicRoot, 'player.js'), bundle: true, format: 'esm', sourcemap: true, target: 'es2022' });
-  } else await copyFile(join(root, 'apps/ue-player/public/player.js'), join(publicRoot, 'player.js'));
-  const playerBytes = await readFile(join(publicRoot, 'player.js'));
-  manifest.playerAsset = { path: join(publicRoot, 'player.js'), sha256: createHash('sha256').update(playerBytes).digest('hex'), sourceMtime: (await stat(join(root, 'apps/ue-player/public/player.js'))).mtime.toISOString(), compiledInQa: phase === 'after' };
-  const engineBinary = join(runtime.engineRoot, 'Engine/Binaries/Win64/UnrealEditor.exe');
-  const projectBinary = join(dirname(runtime.project), 'Binaries/Win64/UnrealEditor-GeoDocumentary.dll');
-  const binaryIdentity = async (path: string) => ({ path, sha256: createHash('sha256').update(await readFile(path)).digest('hex') });
-  manifest.runtimeAssets = { engine: await binaryIdentity(engineBinary), project: await binaryIdentity(projectBinary).catch(() => ({ path: projectBinary, status: 'not-measured' })), projectConfig: await binaryIdentity(runtime.project) };
-  manifest.runPackageIdentity = identity({ player: manifest.playerAsset.sha256, runtime: manifest.runtimeAssets, plan: manifest.planIdentity });
-  await saveManifest();
-  const port = await usablePort(portOption);
+  const port = await usablePort(Number(option('port', '5674')));
   const signallingPort = port + 1, streamerPort = port + 2;
   const children: ChildProcess[] = [];
   const launch = (exe: string, argv: string[], env: NodeJS.ProcessEnv = {}) => {
@@ -182,33 +145,11 @@ async function run() {
     }, 240000, 'UE串流启动超时');
     browser = await chromium.launch({ headless: true });
     const page = await browser.newPage({ viewport: { width, height } });
-    // 记录浏览器镜头计算实际使用的实时scene；UE另行加载几何，正式场景一致性仍未实测。
-    let loadedScene: any;
-    await page.route('**/api/scene?*', async route => {
-      if (!loadedScene) {
-        const response = await route.fetch();
-        if (!response.ok()) throw new Error(`QA场景读取失败${response.status()}`);
-        loadedScene = await response.json();
-      }
-      await route.fulfill({ json: loadedScene });
-    });
-    await page.goto(`http://127.0.0.1:${port}/?region=${encodeURIComponent(region)}&profile=${profile}&imagery=${imageryProvider}&capture=1`);
+    await page.goto(`http://127.0.0.1:${port}/?region=${region}&profile=portrait&imagery=${imageryProvider}&capture=1`);
     await page.waitForFunction(() => Boolean((window as any).geoVideo?.getDiagnostics().ready), {}, { timeout: 240000 });
-    const actualClock = qaClock(loadedScene.region, returnDuration || 4.4, cursor);
+    await page.evaluate(payload => (window as any).geoVideo.prepareStudioTour(payload), { tourStops: stops, returnDuration });
     for (const sample of samples) {
-      if (sample.name === 'closing-mid') sample.time = actualClock.returnStart + actualClock.returnSeconds / 2;
-      if (sample.name === 'closing-end') sample.time = actualClock.returnStart + actualClock.returnSeconds;
-    }
-    samples.splice(0, samples.length, ...mapQaSamples(samples, actualClock));
-    manifest.clock = { ...manifest.clock, ...actualClock, source: 'actual-loaded-scene' };
-    manifest.sceneIdentity = identity({ region: loadedScene.region, layers: loadedScene.layers, context: loadedScene.context });
-    manifest.samplingIdentity = identity(samples);
-    await saveManifest();
-    await page.evaluate(payload => (window as any).geoVideo.prepareStudioTour(payload), { tourStops: stops, returnDuration, parentCamera: spec.tourPlan.parentCamera });
-    await page.evaluate(windows => (window as any).geoVideo.setAnnotationWindows(windows), spec.annotationWindows);
-    await page.evaluate(windows => (window as any).geoVideo.setSubtitleWindows(windows), []);
-    for (const sample of samples) {
-      if (sample.subtitleBounds) await page.evaluate(payload => (window as any).geoVideo.setSubtitleWindows([{ start: payload.captureTime!, end: payload.captureTime! + .01, bounds: payload.subtitleBounds }]), sample);
+      if (sample.subtitleBounds) await page.evaluate(payload => (window as any).geoVideo.setSubtitleWindows([{ start: payload.time, end: payload.time + .01, bounds: payload.subtitleBounds }]), sample);
       if (sample.annotationWindows) {
         await page.evaluate(windows => (window as any).geoVideo.setAnnotationWindows(windows), sample.annotationWindows);
         if (sample.annotationWindows.length > 0) {
@@ -216,15 +157,13 @@ async function run() {
           // 空注记层。等一拍让队列落地（真实预览持续渲染，不存在这个问题）。
           await page.waitForTimeout(2500);
           // 再渲染一次同样本帧，让新到的注记瓦片有机会贴到网格上。
-          await page.evaluate(time => (window as any).geoVideo.renderFrame(time), sample.captureTime!).catch(() => undefined);
+          await page.evaluate(time => (window as any).geoVideo.renderFrame(time), sample.time).catch(() => undefined);
           await page.waitForTimeout(800);
         }
       }
-      const captureStartedAt = new Date().toISOString();
-      const captureStarted = performance.now();
       const previous = new Set(await readdir(frames));
       for (let attempt = 1; ; attempt++) {
-        try { await page.evaluate(time => (window as any).geoVideo.renderFrame(time), sample.captureTime!); break; }
+        try { await page.evaluate(time => (window as any).geoVideo.renderFrame(time), sample.time); break; }
         catch (error) { if (attempt >= 4) throw error; await page.evaluate(() => (window as any).geoVideo?.waitForStream?.(60000)); }
       }
       let added: string[] = [];
@@ -232,17 +171,11 @@ async function run() {
       const file = `${sample.name}.png`;
       await copyFile(join(frames, added.sort().at(-1)!), join(output, file));
       const renderer = await page.evaluate(() => (window as any).geoVideo.getRendererStatus()).catch(() => null);
-      const image = await sharp(join(output, file)).metadata();
-      manifest.samples.push({ ...sample, file, sourceFrame: added.sort().at(-1),
-        coordinates: { mapTimeSeconds: sample.time, captureTimeSeconds: sample.captureTime, pixelOrigin: 'top-left', width: image.width, height: image.height, subtitleBounds: sample.subtitleBounds ?? null },
-        captureStartedAt, captureFinishedAt: new Date().toISOString(), captureRoundTripMs: performance.now() - captureStarted,
-        screenshotSha256: createHash('sha256').update(await readFile(join(output, file))).digest('hex'),
-        metrics: captureMetrics(renderer), renderer });
+      manifest.samples.push({ ...sample, file, sourceFrame: added.at(-1), renderer });
       await saveManifest();
       console.log(`已捕获 ${phase} ${sample.name} t=${sample.time.toFixed(3)}`);
     }
     manifest.status = 'complete';
-    manifest.formalGate = { status: 'not-measured', reason: '已捕获当前画幅；现有UE接口只提供平滑帧时，缺逐帧p95/p99、进程内存与三画幅人工验收证据' };
     await saveManifest();
     if (phase === 'after') await comparison(output, option('before', 'outputs/visual-qa/before'));
   } catch (error) {
@@ -272,10 +205,6 @@ async function comparison(after: string, beforeOption: string) {
   const manifest = JSON.parse(await readFile(join(after, 'manifest.json'), 'utf8'));
   const files: string[] = [];
   const baseline = JSON.parse(await readFile(join(before, 'manifest.json'), 'utf8'));
-  if (!comparableRuns(baseline, manifest)) {
-    await writeFile(join(after, 'comparison-gate.json'), JSON.stringify({ status: 'not-measured', reason: '仅允许同机器、同分辨率、同画幅、同RenderSpec、同几何、同实际场景、同计划、同采样与同影像来源比较' }, null, 2), { flag: 'wx' });
-    return;
-  }
   for (const sample of manifest.samples.filter((item: any) => baseline.samples.some((entry: any) => entry.name === item.name))) {
     const name = `comparison-${sample.name}.png`;
     const images = await Promise.all([before, after].map(directory => sharp(join(directory, sample.file)).resize(540, 960).toBuffer()));

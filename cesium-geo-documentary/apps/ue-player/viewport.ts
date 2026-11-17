@@ -1,5 +1,4 @@
-import { portraitOverviewExtent } from './framing.js';
-import { fitBoundaryCamera, isAutomaticCamera } from '../../packages/geo-camera/index.js';
+import { portraitOverviewExtent, portraitOverviewFrustumTangents, portraitOverviewTarget } from './framing.js';
 export const outputSizes = { portrait:[1080,1920], landscape:[1920,1080], square:[1080,1080] } as const;
 
 export function fitRegionProfiles(region:any, geometry:unknown) {
@@ -9,10 +8,12 @@ export function fitRegionProfiles(region:any, geometry:unknown) {
   for(const [name,[width,height]] of Object.entries(outputSizes)) {
     const preset=profiles[name] || region.cameraPreset;
     if(!preset)continue;
-    const points=extent.points.map(p=>[extent.longitude+p.east/(111320*Math.cos(extent.latitude*Math.PI/180)),extent.latitude+p.north/110570] as const);
-    // 已有自动镜头一旦被用户编辑，也与显式 custom 一样保留。
-    if(preset.framing && !isAutomaticCamera(preset))continue;
-    profiles[name]=fitBoundaryCamera({...preset,heading:Number(preset.heading??0),pitch:Number(preset.pitch??-64)},region.bbox,width/height,points);
+    const heading=Number(preset.heading || 0)*Math.PI/180;
+    const points=extent.points.map(p=>({east:p.east*Math.cos(heading)-p.north*Math.sin(heading),north:p.north*Math.cos(heading)+p.east*Math.sin(heading)}));
+    const target=portraitOverviewTarget(points,Number(preset.pitch ?? -64),.82,portraitOverviewFrustumTangents(width/height));
+    const east=target.eastMeters*Math.cos(heading)+target.northMeters*Math.sin(heading);
+    const north=target.northMeters*Math.cos(heading)-target.eastMeters*Math.sin(heading);
+    profiles[name]={...preset,longitude:extent.longitude+east/(111320*Math.cos(extent.latitude*Math.PI/180)),latitude:extent.latitude+north/110570,height:target.rangeMeters};
   }
   return {...region,cameraProfiles:profiles};
 }

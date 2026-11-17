@@ -74,7 +74,6 @@ export interface VisualClipPlanInput {
   placement: VisualClipPlacement;
   range?: VisualClipRange;
   sequenceIndex: number;
-  childVisualReadySeconds?: number;
   openingSceneId?: string;
   openingDelaySeconds?: number;
   /** Absent when the asset has no resolved cue; the scene window is used instead. */
@@ -142,7 +141,7 @@ export function planVisualClip(input: VisualClipPlanInput): VisualClipPlan {
   const notBeforeNarrationSeconds = scene.id === input.openingSceneId && range
     ? range.start + openingDelay
     : scene.section === "child" && range
-    ? range.start + (input.childVisualReadySeconds ?? plateSettleSeconds(flight))
+    ? range.start + plateSettleSeconds(flight)
     : range && sequenceIndex === 0
     ? range.start
     : undefined;

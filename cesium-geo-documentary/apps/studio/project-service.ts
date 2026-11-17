@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { buildRenderSpec, mapScenesToCues, parseSrt, updateProjectMeasuredDurations, type RenderSpec, type TimedCue } from "../../packages/render-spec/index.js";
 import { mediaKindForPath } from "../../packages/content-engine/media.js";
 import { DEFAULT_IMAGERY_PROVIDER, outputSize, type AssetFit, type AssetPlacement, type StudioAsset, type StudioScene, type VideoProject } from "../../packages/project-schema/index.js";
-import { automaticChildCamera, boundaryCameraPoints, type GeoBounds } from "../../packages/geo-camera/index.js";
+import { portraitChildCameraPreset, type GeoBounds } from "../../packages/geo-camera/index.js";
 import { snapshotFile } from "./boundary-snapshot.js";
 import { readFileResilient, readJsonResilient } from "./fs-resilience.js";
 
@@ -25,7 +25,6 @@ interface RegionContent {
 
 interface RegionData {
   id?: string;
-  cameraPreset?: import("../../packages/render-spec/tour-plan.js").TourCamera;
   name?: string;
   parentId?: string;
   geometryPath?: string;
@@ -205,7 +204,6 @@ export async function geometrySignature(root: string, regionId: string, projectI
  * shipped without a bump. Hashing the actual files removes the class of bug.
  */
 export const RENDERED_MAP_SOURCES = [
-  "packages/geo-camera/index.ts",
   "apps/ue-player/presentation.ts",
   "apps/ue-player/client.ts",
   "apps/ue-player/scene.ts",
@@ -230,17 +228,13 @@ export const RENDERED_MAP_SOURCES = [
   "apps/ue-player/capture.ts",
   "unreal/GeoDocumentary/Source/GeoDocumentary/GeoMap.cpp",
   "unreal/GeoDocumentary/Source/GeoDocumentary/GeoMap.h",
-  "unreal/GeoDocumentary/Source/GeoDocumentary/GeoFocusLabelLayout.h",
   "unreal/GeoDocumentary/Config/DefaultEngine.ini",
   "apps/cesium-player/public/runtime.js",
   "apps/cesium-player/public/index.html",
   "apps/cesium-player/public/imagery-config.json",
   "apps/cesium-player/public/tour-presentation.js",
   ".agents/skills/cesium-geo-documentary/scripts/capture-frames.ts",
-  ".agents/skills/cesium-geo-documentary/scripts/build-cesium-scenes.ts",
-  ".agents/skills/cesium-geo-documentary/scripts/build-child-tour.ts",
-  "packages/render-spec/tour-plan.ts",
-  "packages/render-spec/visual-timeline.ts"
+  ".agents/skills/cesium-geo-documentary/scripts/build-cesium-scenes.ts"
 ];
 
 export async function mapRendererSignature(root: string): Promise<string> {
@@ -274,15 +268,6 @@ export async function makeProject(root: string, regionId?: string, options: { pr
   const regionPath = await regionRecordPath(root, selected.id, options.projectId);
   const data = await json<RegionData>(regionPath);
   const children = data.childRegions ?? [];
-  const geometryPath = data.childGeometryPath;
-  const geometryFile = geometryPath ? await snapshotFile(root, options.projectId, geometryPath) ?? join(root, geometryPath) : undefined;
-  const childGeometry = geometryFile && existsSync(geometryFile) ? await json<{ features?: Array<{ id?: string; properties?: Record<string, unknown>; geometry?: any }> }>(geometryFile) : undefined;
-  const childPoints = new Map<string, Array<readonly [number, number]>>();
-  for (const feature of childGeometry?.features ?? []) {
-    const id = String(feature.properties?.id ?? feature.id ?? '');
-    const points = boundaryCameraPoints({ type: 'Feature', geometry: feature.geometry });
-    childPoints.set(id, [...(childPoints.get(id) ?? []), ...points]);
-  }
   if (!children.length) throw new Error(`${selected.name}没有可用的直接下级行政区边界，暂不能使用新寮镇巡游模板`);
   const childMap = new Map(children.map((child) => [String(child.id), child]));
   // The narrated tour follows `tourChildIds`; `childRegions` additionally holds
@@ -330,7 +315,7 @@ export async function makeProject(root: string, regionId?: string, options: { pr
         childName: child.name,
         ...(child.cameraPreset ? {
           camera: {
-            ...automaticChildCamera(child.cameraProfiles?.portrait ?? child.cameraPreset, child.bbox, childPoints.get(String(child.id))),
+            ...portraitChildCameraPreset(child.cameraProfiles?.portrait ?? child.cameraPreset, child.bbox),
             transition: "fly" as const
           }
         } : {})
@@ -439,9 +424,11 @@ export async function normalizeProject(root: string, input: VideoProject | Recor
       // stable defaults such as `transition: "fly"`. Omitting that declarative
       // default previously produced a different cache signature even though the
       // Cesium camera path was identical.
-      // 已保存的场景相机是用户镜头，冻结边界只提供缺省字段，不能覆盖自定义取景。
+      // The scheme's frozen boundary owns canonical framing; retain only the
+      // saved motion preference so reopening a scheme never re-fits it to a
+      // boundary it was not authored against.
       camera: scene.camera
-        ? { ...scene.camera, ...(previous.camera ?? {}), transition: previous.camera?.transition ?? scene.camera.transition }
+        ? { ...(previous.camera ?? {}), ...scene.camera, transition: previous.camera?.transition ?? scene.camera.transition }
         : previous.camera
     } as StudioScene;
   });
@@ -535,7 +522,6 @@ export async function buildProjectRenderSpec(root: string, project: VideoProject
   return buildRenderSpec({
     project,
     cues: resolvedCues,
-    parentCamera: (await json<RegionData>(await regionRecordPath(root, project.regionId, project.id))).cameraPreset,
     geometrySignature: await geometrySignature(root, project.regionId, project.id),
     rendererSignature: await mapRendererSignature(root),
     // The editor's timecode has to start the narration where the export does; the

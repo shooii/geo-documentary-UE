@@ -1228,9 +1228,6 @@ async function validateProjectReadiness(project: VideoProject): Promise<{ ready:
   let spec: Awaited<ReturnType<typeof buildProjectRenderSpec>> | undefined;
   try { spec = await buildProjectRenderSpec(root, project); check("cues", "实际 cue 映射有效", true, `${spec.narrationCues.length} 个 cue 已映射到 ${spec.sceneCueRanges.length} 个场景`); }
   catch (error) { check("cues", "实际 cue 映射有效", false, error instanceof Error ? error.message : String(error)); }
-  if (spec) advise("tour-budget", "巡游飞行、落稳与填色预算", spec.tourPlan.diagnostics.length === 0, spec.tourPlan.diagnostics.length
-    ? `${spec.tourPlan.diagnostics.map(item => item.message).join("；")}；预览仅诊断，正式导出将以实测旁白严格检查`
-    : `共享巡游计划 ${spec.tourPlan.version}，全部场景预算满足`);
   const childIds = project.scenes.filter((scene) => scene.section === "child").map((scene) => scene.childId!);
   check("children", "下级行政区数量和顺序", childIds.length > 0 && new Set(childIds).size === childIds.length, `${childIds.length} 个下级行政区，顺序来自权威内容配置`);
   const missingAssets = project.assets.filter((asset) => {
@@ -1961,13 +1958,6 @@ async function serveStatic(pathname: string, response: ServerResponse): Promise<
     // an editor that shows hundreds of these at once).
     if (!file.startsWith(normalize(sourceAssetsRoot)) || !existsSync(file)) return sendJson(response, 404, { error: "Project asset not found" });
     return streamFile(file, response, undefined, IMMUTABLE_ASSET_CACHE);
-  }
-  if (pathname === "/shared/tour-plan.js") {
-    const { build } = await import("esbuild");
-    const result = await build({ entryPoints: [join(root, "packages/render-spec/tour-plan.ts")], bundle: true, write: false, platform: "browser", format: "esm", target: "es2022" });
-    response.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-cache" });
-    response.end(result.outputFiles[0]!.text);
-    return;
   }
   const relativePath = pathname === "/" ? "index.html" : pathname.replace(/^\//, "");
   const file = normalize(join(publicRoot, relativePath));

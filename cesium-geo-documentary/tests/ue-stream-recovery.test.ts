@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { transform } from 'esbuild';
-import { createFramePlayback } from '../apps/ue-player/playback.js';
 
 const clientSource = await readFile(new URL('../apps/ue-player/client.ts', import.meta.url), 'utf8');
 const executable = (await transform(`(async () => {\n${clientSource.replace(/^import .*;\s*$/gm, '')}\n})()`, {
@@ -97,17 +96,6 @@ async function harness(search = '', sharedBus?: Bus) {
     addEventListener(_name: string, listener: (event: any) => void) { this.listener = listener; bus.listeners.add(listener); }
     close() { if (this.listener) bus.listeners.delete(this.listener); }
   }
-  // Native animation APIs reject a plain dependency object as their receiver.
-  // Keep the same constraint in this harness so extracted references cannot pass.
-  function requestFrame(this: unknown, callback: () => void) {
-    assert.equal(this, window, 'requestAnimationFrame requires the window receiver');
-    return schedule(callback, 16);
-  }
-  function cancelFrame(this: unknown, id: number) {
-    assert.equal(this, window, 'cancelAnimationFrame requires the window receiver');
-    timers.delete(id);
-  }
-  Object.assign(window, { requestAnimationFrame: requestFrame, cancelAnimationFrame: cancelFrame });
   const sandbox = {
     window, document, parent, location: { search, origin: 'http://player.test' },
     navigator: { sendBeacon: (...args: any[]) => { beacons.push(args); return true; } },
@@ -118,7 +106,7 @@ async function harness(search = '', sharedBus?: Bus) {
     setTimeout: (callback: () => void, delay: number) => schedule(callback, delay),
     setInterval: (callback: () => void, delay: number) => schedule(callback, delay, delay),
     clearTimeout: (id: number) => timers.delete(id), clearInterval: (id: number) => timers.delete(id),
-    requestAnimationFrame: requestFrame, cancelAnimationFrame: cancelFrame,
+    requestAnimationFrame: (callback: () => void) => schedule(callback, 16), cancelAnimationFrame: (id: number) => timers.delete(id),
     fetch: async (url: string, options: any = {}) => {
       if (url === '/runtime-config.json') return { ok: true, status: 200, json: async () => ({ signallingUrl: 'ws://unused.test', streamFps: 30 }) };
       if (url === '/api/viewer-slot') {
@@ -131,8 +119,7 @@ async function harness(search = '', sharedBus?: Bus) {
       throw new Error(`未模拟的请求 ${url}`);
     },
     Config, PixelStreaming, DEFAULT_IMAGERY_PROVIDER: 'test',
-    createFramePlayback,
-    actions: new Set(['seek', 'prepare-tour', 'set-annotations', 'update-tour-labels', 'play-scene-range', 'stop-scene-playback', 'pause-scene-playback', 'resume-scene-playback']),
+    actions: new Set(['seek', 'prepare-tour', 'set-annotations', 'update-tour-labels', 'play-scene-range', 'stop-scene-playback']),
     frameAt: (_scene: any, stops: any[], time: number, _profile: string, _duration: number, _opening: boolean, _origin?: any, _overview?: number, _view?: any, contextIntro?: boolean) => ({ time, stops, accents: {}, contextIntro }),
     contextIntroSeconds: () => 0, configureOpening: (region: any) => region,
     subtitleBounds: (bounds: any) => bounds, activeSubtitleBounds: () => null
@@ -484,41 +471,6 @@ test('按场景播放第二场景也启用县界介绍', async () => {
   await h.advance(20);
   const frames = h.instances.at(-1)!.sent.filter(message => message.action === 'apply-frame');
   assert.equal(frames.at(-1)!.frame.contextIntro, true);
-});
-
-test('暂停途中断线重连仍保留原地图帧与剩余段，继续不重飞', async () => {
-  const h = await harness('?slot=off'); await h.open();
-  const control = (action: string, extra: any = {}) => h.window.dispatch('message', { source: h.parent, origin: 'http://127.0.0.1:4180', data: { type: 'geo-video-studio', action, ...extra } });
-  control('play-scene-range', { playbackEpoch: 9, range: { start: 5, end: 8, sceneId: 'one', flightSeconds: 1 } });
-  await h.advance(1200); control('pause-scene-playback');
-  const frozen = h.window.geoVideo.getFrameStatus().time;
-  h.instances.at(-1)!.dispatch('dataChannelClose');
-  await h.advance(2000); await h.open(); await h.advance(500);
-  assert.equal(h.window.geoVideo.getFrameStatus().time, frozen);
-  control('resume-scene-playback'); await h.advance(2000);
-  assert.equal(h.window.geoVideo.getFrameStatus().time, 8);
-  assert.equal(h.messages.filter(message => message.event === 'tour-flight-complete').length, 1);
-  assert.equal(h.messages.filter(message => message.event === 'scene-range-complete').length, 1);
-});
-
-test('地图加载前暂停保留待播命令，恢复才开始且停止会取消待播', async () => {
-  const h = await harness('?slot=off');
-  const control = (action: string, extra: any = {}) => h.window.dispatch('message', { source: h.parent, origin: 'http://127.0.0.1:4180', data: { type: 'geo-video-studio', action, ...extra } });
-  control('play-scene-range', { playbackEpoch: 7, range: { start: 5, end: 6, sceneId: 'one' } });
-  control('pause-scene-playback');
-  await h.open(); await h.advance(1500);
-  assert.ok(!h.messages.some(message => message.event === 'scene-range-complete'));
-  control('resume-scene-playback'); await h.advance(500);
-  control('pause-scene-playback');
-  const position = h.window.geoVideo.getFrameStatus().time;
-  await h.advance(2000); assert.equal(h.window.geoVideo.getFrameStatus().time, position);
-  control('resume-scene-playback'); await h.advance(600);
-  assert.equal(h.messages.filter(message => message.event === 'scene-range-complete').length, 1);
-  assert.equal(h.messages.find(message => message.event === 'scene-range-complete').playbackEpoch, 7);
-  control('play-scene-range', { range: { start: 8, end: 10 } });
-  control('pause-scene-playback'); control('stop-scene-playback'); control('resume-scene-playback');
-  await h.advance(3000);
-  assert.equal(h.messages.filter(message => message.event === 'scene-range-complete').length, 1);
 });
 
 test('只有元数据不能宣布首帧就绪，loadeddata 到达后才加载场景', async () => {

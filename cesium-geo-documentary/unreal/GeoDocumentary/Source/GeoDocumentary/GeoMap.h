@@ -273,7 +273,6 @@ class AGeoHUD : public AHUD
     UPROPERTY() TMap<FString, TObjectPtr<UTexture2D>> LabelPlates;
     TMap<FString, int32> LabelPlacements;
     int32 LabelGeneration = -1;
-    TSet<FString> FocusLabelWarnings;
 };
 UCLASS()
 class AGeoGameMode : public AGameModeBase

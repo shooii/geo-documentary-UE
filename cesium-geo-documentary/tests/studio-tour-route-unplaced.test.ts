@@ -68,12 +68,10 @@ test("the geometry-less village keeps its editorial position", async () => {
   assert.equal(suggestion.childIds.length, 4);
 });
 
-test("全部站点缺少边界时保留原顺序并报告未知航段", async () => {
+test("a scheme with no boundary-backed village still reports a usable error", async () => {
   const root = await fixture();
-  const suggestion = await suggestTourRoute(root, projectWith(["ghost", "phantom"]));
-  assert.deepEqual(suggestion.childIds, ["ghost", "phantom"]);
-  assert.equal(suggestion.changeNeeded, false);
-  assert.equal(suggestion.complete, false);
-  assert.equal(suggestion.unknownFlights, 1);
-  assert.deepEqual(suggestion.breaks, []);
+  await assert.rejects(
+    () => suggestTourRoute(root, projectWith(["ghost", "phantom"])),
+    /能对上边界数据/
+  );
 });

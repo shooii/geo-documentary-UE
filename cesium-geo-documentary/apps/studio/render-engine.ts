@@ -8,7 +8,6 @@ import { existsSync } from "node:fs";
 import { copyFile, cp, lstat, mkdir, readFile, readdir, readlink, rename, rm, rmdir, stat, symlink, unlink, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
-import { assertTourPlanExportable, normalizeTourCamera } from "../../packages/render-spec/tour-plan.js";
 import { buildRenderSpec, parseSrt, planVisualClip, selectSceneAssetsForRender, updateProjectMeasuredDurations, type RenderSpec } from "../../packages/render-spec/index.js";
 import { normalizeSemanticText, validateVideoProject, type StudioScene, type VideoProject } from "../../packages/project-schema/index.js";
 import { buildProjectRenderSpec, geometrySignature, makeProject, mapRendererSignature } from "./project-service.js";
@@ -480,7 +479,6 @@ export async function materializeProject(sandbox: string, project: VideoProject,
   const outroParagraphIndex = spokenParagraphs.findIndex((scene) => scene.section === "outro");
   if (outroParagraphIndex >= 0) current.outroParagraphIndex = outroParagraphIndex;
   current.tourOrder = spec.childTourOrder;
-  current.tourOutput = project.output;
   // Counts every paragraph that precedes the child tour, not just `overview`:
   // an outro-lead block sits *after* the tour, so it must not inflate this.
   current.tourIntroSentences = project.scenes
@@ -501,13 +499,7 @@ export async function materializeProject(sandbox: string, project: VideoProject,
   if (Array.isArray(region.childRegions)) {
     region.childRegions = (region.childRegions as Array<Record<string, unknown>>).map((child) => ({
       ...child,
-      name: childDisplayNames.get(String(child.id)) || child.name,
-      ...(() => {
-        const camera = project.scenes.find(scene => scene.section === "child" && scene.childId === String(child.id))?.camera;
-        if (!camera) return {};
-        const cameraPreset = normalizeTourCamera(camera);
-        return { cameraPreset, cameraProfiles: { ...((child.cameraProfiles ?? {}) as Record<string, unknown>), portrait: cameraPreset } };
-      })()
+      name: childDisplayNames.get(String(child.id)) || child.name
     }));
   }
   // A verified village point can be authored before its boundary is available.
@@ -521,7 +513,7 @@ export async function materializeProject(sandbox: string, project: VideoProject,
       || !Number.isFinite(camera.longitude) || Math.abs(camera.longitude) > 180
       || !Number.isFinite(camera.latitude) || Math.abs(camera.latitude) > 90
       || !Number.isFinite(camera.height) || camera.height <= 0) continue;
-    const cameraPreset = normalizeTourCamera(camera);
+    const { transition: _transition, ...cameraPreset } = camera;
     children.push({ id: scene.childId, name: scene.childName || scene.title, cameraPreset, cameraProfiles: { portrait: { ...cameraPreset } } });
     for (const key of ["childIds", "tourChildIds"] as const) {
       const ids = Array.isArray(region[key]) ? (region[key] as unknown[]).map(String) : children.map((child) => String(child.id));
@@ -640,9 +632,7 @@ async function writeVisualsManifest(sandbox: string, project: VideoProject, spec
          the export and the editor drifted apart in the first place; the picture
          may only live inside its own scene's narration window, and the panel now
          shows the resulting seconds before anyone renders. */
-      const tourStop = spec.tourPlan?.tourStops.find(stop => stop.sceneId === scene.id);
       const plan = planVisualClip({
-        ...(tourStop ? { childVisualReadySeconds: tourStop.visualReadySeconds } : {}),
         scene,
         placement: asset,
         sequenceIndex,
@@ -1132,8 +1122,7 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   const narrationEndedAt = Date.now();
   const generatedSrtPath = join(sandbox, "assets", "audio", project.regionId, "narration-edge.srt");
   let generatedCues = parseSrt(await readFile(generatedSrtPath, "utf8"));
-  spec = buildRenderSpec({ project, cues: generatedCues, parentCamera: spec.tourPlan.parentCamera, geometrySignature: await geometrySignature(root, project.regionId, project.id), rendererSignature: await mapRendererSignature(root) });
-  assertTourPlanExportable(spec.tourPlan);
+  spec = buildRenderSpec({ project, cues: generatedCues, geometrySignature: await geometrySignature(root, project.regionId, project.id), rendererSignature: await mapRendererSignature(root) });
   // A child scene's narration may be split across several TTS sentence cues
   // (a village paragraph with two sentences produces two cues). The compositor
   // and visuals already consume the exact scene->cue ranges; persist them next
@@ -1148,7 +1137,6 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
   spec = buildRenderSpec({
     project,
     cues: generatedCues,
-    parentCamera: spec.tourPlan.parentCamera,
     geometrySignature: await geometrySignature(root, project.regionId, project.id),
     rendererSignature: await mapRendererSignature(root),
     narrationDurationSeconds: duration.durationSeconds,

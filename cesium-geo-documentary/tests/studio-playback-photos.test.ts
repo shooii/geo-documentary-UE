@@ -108,7 +108,7 @@ test("playback drives the photo rotation from the audio clock and resets per sce
   // A new scene must not inherit the previous scene's placement.
   assert.match(studio, /state\.playbackStagePlacement = null;\s*state\.playbackStageActive = false;\s*state\.selectedSceneId = sceneId/);
   // Stopping puts the operator's own selection back on the stage.
-  assert.match(studio, /if \(!completed && state\.playbackStageActive\) \{[\s\S]{0,200}state\.playbackStageActive = false;[\s\S]{0,200}applyPreviewStagePlacement\(selectedScene\(\), selectedPlacement\(\)\)/);
+  assert.match(studio, /if \(state\.playbackStageActive\) \{[\s\S]{0,200}state\.playbackStageActive = false;[\s\S]{0,200}applyPreviewStagePlacement\(selectedScene\(\), selectedPlacement\(\)\)/);
   // A scene whose pictures are all unmarked stages nothing while it plays: the
   // stage is driven by the flag, not by "is there a placement object".
   assert.match(studio, /state\.playbackStageActive = true;\s*state\.playbackStagePlacement = pool\[0\] \|\| null;\s*applyPreviewStagePlacement\(scene, state\.playbackStagePlacement\);/);
@@ -119,6 +119,6 @@ test("playback drives the photo rotation from the audio clock and resets per sce
   assert.match(studio, /selectAdjacent\(1, true, true\);[\s\S]{0,120}beginPlaybackStage\(nextScene\);/);
   // The audio-less fallback clock has to move the pictures too, otherwise a
   // missing mp3 freezes the preview on photo one.
-  assert.match(studio, /return Math\.min\(1, Math\.max\(0, \(playbackClock\.now\(\) - startedAt\) \/ Math\.max\(1, estimatedMs\)\)\)/);
+  assert.match(studio, /return Math\.min\(1, Math\.max\(0, \(Date\.now\(\) - startedAt\) \/ Math\.max\(1, estimatedMs\)\)\)/);
   assert.match(html, /studio\.js\?v=[0-9A-Za-z-]+/);
 });

@@ -1,9 +1,8 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { buildTourPlan, assertTourPlanExportable, type TourCamera, type TourOutput } from "../../../../packages/render-spec/tour-plan.js";
 import { resolve } from "node:path";
 import { SceneTimelineSchema } from "../../../../packages/timeline-schema/index.js";
 import { normalizeTourReturnSeconds, parseSrt } from "./narration-timing.js";
-import { type GeoBounds } from "../../../../packages/geo-camera/index.js";
+import { portraitChildCameraPreset, type GeoBounds } from "../../../../packages/geo-camera/index.js";
 import { PARENT_BOUNDARY_REVEAL_START_SECONDS } from "../../../../packages/render-spec/opening-timing.js";
 
 interface ChildRegion {
@@ -11,7 +10,7 @@ interface ChildRegion {
   name: string;
   labelPoint: [number, number];
   bbox: GeoBounds;
-  cameraPreset: TourCamera;
+  cameraPreset: { longitude: number; latitude: number; height: number; heading: number; pitch: number; roll: number };
   cameraProfiles?: { portrait?: ChildRegion["cameraPreset"] };
 }
 interface RegionRecord {
@@ -30,7 +29,6 @@ interface TourContent {
   tourFlightSeconds?: number;
   tourReturnSeconds?: number;
   tourMapHoldSeconds?: Record<string, number>;
-  tourOutput?: TourOutput;
   /** Exact per-child sentence-cue ranges written by the render engine after
    *  the real narration SRT was measured. A child paragraph may be split into
    *  several TTS sentence cues; when present this mapping replaces the legacy
@@ -55,6 +53,28 @@ const args = process.argv.slice(2);
 const regionIndex = args.indexOf("--region");
 const regionId = regionIndex >= 0 ? args[regionIndex + 1] : undefined;
 if (!regionId) throw new Error("--region is required");
+const FLIGHT_MIN_SECONDS = 3.2;
+const FLIGHT_MAX_SECONDS = 5.4;
+const SETTLE_SECONDS = 0.9;
+
+function clamp(value: number, minimum: number, maximum: number): number {
+  return Math.max(minimum, Math.min(maximum, value));
+}
+
+function groundDistanceMeters(
+  from: ChildRegion["cameraPreset"],
+  to: ChildRegion["cameraPreset"]
+): number {
+  const radius = 6_378_137;
+  const latitude1 = from.latitude * Math.PI / 180;
+  const latitude2 = to.latitude * Math.PI / 180;
+  const deltaLatitude = latitude2 - latitude1;
+  const deltaLongitude = (to.longitude - from.longitude) * Math.PI / 180;
+  const a = Math.sin(deltaLatitude / 2) ** 2
+    + Math.cos(latitude1) * Math.cos(latitude2) * Math.sin(deltaLongitude / 2) ** 2;
+  return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 const contentIndex = JSON.parse(await readFile(resolve(root, "content/regions.zh-CN.json"), "utf8")) as Record<string, TourContent>;
 const content = contentIndex[regionId];
 if (!content?.tourOrder?.length) throw new Error(`Region ${regionId} has no tourOrder`);
@@ -123,30 +143,30 @@ const tourStops = content.tourOrder.map((id, index) => {
   const cueStart = firstCue.start;
   const cueEnd = lastCue.end;
   const cueDuration = cueEnd - cueStart;
-  const previousChild = index > 0 ? childMap.get(String(content.tourOrder[index - 1])) : undefined;
-  const previousCamera = previousChild?.cameraProfiles?.portrait ?? previousChild?.cameraPreset ?? region.cameraPreset;
-  const plan = buildTourPlan({
-    parentCamera: previousCamera,
-    narrationOffsetSeconds: narrationSyncOffsetSeconds,
-    flightPreferenceSeconds: content.tourFlightSeconds ?? 4.2,
-    output: content.tourOutput,
-    scenes: [{ id: String(id), childId: String(id), section: "child", title: child.name, duration: cueDuration, camera: child.cameraProfiles?.portrait ?? child.cameraPreset, timing: { mapHoldSeconds: Number(content.tourMapHoldSeconds?.[String(id)] ?? 2) } }],
-    ranges: [{ sceneId: String(id), start: cueStart, end: cueEnd }]
-  });
-  assertTourPlanExportable(plan);
-  const planned = plan.tourStops[0]!;
+  const previousCamera = index === 0
+    ? region.cameraPreset
+    : childMap.get(String(content.tourOrder[index - 1]))?.cameraPreset ?? region.cameraPreset;
+  const distanceMeters = groundDistanceMeters(previousCamera, child.cameraPreset);
+  const distanceDuration = FLIGHT_MIN_SECONDS
+    + (FLIGHT_MAX_SECONDS - FLIGHT_MIN_SECONDS) * Math.sqrt(clamp(distanceMeters / 22_000, 0, 1));
+  const editorialPreference = content.tourFlightSeconds ?? 4.2;
+  const adaptiveDuration = distanceDuration * 0.76 + editorialPreference * 0.24;
+  const requestedHoldSeconds = clamp(Number(content.tourMapHoldSeconds?.[String(id)] ?? SETTLE_SECONDS), 0, Math.max(0, cueDuration - FLIGHT_MIN_SECONDS));
+  const availableDuration = Math.max(FLIGHT_MIN_SECONDS, cueDuration - requestedHoldSeconds);
   return {
     id: child.id,
     name: child.name,
     start: cueStart + narrationSyncOffsetSeconds,
     end: cueEnd + narrationSyncOffsetSeconds,
-    flightDuration: planned.flightDuration,
-    visualReadySeconds: planned.visualReadySeconds,
-    groundDistanceMeters: planned.groundDistanceMeters,
-    cameraPreset: planned.cameraPreset,
-    cameraProfiles: planned.cameraProfiles,
+    flightDuration: Math.min(availableDuration, clamp(adaptiveDuration, FLIGHT_MIN_SECONDS, FLIGHT_MAX_SECONDS)),
+    groundDistanceMeters: Math.round(distanceMeters),
+    cameraPreset: child.cameraPreset,
+    cameraProfiles: {
+      ...(child.cameraProfiles ?? {}),
+      portrait: portraitChildCameraPreset(child.cameraProfiles?.portrait ?? child.cameraPreset, child.bbox)
+    },
     narration: rawCues.slice(firstCueIndex, lastCueIndex + 1).map((cue) => cue.text).join(""),
-    requestedHoldSeconds: planned.requestedHoldSeconds
+    requestedHoldSeconds
   };
 });
 

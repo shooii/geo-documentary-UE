@@ -351,7 +351,7 @@ export interface PlanRouteOptions {
   preferOrder?: ReadonlyArray<string>;
 }
 
-export function travelBetween(points: ReadonlyMap<string, Position>, from: string, to: string): number {
+function travelBetween(points: Map<string, Position>, from: string, to: string): number {
   const a = points.get(from);
   const b = points.get(to);
   if (!a || !b) return 0;

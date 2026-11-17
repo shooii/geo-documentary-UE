@@ -26,7 +26,6 @@ test('UE tour starts at settled opening camera and returns to the same camera',(
  const scene={region:{cameraPreset:base}};
  const stops=[{id:'one',start:10,end:20,flightDuration:4,cameraPreset:{...base,longitude:110.1,height:5000}}];
  const overview=frameAt(scene,stops,0,'portrait',4.4).camera;
- assert.equal(overview.height,base.height,'不得在安全拟合后隐式推近总览');
  assert.deepEqual(frameAt(scene,stops,10,'portrait',4.4).camera,overview);
  const returned=frameAt(scene,stops,30,'portrait',4.4).camera;
  assert.ok(Math.abs(returned.height-overview.height)<1e-8);
@@ -47,7 +46,7 @@ test('UE flight follows the Cesium WGS84 path across the antimeridian', () => {
   const actual = flight(from, to, .5);
   assert.ok(Math.abs(actual.lon - expected.longitude * 180 / Math.PI) < 1e-9);
   assert.ok(Math.abs(actual.lat - expected.latitude * 180 / Math.PI) < 1e-9);
-  assert.ok(actual.height > 6000 && actual.height <= 6900, '抬升不得超过较小取景尺度的18%');
+  assert.equal(actual.height, 8800);
 });
 
 test('UE keeps the displayed camera and label when jumping to a nonadjacent village', () => {

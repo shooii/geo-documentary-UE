@@ -5,7 +5,6 @@ import { runInNewContext } from 'node:vm';
 import { applyPortraitZoomToLayer, portraitOverviewExtent, portraitOverviewFrustumTangents, portraitOverviewScreenFractions } from '../apps/ue-player/framing.js';
 import { fitRegionProfiles, outputSizes, simplifyRing } from '../apps/ue-player/viewport.js';
 import { configureOpening, cloudStateAt } from '../apps/ue-player/opening.js';
-import { DEFAULT_CAMERA_SAFE_FRAME } from '../packages/geo-camera/index.js';
 import { frameAt } from '../apps/ue-player/presentation.js';
 const read=async(path:string)=>JSON.parse(await readFile(path,'utf8'));
 
@@ -16,8 +15,7 @@ test('UE portrait framing reproduces the Cesium reference camera exactly',async(
  const region=await read('data/regions/440825102.json'),geometry=await read('data/normalized/440825102.geojson');
  const expected=reference(region,geometry).cameraProfiles.portrait;
  assert.equal(JSON.stringify(applyPortraitZoomToLayer(region,geometry).cameraProfiles.portrait),JSON.stringify(expected));
- const fitted=fitRegionProfiles(region,geometry).cameraProfiles.portrait;
- assert.ok(Number.isFinite(fitted.height) && fitted.height>0);
+ assert.equal(JSON.stringify(fitRegionProfiles(region,geometry).cameraProfiles.portrait),JSON.stringify(expected));
 });
 test('real region vertices stay inside every frame including the tighter tour overview',async()=>{
  for(const id of ['440825102','440882110','440823113']){
@@ -28,10 +26,8 @@ test('real region vertices stay inside every frame including the tighter tour ov
    const east=(camera.lon-extent.longitude)*111320*Math.cos(extent.latitude*Math.PI/180),north=(camera.lat-extent.latitude)*110570;
    const tangent=portraitOverviewFrustumTangents(width/height);
    for(const point of extent.points){
-    const heading=camera.heading*Math.PI/180,x=point.east-east,y=point.north-north;
-    const projected=portraitOverviewScreenFractions(x*Math.cos(heading)-y*Math.sin(heading),y*Math.cos(heading)+x*Math.sin(heading),camera.height,camera.pitch,tangent);
-    const screenX=(projected.x+1)/2,screenY=(1-projected.y)/2,safe=DEFAULT_CAMERA_SAFE_FRAME;
-    assert.ok(screenX>=safe.left-1e-6 && screenX<=safe.right+1e-6 && screenY>=safe.top-1e-6 && screenY<=safe.bottom+1e-6,`${id} ${profile} clipped`);
+    const projected=portraitOverviewScreenFractions(point.east-east,point.north-north,camera.height,camera.pitch,tangent);
+    assert.ok(Math.abs(projected.x)<.94 && Math.abs(projected.y)<.94,`${id} ${profile} clipped`);
    }
   }
  }
