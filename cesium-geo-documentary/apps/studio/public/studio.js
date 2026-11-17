@@ -2301,13 +2301,22 @@ async function planTourRoute() {
   const button = $("planTourRoute");
   const childScenes = state.project.scenes.filter((scene) => scene.section === "child" && scene.childId);
   if (childScenes.length < 2) return toast("至少要有两个下级行政区场景，才能判断接壤顺序");
+  if (new Set(childScenes.map((scene) => String(scene.childId))).size !== childScenes.length) return toast("巡游 childId 重复，未做重排");
   const originalLabel = button.textContent;
   button.disabled = true;
   button.textContent = "计算中…";
   try {
     const result = await api(`/api/projects/${state.project.id}/tour-route`, { method: "POST" });
+    const unknownFlights = result.unknownFlights ?? 0;
+    const routeDetails = [];
+    if (result.breaks.length) routeDetails.push(`${result.breaks.length} 段无共同边界，需跨接`);
+    if (unknownFlights) routeDetails.push(`${unknownFlights} 段因缺少边界无法判断接壤，相关站点保留原编辑位置`);
     if (!result.changeNeeded) {
-      toast(`巡游顺序已经合规：开场为“${childScenes[0].childName || childScenes[0].title}”，${result.touchingAfter}/${result.flights} 段全部与上一个行政区接壤`);
+      const complete = result.touchingAfter === result.flights && !unknownFlights && !result.breaks.length;
+      toast([
+        `${complete ? "巡游顺序已经全部接壤" : "巡游顺序保持不变"}：开场为“${childScenes[0].childName || childScenes[0].title}”，${result.touchingAfter}/${result.flights} 段已确认与上一个行政区接壤`,
+        ...routeDetails
+      ].join("；"));
       return;
     }
     const scenes = state.project.scenes;
@@ -2315,7 +2324,7 @@ async function planTourRoute() {
     const lastChild = scenes.reduce((last, scene, index) => (scene.section === "child" ? index : last), -1);
     const sceneByChild = new Map(childScenes.map((scene) => [String(scene.childId), scene]));
     const ordered = result.childIds.map((id) => sceneByChild.get(String(id))).filter(Boolean);
-    if (ordered.length !== childScenes.length) throw new Error("排序结果与场景数量不一致，未做改动");
+    if (ordered.length !== childScenes.length || new Set(ordered).size !== childScenes.length) throw new Error("排序结果与场景集合不一致，未做改动");
     state.project.scenes = [
       ...scenes.slice(0, firstChild),
       ...ordered,
@@ -2335,11 +2344,7 @@ async function planTourRoute() {
     } else if (result.strategy === "hopped") {
       summary.push(`开场固定为“${opening}”，其余村庄按接壤就近推进`);
     }
-    if (result.breaks.length) {
-      summary.push(result.strategy === "hopped"
-        ? `${result.breaks.length} 段无法接壤，只能跨接（开场保持不动）`
-        : `${result.breaks.length} 段无共同边界，属真实地理限制`);
-    }
+    summary.push(...routeDetails);
     toast(summary.join("；"));
   } catch (error) {
     toast(`按接壤重排失败：${error.message}`);

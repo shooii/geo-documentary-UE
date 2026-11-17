@@ -131,7 +131,7 @@ test("过期spec不复用旧cue、QA只允许冻结或实测入口声称正式�
   const qa = await readFile(resolve("scripts/ue-visual-qa.ts"), "utf8");
   assert.match(qa, /option\('render-spec', ''\)/);
   assert.match(qa, /option\('cues', ''\)/);
-  assert.match(qa, /formalParity: timingSource !== 'estimated'/);
+  assert.match(qa, /formalParity: false, parity: \{ status: 'not-measured'/);
   assert.match(qa, /option\('region', project\.regionId\)/);
 });
 
