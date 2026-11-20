@@ -8,6 +8,8 @@ export interface SubtitleCue {
 
 export interface DisplayCue extends SubtitleCue {
   lines: string[];
+  /** 有词表且成功对齐时附带，供导出后核对金色擦出是否真的跟上了人声。 */
+  wordAlignment?: SubtitleWordAlignmentInfo;
 }
 
 export interface SingleLineCueOverride {
@@ -259,11 +261,313 @@ export function subtitleHighlightPoints(text: string, start: number, end: number
   return points;
 }
 
+/** 逐词时间（来自 TTS WordBoundary，秒，相对旁白音频起点）。 */
+export interface WordTiming { start: number; end: number; text: string }
+
+/** 单行字幕与词表的对齐诊断，便于导出后核对金色字幕是否真的跟上了人声。 */
+export interface SubtitleWordAlignmentInfo {
+  /** 是否使用了真实词时间（false 表示回退到字重插值）。 */
+  aligned: boolean;
+  /** 匹配到真实词的发音字符数。 */
+  matchedChars: number;
+  /** 该行发音字符总数。 */
+  totalChars: number;
+  /** matchedChars / totalChars。 */
+  coverage: number;
+  /** 覆盖该行的不同词数。 */
+  wordCount: number;
+  /** 该行第一个匹配词的起点（秒）。 */
+  firstWordStart?: number;
+  /** 该行最后一个匹配词的终点（秒）。 */
+  lastWordEnd?: number;
+}
+
+/** 汇总所有字幕行的对齐覆盖，供主线程在导出时打印验收。 */
+export interface SubtitleAlignmentReport {
+  totalCues: number;
+  alignedCues: number;
+  fallbackCues: number;
+  totalChars: number;
+  matchedChars: number;
+  coverage: number;
+  rows: Array<SubtitleWordAlignmentInfo & { text: string; start: number; end: number }>;
+}
+
+interface SpeechChar {
+  char: string;
+  sourceIndex: number;
+  width: number;
+  speak: boolean;
+}
+
+interface AlignedCharInfo {
+  time: number;
+  word: number | undefined;
+  /** 该字符在所属词发音字符序列中的下标（跨行切词时用来切出词的真实片段）。 */
+  charIndex: number;
+  /** 所属词的发音字符总数。 */
+  wordCharCount: number;
+}
+
+interface WordCursor { word: number; char: number }
+
+interface CueAlignment {
+  /** 按 cue 文本 UTF16 下标索引的对齐信息；非发音字符为 undefined。 */
+  chars: Array<AlignedCharInfo | undefined>;
+  cursor: WordCursor;
+}
+
+/** 低于此覆盖率就认为这行和词表对不上，严格回退，不用错位时间硬套。 */
+const MIN_ALIGN_COVERAGE = 0.6;
+
+function clampTime(value: number, low: number, high: number): number {
+  if (high < low) return low;
+  return Math.max(low, Math.min(high, value));
+}
+
+function isSpeechChar(char: string): boolean {
+  return Boolean(char) && !semanticPunctuation.includes(char) && !/\s/u.test(char);
+}
+
+/** 文本 -> 发音字符序列。宽度沿用字重插值口径（半角 0.5、全角 1、标点 0）。 */
+function toSpeechChars(text: string): SpeechChar[] {
+  const chars: SpeechChar[] = [];
+  let sourceIndex = 0;
+  for (const char of text) {
+    const speak = isSpeechChar(char);
+    chars.push({
+      char,
+      sourceIndex,
+      width: speak ? (/[\x00-\xff]/.test(char) ? 0.5 : 1) : 0,
+      speak
+    });
+    sourceIndex += char.length;
+  }
+  return chars;
+}
+
+function wordSpeechChars(word: WordTiming): string[] {
+  return toSpeechChars(word.text).filter((char) => char.speak).map((char) => char.char);
+}
+
+/** 一个词内第 charIndex 个发音字符读完的时刻；词内按字符线性擦出。 */
+function wordLightTime(word: WordTiming, charIndex: number, charCount: number): number {
+  if (charCount <= 0) return word.end;
+  return word.start + (word.end - word.start) * (charIndex + 1) / charCount;
+}
+
+/**
+ * 全局按顺序把一段字幕文本对齐到词表。
+ *
+ * - 用「发音字符」逐个比较（标点/空白不参与），因此数字 "42,104" 与字幕 "42104"
+ *   在去掉千分位后逐字符一致，不再把 UTF16 下标误当 speechUnits 数组下标。
+ * - 重复词、跨行切词天然由顺序游标处理：游标只在真正消费发音字符时前移。
+ * - 词内 TTS 多读一个字时允许向后看 1~2 个字符跳过，但绝不做「首字相同就算匹配」
+ *   的宽松兜底；对不上就留空，交给覆盖率判定严格回退。
+ * - word.start 决定节点起点：词间静音期间不产生新节点，渲染端线性插值时
+ *   progress 保持不变，即停顿 hold，不会在静音里继续扫。
+ */
+function alignTextToWords(text: string, words: readonly WordTiming[], cursor: WordCursor): CueAlignment {
+  const chars = toSpeechChars(text);
+  const alignedChars: Array<AlignedCharInfo | undefined> = new Array(chars.length);
+  const cache = words.map((word) => wordSpeechChars(word));
+  let word = cursor.word;
+  let char = cursor.char;
+
+  for (let index = 0; index < chars.length; index += 1) {
+    if (!chars[index]!.speak) continue;
+    while (word < words.length && char >= (cache[word]?.length ?? 0)) {
+      word += 1;
+      char = 0;
+    }
+    if (word >= words.length) continue;
+    const expected = cache[word]![char]!;
+    const current = chars[index]!.char;
+    const record = (charIndex: number) => {
+      alignedChars[index] = {
+        time: wordLightTime(words[word]!, charIndex, cache[word]!.length),
+        word,
+        charIndex,
+        wordCharCount: cache[word]!.length
+      };
+    };
+    if (current === expected) {
+      record(char);
+      char += 1;
+      continue;
+    }
+    let skipped = false;
+    for (let look = 1; look <= 2 && char + look < cache[word]!.length; look += 1) {
+      if (current === cache[word]![char + look]) {
+        record(char + look);
+        char += look + 1;
+        skipped = true;
+        break;
+      }
+    }
+    if (skipped) continue;
+    // 不匹配：不消费词字符、不记录时间，严格交给覆盖率回退。
+  }
+
+  return { chars: alignedChars, cursor: { word, char } };
+}
+
+/** 把 cue 级对齐（按 cue 文本下标）映射到单行 chunk（按 chunk 文本下标）。 */
+function mapAlignmentToChunk(
+  chunk: string,
+  cueText: string,
+  from: number,
+  to: number,
+  alignment: CueAlignment
+): Array<AlignedCharInfo | undefined> {
+  const result: Array<AlignedCharInfo | undefined> = new Array(chunk.length);
+  const sourceChars = toSpeechChars(cueText.slice(from, to)).filter((char) => char.speak);
+  const targetChars = toSpeechChars(chunk).filter((char) => char.speak);
+  let sourceIndex = 0;
+  for (const target of targetChars) {
+    while (sourceIndex < sourceChars.length && !sourceChars[sourceIndex]!.speak) sourceIndex += 1;
+    if (sourceIndex >= sourceChars.length) break;
+    const absolute = from + sourceChars[sourceIndex]!.sourceIndex;
+    result[target.sourceIndex] = alignment.chars[absolute];
+    sourceIndex += 1;
+  }
+  return result;
+}
+
+function normalizePoints(points: Array<{ time: number; progress: number }>, start: number, end: number): Array<{ time: number; progress: number }> {
+  const clean: Array<{ time: number; progress: number }> = [];
+  for (const point of points) {
+    const time = clampTime(point.time, start, end);
+    const progress = Math.max(clean.at(-1)?.progress ?? 0, Math.min(1, point.progress));
+    if (clean.length && time <= clean.at(-1)!.time + 1e-6) {
+      clean[clean.length - 1] = { time: clean.at(-1)!.time, progress: Math.max(clean.at(-1)!.progress, progress) };
+    } else {
+      clean.push({ time, progress });
+    }
+  }
+  return clean;
+}
+
+interface RowAlignment {
+  points: Array<{ time: number; progress: number }>;
+  info: SubtitleWordAlignmentInfo;
+  firstTime: number;
+  lastTime: number;
+}
+
+/** 用对齐结果生成单行的金色节点：词内线性擦出，词间（含停顿）progress 保持不变。 */
+function highlightFromAlignment(
+  chunk: string,
+  aligned: ReadonlyArray<AlignedCharInfo | undefined>,
+  words: readonly WordTiming[],
+  start: number,
+  end: number
+): RowAlignment | null {
+  const chars = toSpeechChars(chunk).filter((char) => char.speak);
+  if (!chars.length) return null;
+  const totalWidth = chars.reduce((sum, char) => sum + char.width, 0) || 1;
+  let acc = 0;
+  const rows = chars.map((char) => {
+    acc += char.width;
+    const info = aligned[char.sourceIndex];
+    return {
+      ...char,
+      progress: acc / totalWidth,
+      time: info?.time,
+      word: info?.word,
+      charIndex: info?.charIndex ?? 0,
+      wordCharCount: info?.wordCharCount ?? 1
+    };
+  });
+  const matched = rows.filter((row) => row.time !== undefined);
+  const wordSet = new Set(matched.map((row) => row.word).filter((word): word is number => word !== undefined));
+  if (matched.length < Math.max(1, rows.length * MIN_ALIGN_COVERAGE) || !wordSet.size) return null;
+
+  const firstTime = Math.min(...matched.map((row) => row.time!));
+  const lastTime = Math.max(...matched.map((row) => row.time!));
+  const firstWord = Math.min(...wordSet);
+  const lastWord = Math.max(...wordSet);
+  const info: SubtitleWordAlignmentInfo = {
+    aligned: true,
+    matchedChars: matched.length,
+    totalChars: rows.length,
+    coverage: matched.length / rows.length,
+    wordCount: wordSet.size,
+    firstWordStart: words[firstWord]?.start ?? firstTime,
+    lastWordEnd: words[lastWord]?.end ?? lastTime
+  };
+
+  const groups: Array<Array<typeof rows[number]>> = [];
+  for (const row of rows) {
+    const current = groups.at(-1);
+    if (row.word !== undefined && current?.[0]?.word === row.word) current.push(row);
+    else groups.push([row]);
+  }
+
+  const points: Array<{ time: number; progress: number }> = [{ time: start, progress: 0 }];
+  let previousProgress = 0;
+  for (const group of groups) {
+    const timed = group.filter((row) => row.time !== undefined);
+    if (!timed.length) continue;
+    // 用词的真实时间区间做擦出：从该行覆盖到的第一个词内字符位置起，
+    // 到最后一个字符念完止。跨行切词时两行各拿词的一段，不会抢同一个词首。
+    const timing = timed[0]!.word !== undefined ? words[timed[0]!.word] : undefined;
+    const fromIndex = Math.min(...timed.map((row) => row.charIndex));
+    const toIndex = Math.max(...timed.map((row) => row.charIndex));
+    const charCount = timed[0]!.wordCharCount;
+    const fraction = (index: number) => (charCount > 0 ? (index + 1) / charCount : 1);
+    const groupStart = clampTime(timing ? timing.start + (timing.end - timing.start) * (fromIndex / charCount) : Math.min(...timed.map((row) => row.time!)), start, end);
+    const groupEnd = clampTime(timing ? timing.start + (timing.end - timing.start) * fraction(toIndex) : Math.max(...timed.map((row) => row.time!)), start, end);
+    const afterProgress = timed.at(-1)!.progress;
+    if (groupStart > (points.at(-1)?.time ?? start) + 1e-4) {
+      // 静音/停顿：上一节点的 progress 保持不动，直到这个词真正开始。
+      points.push({ time: groupStart, progress: previousProgress });
+    }
+    let advanceTime = groupEnd;
+    if (advanceTime <= (points.at(-1)?.time ?? start) + 1e-4) {
+      advanceTime = (points.at(-1)?.time ?? start) + 0.001;
+    }
+    points.push({ time: Math.min(advanceTime, end), progress: afterProgress });
+    previousProgress = afterProgress;
+  }
+  if ((points.at(-1)?.progress ?? 0) < 0.999 && end > (points.at(-1)?.time ?? start) + 1e-4) {
+    points.push({ time: end, progress: 1 });
+  }
+  return { points: normalizePoints(points, start, end), info, firstTime, lastTime };
+}
+
+/**
+ * 用真实逐词时间生成金色擦出节点。
+ *
+ * 旧算法把整句时长按“字重”均分，遇到数字、英文或明显停顿时，金色扫描会和
+ * 人声错位。这里改为：每个词在它真正念完的时刻推进到该词末尾，词内再按宽度
+ * 均分。若该行可匹配到的词覆盖不足（跨行截断、文本被改写等），返回 null，
+ * 由调用方回退到按字重插值，避免用错位的时间强行覆盖。
+ */
+export function subtitleHighlightPointsFromWords(
+  text: string,
+  start: number,
+  end: number,
+  words: readonly WordTiming[]
+): Array<{ time: number; progress: number }> | null {
+  if (!words.length || end <= start) return null;
+  // 词表可能覆盖整条旁白而本行只是其中一段：先裁到本行附近再对齐，
+  // 既让游标从这行的第一个词起步，也不会把相邻行的词误算进来。
+  const window = 0.5;
+  const sorted = [...words]
+    .filter((word) => word.end > start - window && word.start < end + window)
+    .sort((a, b) => a.start - b.start || a.end - b.end);
+  if (!sorted.length) return null;
+  const alignment = alignTextToWords(text, sorted, { word: 0, char: 0 });
+  return highlightFromAlignment(text, alignment.chars, sorted, start, end)?.points ?? null;
+}
+
 export function buildSingleLineCues(
   cues: SubtitleCue[],
   maximum: number,
   protectedPhrases: readonly string[] = [],
-  overrides: readonly SingleLineCueOverride[] = []
+  overrides: readonly SingleLineCueOverride[] = [],
+  wordTimings: readonly WordTiming[] = []
 ): DisplayCue[] {
   const overrideMap = new Map<number, string[]>();
   for (const override of overrides) {
@@ -273,6 +577,31 @@ export function buildSingleLineCues(
     if (overrideMap.has(override.cueIndex)) throw new Error(`Duplicate subtitle override for cue ${override.cueIndex}`);
     overrideMap.set(override.cueIndex, override.chunks);
   }
+
+  // 全局按时间排序后，用一条跨 cue 连续推进的词游标把所有字幕对齐到词表。
+  // 这样跨行/跨句切词的字符都能拿到真正属于它的词时间，而不是各自在时间窗里
+  // 重新找词导致错位。无词表时 sortedWords 为空，下面整体走字重插值兼容路径。
+  // 词表常覆盖整条旁白，而传入的 cues 可能只是其中一段；先按 cue 时间范围
+  // 裁掉范围外的词，避免游标从音频开头一路空转到这段字幕才开始对齐。
+  const windowStart = cues.length ? Math.min(...cues.map((cue) => cue.start)) : 0;
+  const windowEnd = cues.length ? Math.max(...cues.map((cue) => cue.end)) : 0;
+  const wordWindow = 0.5;
+  const sortedWords = wordTimings.length
+    ? [...wordTimings]
+        .filter((word) => word.end > windowStart - wordWindow && word.start < windowEnd + wordWindow)
+        .sort((a, b) => a.start - b.start || a.end - b.end)
+    : [];
+  let cursor: WordCursor = { word: 0, char: 0 };
+  const cueAlignments = cues.map((cue) => {
+    const alignment = alignTextToWords(cue.text, sortedWords, cursor);
+    // Carry the consumed-word cursor into the next cue: alignTextToWords copies
+    // the incoming cursor and returns its advanced position. Without this the
+    // second and later cues all restart at word 0 and their text no longer
+    // matches the head of the table, collapsing coverage and forcing fallbacks.
+    cursor = alignment.cursor;
+    return alignment;
+  });
+
   return cues.flatMap((cue, cueIndex) => {
     if (cue.end <= cue.start) throw new Error(`Subtitle cue must have positive duration: ${cue.start}-${cue.end}`);
     const overrideChunks = overrideMap.get(cueIndex);
@@ -289,8 +618,10 @@ export function buildSingleLineCues(
     const speechWeight = (text: string) => subtitleSpeechUnits(text).reduce((sum, unit) => sum + unit.weight, 0);
     const totalWeight = Math.max(1, speechWeight(cue.text));
     const duration = cue.end - cue.start;
+    const alignment = cueAlignments[cueIndex]!;
     let sourceCursor = 0;
-    return chunks.map((chunk) => {
+
+    const prepared = chunks.map((chunk) => {
       const sourceStart = cue.text.indexOf(chunk, sourceCursor);
       // 手工换行可能移除了内部标点：按语义字符匹配原句，保留原句里的停顿权重。
       let from = sourceStart;
@@ -303,27 +634,83 @@ export function buildSingleLineCues(
         while (to < cue.text.length && normalizeSubtitleSemantics(cue.text.slice(from, to)).length < target.length) to += 1;
       }
       sourceCursor = to;
-      const start = cue.start + duration * speechWeight(cue.text.slice(0, from)) / totalWeight;
-      const end = cue.start + duration * speechWeight(cue.text.slice(0, to)) / totalWeight;
-      return {
-        start,
-        end,
-        text: chunk,
-        lines: [chunk],
-        highlight: subtitleHighlightPoints(chunk, start, end)
+      const fallbackStart = cue.start + duration * speechWeight(cue.text.slice(0, from)) / totalWeight;
+      const fallbackEnd = cue.start + duration * speechWeight(cue.text.slice(0, to)) / totalWeight;
+      const aligned = sortedWords.length
+        ? mapAlignmentToChunk(chunk, cue.text, from, to, alignment)
+        : [];
+      return { chunk, fallbackStart, fallbackEnd, aligned };
+    });
+
+    // 行的出现时机跟随真实词：以行内第一个匹配字符的点亮时刻为锚，同时保证
+    // 各行窗口单调递增、首尾仍锁在 cue 区间内（停顿留在行内，不把行提前）。
+    const starts: number[] = [];
+    for (const [index, row] of prepared.entries()) {
+      const previous = index === 0 ? cue.start : (starts[index - 1] ?? cue.start);
+      const firstInfo = row.aligned.find((info) => info?.time !== undefined);
+      let desired = row.fallbackStart;
+      if (sortedWords.length && firstInfo && firstInfo.word !== undefined) {
+        const firstWord = sortedWords[firstInfo.word];
+        if (firstWord) {
+          // 跨行切词时行首若落在词的后半段，用该字符在词内的位置推算起点，
+          // 不能整行退回词首，否则上一行会被挤成零宽。
+          desired = firstWord.start
+            + (firstWord.end - firstWord.start) * firstInfo.charIndex / Math.max(1, firstInfo.wordCharCount);
+        }
+      }
+      starts.push(clampTime(desired, previous + (index === 0 ? 0 : 0.001), cue.end - 0.001));
+    }
+
+    return prepared.map((row, index) => {
+      const start = starts[index]!;
+      const end = index === prepared.length - 1 ? cue.end : Math.max(start + 0.001, starts[index + 1]!);
+      const wordResult = sortedWords.length
+        ? highlightFromAlignment(row.chunk, row.aligned, sortedWords, start, end)
+        : null;
+      // 无词表时保留旧的「句尾标点留白」：字重窗口里末尾标点的权重不该被
+      // 已读文字占满，所以先用字重节点收窄发声窗口再重新生成高亮。
+      const fallbackWindow = subtitleHighlightPoints(row.chunk, row.fallbackStart, row.fallbackEnd);
+      const spokenStart = Math.max(start, fallbackWindow[0]?.time ?? start);
+      const spokenEnd = Math.max(spokenStart + 0.001, Math.min(end, fallbackWindow.at(-1)?.time ?? end));
+      const highlight = wordResult?.points ?? subtitleHighlightPoints(row.chunk, spokenStart, spokenEnd);
+      const wordAlignment: SubtitleWordAlignmentInfo = wordResult?.info ?? {
+        aligned: false,
+        matchedChars: 0,
+        totalChars: toSpeechChars(row.chunk).filter((char) => char.speak).length,
+        coverage: 0,
+        wordCount: 0
       };
-    }).map((display, index, displays) => {
-      const start = index === 0 ? cue.start : display.start;
-      const end = displays[index + 1]?.start ?? cue.end;
-      // The line's actual on-screen window can differ from the source span when
-      // punctuation was removed at a split. Never let the yellow wash begin
-      // before this line is visible or finish after the next line has arrived.
-      const spokenStart = Math.max(start, display.highlight?.[0]?.time ?? start);
-      const spokenEnd = Math.max(spokenStart + .001, Math.min(end, display.highlight?.at(-1)?.time ?? end));
-      return { ...display, start, end,
-        highlight: subtitleHighlightPoints(display.text, spokenStart, spokenEnd) };
+      return { start, end, text: row.chunk, lines: [row.chunk], highlight, wordAlignment };
     });
   });
+}
+
+/** 汇总字幕行的对齐覆盖，主线程可在生成 composition 后打印它做金色字幕验收。 */
+export function subtitleAlignmentReport(displayCues: readonly DisplayCue[]): SubtitleAlignmentReport {
+  const rows = displayCues.map((cue) => ({
+    ...(cue.wordAlignment ?? {
+      aligned: false,
+      matchedChars: 0,
+      totalChars: 0,
+      coverage: 0,
+      wordCount: 0
+    }),
+    text: cue.text,
+    start: cue.start,
+    end: cue.end
+  }));
+  const totalChars = rows.reduce((sum, row) => sum + row.totalChars, 0);
+  const matchedChars = rows.reduce((sum, row) => sum + row.matchedChars, 0);
+  const alignedCues = rows.filter((row) => row.aligned).length;
+  return {
+    totalCues: displayCues.length,
+    alignedCues,
+    fallbackCues: displayCues.length - alignedCues,
+    totalChars,
+    matchedChars,
+    coverage: totalChars ? matchedChars / totalChars : 0,
+    rows
+  };
 }
 
 export function timelineValues(start: number, end: number): { start: string; duration: string } {

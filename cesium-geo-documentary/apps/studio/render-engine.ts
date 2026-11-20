@@ -1311,7 +1311,7 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
  * Studio's narration preview and every later export look it up through the job
  * history. Only the reusable audio is kept; the WAV is regenerated from it.
  */
-export const NARRATION_REUSE_FILES = ["narration.mp3", "duration.json", "narration-edge.srt"];
+export const NARRATION_REUSE_FILES = ["narration.mp3", "duration.json", "narration-edge.srt", "word-timestamps.json", "pronunciation-map.json", "narration-input.txt"];
 
 /** 诊断副本限制体积；恢复所需的原始帧留在本任务沙箱中。 */
 const DIAGNOSTIC_FILE_LIMIT = 12;

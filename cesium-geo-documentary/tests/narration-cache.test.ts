@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, writeFile, copyFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -26,7 +27,22 @@ test("完整历史旁白仅在精确匹配时复用，损坏或修改后拒绝",
     const result = spawnSync(ffmpeg, ["-y", "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000", "-t", "8", "-c:a", "libmp3lame", join(audio, "narration.mp3")], { stdio: "ignore" });
     assert.equal(result.status, 0);
     await writeFile(join(audio, "narration-edge.srt"), "1\n00:00:00,100 --> 00:00:01,000\n开场。\n\n2\n00:00:01,000 --> 00:00:02,000\n村庄。\n\n3\n00:00:06,400 --> 00:00:07,500\n结尾。\n");
-    await writeFile(join(audio, "duration.json"), JSON.stringify({ provider: "edge-tts", voiceId: content.voiceId, rate: content.voiceRate, narrationTextHash: stableNarrationTextHash("开场。\n\n村庄。\n\n结尾。\n"), durationSeconds: 8, formalReleaseReady: true, sampleRate: 48000, loudnessTargetLufs: -16, outroPause: { applied: true, mode: "parent-child-tour", requestedSeconds: 4.4, insertedSeconds: 4.4, outroCueIndex: 2, hasClosingNarration: true, rawOutroNarrationStartSeconds: 2, outroNarrationStartSeconds: 6.4, insertionAtSeconds: 2, lastChildNarrationEndSeconds: 2, returnWindowSeconds: 4.4 } }));
+    const mp3Hash = createHash("sha256").update(await readFile(join(audio, "narration.mp3"))).digest("hex");
+    const wordTextHash = createHash("sha256").update("开场。\n\n村庄。\n\n结尾。\n", "utf8").digest("hex");
+    const shift = { insertionAtSeconds: 2, insertedSeconds: 4.4, appliedBy: "duration.json.outroPause" };
+    const wordPayload = {
+      regionId: "r", voiceId: content.voiceId, rate: content.voiceRate,
+      boundary: "WordBoundary", timingMode: "provider-word-boundaries",
+      textHash: wordTextHash, sourceAudioHash: "same-edge-stream", audioHash: mp3Hash,
+      timeline: "final-narration", shift,
+      words: [
+        { start: 0.1, end: 0.6, text: "开场" },
+        { start: 1.0, end: 1.8, text: "村庄" },
+        { start: 6.4, end: 7.3, text: "结尾" }
+      ]
+    };
+    await writeFile(join(audio, "word-timestamps.json"), JSON.stringify(wordPayload));
+    await writeFile(join(audio, "duration.json"), JSON.stringify({ provider: "edge-tts", voiceId: content.voiceId, rate: content.voiceRate, narrationTextHash: stableNarrationTextHash("开场。\n\n村庄。\n\n结尾。\n"), durationSeconds: 8, formalReleaseReady: true, sampleRate: 48000, loudnessTargetLufs: -16, outroPause: { applied: true, mode: "parent-child-tour", requestedSeconds: 4.4, insertedSeconds: 4.4, outroCueIndex: 2, hasClosingNarration: true, rawOutroNarrationStartSeconds: 2, outroNarrationStartSeconds: 6.4, insertionAtSeconds: 2, lastChildNarrationEndSeconds: 2, returnWindowSeconds: 4.4 }, wordTimestamps: { file: "word-timestamps.json", audioHash: mp3Hash, sourceAudioHash: "same-edge-stream", textHash: wordTextHash, boundary: "WordBoundary", wordCount: 3, shift } }));
     await stageNarrationCache(root, sandbox, join(root, "new"), project);
     assert.equal(await canReuseFinalNarration(target, content), true);
     for (const [index, changed] of [
@@ -56,6 +72,25 @@ test("完整历史旁白仅在精确匹配时复用，损坏或修改后拒绝",
     await writeFile(join(baseline, "narration.mp3"), "bad baseline");
     await stageNarrationCache(root, sandbox, join(root, "new"), project);
     assert.deepEqual(await readFile(join(target, "narration.mp3")), before);
+    // 逐词表必须同源且已按 outroPause 位移：缺失 / 独立合成形状 / 音频不符 /
+    // 文本不符 / 未位移 / 时间越界，任何一种都不能被当作精确词表复用。
+    const wordsPath = join(target, "word-timestamps.json");
+    const originalWords = await readFile(wordsPath, "utf8");
+    assert.equal(await canReuseFinalNarration(target, content), true);
+    await rm(wordsPath);
+    assert.equal(await canReuseFinalNarration(target, content), false);
+    await writeFile(wordsPath, JSON.stringify({ ...wordPayload, sourceAudioHash: undefined, audioHash: undefined, timeline: undefined, shift: undefined }));
+    assert.equal(await canReuseFinalNarration(target, content), false);
+    await writeFile(wordsPath, JSON.stringify({ ...wordPayload, audioHash: "stale-audio-hash" }));
+    assert.equal(await canReuseFinalNarration(target, content), false);
+    await writeFile(wordsPath, JSON.stringify({ ...wordPayload, textHash: createHash("sha256").update("别的稿子").digest("hex") }));
+    assert.equal(await canReuseFinalNarration(target, content), false);
+    await writeFile(wordsPath, JSON.stringify({ ...wordPayload, shift: { insertionAtSeconds: 0, insertedSeconds: 0, appliedBy: null } }));
+    assert.equal(await canReuseFinalNarration(target, content), false);
+    await writeFile(wordsPath, JSON.stringify({ ...wordPayload, words: [...wordPayload.words.slice(0, 2), { start: 6.4, end: 20, text: "结尾" }] }));
+    assert.equal(await canReuseFinalNarration(target, content), false);
+    await writeFile(wordsPath, originalWords);
+    assert.equal(await canReuseFinalNarration(target, content), true);
     await writeFile(join(target, "narration-edge.srt"), "damaged");
     assert.equal(await canReuseFinalNarration(target, content), false);
     await rm(join(audio, "duration.json"));

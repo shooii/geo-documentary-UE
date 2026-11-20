@@ -6,6 +6,45 @@ export interface NarrationCue {
   text: string;
 }
 
+/** 与 subtitles.ts 的 WordTiming 同形：秒、相对最终旁白音频起点。 */
+export interface WordTiming {
+  start: number;
+  end: number;
+  text: string;
+}
+
+/**
+ * 把同源 WordBoundary 词表从源音频时间轴平移到最终旁白时间轴。
+ *
+ * insertSilence() 在 insertionAtSeconds 处插入 insertedSeconds 静音：该时刻之后
+ * 的词整体后移；跨越插入点、被 ffmpeg atrim 截尾的词只保留插入点之前的尾音。
+ * 元数据取自 duration.json.outroPause，不用估算、不按字数插值。
+ */
+export function shiftWordTimings(
+  words: readonly WordTiming[],
+  pause: Pick<TourOutroPausePlan, "insertionAtSeconds" | "insertedSeconds"> | null
+): WordTiming[] {
+  if (!pause || !Number.isFinite(pause.insertionAtSeconds) || !(pause.insertedSeconds > 0)) {
+    return words.map((word) => ({ start: word.start, end: word.end, text: word.text }));
+  }
+  const at = pause.insertionAtSeconds;
+  const inserted = pause.insertedSeconds;
+  // 句级 SRT 的时间戳是毫秒，WordBoundary 是 100 纳秒；同一个词可能因此相差
+  // 不到 1 ms。插入点附近这种舍入误差不能把词裁成 1 ms 的碎片，整词随后续句后移。
+  const boundaryTolerance = 0.06;
+  return words.map((word) => {
+    if (word.start >= at - boundaryTolerance) {
+      return {
+        start: roundToSrtMilliseconds(word.start + inserted),
+        end: roundToSrtMilliseconds(word.end + inserted),
+        text: word.text
+      };
+    }
+    if (word.end <= at) return { start: word.start, end: word.end, text: word.text };
+    return { start: word.start, end: at, text: word.text };
+  });
+}
+
 export interface TourOutroPausePlan {
   outroCueIndex: number;
   hasClosingNarration: boolean;

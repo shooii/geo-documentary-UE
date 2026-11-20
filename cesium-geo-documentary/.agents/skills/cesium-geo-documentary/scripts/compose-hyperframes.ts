@@ -1,11 +1,13 @@
 import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { extname, resolve } from "node:path";
 import { execFileSync, spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
-import { buildSingleLineCues, subtitleHighlightPoints, timelineValues, type SingleLineCueOverride, type SubtitleCue as Cue } from "../../../../packages/content-engine/subtitles.js";
+import { buildSingleLineCues, subtitleAlignmentReport, subtitleHighlightPoints, timelineValues, type SingleLineCueOverride, type SubtitleCue as Cue } from "../../../../packages/content-engine/subtitles.js";
+import { sameSha256Digest } from "../../../../packages/content-engine/hash.js";
 import { mediaKindForPath } from "../../../../packages/content-engine/media.js";
 import { COMPOSITION_TRACKS, musicTrack, visualTrack } from "../../../../packages/content-engine/tracks.js";
 import { normalizeAnchorText } from "../../../../packages/content-engine/visual-anchoring.js";
@@ -221,12 +223,14 @@ async function writeMapFallbackStub(target: string, profile: RenderProfile, dura
   });
 }
 
-function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], audioDuration: number, timelineDuration: number, narrationStartSeconds: number, openingGateSeconds: number, visuals: ResolvedVisualClip[], cover: ResolvedCover): string {
+function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], audioDuration: number, timelineDuration: number, narrationStartSeconds: number, openingGateSeconds: number, visuals: ResolvedVisualClip[], cover: ResolvedCover, exactSubtitleTiming = false): string {
   const content = master[regionId];
   if (!content) throw new Error(`Unknown region ${regionId}`);
   const offset = cover.introSeconds;
   const narrationOffset = offset + narrationStartSeconds + openingGateSeconds;
-  const subtitleLeadSeconds = Math.max(-0.35, Math.min(0.2, Number(content.subtitleLeadSeconds ?? 0)));
+  // Provider word boundaries already use the audio clock; legacy lead offsets
+  // must not shift either line transitions or the gold wash away from that clock.
+  const subtitleLeadSeconds = exactSubtitleTiming ? 0 : Math.max(-0.35, Math.min(0.2, Number(content.subtitleLeadSeconds ?? 0)));
   const compositionDuration = timelineDuration + offset;
   const coverFadeSeconds = Math.min(0.46, Math.max(0.28, offset * 0.22));
   const coverFadeStart = Math.max(0, offset - coverFadeSeconds);
@@ -261,7 +265,7 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
     // 而不是整句在结尾"啪"地变色。aria-hidden 让读屏只念一遍。
     const html = escapeHtml(cue.text);
     const cueEnd = Number(timeline.start) + Number(timeline.duration);
-    const activeEnd = Math.min(cueEnd, Math.max(Number(timeline.start) + .08, cueEnd - .1) + .08);
+    const activeEnd = exactSubtitleTiming ? cueEnd : Math.min(cueEnd, Math.max(Number(timeline.start) + .08, cueEnd - .1) + .08);
     return `<div id="caption-${index}" class="clip subtitle" data-active-end="${activeEnd.toFixed(3)}" data-start="${timeline.start}" data-duration="${timeline.duration}" data-track-index="${COMPOSITION_TRACKS.subtitle}"><span id="caption-inner-${index}" class="subtitle-inner" data-layout-allow-overlap><span id="caption-wash-${index}" class="subtitle-wash" aria-hidden="true">${html}</span><span class="subtitle-ink">${html}</span></span></div>`;
   }).join("\n");
   const visualClips = visuals.map((visual, index) => {
@@ -414,7 +418,7 @@ function compositionHtml(regionId: string, prefix: string, displayCues: Cue[], a
     return `tl.fromTo("#visual-main-${index}",{scale:${fromScale.toFixed(3)},x:${fromX.toFixed(1)},y:${y.toFixed(1)}},{scale:${toScale.toFixed(3)},x:${toX.toFixed(1)},y:${y.toFixed(1)},duration:${duration.toFixed(3)},ease:"none"},${start.toFixed(3)});`;
   }).join("\n")}
   ${visuals.map((visual, index) => { const start = visual.start + offset; const end = visual.end + offset; const cueStart = visual.cueStart === undefined ? start : narrationOffset + visual.cueStart; const capIn = Math.max(start + .25, cueStart); const capOut = Math.max(capIn + .15, end - .45); return `tl.fromTo("#visual-caption-${index}",{opacity:0},{opacity:1,duration:.12},${capIn.toFixed(3)}).to("#visual-caption-${index}",{opacity:0,duration:.12},${capOut.toFixed(3)}).set("#visual-caption-${index}",{opacity:0},${(capOut + .12).toFixed(3)}).set("#visual-caption-${index}",{opacity:0},${end.toFixed(3)});`; }).join("\n")}
-  ${displayCues.map((cue, index) => { const timing = timelineValues(Math.max(offset, cue.start + narrationOffset + subtitleLeadSeconds), Math.max(offset + 0.08, cue.end + narrationOffset + subtitleLeadSeconds)); const cueEnd = Number(timing.start) + Number(timing.duration); const fadeOutAt = Math.max(Number(timing.start) + 0.08, cueEnd - 0.1); const hardKillAt = Math.min(cueEnd, fadeOutAt + 0.08); const points = cue.highlight ?? subtitleHighlightPoints(cue.text, cue.start, cue.end); const wash = points.map((point, pointIndex) => { const at = point.time + narrationOffset + subtitleLeadSeconds; const previous = points[pointIndex - 1]; const cut = ((1 - point.progress) * 100).toFixed(4); if (!previous || point.time <= previous.time) return `.set("#caption-wash-${index}",{clipPath:"inset(0 ${cut}% 0 0)"},${at.toFixed(4)})`; return `.fromTo("#caption-wash-${index}",{clipPath:"inset(0 ${((1 - previous.progress) * 100).toFixed(4)}% 0 0)"},{clipPath:"inset(0 ${cut}% 0 0)",duration:${(point.time - previous.time).toFixed(4)},ease:"none",immediateRender:false},${(previous.time + narrationOffset + subtitleLeadSeconds).toFixed(4)})`; }).join(""); return `tl.fromTo("#caption-inner-${index}",{opacity:0,y:8},{opacity:1,y:0,duration:.08},${timing.start})${wash}.to("#caption-inner-${index}",{opacity:0,duration:.08},${fadeOutAt.toFixed(3)}).set("#caption-inner-${index}",{opacity:0},${hardKillAt.toFixed(3)});`; }).join("\n")}
+  ${displayCues.map((cue, index) => { const timing = timelineValues(Math.max(offset, cue.start + narrationOffset + subtitleLeadSeconds), Math.max(offset + 0.08, cue.end + narrationOffset + subtitleLeadSeconds)); const cueEnd = Number(timing.start) + Number(timing.duration); const fadeOutAt = exactSubtitleTiming ? cueEnd : Math.max(Number(timing.start) + 0.08, cueEnd - 0.1); const hardKillAt = exactSubtitleTiming ? cueEnd : Math.min(cueEnd, fadeOutAt + 0.08); const points = cue.highlight ?? subtitleHighlightPoints(cue.text, cue.start, cue.end); const wash = points.map((point, pointIndex) => { const at = point.time + narrationOffset; const previous = points[pointIndex - 1]; const cut = ((1 - point.progress) * 100).toFixed(4); if (!previous || point.time <= previous.time) return `.set("#caption-wash-${index}",{clipPath:"inset(0 ${cut}% 0 0)"},${at.toFixed(4)})`; return `.fromTo("#caption-wash-${index}",{clipPath:"inset(0 ${((1 - previous.progress) * 100).toFixed(4)}% 0 0)"},{clipPath:"inset(0 ${cut}% 0 0)",duration:${(point.time - previous.time).toFixed(4)},ease:"none",immediateRender:false},${(previous.time + narrationOffset).toFixed(4)})`; }).join(""); return `tl.fromTo("#caption-inner-${index}",{opacity:0,y:8},{opacity:1,y:0,duration:.08},${timing.start})${wash}.to("#caption-inner-${index}",{opacity:0,duration:${exactSubtitleTiming ? 0 : .08}},${fadeOutAt.toFixed(3)}).set("#caption-inner-${index}",{opacity:0},${hardKillAt.toFixed(3)});`; }).join("\n")}
   window.__timelines=window.__timelines||{};window.__timelines["${regionId}-${profileName}"]=tl;
 </script>
 </body></html>`;
@@ -806,7 +810,26 @@ for (const id of ids) {
     process.stdout.write(`MAP_STUB_USED ${mapTarget}\n`);
   }
   const captionData = JSON.parse(await readFile(resolve(compositor, `captions/${id}.json`), "utf8")) as { cues: Cue[]; protectedPhrases?: string[] };
-  const durationData = JSON.parse(await readFile(resolve(root, `assets/audio/${id}/duration.json`), "utf8")) as { durationSeconds: number };
+  const audioRoot = resolve(root, `assets/audio/${id}`);
+  const durationData = JSON.parse(await readFile(resolve(audioRoot, "duration.json"), "utf8")) as { durationSeconds: number; provider?: string; narrationTextHash?: string };
+  const wordTimingsPath = resolve(audioRoot, "word-timestamps.json");
+  const wordData = existsSync(wordTimingsPath)
+    ? JSON.parse(await readFile(wordTimingsPath, "utf8")) as { words?: Array<{ start: number; end: number; text: string }>; audioHash?: string; textHash?: string; timingMode?: string; timeline?: string }
+    : null;
+  const exactSubtitleTiming = durationData.provider === "edge-tts";
+  if (exactSubtitleTiming) {
+    const hash = createHash("sha256").update(await readFile(resolve(audioRoot, "narration.mp3"))).digest("hex");
+    // The Edge WordBoundary stream writes a bare sha256 hex into the payload's
+    // textHash, while stableNarrationTextHash() writes duration.json's
+    // narrationTextHash with a "sha256:" prefix. Compare only the digest after
+    // stripping the optional prefix, and require both to be valid 64-hex — a
+    // missing/corrupt hash must fail. audioHash stays a strict match against the
+    // real narration.mp3 bytes; no threshold or fallback behavior is relaxed.
+    if (!wordData?.words?.length || wordData.audioHash !== hash || wordData.timingMode !== "provider-word-boundaries" || wordData.timeline !== "final-narration" || !sameSha256Digest(wordData.textHash, durationData.narrationTextHash)) {
+      throw new Error("字幕词时间戳缺失或与正式旁白不同源，拒绝回退到估算高亮。");
+    }
+  }
+  const wordTimings = wordData?.words ?? [];
   const narrationStartSeconds = Math.max(0, Number(timelineData.narrationStartSeconds ?? 0));
   // 开场闸门：穿云没结束、金色光束还没落笔之前不出字幕，也不起旁白。一个数同时平移人声、字幕和落笔音，三者不会互相错位。
   // 但 `narrationStartSeconds` 一旦存在，就已经含了开场（子巡游重写 timeline 时写的是
@@ -845,16 +868,24 @@ for (const id of ids) {
     captionData.cues,
     profile.subtitle_chars_per_line,
     protectedPhrases,
-    overrideData.cues ?? []
+    overrideData.cues ?? [],
+    wordTimings
   );
+  const alignmentReport = subtitleAlignmentReport(displayCues);
+  const syncReport = { regionId: id, audioHash: wordData?.audioHash, exactSubtitleTiming, ...alignmentReport };
+  await writeFile(resolve(audioRoot, "subtitle-sync-report.json"), JSON.stringify(syncReport, null, 2), "utf8");
+  if (exactSubtitleTiming && (alignmentReport.coverage < 0.995 || alignmentReport.fallbackCues > 0)) {
+    throw new Error(`字幕真实词对齐不足：coverage=${alignmentReport.coverage.toFixed(5)} fallback=${alignmentReport.fallbackCues}，详见 subtitle-sync-report.json`);
+  }
+  process.stdout.write(`SUBTITLE_SYNC_OK ${id} coverage=${alignmentReport.coverage.toFixed(5)} aligned=${alignmentReport.alignedCues}/${alignmentReport.totalCues}\n`);
   const fullCompositionDuration = timelineData.duration + cover.introSeconds;
   const compositionDuration = Math.min(fullCompositionDuration, openingClipSeconds ?? fullCompositionDuration);
-  const fullHtml = compositionHtml(id, "media", displayCues, durationData.durationSeconds, timelineData.duration, narrationStartSeconds, openingGateSeconds, visuals, cover);
+  const fullHtml = compositionHtml(id, "media", displayCues, durationData.durationSeconds, timelineData.duration, narrationStartSeconds, openingGateSeconds, visuals, cover, exactSubtitleTiming);
   const html = openingClipSeconds === undefined ? fullHtml : openingClipHtml(fullHtml, compositionDuration);
   await writeVisualSyncReport(id, visuals, cover.introSeconds, narrationStartSeconds);
   await Promise.all([
     writeFile(resolve(compositionDir, `${id}-${profileName}.html`), html, "utf8"),
-    writeOffsetCaptions(id, displayCues, cover.introSeconds, narrationStartSeconds + openingGateSeconds, cover.hierarchicalTitle, Math.max(-0.35, Math.min(0.2, Number(master[id]?.subtitleLeadSeconds ?? 0)))),
+    writeOffsetCaptions(id, displayCues, cover.introSeconds, narrationStartSeconds + openingGateSeconds, cover.hierarchicalTitle, exactSubtitleTiming ? 0 : Math.max(-0.35, Math.min(0.2, Number(master[id]?.subtitleLeadSeconds ?? 0)))),
     writeFile(resolve(compositionDir, `${id}-${profileName}.json`), JSON.stringify({
       regionId: id,
       profile: profileName,

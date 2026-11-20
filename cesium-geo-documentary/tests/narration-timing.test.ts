@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
@@ -9,6 +10,7 @@ import {
   parseSrt,
   planTourOutroPause,
   serializeSrt,
+  shiftWordTimings,
   stableNarrationTextHash
 } from "../.agents/skills/cesium-geo-documentary/scripts/narration-timing.js";
 
@@ -20,6 +22,25 @@ const sampleCues = [
   { start: 17.15, end: 21.1, text: "outro one" },
   { start: 21.3, end: 24.8, text: "outro two" }
 ];
+
+test("word timings shift by the actual inserted outro silence, not an estimate", () => {
+  const words = [
+    { start: 0.05, end: 0.5, text: "前" },
+    { start: 10.0, end: 10.4, text: "插入点前" },
+    { start: 10.5, end: 11.0, text: "插入点后" },
+    { start: 12.0, end: 12.3, text: "结尾" }
+  ];
+  const shifted = shiftWordTimings(words, { insertionAtSeconds: 10.2, insertedSeconds: 4.4 });
+  assert.deepEqual(shifted[0], words[0]);
+  assert.deepEqual(shifted[1], { start: 10.0, end: 10.2, text: "插入点前" });
+  assert.deepEqual(shifted[2], { start: 14.9, end: 15.4, text: "插入点后" });
+  assert.deepEqual(shifted[3], { start: 16.4, end: 16.7, text: "结尾" });
+  // 毫秒级 SRT 与 100ns WordBoundary 的舍入差不能把后一句首词裁成碎片。
+  const rounding = shiftWordTimings([{ start: 2.9375, end: 3.425, text: "结尾" }], { insertionAtSeconds: 2.938, insertedSeconds: 4.4 });
+  assert.deepEqual(rounding, [{ start: 7.338, end: 7.825, text: "结尾" }]);
+  assert.equal(shiftWordTimings(words, null)[2]!.start, 10.5);
+  assert.equal(shiftWordTimings(words, { insertionAtSeconds: 10.2, insertedSeconds: 0 })[2]!.start, 10.5);
+});
 
 test("parent-child narration inserts a deterministic return pause before the outro", () => {
   const plan = planTourOutroPause(sampleCues, 2, 2, DEFAULT_TOUR_RETURN_SECONDS);
@@ -90,6 +111,30 @@ test("paragraph-to-cue mapping ignores decorative symbols omitted by Edge TTS", 
   );
   assert.equal(mapped.length, 1);
   assert.deepEqual([mapped[0]!.startIndex, mapped[0]!.endIndex], [0, 0]);
+});
+
+test("word helper captures audio and WordBoundary from one stream; narration never re-synthesises words", async () => {
+  const root = process.cwd();
+  const helper = resolve(root, ".agents/skills/cesium-geo-documentary/scripts/generate-word-timestamps.py");
+  const python = process.env.PYTHON ?? "python";
+  const selfTest = spawnSync(python, [helper, "--region", "selftest", "--self-test"], {
+    cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"]
+  });
+  assert.equal(selfTest.status, 0, selfTest.stderr);
+  assert.match(selfTest.stdout, /WORD_TIMESTAMPS_SELFTEST_OK/);
+  const [helperSource, narrationSource] = await Promise.all([
+    readFile(helper, "utf8"),
+    readFile(resolve(root, ".agents/skills/cesium-geo-documentary/scripts/generate-narration.ts"), "utf8")
+  ]);
+  assert.match(helperSource, /boundary="WordBoundary"/);
+  assert.match(helperSource, /--write-media/);
+  assert.match(helperSource, /--write-subtitles/);
+  assert.match(helperSource, /sourceAudioHash/);
+  assert.match(helperSource, /assign_words_to_sentences/);
+  assert.doesNotMatch(narrationSource, /WORD_TIMESTAMPS_SKIPPED/);
+  assert.doesNotMatch(narrationSource, /"-m", "edge_tts"/);
+  assert.match(narrationSource, /word-timestamps-source\.json/);
+  assert.match(narrationSource, /shiftWordTimings/);
 });
 
 test("narration hash is stable and changes whenever the TTS input changes", () => {

@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
   applyTourOutroPause,
@@ -10,8 +11,10 @@ import {
   parseSrt,
   planTourOutroPause,
   serializeSrt,
+  shiftWordTimings,
   stableNarrationTextHash,
-  type TourOutroPausePlan
+  type TourOutroPausePlan,
+  type WordTiming
 } from "./narration-timing.js";
 import { isXfyunVoice, synthesizeXfyun, xfyunCredentialsFromEnvFile } from "../../../../packages/xfyun-tts/index.js";
 import { alignCueBoundaries, splitNarrationSentences } from "../../../../packages/render-spec/narration-align.js";
@@ -109,6 +112,102 @@ function normalizeEdgeTtsRate(value: string): string {
   const parsed = Number.parseInt(String(value).replace("%", ""), 10);
   const percent = Number.isFinite(parsed) ? Math.max(-100, Math.min(100, parsed)) : 0;
   return `${percent >= 0 ? "+" : ""}${percent}%`;
+}
+
+interface SourceWordTimestamps {
+  regionId: string;
+  voiceId: string;
+  rate: string;
+  boundary: string;
+  timingMode: string;
+  textHash: string;
+  sourceAudioHash: string;
+  words: WordTiming[];
+}
+interface FinalWordTimestampMetadata {
+  file: string;
+  audioHash: string;
+  sourceAudioHash: string;
+  textHash: string;
+  boundary: "WordBoundary";
+  wordCount: number;
+  shift: { insertionAtSeconds: number; insertedSeconds: number; appliedBy: string | null };
+}
+
+/**
+ * Edge 只支持每次连接返回一种 boundary。要证明词表与音频同源，只能让一次
+ * Communicate(boundary="WordBoundary") 的流同时写音频和词事件；先前“CLI 合成
+ * 音频 + 独立第二次合成词表”的时间戳无法证明属于这段音频，已移除。
+ *
+ * helper 也会从同一批词事件推导句级 SRT（还原输入文本的标点），继续兼容
+ * generate-subtitles.py / parseSrt / mapParagraphsToCues。失败不静默跳过：
+ * 正式模式由调用方抛错，草稿模式才允许降到 SAPI（此时没有逐词高亮，由
+ * buildSingleLineCues 回退到字重插值）。
+ */
+function runEdgeWordBoundaryStream(
+  id: string,
+  textPath: string,
+  voice: string,
+  rate: string,
+  sourceMp3: string,
+  sourceSrt: string,
+  sourceWords: string
+): void {
+  const output = runEdgeTtsWithRetry([
+    ".agents/skills/cesium-geo-documentary/scripts/generate-word-timestamps.py",
+    "--region", id,
+    "--text-file", textPath,
+    "--voice", voice,
+    "--rate", rate,
+    "--write-media", sourceMp3,
+    "--write-subtitles", sourceSrt,
+    "--word-timestamps", sourceWords
+  ], { ...process.env, PYTHONPATH: pythonPath });
+  if (!existsSync(sourceWords) || !existsSync(sourceMp3) || !existsSync(sourceSrt)) {
+    throw new Error(`Edge WordBoundary helper did not produce all artefacts for ${id}\n${output.slice(-2_000)}`);
+  }
+  const line = output.split("\n").find((entry) => entry.includes("WORD_TIMESTAMPS_READY"));
+  if (line) process.stdout.write(`${line.trim()}\n`);
+}
+
+/**
+ * 把同源词表从源音频时间轴位移到最终旁白时间轴，并绑定最终 mp3 的 hash。
+ * 位移量只读 duration.json.outroPause 的字段，由 buildFinalNarrationAssets 实际插
+ * 入静音时算出，不用估算，也不读独立合成的旧词表。
+ */
+async function finalizeWordTimestamps(
+  sourcePath: string,
+  finalPath: string,
+  finalMp3: string,
+  pause: OutroPauseMetadata | null,
+  finalDuration: number
+): Promise<FinalWordTimestampMetadata> {
+  const source = JSON.parse(await readFile(sourcePath, "utf8")) as SourceWordTimestamps;
+  if (source.boundary !== "WordBoundary" || source.timingMode !== "provider-word-boundaries"
+    || !Array.isArray(source.words) || source.words.length === 0 || !source.sourceAudioHash) {
+    throw new Error(`Invalid same-source WordBoundary payload: ${sourcePath}`);
+  }
+  if (source.words.some((word) => !Number.isFinite(word.start) || !Number.isFinite(word.end)
+    || word.end <= word.start || typeof word.text !== "string")) {
+    throw new Error(`Corrupt WordBoundary payload: ${sourcePath}`);
+  }
+  const words = shiftWordTimings(source.words, pause
+    ? { insertionAtSeconds: pause.insertionAtSeconds, insertedSeconds: pause.insertedSeconds }
+    : null);
+  const audioHash = createHash("sha256").update(await readFile(finalMp3)).digest("hex");
+  const shift = pause
+    ? { insertionAtSeconds: pause.insertionAtSeconds, insertedSeconds: pause.insertedSeconds, appliedBy: "duration.json.outroPause" }
+    : { insertionAtSeconds: 0, insertedSeconds: 0, appliedBy: null };
+  await writeFile(finalPath, JSON.stringify({
+    ...source,
+    audioHash,
+    durationSeconds: finalDuration,
+    timeline: "final-narration",
+    shift,
+    wordCount: words.length,
+    words
+  }, null, 1), "utf8");
+  return { file: "word-timestamps.json", audioHash, sourceAudioHash: source.sourceAudioHash, textHash: source.textHash, boundary: "WordBoundary", wordCount: words.length, shift };
 }
 
 function runEdgeTtsWithRetry(commandArgs: string[], env: NodeJS.ProcessEnv): string {
@@ -377,6 +476,8 @@ for (const id of ids) {
   const sapiWav = resolve(audioDir, "narration-sapi.wav");
   const metadataPath = resolve(audioDir, "duration.json");
   const ttsInputPath = resolve(audioDir, "narration-input.txt");
+  const sourceWordsPath = resolve(audioDir, "word-timestamps-source.json");
+  const wordsPath = resolve(audioDir, "word-timestamps.json");
   const pronunciationPath = resolve(audioDir, "pronunciation-map.json");
   const requestedRate = normalizeEdgeTtsRate(content.voiceRate ?? "-4%");
   const requestedVoiceId = content.voiceId ?? "zh-CN-YunyangNeural";
@@ -386,13 +487,22 @@ for (const id of ids) {
   const narrationTextHash = stableNarrationTextHash(ttsInput);
   if (!force && !draftMode && await canReuseFinalNarration(audioDir, content)) {
     loudnessNormalize(mp3, wav);
-    const metadata = JSON.parse(await readFile(metadataPath, "utf8")) as { durationSeconds: number };
+    const metadata = JSON.parse(await readFile(metadataPath, "utf8")) as { durationSeconds: number; provider?: string };
+    if (metadata.provider !== "edge-tts") {
+      // 讯飞/SAPI 没有 WordBoundary；清掉上一次 Edge 留下的词表，避免金色高亮
+      // 拿旧词表硬套新音频。
+      await rm(wordsPath, { force: true });
+      await rm(sourceWordsPath, { force: true });
+    }
     await synchronizeEditorialDuration(id, metadata.durationSeconds);
     run(python, [
       ".agents/skills/cesium-geo-documentary/scripts/generate-subtitles.py",
       "--region", id, "--narration-srt", edgeSrt,
       ...(outDirOverride ? ["--captions-dir", outDirOverride] : [])
     ]);
+    // canReuseFinalNarration() 已认证逐词词表（文本/音色/语速/最终 mp3 hash）。
+    // 缺词表或词表与这次文本/音频不匹配时缓存失效，走同源重生成，绝不独立
+    // 再合成一次假精确词表，也不静默留下旧词表。
     process.stdout.write(`NARRATION_READY ${id} ${metadata.durationSeconds.toFixed(2)}s (cached)\n`);
     continue;
   }
@@ -418,6 +528,7 @@ for (const id of ids) {
   const shouldGenerate = force
     || !existsSync(sourceMp3)
     || !existsSync(sourceEdgeSrt)
+    || (!isXfyunVoice(requestedVoiceId) && !existsSync(sourceWordsPath))
     || existingMetadata?.voiceId !== requestedVoiceId
     || existingMetadata?.rate !== requestedRate
     || existingMetadata?.narrationTextHash !== narrationTextHash
@@ -448,10 +559,7 @@ for (const id of ids) {
       provider = "edge-tts";
       actualVoiceId = requestedVoiceId;
       try {
-        runEdgeTtsWithRetry([
-          "-m", "edge_tts", "--voice", requestedVoiceId, `--rate=${requestedRate}`,
-          "--file", ttsInputPath, "--write-media", sourceMp3, "--write-subtitles", sourceEdgeSrt
-        ], { ...process.env, PYTHONPATH: pythonPath });
+        runEdgeWordBoundaryStream(id, ttsInputPath, requestedVoiceId, requestedRate, sourceMp3, sourceEdgeSrt, sourceWordsPath);
       } catch (error) {
         fallbackReason = error instanceof Error ? error.message.slice(0, 2_000) : String(error).slice(0, 2_000);
         if (!draftMode) {
@@ -476,10 +584,23 @@ for (const id of ids) {
   if (!draftMode && provider !== "edge-tts" && provider !== "xfyun-tts") {
     throw new Error(`Formal narration for ${id} is not premium TTS; regenerate with Edge TTS or 讯飞配音 before release.`);
   }
+  if (provider !== "edge-tts") {
+    await rm(wordsPath, { force: true });
+    await rm(sourceWordsPath, { force: true });
+  }
   const outroPause = await buildFinalNarrationAssets(content, sourceMp3, sourceEdgeSrt, mp3, edgeSrt);
   const loudness = loudnessNormalize(mp3, wav);
   const duration = durationFromFfmpeg(wav);
   const editorialDuration = await synchronizeEditorialDuration(id, duration);
+  // 正式 Edge 旁白必须带同源逐词时间；缺失即报错，不允许用独立第二次合成的
+  // 词表顶替，也不允许静默留空等 compose 回退到字级插值。
+  let wordMetadata: FinalWordTimestampMetadata | null = null;
+  if (provider === "edge-tts") {
+    if (!existsSync(sourceWordsPath)) {
+      throw new Error(`Formal narration for ${id} has no same-source WordBoundary payload; regenerate with Edge TTS.`);
+    }
+    wordMetadata = await finalizeWordTimestamps(sourceWordsPath, wordsPath, mp3, outroPause, duration);
+  }
   await writeFile(metadataPath, JSON.stringify({
     regionId: id,
     provider,
@@ -502,6 +623,7 @@ for (const id of ids) {
       ? "sentence punctuation with blank-line paragraph pauses and parent-return silence"
       : "sentence punctuation with blank-line paragraph pauses",
     outroPause,
+    wordTimestamps: wordMetadata,
     loudnessTargetLufs: -16,
     truePeakTargetDbtp: -1.5,
     measuredInputLufs: Number(loudness.input_i),
