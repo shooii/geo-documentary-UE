@@ -224,7 +224,12 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   const fills: Record<string, number> = {};
   if (!openingOnly) {
     stops.forEach((item) => {
-      const strength = smooth((mapTime - Number(item.start)) / 1.15);
+      // 色块必须等镜头飞稳、名牌/ICON 浮出之后再慢慢铺开。旧的起算点是场景
+      // 开头 +1.15s，而飞行本身要 3.2–4.2s：镜头还在半空时绿色已经铺满，
+      // 抢在了落地扫光和名牌前面。现在从落地点起算，之前一帧都不画村域色块。
+      const flightSeconds = Math.max(.001, Number(item.flightDuration) || .001);
+      const fillStart = Number(item.start) + flightSeconds;
+      const strength = smooth((mapTime - fillStart) / 1.15);
       if (strength > .01) fills[String(item.id)] = strength;
     });
   }
@@ -308,11 +313,17 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   const plateFade = clamp(1 - closingLinear / .12);
   const hierarchy = visualHierarchy(pose.height, overview.height, closing);
   if (stops.length && !openingOnly) {
+    const closingShot = returnProgress !== null || overviewProgress !== undefined;
     const representatives = overviewRepresentatives(stops, profile);
     for (const [id, label] of Object.entries(labels)) {
-      // 收尾把全部村名交还给 UE 的标注避让（放不下的按巡游顺序淡出），不再按
-      // “代表村”收缩：labelMix 的压制随收尾进度线性放开，巡游中行为不变。
-      if (id !== current && !representatives.has(id)) label.alpha *= 1 - hierarchy.labelMix * (1 - closing);
+      // 收尾只允许“同亮显示”或“完全交给避让隐藏”。旧公式在返航 2–3 秒把
+      // 非代表村乘到 0.56–0.80，潭龙村、英益村这类落在浅绿填充上的字被透成
+      // 灰绿，看着像单独换色；同一时刻代表村仍是 0.88。巡游阶段保持原逻辑。
+      if (closingShot) {
+        label.alpha = label.alpha > .01 ? .88 : 0;
+      } else if (id !== current && !representatives.has(id)) {
+        label.alpha *= 1 - hierarchy.labelMix * (1 - closing);
+      }
     }
   }
   const focusId = Object.keys(accents).reduce((best, id) => accents[id]! > (accents[best] ?? parentAccent) ? id : best, '');

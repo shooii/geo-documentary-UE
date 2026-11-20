@@ -583,26 +583,25 @@ async function writeRegionAnnotationWindows(sandbox: string, regionId: string, s
  * cues). It must be written after the real narration SRT has been measured and
  * the render spec rebuilt from actual cues.
  */
-async function writeChildCueRanges(sandbox: string, regionId: string, spec: RenderSpec): Promise<void> {
+export async function writeChildCueRanges(sandbox: string, regionId: string, spec: RenderSpec): Promise<void> {
   const masterPath = join(sandbox, "content", "regions.zh-CN.json");
   const master = JSON.parse(await readFile(masterPath, "utf8")) as Record<string, Record<string, unknown>>;
   const current = master[regionId];
   if (!current) return;
   const childRanges: Array<{ childId: string; cueStartIndex: number; cueEndIndex: number }> = [];
+  const sceneById = new Map(spec.scenes.map((scene) => [scene.sceneId, scene]));
   for (const range of spec.sceneCueRanges) {
-    const sceneId = String(range.sceneId);
-    const childPrefix = "child-";
-    if (!sceneId.startsWith(childPrefix)) continue;
+    // 场景 ID 可由导入器或编辑器自定义，不能从命名前缀推断村级身份。
+    const scene = sceneById.get(range.sceneId);
+    if (scene?.section !== "child" || !scene.childId) continue;
     childRanges.push({
-      childId: sceneId.slice(childPrefix.length),
+      childId: scene.childId,
       cueStartIndex: range.cueStartIndex,
       cueEndIndex: range.cueEndIndex
     });
   }
-  if (childRanges.length > 0) {
-    current.tourChildCueRanges = childRanges;
-    await writeFile(masterPath, JSON.stringify(master, null, 2), "utf8");
-  }
+  current.tourChildCueRanges = childRanges;
+  await writeFile(masterPath, JSON.stringify(master, null, 2), "utf8");
 }
 
 // The selection rule lives in the render-spec package so the workbook export can

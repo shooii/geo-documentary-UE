@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { transform } from 'esbuild';
+import { assertUiInteractionSize, buildEnvelope, captureBatches } from '../apps/ue-player/message-budget.js';
 
 const clientSource = await readFile(new URL('../apps/ue-player/client.ts', import.meta.url), 'utf8');
 const executable = (await transform(`(async () => {\n${clientSource.replace(/^import .*;\s*$/gm, '')}\n})()`, {
@@ -119,6 +120,7 @@ async function harness(search = '', sharedBus?: Bus) {
       throw new Error(`未模拟的请求 ${url}`);
     },
     Config, PixelStreaming, DEFAULT_IMAGERY_PROVIDER: 'test',
+    assertUiInteractionSize, buildEnvelope, captureBatches,
     actions: new Set(['seek', 'prepare-tour', 'set-annotations', 'update-tour-labels', 'play-scene-range', 'stop-scene-playback']),
     frameAt: (_scene: any, stops: any[], time: number, _profile: string, _duration: number, _opening: boolean, _origin?: any, _overview?: number, _view?: any, contextIntro?: boolean) => ({ time, stops, accents: {}, contextIntro }),
     contextIntroSeconds: () => 0, configureOpening: (region: any) => region,
@@ -135,6 +137,35 @@ async function harness(search = '', sharedBus?: Bus) {
     setLease: (handler: typeof lease) => { lease = handler; },
     connections: () => instances.reduce((total, instance) => total + instance.connectCalls + instance.reconnectCalls, 0) };
 }
+
+test('capture-batch 拆包保持时间顺序、帧内容和 captured 汇总', async () => {
+  const h = await harness('?slot=off'); await h.open();
+  const stops = [{ id: '村名', text: 'x'.repeat(8000) }];
+  h.window.geoVideo.prepareStudioTour({ tourStops: stops });
+  const times = Array.from({ length: 16 }, (_, i) => 563.84 + i / 30);
+  const result = await h.window.geoVideo.renderBatch(times);
+  const batches = h.instances.at(-1)!.sent.filter(message => message.action === 'capture-batch');
+  assert.ok(batches.length > 1);
+  assert.equal(result.captured, 16);
+  assert.ok(batches.every(message => JSON.stringify(message).length <= 60000));
+  assert.equal(new Set(batches.map(message => message.requestId)).size, batches.length);
+  const frames = batches.flatMap(message => message.frames);
+  assert.deepEqual(frames.map(frame => frame.time), times);
+  assert.ok(frames.every(frame => JSON.stringify(frame.stops) === JSON.stringify(stops)));
+});
+
+test('单帧和普通 send 超限都即时拒绝，不发消息、不遗留超时等待', async () => {
+  const h = await harness('?slot=off'); await h.open();
+  const stream = h.instances.at(-1)!;
+  const count = stream.sent.length, timerCount = h.timers.size;
+  h.window.geoVideo.prepareStudioTour({ tourStops: [{ text: 'x'.repeat(60000) }] });
+  await assert.rejects(h.window.geoVideo.renderBatch([0]), /超过长度限制 60000/);
+  assert.equal(stream.sent.length, count);
+  assert.equal(h.timers.size, timerCount);
+  await assert.rejects(h.window.geoVideo.setAnnotationWindows([{ text: 'x'.repeat(65536) }]), /超过长度限制 65535/);
+  assert.equal(stream.sent.length, count);
+  assert.equal(h.timers.size, timerCount);
+});
 
 test('应用独占重连，UE 冷启动期间不打断首次握手', async () => {
   const h = await harness('?slot=off');

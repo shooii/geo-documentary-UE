@@ -5,7 +5,9 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { buildRenderSpec, clampMinimumDisplaySeconds, mapScenesToCues, parseSrt, subtitleOverrideChunks, updateProjectMeasuredDurations } from "../packages/render-spec/index.js";
 import { buildProjectRenderSpec, makeProject, geometrySignature, mapRendererSignature, normalizeProject, readCanonicalCues, RENDERED_MAP_SOURCES } from "../apps/studio/project-service.js";
-import { newRenderJob, selectSceneAssetsForRender } from "../apps/studio/render-engine.js";
+import { newRenderJob, selectSceneAssetsForRender, writeChildCueRanges } from "../apps/studio/render-engine.js";
+import { execFileSync } from "node:child_process";
+import { planTourOutroPause, serializeSrt, applyTourOutroPause } from "../.agents/skills/cesium-geo-documentary/scripts/narration-timing.js";
 import { normalizeTimedCueOverlaps } from "../apps/studio/render-timing.js";
 import { normalizeSemanticText, validateVideoProject, type AssetPlacement, type VideoProject } from "../packages/project-schema/index.js";
 import { allChildrenPresent, goldenDurationIsComparable } from "../apps/studio/golden-qa.js";
@@ -910,6 +912,68 @@ test("Studio export supports a durable multi-task queue with per-task controls",
   assert.doesNotMatch(serverSource, /readiness\.checks\.filter\(\(item\) => !item\.pass\)/);
   assert.match(css, /readiness-item\.warn>span\{/);
   assert.match(css, /Export queue: compact, task-first delivery UI/);
+});
+
+test("自定义场景ID按childId写入完整cue范围，替换旧映射并通过真实巡游脚本", async () => {
+  const scratch = await mkdtemp(join(tmpdir(), "custom-child-cues-"));
+  const regionId = "990000001";
+  const texts = ["总览（海拔1.25米），他说：“看到了吗？”", "甲村有老屋。", "也有新田。", "乙村临水。", "（再看一眼！）", "回到全景。", "结尾补充。"];
+  const sourceCues = texts.map((text, index) => ({ index, start: index * 5, end: (index + 1) * 5, text }));
+  const scenes = [
+    { id: "child-not-a-village", section: "overview", narration: texts[0] },
+    { id: "v-01", section: "child", childId: "a", narration: texts.slice(1, 3).join("") },
+    { id: "自定义乙村", section: "child", childId: "b", narration: texts.slice(3, 5).join("") },
+    { id: "closing", section: "outro", narration: texts[5] },
+    { id: "tail", section: "outro-lead", narration: texts[6] }
+  ] as unknown as VideoProject["scenes"];
+  const sceneCueRanges = mapScenesToCues(scenes, sourceCues);
+  const spec = { scenes: scenes.map((scene) => ({ ...scene, sceneId: scene.id })), sceneCueRanges } as unknown as RenderSpec;
+  try {
+    await mkdir(join(scratch, "content"), { recursive: true });
+    const masterPath = join(scratch, "content", "regions.zh-CN.json");
+    await writeFile(masterPath, JSON.stringify({ [regionId]: {
+      tourOrder: ["a", "b"], tourIntroSentences: 1, tourReturnSeconds: 4.4,
+      tourChildCueRanges: [{ childId: "obsolete", cueStartIndex: 90, cueEndIndex: 99 }]
+    } }));
+    await writeChildCueRanges(scratch, regionId, spec);
+    const master = JSON.parse(await readFile(masterPath, "utf8"));
+    const expectedRanges = [
+      { childId: "a", cueStartIndex: 1, cueEndIndex: 2 },
+      { childId: "b", cueStartIndex: 3, cueEndIndex: 4 }
+    ];
+    assert.deepEqual(master[regionId].tourChildCueRanges, expectedRanges);
+
+    const plan = planTourOutroPause(sourceCues, 1, 2, 4.4, 5);
+    const audioDir = join(scratch, "assets", "audio", regionId);
+    await mkdir(audioDir, { recursive: true });
+    await writeFile(join(audioDir, "narration-edge.srt"), serializeSrt(applyTourOutroPause(sourceCues, plan)));
+    await writeFile(join(audioDir, "duration.json"), JSON.stringify({ durationSeconds: 39.4, outroPause: { ...plan, applied: true, mode: "parent-child-tour" } }));
+    const cameraPreset = { longitude: 110, latitude: 21, height: 2000, heading: 0, pitch: -60, roll: 0 };
+    await mkdir(join(scratch, "data", "regions"), { recursive: true });
+    await writeFile(join(scratch, "data", "regions", `${regionId}.json`), JSON.stringify({
+      childIds: ["a", "b"], openingDescent: { enabled: false }, cameraPreset,
+      childRegions: ["a", "b"].map((id) => ({ id, name: id, labelPoint: [110, 21], bbox: [109.99, 20.99, 110.01, 21.01], cameraPreset }))
+    }));
+    const runTour = () => execFileSync(process.execPath, [join(root, "node_modules", "tsx", "dist", "cli.mjs"), join(root, ".agents/skills/cesium-geo-documentary/scripts/build-child-tour.ts"), "--region", regionId], { cwd: scratch, encoding: "utf8", stdio: "pipe" });
+    const output = runTour();
+    assert.match(output, /CHILD_TOUR_READY/);
+    const region = JSON.parse(await readFile(join(scratch, "data", "regions", `${regionId}.json`), "utf8"));
+    assert.equal(region.tourStops.length, 2);
+    assert.equal(region.tourStops[0].narration, texts.slice(1, 3).join(""));
+    assert.equal(region.tourStops[1].narration, texts.slice(3, 5).join(""));
+    assert.equal(region.tourClosingNarrationStart, plan.outroNarrationStartSeconds! + 0.35);
+    assert.ok(Math.abs(region.tourReturnWindowSeconds - 4.4) < 0.001);
+    // 修复映射，不放宽 SRT/metadata 不一致检查。
+    await writeFile(join(audioDir, "duration.json"), JSON.stringify({ durationSeconds: 39.4, outroPause: { ...plan, applied: true, mode: "parent-child-tour", outroNarrationStartSeconds: plan.outroNarrationStartSeconds! + 1 } }));
+    assert.throws(runTour, /out of sync/);
+
+    // 同一沙箱改成无村级场景时，不能保留上次导出的映射。
+    await writeChildCueRanges(scratch, regionId, { scenes: [], sceneCueRanges: [] } as unknown as RenderSpec);
+    const cleared = JSON.parse(await readFile(masterPath, "utf8"));
+    assert.deepEqual(cleared[regionId].tourChildCueRanges, []);
+  } finally {
+    await rm(scratch, { recursive: true, force: true });
+  }
 });
 
 test("Studio timing keeps parent-return metadata aligned with the rewritten narration SRT", async () => {

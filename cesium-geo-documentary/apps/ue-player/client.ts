@@ -2,6 +2,7 @@ import { Config, PixelStreaming } from '@epicgames-ps/lib-pixelstreamingfrontend
 import { actions, contextIntroSeconds, frameAt, type PreviewFlightOrigin } from './presentation.js';
 import { configureOpening } from './opening.js';
 import { activeSubtitleBounds, subtitleBounds, type SubtitleBounds, type SubtitleWindow } from './subtitle-layout.js';
+import { assertUiInteractionSize, buildEnvelope, captureBatches } from './message-budget.js';
 
 let previewSubtitleBounds: SubtitleBounds | undefined;
 let subtitleWindows: SubtitleWindow[] = [];
@@ -66,16 +67,19 @@ const frameInterval = 1000 / Math.max(15, Math.min(120, Number(settings.streamFp
 const createConfig = () => new Config({ useUrlParams: false, initialSettings: { ss: settings.signallingUrl, AutoConnect: false, AutoPlayVideo: true, StartVideoMuted: true, WaitForStreamer: true, MaxReconnectAttempts:0, StreamerAutoJoinInterval:2000, MatchViewportRes: false, KeyboardInput: false, MouseInput: false, TouchInput: false } });
 let stream: PixelStreaming;
 let streamGeneration = 0;
-function send(action: string, payload = {}): Promise<any> {
+function send(action: string, payload = {}, requestId: string = crypto.randomUUID()): Promise<any> {
   if (!channelReady) return Promise.reject(new Error('UE data channel unavailable'));
-  const requestId = crypto.randomUUID();
   return new Promise((resolve, reject) => {
     // A batch rides one round trip for N frames; its reply can therefore take far
     // longer than a solo capture-frame, so it gets its own timeout budget.
     const budget = action === 'capture-frame' ? 90000 : action === 'capture-batch' ? 300000 : 30000;
     const timer = setTimeout(() => { pending.delete(requestId); reject(new Error(`UE command timeout: ${action}`)); }, budget);
     pending.set(requestId, { resolve, reject, timer });
-    if (!stream.emitUIInteraction({ type: 'geo-video-ue', version: 1, requestId, action, ...payload })) {
+    const envelope = buildEnvelope(requestId, action, payload);
+    // 在发送前拒绝超限消息，避免 uint16 长度回绕导致 UE 静默丢弃。
+    try { assertUiInteractionSize(envelope); }
+    catch (error) { clearTimeout(timer); pending.delete(requestId); reject(error as Error); return; }
+    if (!stream.emitUIInteraction(envelope)) {
       clearTimeout(timer); pending.delete(requestId); reject(new Error('UE data channel unavailable'));
     }
   });
@@ -506,29 +510,22 @@ Object.assign(window,{ geoVideo: {
    * the run to UE in one or more data-channel messages. UE walks them on its own Tick
    * and answers each message once, so the per-frame evaluate/datachannel round trip
    * disappears; each frame is still rendered and screenshotted by the same single-frame
-   * pipeline. A message is split to stay under ~120 KB, because the WebRTC data channel
-   * silently truncates a larger reliable message and UE then drops the whole JSON.
+   * pipeline.
+   * 按完整 envelope 的 JSON 长度拆包，每包不超过 60000 个 UTF-16 码元，
+   * 避免 PixelStreaming 的 uint16 长度字段回绕、UE 静默丢弃截断的 JSON。
    */
   renderBatch: async (times: number[]) => {
     stop(); time=times.at(-1) ?? time; openingOnly=false;
     if (!ready) throw new Error('UE renderer not ready');
     if (!times.length) return { captured: 0 };
-    const MAX_MESSAGE = 120_000;
     let captured = 0;
-    for (let base = 0; base < times.length;) {
-      const frames: any[] = [];
-      let size = 0;
-      let i = base;
-      while (i < times.length) {
-        const t = times[i]!;
-        const frame = { ...frameAt(scene, stops ?? [], t, profile, duration, false, undefined, undefined, undefined, true), subtitleBounds: activeSubtitleBounds(subtitleWindows, t) ?? null };
-        const n = JSON.stringify(frame).length;
-        if (frames.length && size + n > MAX_MESSAGE) break;
-        frames.push(frame); size += n; i++;
-      }
-      const response = await send('capture-batch', { frames });
-      captured += Number(response?.captured ?? frames.length);
-      base = i;
+    const batches = captureBatches(times.length, index => ({
+      ...frameAt(scene, stops ?? [], times[index]!, profile, duration, false, undefined, undefined, undefined, true),
+      subtitleBounds: activeSubtitleBounds(subtitleWindows, times[index]!) ?? null
+    }), () => crypto.randomUUID());
+    for (const batch of batches) {
+      const response = await send('capture-batch', { frames: batch.frames }, batch.requestId);
+      captured += Number(response?.captured ?? batch.frames.length);
     }
     return { captured };
   },

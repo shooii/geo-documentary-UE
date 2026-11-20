@@ -52,7 +52,10 @@ test("visited child labels grow monotonically and persist through the parent ret
   assert.equal(current.current, true);
   assert.equal(earlier.current, false);
   assert.ok(current.alpha > earlier.alpha);
-  assert.ok(earlier.alpha <= 0.70);
+  // 已讲过的村必须“更安静但清晰可读”：此前 0.70 的白字压在半透明浅绿填充上
+  // 会灰成一片，工作台预览里村名几乎读不出来。
+  assert.ok(earlier.alpha >= 0.85, `visited label alpha ${earlier.alpha} is not readable`);
+  assert.ok(earlier.alpha < current.alpha, "visited labels must stay quieter than the narrated one");
   assert.ok(current.scale > earlier.scale);
 
   const returning = { progress: 0.5 };

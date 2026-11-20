@@ -135,7 +135,7 @@ async function captureChunk(chunkStart: number, chunkEnd: number, subtitleWindow
   scope.signal.throwIfAborted();
   const page=await scope.wait(context.newPage());
   page.on('console',m=>{ console.log('UE_PAGE_CONSOLE',m.type(),m.text().slice(0,160)); });
-  page.on('pageerror',e=>console.log('UE_PAGE_ERROR',e.message));
+  page.on('pageerror',e=>console.log('UE_PAGE_ERROR',e.stack ?? e.message));
   page.on('response',r=>{ if(r.status()>=400) console.log('UE_PAGE_HTTP',r.status(),r.url()); });
   page.once('crash', () => scope.fail(new CaptureRetryError('UE 录制页面崩溃')));
   page.once('close', () => scope.fail(new CaptureRetryError('UE 录制页面关闭')));
