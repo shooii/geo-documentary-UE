@@ -17,6 +17,8 @@ import {
   type WordTiming
 } from "./narration-timing.js";
 import { isXfyunVoice, synthesizeXfyun, xfyunCredentialsFromEnvFile } from "../../../../packages/xfyun-tts/index.js";
+import { doubaoCredentialsFromEnvFile, isDoubaoVoice } from "../../../../packages/doubao-tts/index.js";
+import { synthesizeDoubaoNarration } from "../../../../packages/doubao-tts/narration.js";
 import { alignCueBoundaries, splitNarrationSentences } from "../../../../packages/render-spec/narration-align.js";
 import { canReuseFinalNarration } from "../../../../packages/narration-cache/index.js";
 
@@ -129,7 +131,8 @@ interface FinalWordTimestampMetadata {
   audioHash: string;
   sourceAudioHash: string;
   textHash: string;
-  boundary: "WordBoundary";
+  /** Edge=WordBoundary；豆包=CharacterBoundary。两者都是 provider 同源字/词边界。 */
+  boundary: string;
   wordCount: number;
   shift: { insertionAtSeconds: number; insertedSeconds: number; appliedBy: string | null };
 }
@@ -174,6 +177,10 @@ function runEdgeWordBoundaryStream(
  * 把同源词表从源音频时间轴位移到最终旁白时间轴，并绑定最终 mp3 的 hash。
  * 位移量只读 duration.json.outroPause 的字段，由 buildFinalNarrationAssets 实际插
  * 入静音时算出，不用估算，也不读独立合成的旧词表。
+ *
+ * Edge 交 WordBoundary；豆包 2.0 交 CharacterBoundary（enable_subtitle 的字级
+ * 时间）。两者都是"一次同源合成流直接产出"，同样泛化为 provider-word-boundaries，
+ * 只允许这两种自描述边界，绝不接纳估算/独立合成的词表。
  */
 async function finalizeWordTimestamps(
   sourcePath: string,
@@ -183,13 +190,14 @@ async function finalizeWordTimestamps(
   finalDuration: number
 ): Promise<FinalWordTimestampMetadata> {
   const source = JSON.parse(await readFile(sourcePath, "utf8")) as SourceWordTimestamps;
-  if (source.boundary !== "WordBoundary" || source.timingMode !== "provider-word-boundaries"
+  if ((source.boundary !== "WordBoundary" && source.boundary !== "CharacterBoundary")
+    || source.timingMode !== "provider-word-boundaries"
     || !Array.isArray(source.words) || source.words.length === 0 || !source.sourceAudioHash) {
-    throw new Error(`Invalid same-source WordBoundary payload: ${sourcePath}`);
+    throw new Error(`Invalid same-source provider boundary payload: ${sourcePath}`);
   }
   if (source.words.some((word) => !Number.isFinite(word.start) || !Number.isFinite(word.end)
     || word.end <= word.start || typeof word.text !== "string")) {
-    throw new Error(`Corrupt WordBoundary payload: ${sourcePath}`);
+    throw new Error(`Corrupt provider boundary payload: ${sourcePath}`);
   }
   const words = shiftWordTimings(source.words, pause
     ? { insertionAtSeconds: pause.insertionAtSeconds, insertedSeconds: pause.insertedSeconds }
@@ -207,7 +215,7 @@ async function finalizeWordTimestamps(
     wordCount: words.length,
     words
   }, null, 1), "utf8");
-  return { file: "word-timestamps.json", audioHash, sourceAudioHash: source.sourceAudioHash, textHash: source.textHash, boundary: "WordBoundary", wordCount: words.length, shift };
+  return { file: "word-timestamps.json", audioHash, sourceAudioHash: source.sourceAudioHash, textHash: source.textHash, boundary: source.boundary, wordCount: words.length, shift };
 }
 
 function runEdgeTtsWithRetry(commandArgs: string[], env: NodeJS.ProcessEnv): string {
@@ -488,9 +496,9 @@ for (const id of ids) {
   if (!force && !draftMode && await canReuseFinalNarration(audioDir, content)) {
     loudnessNormalize(mp3, wav);
     const metadata = JSON.parse(await readFile(metadataPath, "utf8")) as { durationSeconds: number; provider?: string };
-    if (metadata.provider !== "edge-tts") {
-      // 讯飞/SAPI 没有 WordBoundary；清掉上一次 Edge 留下的词表，避免金色高亮
-      // 拿旧词表硬套新音频。
+    if (metadata.provider !== "edge-tts" && metadata.provider !== "doubao-tts") {
+      // 讯飞/SAPI 没有 provider 词表；清掉上一次 Edge/豆包留下的词表，避免金色高亮
+      // 拿旧词表硬套新音频。Edge/豆包 的词表同源且已通过缓存认证，必须保留。
       await rm(wordsPath, { force: true });
       await rm(sourceWordsPath, { force: true });
     }
@@ -532,10 +540,40 @@ for (const id of ids) {
     || existingMetadata?.voiceId !== requestedVoiceId
     || existingMetadata?.rate !== requestedRate
     || existingMetadata?.narrationTextHash !== narrationTextHash
-    || (!draftMode && existingMetadata?.provider !== "edge-tts" && existingMetadata?.provider !== "xfyun-tts");
+    || (!draftMode && existingMetadata?.provider !== "edge-tts" && existingMetadata?.provider !== "xfyun-tts" && existingMetadata?.provider !== "doubao-tts");
   if (shouldGenerate) {
     fallbackReason = null;
-    if (isXfyunVoice(requestedVoiceId)) {
+    if (isDoubaoVoice(requestedVoiceId)) {
+      // 豆包 2.0：按朗读句分块，每块一次同源 HTTP 合成（enable_subtitle 返回字级
+      // 时间），解码成 48k mono PCM 按真实时长累加偏移拼接；source mp3/SRT/词表
+      // 三者同源，沿用现有 outroPause 位移与缓存认证。speed 由原有 ratePercent 换算：
+      // +0% -> 1.0，+N% -> 1+N/100（豆包接受 0.5~2.0）。
+      provider = "doubao-tts";
+      actualVoiceId = requestedVoiceId;
+      const credentials = doubaoCredentialsFromEnvFile(resolve(root, ".env.local"));
+      if (!credentials) {
+        throw new Error(
+          `豆包语音合成缺少凭据：请在 .env.local 配置 DOUBAO_TTS_API_KEY（当前音色 ${requestedVoiceId}）。`
+        );
+      }
+      const doubaoSpeed = Math.max(0.5, Math.min(2, 1 + requestedRatePercent / 100));
+      const sourceTextHash = createHash("sha256").update(ttsInput, "utf8").digest("hex");
+      const doubaoResult = await synthesizeDoubaoNarration({
+        credentials,
+        voiceId: requestedVoiceId,
+        speed: doubaoSpeed,
+        text: ttsInput,
+        textHash: sourceTextHash,
+        rate: requestedRate,
+        regionId: id,
+        sourceMp3,
+        sourceSrt: sourceEdgeSrt,
+        sourceWords: sourceWordsPath,
+        ffmpeg,
+        root
+      });
+      process.stdout.write(`DOUBAO_SYNTHESIZED ${id} chunks=${doubaoResult.chunkCount} words=${doubaoResult.wordCount}\n`);
+    } else if (isXfyunVoice(requestedVoiceId)) {
       // 讯飞在线合成只返回音频，不返回句级时间戳：字幕按句子切开后，用 silencedetect
       // 测到的真实停顿把每条边界吸附过去（见 writeProportionalSrt / narration-align）。
       // 音色与音质由讯飞云端决定，和 Edge 一样可以直接进成片（不再降级）。
@@ -581,10 +619,10 @@ for (const id of ids) {
     }
     }
   }
-  if (!draftMode && provider !== "edge-tts" && provider !== "xfyun-tts") {
-    throw new Error(`Formal narration for ${id} is not premium TTS; regenerate with Edge TTS or 讯飞配音 before release.`);
+  if (!draftMode && provider !== "edge-tts" && provider !== "xfyun-tts" && provider !== "doubao-tts") {
+    throw new Error(`Formal narration for ${id} is not premium TTS; regenerate with Edge TTS、讯飞配音 or 豆包 2.0 before release.`);
   }
-  if (provider !== "edge-tts") {
+  if (provider !== "edge-tts" && provider !== "doubao-tts") {
     await rm(wordsPath, { force: true });
     await rm(sourceWordsPath, { force: true });
   }
@@ -592,12 +630,12 @@ for (const id of ids) {
   const loudness = loudnessNormalize(mp3, wav);
   const duration = durationFromFfmpeg(wav);
   const editorialDuration = await synchronizeEditorialDuration(id, duration);
-  // 正式 Edge 旁白必须带同源逐词时间；缺失即报错，不允许用独立第二次合成的
+  // 正式 Edge/豆包 旁白必须带同源逐词时间；缺失即报错，不允许用独立第二次合成的
   // 词表顶替，也不允许静默留空等 compose 回退到字级插值。
   let wordMetadata: FinalWordTimestampMetadata | null = null;
-  if (provider === "edge-tts") {
+  if (provider === "edge-tts" || provider === "doubao-tts") {
     if (!existsSync(sourceWordsPath)) {
-      throw new Error(`Formal narration for ${id} has no same-source WordBoundary payload; regenerate with Edge TTS.`);
+      throw new Error(`Formal narration for ${id} has no same-source provider boundary payload; regenerate with Edge TTS or 豆包 2.0.`);
     }
     wordMetadata = await finalizeWordTimestamps(sourceWordsPath, wordsPath, mp3, outroPause, duration);
   }
@@ -614,11 +652,10 @@ for (const id of ids) {
     sampleRate: 48000,
     generatedAt,
     edgeTtsFallbackReason: fallbackReason,
-    // Edge hands back real sentence boundaries. 讯飞 doesn't, so its timeline is
-    // estimated per sentence and then snapped to measured pauses — recording it as
-    // "paragraph-proportional" would describe an algorithm that no longer runs.
-    timingMode: provider === "edge-tts" ? "provider-sentence-boundaries" : "sentence-pause-snapped",
+    // Edge/豆包 都直接给出真实句子/字边界；讯飞没有句级时间，靠停顿吸附估算。
+    timingMode: provider === "edge-tts" || provider === "doubao-tts" ? "provider-sentence-boundaries" : "sentence-pause-snapped",
     xfyunVoice: provider === "xfyun-tts" ? actualVoiceId.replace(/^xfyun:/, "") : null,
+    doubaoVoice: provider === "doubao-tts" ? actualVoiceId.replace(/^doubao:/, "") : null,
     pauseProfile: outroPause
       ? "sentence punctuation with blank-line paragraph pauses and parent-return silence"
       : "sentence punctuation with blank-line paragraph pauses",
@@ -628,7 +665,7 @@ for (const id of ids) {
     truePeakTargetDbtp: -1.5,
     measuredInputLufs: Number(loudness.input_i),
     measuredInputTruePeakDbtp: Number(loudness.input_tp),
-    formalReleaseReady: provider === "edge-tts" || provider === "xfyun-tts",
+    formalReleaseReady: provider === "edge-tts" || provider === "xfyun-tts" || provider === "doubao-tts",
     pronunciationRecordPath: `assets/audio/${id}/pronunciation-map.json`
   }, null, 2), "utf8");
   // Subtitles go to the same override directory as the audio, otherwise this run

@@ -184,6 +184,41 @@ function toast(message, options = {}) {
 function toastError(message, options = {}) { return toast(message, { ...options, type: "error" }); }
 function toastSuccess(message, options = {}) { return toast(message, { ...options, type: "success" }); }
 
+let doubaoPreviewUrl = null;
+let doubaoPreviewGeneration = 0;
+function updateDoubaoVoiceTools() {
+  const tools = $("doubaoVoiceTools");
+  if (!tools) return;
+  const enabled = $("voiceId").value.startsWith("doubao:");
+  tools.hidden = !enabled;
+  doubaoPreviewGeneration++;
+  const audio = $("doubaoVoiceAudio");
+  audio.pause(); audio.hidden = true; audio.removeAttribute("src");
+  if (doubaoPreviewUrl) { URL.revokeObjectURL(doubaoPreviewUrl); doubaoPreviewUrl = null; }
+  if (enabled) $("doubaoVoiceStatus").textContent = "使用豆包语音 2.0；导出同步获取真实字时间。";
+}
+async function previewDoubaoVoice() {
+  if (!state.project) return;
+  const button = $("doubaoVoicePreview"), status = $("doubaoVoiceStatus"), audio = $("doubaoVoiceAudio");
+  const generation = ++doubaoPreviewGeneration;
+  button.disabled = true; button.textContent = "正在生成试听…";
+  status.textContent = "正在合成短句，可能产生少量语音合成用量。";
+  try {
+    const r = await fetch("/api/voices/doubao/preview", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ voiceId: $("voiceId").value, speed: Number($("voiceSpeed").value || 1), text: `你好，欢迎来到${state.project.name || "我们的家乡"}。一起了解家乡风貌，听见家乡的故事。`.slice(0, 120) }) });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || `试听失败（${r.status}）`); }
+    const blob = await r.blob();
+    if (generation !== doubaoPreviewGeneration) return;
+    if (doubaoPreviewUrl) URL.revokeObjectURL(doubaoPreviewUrl);
+    doubaoPreviewUrl = URL.createObjectURL(blob);
+    audio.src = doubaoPreviewUrl; audio.hidden = false;
+    status.textContent = "试听已生成；保存方案后，下次导出使用所选豆包音色。";
+    await audio.play().catch(() => { status.textContent = "试听已生成，点击播放器播放。"; });
+  } catch (error) {
+    if (generation === doubaoPreviewGeneration) { status.textContent = error.message; toastError(error.message); }
+  } finally { button.disabled = false; button.textContent = "试听豆包音色"; }
+}
+
 /* Self-hosted confirm dialog (keeps destructive prompts inside the editor skin
    instead of the browser's native window.confirm). */
 function askConfirm(options = {}) {
@@ -2477,6 +2512,7 @@ function render() {
         ? "Cesium ion 资产 2 · Bing Maps 航拍，预览和导出共用。"
         : "预览与导出共用此影像源；切换立即生效，不会重连像素流。";
   $("voiceId").value = project.voice.voiceId; $("voiceSpeed").value = project.voice.speed;
+  updateDoubaoVoiceTools();
   $("previewFrame").className = `preview-frame ${project.output.profile}`;
   requestAnimationFrame(syncPreviewTypography);
   renderMapView();
@@ -4171,7 +4207,8 @@ function bind() {
     }
     render();
   };
-  $("voiceId").onchange = (event) => { state.project.voice.voiceId = event.target.value; markDirty(); }; $("voiceSpeed").onchange = (event) => { const speed = clampInputValue(event.target, 0.7, 1.3); state.project.voice.speed = speed; markDirty(); };
+  $("voiceId").onchange = (event) => { state.project.voice.voiceId = event.target.value; updateDoubaoVoiceTools(); markDirty(); };
+  $("doubaoVoicePreview").onclick = previewDoubaoVoice; $("voiceSpeed").onchange = (event) => { const speed = clampInputValue(event.target, 0.7, 1.3); state.project.voice.speed = speed; markDirty(); };
   $("sceneTitle").oninput = (event) => editScene("title", event.target.value); $("narration").oninput = (event) => editScene("narration", event.target.value);
   $("sceneImageryAnnotation").onchange = (event) => { editScene("imageryAnnotation", event.target.checked); setTimeout(previewSelectedScene, 40); };
   [["preHold", "preHoldSeconds"], ["postHold", "postHoldSeconds"], ["mapHold", "mapHoldSeconds"]].forEach(([id, key]) => $(id).onchange = (event) => editTiming(key, event.target.value));

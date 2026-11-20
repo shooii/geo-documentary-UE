@@ -815,18 +815,21 @@ for (const id of ids) {
   const durationData = JSON.parse(await readFile(resolve(audioRoot, "duration.json"), "utf8")) as { durationSeconds: number; provider?: string; narrationTextHash?: string };
   const wordTimingsPath = resolve(audioRoot, "word-timestamps.json");
   const wordData = existsSync(wordTimingsPath)
-    ? JSON.parse(await readFile(wordTimingsPath, "utf8")) as { words?: Array<{ start: number; end: number; text: string }>; audioHash?: string; textHash?: string; timingMode?: string; timeline?: string }
+    ? JSON.parse(await readFile(wordTimingsPath, "utf8")) as { words?: Array<{ start: number; end: number; text: string }>; audioHash?: string; textHash?: string; timingMode?: string; timeline?: string; boundary?: string }
     : null;
-  const exactSubtitleTiming = durationData.provider === "edge-tts";
+  // Edge WordBoundary / 豆包 2.0 CharacterBoundary 都是一次同源合成直接产出的
+  // 字/词时间，可驱动金色字幕精确擦出；讯飞/SAPI 没有，沿用字重插值。
+  const exactSubtitleTiming = durationData.provider === "edge-tts" || durationData.provider === "doubao-tts";
   if (exactSubtitleTiming) {
     const hash = createHash("sha256").update(await readFile(resolve(audioRoot, "narration.mp3"))).digest("hex");
-    // The Edge WordBoundary stream writes a bare sha256 hex into the payload's
-    // textHash, while stableNarrationTextHash() writes duration.json's
-    // narrationTextHash with a "sha256:" prefix. Compare only the digest after
-    // stripping the optional prefix, and require both to be valid 64-hex — a
-    // missing/corrupt hash must fail. audioHash stays a strict match against the
-    // real narration.mp3 bytes; no threshold or fallback behavior is relaxed.
-    if (!wordData?.words?.length || wordData.audioHash !== hash || wordData.timingMode !== "provider-word-boundaries" || wordData.timeline !== "final-narration" || !sameSha256Digest(wordData.textHash, durationData.narrationTextHash)) {
+    // WordBoundary/CharacterBoundary 流把裸 sha256 hex 写进 payload.textHash，
+    // 而 stableNarrationTextHash() 写的 duration.json.narrationTextHash 带
+    // "sha256:" 前缀。只比较去掉可选前缀后的 64 位 hex，两者都必须合法——缺失
+    // 或损坏的 hash 一律失败。audioHash 仍严格比对真实 narration.mp3，不放宽。
+    const expectedBoundary = durationData.provider === "doubao-tts" ? "CharacterBoundary" : "WordBoundary";
+    if (!wordData?.words?.length || wordData.audioHash !== hash || wordData.timingMode !== "provider-word-boundaries"
+      || wordData.timeline !== "final-narration" || wordData.boundary !== expectedBoundary
+      || !sameSha256Digest(wordData.textHash, durationData.narrationTextHash)) {
       throw new Error("字幕词时间戳缺失或与正式旁白不同源，拒绝回退到估算高亮。");
     }
   }

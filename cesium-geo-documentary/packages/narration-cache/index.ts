@@ -4,6 +4,7 @@ import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs
 import { join, resolve } from "node:path";
 import { mapParagraphsToCues, parseSrt, stableNarrationTextHash } from "../../.agents/skills/cesium-geo-documentary/scripts/narration-timing.js";
 import { isXfyunVoice } from "../xfyun-tts/index.js";
+import { isDoubaoVoice } from "../doubao-tts/index.js";
 import type { VideoProject } from "../project-schema/index.js";
 
 type Content = { narration: string[]; voiceId?: string; voiceRate?: string; pronunciations?: Array<{term: string; spokenForm?: string}>; tourOrder?: string[]; tourIntroSentences?: number; tourReturnSeconds?: number; outroParagraphIndex?: number };
@@ -39,20 +40,24 @@ interface WordPayload {
 }
 
 /**
- * 逐词词表必须和这段音频同源：只认同一次 WordBoundary 流写出、并按
+ * 逐词词表必须和这段音频同源：只认同一次合成流/同一次分块拼接写出、并按
  * duration.json.outroPause 位移到最终 mp3 的 JSON。独立第二次合成的词表没有
  * sourceAudioHash/audioHash/shift，或 hash、文本、音色、语速不吻合，一律拒绝，
  * 让 generate-narration 重新做同源合成；绝不静默回退到字级插值。
+ *
+ * Edge = WordBoundary，豆包 2.0 = CharacterBoundary（enable_subtitle）；两者
+ * 都是按 provider 期望的边界类型校验，跨 provider 的词表不认。
  */
 async function authenticateWordTimestamps(dir: string, content: Content, meta: Record<string, any>): Promise<boolean> {
-  if (meta.provider !== "edge-tts") return true; // 讯飞/SAPI 不提供 WordBoundary
+  if (meta.provider !== "edge-tts" && meta.provider !== "doubao-tts") return true; // 讯飞/SAPI 不提供 provider 词表
+  const expectedBoundary = meta.provider === "doubao-tts" ? "CharacterBoundary" : "WordBoundary";
   try {
     const raw = await readFile(join(dir, wordFile));
     const word = JSON.parse(raw.toString()) as WordPayload;
     const mp3 = await readFile(join(dir, "narration.mp3"));
     const mp3Hash = digest(mp3);
     const textHash = digest(inputText(content));
-    if (word.boundary !== "WordBoundary" || word.timingMode !== "provider-word-boundaries") return false;
+    if (word.boundary !== expectedBoundary || word.timingMode !== "provider-word-boundaries") return false;
     if (word.voiceId !== (content.voiceId ?? "zh-CN-YunyangNeural") || word.rate !== normalizedRate(content)) return false;
     if (word.textHash !== textHash || !word.sourceAudioHash || word.audioHash !== mp3Hash) return false;
     if (word.timeline !== "final-narration" || !word.shift) return false;
@@ -72,7 +77,7 @@ async function authenticateWordTimestamps(dir: string, content: Content, meta: R
       || typeof entry.text !== "string")) return false;
     if (meta.wordTimestamps && (meta.wordTimestamps.audioHash !== mp3Hash
       || meta.wordTimestamps.textHash !== textHash
-      || meta.wordTimestamps.boundary !== "WordBoundary"
+      || meta.wordTimestamps.boundary !== expectedBoundary
       || meta.wordTimestamps.wordCount !== word.words.length)) return false;
     return true;
   } catch { return false; }
@@ -95,7 +100,8 @@ async function validate(dir: string, content: Content, ffprobe: string): Promise
     const parsedRate = Number.parseInt(String(content.voiceRate ?? "-4%").replace("%", ""), 10);
     const rateValue = Number.isFinite(parsedRate) ? Math.max(-100, Math.min(100, parsedRate)) : 0;
     const rate = `${rateValue >= 0 ? "+" : ""}${rateValue}%`;
-    if (meta.provider !== (isXfyunVoice(voice) ? "xfyun-tts" : "edge-tts") || meta.voiceId !== voice || meta.rate !== rate || meta.narrationTextHash !== stableNarrationTextHash(inputText(content)) || meta.formalReleaseReady !== true || meta.sampleRate !== 48000 || meta.loudnessTargetLufs !== -16 || !Number.isFinite(meta.durationSeconds) || meta.durationSeconds <= 0 || Number(meta.studioTiming?.insertedSeconds ?? 0) !== 0) return false;
+    const expectedProvider = isDoubaoVoice(voice) ? "doubao-tts" : isXfyunVoice(voice) ? "xfyun-tts" : "edge-tts";
+    if (meta.provider !== expectedProvider || meta.voiceId !== voice || meta.rate !== rate || meta.narrationTextHash !== stableNarrationTextHash(inputText(content)) || meta.formalReleaseReady !== true || meta.sampleRate !== 48000 || meta.loudnessTargetLufs !== -16 || !Number.isFinite(meta.durationSeconds) || meta.durationSeconds <= 0 || Number(meta.studioTiming?.insertedSeconds ?? 0) !== 0) return false;
     const pause = meta.outroPause;
     if ((content.tourOrder?.length ?? 0) > 0) {
       if (!pause?.applied || pause.mode !== "parent-child-tour" || pause.requestedSeconds !== (content.tourReturnSeconds ?? 4.4) || pause.insertedSeconds !== pause.requestedSeconds) return false;
@@ -144,7 +150,7 @@ export async function stageNarrationCache(root: string, sandbox: string, jobRoot
     if (candidate !== target) {
       for (const file of files) await copyFile(join(candidate, file), join(target, file));
       // 逐词词表也要随缓存搬运：它不是可重建的附属品，独立合成的词表无法通过
-      // authenticateWordTimestamps 的 audioHash/文本/音色/语速认证。
+      // authenticateWordTimestamps 的 audioHash/文本/音色/语速/边界认证。
       const candidateWords = await readFile(join(candidate, wordFile)).catch(() => null);
       if (candidateWords) await writeFile(join(target, wordFile), candidateWords);
       else await rm(join(target, wordFile), { force: true });
@@ -165,7 +171,7 @@ export async function canReuseFinalNarration(dir: string, content: Content): Pro
     if (marker.signature !== signature(content)) return false;
     for (const file of files) if (marker.hashes?.[file] !== digest(await readFile(join(dir, file)))) return false;
     // 缓存标记里记了词表 hash 时也必须逐字节吻合；标记里没有也不放行——
-    // edge-tts 的词表必须存在且能认证，否则交给 generate-narration 同源重生成。
+    // edge/豆包 的词表必须存在且能认证，否则交给 generate-narration 同源重生成。
     if (marker.hashes?.[wordFile] && marker.hashes[wordFile] !== digest(await readFile(join(dir, wordFile)))) return false;
     const meta = JSON.parse(await readFile(join(dir, "duration.json"), "utf8")) as Record<string, any>;
     return await authenticateWordTimestamps(dir, content, meta);

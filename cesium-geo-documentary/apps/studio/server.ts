@@ -29,6 +29,7 @@ import { isWorkspaceAssetFileName } from "./media-sniff.js";
 import { MAX_BINARY_ASSET_BYTES, storeUploadedBuffer, storeUploadedFile } from "./asset-store.js";
 import { HttpError } from "./http-error.js";
 import { startPreviewRuntime } from "../ue-player/runtime.js";
+import { DOUBAO_VOICES, doubaoCredentialsFromEnvFile, isDoubaoVoice, synthesizeDoubao } from "../../packages/doubao-tts/index.js";
 
 const root = resolve(process.cwd());
 const publicRoot = join(root, "apps", "studio", "public");
@@ -1967,6 +1968,7 @@ async function serveStatic(pathname: string, response: ServerResponse): Promise<
 
 await Promise.all([mkdir(projectsRoot, { recursive: true }), mkdir(jobsRoot, { recursive: true }), mkdir(assetsRoot, { recursive: true }), mkdir(coverPreviewsRoot, { recursive: true })]);
 
+let doubaoPreviewBusy = false;
 const server = createServer(async (request, response) => {
   // Stamp the queue-wait separately from the work: when the editor is frozen the
   // request that eventually answers is not the slow one — it is the first one
@@ -2012,6 +2014,32 @@ const server = createServer(async (request, response) => {
     const assetMatch = url.pathname.match(/^\/api\/assets\/([a-zA-Z0-9_-]+)$/);
     const workbookMatch = url.pathname.match(/^\/api\/projects\/([a-zA-Z0-9_-]+)\/workbook$/);
     if (request.method === "GET" && url.pathname === "/api/health") return sendJson(response, 200, { ok: true, service: "geo-video-studio", activeJobs: activeJobIds.size, queuedJobs: queuedRenders.length, maxConcurrentExports, isolatedJobs: true });
+    if (request.method === "GET" && url.pathname === "/api/voices/doubao") {
+      return sendJson(response, 200, { configured: Boolean(doubaoCredentialsFromEnvFile(join(root, ".env.local"))), voices: DOUBAO_VOICES });
+    }
+    if (request.method === "POST" && url.pathname === "/api/voices/doubao/preview") {
+      const origin = request.headers.origin;
+      if ((origin && origin !== url.origin) || !request.headers["content-type"]?.toLowerCase().startsWith("application/json")) {
+        return sendJson(response, 403, { error: "仅接受工作台同源的 JSON 试听请求" });
+      }
+      // Credentials never travel through the browser. Bound the billable text and
+      // serialize previews so repeated clicks cannot start unbounded synthesis.
+      const input = await bodyJson(request) as { voiceId?: unknown; text?: unknown; speed?: unknown };
+      if (doubaoPreviewBusy) return sendJson(response, 409, { error: "已有豆包试听正在生成，请稍候" });
+      const voiceId = typeof input.voiceId === "string" ? input.voiceId : "";
+      const text = typeof input.text === "string" ? input.text.trim() : "";
+      const speed = Number(input.speed ?? 1);
+      if (!isDoubaoVoice(voiceId) || !DOUBAO_VOICES.some(v => v.id === voiceId)) return sendJson(response, 400, { error: "请选择豆包 2.0 音色" });
+      if (!text || [...text].length > 120 || !Number.isFinite(speed) || speed < .7 || speed > 1.3) return sendJson(response, 400, { error: "试听限 1–120 字，语速范围 0.7–1.3" });
+      const credentials = doubaoCredentialsFromEnvFile(join(root, ".env.local"));
+      if (!credentials) return sendJson(response, 503, { error: "服务端尚未配置豆包语音 API Key" });
+      doubaoPreviewBusy = true;
+      try {
+        const result = await synthesizeDoubao(text, credentials, { voice: voiceId, speed, requireTimestamps: true });
+        response.setHeader("Cache-Control", "no-store");
+        return sendBuffer(response, 200, result.audio, "audio/mpeg");
+      } finally { doubaoPreviewBusy = false; }
+    }
     if (request.method === "GET" && url.pathname === "/api/regions") return sendJson(response, 200, await readRegions(root));
     if (request.method === "GET" && url.pathname === "/api/admin-divisions") {
       const level = url.searchParams.get("level") as AdminLevel | null;
