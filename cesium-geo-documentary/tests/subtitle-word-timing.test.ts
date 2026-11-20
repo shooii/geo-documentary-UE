@@ -6,6 +6,7 @@ import {
   subtitleHighlightPointsFromWords,
   type WordTiming
 } from "../packages/content-engine/subtitles.js";
+import { smoothHighlightSegments } from "../packages/content-engine/subtitle-motion.js";
 
 /** 模拟渲染端在相邻节点之间对 progress 做线性插值。 */
 function progressAt(points: ReadonlyArray<{ time: number; progress: number }>, time: number): number {
@@ -23,6 +24,35 @@ function progressAt(points: ReadonlyArray<{ time: number; progress: number }>, t
 }
 
 const word = (start: number, end: number, text: string): WordTiming => ({ start, end, text });
+
+function smoothProgressAt(points: ReadonlyArray<{ time: number; progress: number }>, time: number): number {
+  const segments = smoothHighlightSegments(points);
+  const segment = segments.find(s => time <= s.end) ?? segments.at(-1);
+  if (!segment || time <= segment.start) return segment?.from ?? 0;
+  const p = Math.min(1, (time - segment.start) / (segment.end - segment.start));
+  const [a,b,c] = segment.ease;
+  return segment.from + (segment.to - segment.from) * (a*p*p*p + b*p*p + c*p);
+}
+
+test("词内曲线以真实词首词尾为锚并保持连续单调", () => {
+  const points = [
+    {time: 0, progress: 0}, {time: .08, progress: .12}, {time: .21, progress: .28},
+    {time: .45, progress: .28}, {time: .52, progress: .54}, {time: .66, progress: .70}, {time: .82, progress: 1}
+  ];
+  const segs = smoothHighlightSegments(points);
+  assert.equal(smoothProgressAt(points, 0), 0);
+  assert.equal(smoothProgressAt(points, .21), .28);
+  assert.equal(smoothProgressAt(points, .45), .28, "词间静音保持原进度");
+  assert.equal(smoothProgressAt(points, .82), 1, "句尾仍严格落在词时间终点");
+  for (let i=1;i<=160;i++) assert.ok(smoothProgressAt(points, .82*i/160) >= smoothProgressAt(points, .82*(i-1)/160)-1e-9);
+  for (let i=0;i<segs.length-1;i++) {
+    const left=segs[i]!, right=segs[i+1]!;
+    assert.ok(Math.abs(left.ease[0]+left.ease[1]+left.ease[2]-1) < 1e-9, "相邻段首尾命中真实锚点");
+    const outgoing=(left.to-left.from)/(left.end-left.start)*(3*left.ease[0]+2*left.ease[1]+left.ease[2]);
+    const incoming=(right.to-right.from)/(right.end-right.start)*right.ease[2];
+    assert.ok(Math.abs(outgoing-incoming)<1e-8, "词段连接处速度连续，不能突然跳速");
+  }
+});
 
 test("数字按字符对齐，不再把 UTF16 下标当作语音单元数组下标", () => {
   const words = [
