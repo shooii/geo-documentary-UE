@@ -79,7 +79,7 @@ test("有残留或查询异常时保留租约，空快照后自动恢复且停�
   assert.equal(releases, 1);
 });
 
-test("a terminal job keeps its narration and gives the sandbox back", async () => {
+test("已完成任务保留配音与成片并正常回收沙箱", async () => {
   const tempRoot = join(tmpdir(), "geo-video-studio");
   const jobId = `prune-test-${Date.now().toString(36)}`;
   // The temp working copy is named after the job directory, exactly as
@@ -103,7 +103,7 @@ test("a terminal job keeps its narration and gives the sandbox back", async () =
     await writeFile(join(jobRoot, "output", "film.mp4"), "film\n", "utf8");
     await symlink(sandbox, join(jobRoot, "sandbox"), process.platform === "win32" ? "junction" : "dir");
 
-    await pruneJobIntermediates({ id: jobId, jobRoot, regionId: "440825112" });
+    await pruneJobIntermediates({ id: jobId, jobRoot, regionId: "440825112", status: "completed" });
 
     for (const name of NARRATION_REUSE_FILES) {
       assert.ok(existsSync(join(jobRoot, "audio", name)), `${name} must survive for the narration preview`);
@@ -119,6 +119,43 @@ test("a terminal job keeps its narration and gives the sandbox back", async () =
     await rm(tempJobRoot, { recursive: true, force: true });
   }
 });
+
+for (const status of ["failed", "cancelled", "validating"] as const) {
+  for (const materialized of [false, true]) {
+    test(`${status} 任务原地保留${materialized ? "实体" : "链接"}沙箱、原始帧与恢复清单`, async () => {
+      const base = await mkdtemp(join(tmpdir(), "geo-progress-"));
+      const jobId = `retain-${status}-${materialized}-${Date.now().toString(36)}`;
+      const jobRoot = join(base, jobId);
+      const tempJobRoot = join(tmpdir(), "geo-video-studio", jobId);
+      const sandbox = materialized ? join(jobRoot, "sandbox") : join(tempJobRoot, "sandbox");
+      const take = join(sandbox, "renders", "ue-frames", "region-portrait-123");
+      const manifest = JSON.stringify({ totalFrames: 18000, capturedFrames: 16915 });
+      try {
+        await mkdir(jobRoot, { recursive: true });
+        await mkdir(take, { recursive: true });
+        await mkdir(join(sandbox, "assets", "audio", "region"), { recursive: true });
+        await writeFile(join(take, "frame-016914.png"), "原始录制帧");
+        await writeFile(join(take, "capture-manifest.json"), manifest);
+        await writeFile(join(sandbox, "assets", "audio", "region", "narration.mp3"), "配音");
+        await writeFile(join(jobRoot, "render-spec.json"), "冻结规格");
+        if (!materialized) await symlink(sandbox, join(jobRoot, "sandbox"), process.platform === "win32" ? "junction" : "dir");
+        const job = { id: jobId, jobRoot, regionId: "region", status };
+
+        await pruneJobIntermediates(job);
+        await pruneJobIntermediates(job, { includeMaterializedSandbox: true });
+
+        assert.equal(await readFile(join(jobRoot, "sandbox", "renders", "ue-frames", "region-portrait-123", "frame-016914.png"), "utf8"), "原始录制帧");
+        assert.equal(await readFile(join(take, "capture-manifest.json"), "utf8"), manifest);
+        assert.equal(await readFile(join(jobRoot, "render-spec.json"), "utf8"), "冻结规格");
+        assert.equal(existsSync(join(jobRoot, "audio")), false, "保留策略应在复制或删除前返回，不复制任何录制进度");
+        if (!materialized) assert.ok(existsSync(tempJobRoot), "临时沙箱目标与 jobRoot 链接必须同时保留");
+      } finally {
+        await rm(base, { recursive: true, force: true });
+        await rm(tempJobRoot, { recursive: true, force: true });
+      }
+    });
+  }
+}
 
 test("时间戳录制诊断仅收集本任务并优先保留最新报告与日志", async () => {
   const jobRoot = await mkdtemp(join(tmpdir(), "geo-diagnostics-"));
@@ -179,7 +216,6 @@ test("the retry budget and the sandbox reclaim are wired into the export queue",
   assert.match(server, /STUDIO_JOB_ATTEMPTS/);
   assert.match(server, /!isRetryableRenderFailure\(message\)/);
   assert.match(server, /await pruneJobIntermediates\(job\)/);
-  // The narration preview reads the kept copy first now that the sandbox is
-  // reclaimed at every terminal outcome.
+  // 成功任务回收沙箱后，配音预览仍应优先读取已保留的配音副本。
   assert.match(server, /join\(job\.jobRoot, "audio", "narration\.mp3"\)/);
 });

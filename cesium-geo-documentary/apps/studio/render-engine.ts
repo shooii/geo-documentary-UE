@@ -75,7 +75,7 @@ export interface RenderJobRecord {
   videoDurationSeconds?: number;
   /** Size of the published MP4, so the size estimate stops being a guess. */
   outputBytes?: number;
-  /** Where a failed export's capture report was kept after the sandbox was pruned. */
+  /** 失败任务诊断报告的轻量副本目录，原始沙箱仍保留。 */
   diagnosticsDir?: string;
   diagnosticsFiles?: string[];
 }
@@ -974,8 +974,9 @@ async function preflightComposition(
     try { report = JSON.parse(result.stdout.slice(start, end + 1)) as PreflightReport; } catch { report = null; }
   }
   if (!report) {
-    log(`PREFLIGHT_INCONCLUSIVE 预检未产出可解析报告（退出码 ${result.code ?? "null"}${result.timedOut ? "，超时" : ""}）`);
-    return;
+    const detail = `PREFLIGHT_INCONCLUSIVE 预检未产出可解析报告（退出码 ${result.code ?? "null"}${result.timedOut ? "，超时" : ""}）`;
+    log(detail);
+    throw new Error(`${detail}。${options.stopMessage}`);
   }
   const summary = summarizePreflightReport(report);
   if (summary.errors === 0) {
@@ -994,7 +995,7 @@ const previewExec = promisify(execFile);
 
 export function previewStopCommand(pid: string): string {
   if (!/^[1-9]\d*$/.test(pid)) throw new Error("预览 PID 无效");
-  return `$ErrorActionPreference='Stop'; $same = { param($p) $p -and ($p.CommandLine -ceq $env:GEO_PREVIEW_COMMAND) -and ([string]$p.CreationDate.Ticks -ceq $env:GEO_PREVIEW_CREATED) -and ($p.ExecutablePath -ieq $env:GEO_PREVIEW_EXECUTABLE) }; $p = Get-CimInstance Win32_Process -Filter "ProcessId=${pid}"; if (& $same $p) { & taskkill.exe /pid ${pid} /t /f; $killCode = $LASTEXITCODE; if ($killCode -ne 0) { $remaining = Get-CimInstance Win32_Process -Filter "ProcessId=${pid}"; if (& $same $remaining) { exit $killCode } } }; exit 0`;
+  return `$ErrorActionPreference='Stop'; $same = { param($p) $p -and ($p.CommandLine -ceq $env:GEO_PREVIEW_COMMAND) -and ([string]$p.CreationDate.Ticks -ceq $env:GEO_PREVIEW_CREATED) -and ($p.ExecutablePath -ieq $env:GEO_PREVIEW_EXECUTABLE) }; $p = Get-CimInstance Win32_Process -Filter "ProcessId=${pid}"; if (& $same $p) { $ErrorActionPreference='Continue'; & taskkill.exe /pid ${pid} /t /f; $ErrorActionPreference='Stop'; $remaining = Get-CimInstance Win32_Process -Filter "ProcessId=${pid}"; if (& $same $remaining) { exit 1 } }; exit 0`;
 }
 
 async function pausePreviewRenderer(root: string, cancelled: () => boolean): Promise<ExportLease> {
@@ -1295,8 +1296,8 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
 }
 
 /**
- * A terminal export keeps what a person needs — the film, its subtitles, the QA
- * report and the durable record — and hands the executable sandbox back.
+ * 成功且通过 QA 的导出保留成片、字幕、QA 报告与记录，再回收执行沙箱。
+ * 失败或取消的任务原地保留全部沙箱，不删除或复制录制进度。
  *
  * The sandbox is a full working copy of the pipeline plus every intermediate it
  * produced: the map video (200-400 MB), the narration WAV, the composed media
@@ -1312,7 +1313,7 @@ export async function executeRender(root: string, job: RenderJobRecord, projectI
  */
 export const NARRATION_REUSE_FILES = ["narration.mp3", "duration.json", "narration-edge.srt"];
 
-/** A failed export is worth a handful of files, not a gigabyte of frames. */
+/** 诊断副本限制体积；恢复所需的原始帧留在本任务沙箱中。 */
 const DIAGNOSTIC_FILE_LIMIT = 12;
 const DIAGNOSTIC_BYTES_LIMIT = 8 * 1024 * 1024;
 
@@ -1322,16 +1323,8 @@ export interface JobDiagnostics {
 }
 
 /**
- * Keep the evidence a failed export leaves behind.
- *
- * The capture report — tile/imagery errors, per-frame failures, the annotation
- * counters — is written into the sandbox, and the sandbox is deleted as soon as
- * the job reaches a terminal state. So the only thing a failed job kept was
- * `job.error`, a single line that usually reads like "timed out", while the
- * `job.logs` ring buffer had already been overwritten by the retry attempt.
- * Copying the report out before the prune is what turns "导出失败" into something
- * an operator can act on (or hand over without re-running a two-hour export to
- * reproduce it).
+ * 为失败任务收集有体积上限的诊断副本，便于查看或交接报告。
+ * 原始沙箱和录制进度由 pruneJobIntermediates 的状态守卫保留，不依赖此副本恢复。
  */
 export async function collectJobDiagnostics(
   job: Pick<RenderJobRecord, "jobRoot" | "regionId" | "profile">
@@ -1379,9 +1372,12 @@ export async function collectJobDiagnostics(
 }
 
 export async function pruneJobIntermediates(
-  job: Pick<RenderJobRecord, "id" | "jobRoot" | "regionId">,
+  job: Pick<RenderJobRecord, "id" | "jobRoot" | "regionId" | "status">,
   options: { includeMaterializedSandbox?: boolean } = {}
 ): Promise<void> {
+  // 仅通过完整 QA 的成片可自动清理；失败或取消的原始帧与清单原地保留供恢复。
+  // 此守卫同样约束 workspace:prune，不能通过实体沙箱清理选项绕过。
+  if (job.status !== "completed") return;
   const link = join(job.jobRoot, "sandbox");
   if (job.regionId) {
     const source = join(link, "assets", "audio", job.regionId);

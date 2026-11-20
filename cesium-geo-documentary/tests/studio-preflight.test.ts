@@ -13,18 +13,19 @@ const root = resolve(import.meta.dirname, "..");
 
 test("暂停预览命令只终止同实例，目标消失或PID复用显式成功", { skip: process.platform !== 'win32' }, async () => {
   const command = previewStopCommand('123');
-  assert.match(command, /if \(& \$same \$p\) \{ & taskkill\.exe/);
-  assert.match(command, /if \(& \$same \$remaining\) \{ exit \$killCode \}/);
+  assert.match(command, /if \(& \$same \$p\) \{ \$ErrorActionPreference='Continue'; & taskkill\.exe/);
+  assert.match(command, /taskkill\.exe \/pid 123 \/t \/f;/);
+  assert.match(command, /if \(& \$same \$remaining\) \{ exit 1 \}/);
   assert.match(command, /; exit 0$/);
   assert.throws(() => previewStopCommand('123;exit 0'), /PID/);
   const exec = promisify(execFile);
   for (const scenario of ['missing', 'gone', 'reused', 'alive', 'different', 'success']) {
-    const mock = `$global:queries=0; $global:kills=0; function Get-CimInstance { param($ClassName,$Filter) $global:queries++; if ('${scenario}' -eq 'missing' -or ('${scenario}' -eq 'gone' -and $global:queries -gt 1)) { return }; $text='owned'; if ('${scenario}' -eq 'different' -or ('${scenario}' -eq 'reused' -and $global:queries -gt 1)) { $text='other' }; [pscustomobject]@{CommandLine=$text;CreationDate=[datetime]::MinValue;ExecutablePath='owned.exe'} }; function taskkill.exe { $global:kills++; $global:LASTEXITCODE=128; if ('${scenario}' -eq 'success') { $global:LASTEXITCODE=0 }; [Console]::WriteLine('MOCK_TASKKILL') }; `;
+    const mock = `$global:queries=0; $global:kills=0; function Get-CimInstance { param($ClassName,$Filter) $global:queries++; if ('${scenario}' -eq 'missing' -or (('${scenario}' -eq 'gone' -or '${scenario}' -eq 'success') -and $global:queries -gt 1)) { return }; $text='owned'; if ('${scenario}' -eq 'different' -or ('${scenario}' -eq 'reused' -and $global:queries -gt 1)) { $text='other' }; [pscustomobject]@{CommandLine=$text;CreationDate=[datetime]::MinValue;ExecutablePath='owned.exe'} }; function taskkill.exe { $global:kills++; $global:LASTEXITCODE=128; if ('${scenario}' -eq 'success') { $global:LASTEXITCODE=0 }; if ('${scenario}' -eq 'gone' -or '${scenario}' -eq 'reused') { [Console]::Error.WriteLine('no process instance') }; [Console]::WriteLine('MOCK_TASKKILL') }; `;
     const result = await exec('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', mock + command], {
       windowsHide: true, timeout: 10_000,
       env: { ...process.env, GEO_PREVIEW_COMMAND: 'owned', GEO_PREVIEW_CREATED: '0', GEO_PREVIEW_EXECUTABLE: 'owned.exe' }
     }).then(value => ({ ...value, code: 0 }), error => ({ stdout: String(error.stdout), code: error.code }));
-    assert.equal(result.code, scenario === 'alive' ? 128 : 0, scenario);
+    assert.equal(result.code, scenario === 'alive' ? 1 : 0, scenario);
     assert.equal(result.stdout.includes('MOCK_TASKKILL'), !['missing', 'different'].includes(scenario), scenario);
   }
 });
@@ -160,7 +161,7 @@ test("普通导出命令取消后无close也会释放注册并结束等待", asy
   assert.deepEqual(registrations, [child, null]);
 });
 
-test("the preflight runs before the encode and stays out of the way when it cannot run", async () => {
+test("the preflight runs before the encode and blocks an inconclusive result", async () => {
   const engine = await readFile(resolve(root, "apps/studio/render-engine.ts"), "utf8");
   // It has to sit between composition and encoding — the composition does not
   // exist before the map video does, and the whole point is to refuse a
@@ -173,10 +174,11 @@ test("the preflight runs before the encode and stays out of the way when it cann
   const encode = engine.indexOf('"编码新的 MP4", 79');
   assert.ok(compose > 0 && preflight > compose, "the preflight must run after composition");
   assert.ok(encode > preflight, "the preflight must run before the encode");
-  // An inconclusive preflight passes the export through rather than inventing a
-  // new failure mode.
-  assert.match(engine, /PREFLIGHT_INCONCLUSIVE/);
-  assert.match(engine, /if \(!report\) \{/);
+  // A missing report cannot certify the composition as ready.
+  const inconclusive = engine.slice(engine.indexOf("  if (!report) {"), engine.indexOf("  const summary = summarizePreflightReport(report);"));
+  assert.match(inconclusive, /PREFLIGHT_INCONCLUSIVE/);
+  assert.match(inconclusive, /throw new Error/);
+  assert.doesNotMatch(inconclusive, /return;/);
   assert.match(engine, /STUDIO_PREFLIGHT/);
   assert.doesNotMatch(engine, /"check", "\.", "--json", "--samples", String\(samples\), "--strict"/);
 });
