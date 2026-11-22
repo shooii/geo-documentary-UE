@@ -18,7 +18,11 @@
 
 # Local measurement and comparison output (screenshots produced while tuning
 # things like the subtitle baseline). Evidence for a decision, not a deliverable.
-outputs/
+# Video plan content (scripts/copy/HTML plans/images/video) is kept local only;
+# only project engineering code is committed. See .workbuddy/memory/MEMORY.md.
+**/outputs/
+**/output/
+**/.tmp/
 
 # Project data and generated render output
 **/data/
@@ -73,6 +77,18 @@ cesium-geo-documentary/content/coverage-manifest-*.json
 
 # Agent working memory (local, never tracked)
 .workbuddy/
+.Antigravity/
+
+# One-off per-town content-production scripts and ad-hoc validators (not engine
+# code). Matched by town name or temp/version suffix; generic engine scripts such
+# as apply-town-template.mjs / geo-video.ts stay tracked.
+cesium-geo-documentary/scripts/*kelu*
+cesium-geo-documentary/scripts/*yingli*
+cesium-geo-documentary/scripts/*zhenlong*
+cesium-geo-documentary/scripts/*longmen*
+cesium-geo-documentary/scripts/verify-word-highlight.mjs
+cesium-geo-documentary/validate-*-tmp.ts
+cesium-geo-documentary/validate-v*.ts
 
 # One-off helpers left over from earlier debug sessions. The edits they applied are
 # already in the tree, and the frame probes they duplicate live in
