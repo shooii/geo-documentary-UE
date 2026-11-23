@@ -1,7 +1,7 @@
 {
   "regionId": "440882102",
   "title": "地理乡土情·雷州市客路镇",
-  "duration": 287,
+  "duration": 484,
   "profile": "portrait",
   "presentationMode": "parent-child-tour-with-evidence-cutaways",
   "tourChildCount": 30,
@@ -1228,7 +1228,7 @@
     {
       "sceneId": "440882102-finale",
       "start": 288.371,
-      "duration": 0.5,
+      "duration": 195.62900000000002,
       "end": 302,
       "narrationRef": "script:paragraph-40",
       "narration": "??????????????????????????????",
