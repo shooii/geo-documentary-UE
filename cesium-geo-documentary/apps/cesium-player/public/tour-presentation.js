@@ -1,8 +1,6 @@
 const LABEL_REVEAL_FLIGHT_FRACTION = 0.55;
 const LABEL_REVEAL_DURATION_FRACTION = 0.35;
 const LABEL_REVEAL_MIN_SECONDS = 0.45;
-const VISITED_LABEL_ALPHA = 0.88;
-const CURRENT_LABEL_ALPHA = 0.98;
 const VISITED_LABEL_SCALE = 0.9;
 
 const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
@@ -83,7 +81,8 @@ export function tourLabelPresentationAt(time, tour, returnState, stop, stopIndex
     visited: true,
     revealStrength,
     emphasis,
-    alpha: revealStrength * lerp(VISITED_LABEL_ALPHA, CURRENT_LABEL_ALPHA, emphasis),
+    // Reveal controls admission, not the opacity of the glyphs.
+    alpha: 1,
     scale: lerp(VISITED_LABEL_SCALE, 1, emphasis)
   };
 }

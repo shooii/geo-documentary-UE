@@ -56,7 +56,7 @@ test('UE全Bounds安全区和字幕检测覆盖Pinned及Animated，锚点不改�
   assert.match(layout, /TEXT\("subtitleBounds"\)/);
   assert.match(layout, /Label\.Ink\) \* \(Label\.Animated \? \.55 : \.5\)/);
   assert.match(layout, /Label\.Anchor \+ FVector2D\(0, BaseY\)/);
-  assert.match(layout, /Label\.Color\.A \*= LayoutAlpha/);
+  assert.match(layout, /if \(Label\.Animated\)\s*Label\.Color\.A \*= ClearanceAlpha/);
   assert.doesNotMatch(layout, /!Pinned && !Label\.Animated|CaptionY|LabelPlacements\.Contains/);
-  assert.ok(layout.indexOf('if (LayoutAlpha <= 0)') < layout.indexOf('Canvas->DrawItem(Icon)'));
+  assert.ok(layout.indexOf('if (Clearance <= 0)') < layout.indexOf('Canvas->DrawItem(Icon)'));
 });

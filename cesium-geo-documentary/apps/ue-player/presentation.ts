@@ -3,7 +3,7 @@ import { tourHighlightStrength, tourLabelPresentationAt } from '../cesium-player
 import type { MapView } from '../../packages/project-schema/index.js';
 import { cloudStateAt } from './opening.js';
 import { boundaryAnimation } from './boundary-style.js';
-import { visualHierarchy, overviewRepresentatives } from './visual-hierarchy.js';
+import { visualHierarchy } from './visual-hierarchy.js';
 
 export const actions = new Set(['prepare-tour', 'play-opening', 'set-annotations', 'show-tour-frame', 'play-tour-segment', 'play-scene-range', 'stop-scene-playback', 'update-tour-labels', 'play-tour-outro', 'play-parent-overview', 'preview-child-camera', 'set-map-view', 'switch-imagery']);
 export const clamp = (x: number) => Math.max(0, Math.min(1, x));
@@ -249,7 +249,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
       const id = String(item.id);
       const label = tourLabelPresentationAt(mapTime, tour, returning, item, stopIndex);
       if (label.visible) labels[id] = {
-        alpha: label.alpha * labelsReveal, scale: label.scale * closingScale, emphasis: label.emphasis,
+        alpha: 1, scale: label.scale * closingScale, emphasis: label.emphasis,
         // Tour order, so the map's own declutter pass can rank a village the way Cesium
         // does: the place that was narrated first keeps its name when two collide.
         rank: stopIndex
@@ -284,7 +284,8 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     for (const id of new Set([...Object.keys(origin.labels), ...Object.keys(labels)])) {
       const start = origin.labels[id], end = labels[id];
       labels[id] = {
-        alpha: lerp(start?.alpha ?? 0, end?.alpha ?? 0, transition),
+        // Switch admission at the midpoint; never crossfade the village name.
+        alpha: ((transition < .5 ? start : end)?.alpha ?? 0) > .01 ? 1 : 0,
         scale: lerp(start?.scale ?? end!.scale, end?.scale ?? start!.scale, transition),
         emphasis: lerp(start?.emphasis ?? 0, end?.emphasis ?? 0, transition),
         rank: end?.rank ?? start?.rank
@@ -306,25 +307,10 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
   // The final overview belongs to the villages: keep the town outline/fill, but
   // never restore its large name above the village labels on either outro path.
   if (stops.length && !openingOnly && (returnProgress !== null || overviewProgress !== undefined)) parentLabel = 0;
-  // 收尾起始段让当前村的名牌与定位点淡出。旧实现靠 UE 端「current 从非空跳空」的跨帧
-  // 检测启动 0.45s 淡出，跳转采样（QA 的 renderFrame 直接落帧）或收尾首帧会满强度残留。
-  // 这里改为用收尾进度线性显式驱动，两条收尾路径（tour 返航 / outro 总览）都覆盖。
-  const closingLinear = overviewProgress !== undefined ? clamp(overviewProgress) : returnProgress !== null ? clamp(returnProgress) : 0;
-  const plateFade = clamp(1 - closingLinear / .12);
   const hierarchy = visualHierarchy(pose.height, overview.height, closing);
-  if (stops.length && !openingOnly) {
-    const closingShot = returnProgress !== null || overviewProgress !== undefined;
-    const representatives = overviewRepresentatives(stops, profile);
-    for (const [id, label] of Object.entries(labels)) {
-      // 收尾只允许“同亮显示”或“完全交给避让隐藏”。旧公式在返航 2–3 秒把
-      // 非代表村乘到 0.56–0.80，潭龙村、英益村这类落在浅绿填充上的字被透成
-      // 灰绿，看着像单独换色；同一时刻代表村仍是 0.88。巡游阶段保持原逻辑。
-      if (closingShot) {
-        label.alpha = label.alpha > .01 ? .88 : 0;
-      } else if (id !== current && !representatives.has(id)) {
-        label.alpha *= 1 - hierarchy.labelMix * (1 - closing);
-      }
-    }
+  // Opening may start from a preview origin, but must never inherit its villages.
+  if (openingOnly || labelsReveal <= .05) {
+    for (const id of Object.keys(labels)) delete labels[id];
   }
   const focusId = Object.keys(accents).reduce((best, id) => accents[id]! > (accents[best] ?? parentAccent) ? id : best, '');
   const nextAccent = Math.max(focusId ? parentAccent : 0, ...Object.entries(accents).filter(([id]) => id !== focusId).map(([, value]) => value));
@@ -339,7 +325,7 @@ export function frameAt(scene: any, stops: any[], time: number, profile: string,
     camera: pose, time, mapTime, current, progress: returning ? 1 - returning.progress : tour?.progress ?? 0,
     visited: Object.keys(labels).filter(id => labels[id]!.alpha > .01),
     parentReveal: reveal, childReveal: smooth((mapTime - 3.15) / 1.35), parentLabel, parentAccent, contextReveal, contextOpacity, contextErasing,
-    labels, accents, labelReferenceDistance, focusId, focus, labelsReveal, fills, hierarchy, plateFade,
+    labels, accents, labelReferenceDistance, focusId, focus, labelsReveal, fills, hierarchy,
     // 行政村填充底色（RGB 0-1），UE 端 GeoMap 用来替换默认的饱和绿。
     villageFill: villageFillColor(region),
     // Villages the tour has already reached. UE keeps their plate painted, so the

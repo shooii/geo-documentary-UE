@@ -51,11 +51,12 @@ test("visited child labels grow monotonically and persist through the parent ret
   const earlier = tourLabelPresentationAt(35, activeTour, null, stops[0]!, 0);
   assert.equal(current.current, true);
   assert.equal(earlier.current, false);
-  assert.ok(current.alpha > earlier.alpha);
-  // 已讲过的村必须“更安静但清晰可读”：此前 0.70 的白字压在半透明浅绿填充上
-  // 会灰成一片，工作台预览里村名几乎读不出来。
-  assert.ok(earlier.alpha >= 0.85, `visited label alpha ${earlier.alpha} is not readable`);
-  assert.ok(earlier.alpha < current.alpha, "visited labels must stay quieter than the narrated one");
+  assert.equal(current.alpha, 1);
+  assert.equal(earlier.alpha, 1);
+  const justRevealed = tourLabelPresentationAt(32.4, tourStateAt(32.4), null, stops[2]!, 2);
+  assert.equal(justRevealed.visible, true);
+  assert.ok(justRevealed.revealStrength < .1);
+  assert.equal(justRevealed.alpha, 1);
   assert.ok(current.scale > earlier.scale);
 
   const returning = { progress: 0.5 };

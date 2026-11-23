@@ -108,10 +108,7 @@ import {
   const CHILD_LABEL_OUTLINE_WIDTH = 3.4;
   const LABEL_OUTLINE_MAX_ALPHA = 1;
   const LABEL_OUTLINE_ALPHA_RATIO = 1.05;
-  const CHILD_LABEL_OUTLINE_MAX_ALPHA = 1;
-  const CHILD_LABEL_OUTLINE_ALPHA_RATIO = 1.05;
   const RETURN_CHILD_LABEL_OUTLINE_WIDTH = 5.4;
-  const RETURN_CHILD_LABEL_OUTLINE_ALPHA_RATIO = 1.45;
   const SELECTED_BOUNDARY = Cesium.Color.fromCssColorString("#FFD166");
   const CHILD_BOUNDARY = Cesium.Color.fromCssColorString("#E8F0F5");
   // Widths follow design/tokens.json `boundary` and the grounded boundary
@@ -646,10 +643,6 @@ import {
   const readableLabelOutlineAlpha = (fillAlpha) => Math.min(
     LABEL_OUTLINE_MAX_ALPHA,
     Math.max(0, Number(fillAlpha) || 0) * LABEL_OUTLINE_ALPHA_RATIO
-  );
-  const readableChildLabelOutlineAlpha = (fillAlpha) => Math.min(
-    CHILD_LABEL_OUTLINE_MAX_ALPHA,
-    Math.max(0, Number(fillAlpha) || 0) * CHILD_LABEL_OUTLINE_ALPHA_RATIO
   );
   let viewer = null;
   let region = null;
@@ -1626,7 +1619,7 @@ import {
         entry.labelEntity.show = labelAlpha > 0.02;
         if (entry.labelProperties.length === 2) {
           setColorProperty(entry.labelProperties[0], Cesium.Color.WHITE.withAlpha(labelAlpha));
-          setColorProperty(entry.labelProperties[1], CHILD_LABEL_OUTLINE.withAlpha(readableChildLabelOutlineAlpha(labelAlpha)));
+          setColorProperty(entry.labelProperties[1], CHILD_LABEL_OUTLINE.withAlpha(readableLabelOutlineAlpha(labelAlpha)));
         }
       }
     }
@@ -1840,7 +1833,6 @@ import {
           style: Cesium.LabelStyle.FILL_AND_OUTLINE,
           showBackground: false,
           scaleByDistance: labelScaleByDistance(),
-          translucencyByDistance: labelTranslucencyByDistance(),
           heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
           verticalOrigin: Cesium.VerticalOrigin.CENTER,
           disableDepthTestDistance: Number.POSITIVE_INFINITY
@@ -2142,15 +2134,8 @@ import {
       if (scaleProperty) setNumberProperty(scaleProperty, authoredScale);
       labelStates.set(key, { entity: labelEntity, presentation });
       if (!presentation.visible || !labelEntity) continue;
-      const fill = Cesium.Color.lerp(Cesium.Color.WHITE, SELECTED_BOUNDARY, 0.58 * presentation.emphasis, new Cesium.Color());
-      fill.alpha = presentation.alpha;
-      setColorProperty(properties[0], fill);
-      setColorProperty(
-        properties[1],
-        CHILD_LABEL_OUTLINE.withAlpha(returnState
-          ? Math.min(1, presentation.alpha * RETURN_CHILD_LABEL_OUTLINE_ALPHA_RATIO)
-          : readableChildLabelOutlineAlpha(presentation.alpha))
-      );
+      setColorProperty(properties[0], Cesium.Color.WHITE);
+      setColorProperty(properties[1], CHILD_LABEL_OUTLINE);
       // Rank: the active stop is always admitted first, then the freshest tour
       // order, so the narrated place name cannot be displaced by context.
       const rank = tour && String(tour.current?.id) === key ? -1 : (stopIndex ?? stops.length);
@@ -2242,7 +2227,6 @@ import {
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         showBackground: false,
         scaleByDistance: labelScaleByDistance(),
-        translucencyByDistance: labelTranslucencyByDistance(),
         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
         pixelOffset: new Cesium.Cartesian2(0, -28),
@@ -2256,8 +2240,9 @@ import {
     const value = clamp(strength, 0, 1);
     const fill = Cesium.Color.fromCssColorString("#FFD166").withAlpha(0.15 * value);
     const outline = Cesium.Color.fromCssColorString("#FFD166").withAlpha(0.98 * value);
-    const labelFill = Cesium.Color.WHITE.withAlpha(value);
-    const labelOutline = CHILD_LABEL_OUTLINE.withAlpha(readableChildLabelOutlineAlpha(value));
+    const labelAlpha = value > .05 ? 1 : 0;
+    const labelFill = Cesium.Color.WHITE.withAlpha(labelAlpha);
+    const labelOutline = CHILD_LABEL_OUTLINE.withAlpha(labelAlpha);
     for (const property of fillProperties) property.setValue(fill);
     for (const property of outlineProperties) property.setValue(outline);
     const labelColors = [labelFill, labelOutline];

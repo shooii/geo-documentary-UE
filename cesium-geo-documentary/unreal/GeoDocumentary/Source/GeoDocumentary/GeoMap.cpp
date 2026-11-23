@@ -1695,32 +1695,8 @@ void AGeoHUD::DrawHUD()
     const auto F = Map->Frame;
     const FString Current = S(F, TEXT("current"));
     const FString FocusId = S(F, TEXT("focusId"));
-    // The plaque hand-off. `current` is the village the shot belongs to; the moment the
-    // closing pull-back starts the runtime clears it, so the plaque and the pin used to
-    // disappear between one frame and the next — the only hard cut in the whole closing.
-    // The last village to hold the plaque keeps it for another 0.45 s and fades out.
-    const double FrameTime = N(F, TEXT("time"));
-    if (!Current.IsEmpty())
-    {
-        FadingPlateId = Current;
-        FadingPlateSince = -1;
-    }
-    else if (!FadingPlateId.IsEmpty() && FadingPlateSince < 0)
-        FadingPlateSince = FrameTime;
-    float PlateFade = 1.f;
-    if (FadingPlateSince >= 0)
-    {
-        PlateFade = FMath::Clamp(1.f - float((FrameTime - FadingPlateSince) / .45), 0.f, 1.f);
-        if (PlateFade <= 0.f)
-        {
-            FadingPlateId.Reset();
-            FadingPlateSince = -1;
-        }
-    }
-    // 收尾起始段由前端收尾进度(plateFade)显式驱动的淡出：覆盖跳转采样 / 收尾首帧时
-    // 状态机尚未启动而满强度残留的情况。两者取更小值，确保任何路径都不会晚淡出。
-    PlateFade = FMath::Min(PlateFade, float(FMath::Clamp(N(F, TEXT("plateFade"), 1), 0., 1.)));
-    const FString CurrentId = Current.IsEmpty() ? FadingPlateId : Current;
+    // The plaque contains the glyphs. Switch to plain text as soon as a village
+    // loses focus, so neither sequential playback nor scrubbing fades its ink.
     const float Scale = Canvas->SizeX / (Map->RenderProfile == TEXT("landscape") ? 1920.f : 1080.f);
     const FIntPoint Size(Canvas->SizeX, Canvas->SizeY);
     // The HUD costs a projection per boundary vertex, every frame: 12.5k points for the
@@ -3117,6 +3093,25 @@ void AGeoHUD::DrawHUD()
         Text.SetColor(ContextColor);
         Canvas->DrawItem(Text);
     }
+    // The fallback screen-space clouds sit behind village ink, just like native clouds.
+    const auto Clouds = O(F, TEXT("clouds"));
+    const double Raw = N(Clouds, TEXT("raw"), 1);
+    auto CloudLayer = [this](UTexture2D *Texture, double Alpha, double Zoom, double X, double Y) {
+        if (!Texture || Alpha < .001)
+            return;
+        const FVector2D Extent(Canvas->SizeX * Zoom, Canvas->SizeY * Zoom);
+        const FVector2D Position((Canvas->SizeX - Extent.X) / 2 + X * Canvas->SizeX / 1080,
+                                 (Canvas->SizeY - Extent.Y) / 2 + Y * Canvas->SizeY / 1920);
+        FCanvasTileItem Tile(Position, Texture->GetResource(), Extent, FLinearColor(1, 1, 1, Alpha));
+        Tile.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Tile);
+    };
+    if (!Map->UsesNativeClouds())
+    {
+        CloudLayer(Map->CloudDeck, N(Clouds, TEXT("deck")), 1.05 + Raw * .16, (Raw - .5) * -28, (Raw - .5) * 20);
+        CloudLayer(Map->CloudDeck, N(Clouds, TEXT("volume")) * .18, 1.5 + Raw * .8, (Raw - .5) * 100, (Raw - .5) * -70);
+        CloudLayer(Map->CloudPass, N(Clouds, TEXT("veil")), 1.06 + Raw * .13, (Raw - .5) * -31, (Raw - .5) * 17);
+    }
     struct FLabelDraw
     {
         FString Id, Name, PlatePath;
@@ -3139,8 +3134,6 @@ void AGeoHUD::DrawHUD()
         // On-screen line-box height of the name, in pixels: the outline width is derived
         // from it so that it stays proportional at every zoom.
         float Ink = 0;
-        /** Plaque and pin only: the closing hand-off fades them out instead of cutting. */
-        float Fade = 1;
     };
     TArray<FLabelDraw> DrawLabels;
     if (!LabelFont)
@@ -3199,12 +3192,10 @@ void AGeoHUD::DrawHUD()
         const auto Ramp = [DistanceRatioSq](double Near, double Far) {
             return FMath::Pow(FMath::Clamp((DistanceRatioSq - Near * Near) / (Far * Far - Near * Near), 0., 1.), .2);
         };
-        const bool CurrentVillage = !Label.Parent && Label.Id == CurrentId;
-        const bool Primary = Label.Parent || CurrentVillage;
-        // Cesium fades a name to nothing as it leaves its NearFarScalar range. On a
-        // satellite photo under a black rim that also fades, the far names turned grey
-        // rather than quiet — 0.85 keeps the hierarchy without emptying the glyph.
-        const float Opacity = float(Alpha * LabelsReveal * (1 - Ramp(1, 2.8) * (Primary ? .20 : .15)));
+        const bool CurrentVillage = !Label.Parent && Label.Id == Current;
+        const float Opacity = Label.Parent
+            ? float(Alpha * LabelsReveal * (1 - Ramp(1, 2.8) * .20))
+            : (LabelsReveal > .05 ? 1.f : 0.f);
         if (Opacity <= .01)
             continue;
         const float Emphasis = Label.Parent ? 0 : N(*Style, TEXT("emphasis"));
@@ -3260,7 +3251,7 @@ void AGeoHUD::DrawHUD()
             return float(FMath::Lerp(1.1, .68, FMath::Clamp((Ratio - .5) / 2.5, 0., 1.)));
         };
         const float SizePx = Label.Parent
-            ? 120.f * TownNameScale * FaceInkCompensation * Scale * ClosingTitleScale * FMath::Lerp(1.f, Primary ? .90f : .88f, Ramp(.5, 3))
+            ? 120.f * TownNameScale * FaceInkCompensation * Scale * ClosingTitleScale * FMath::Lerp(1.f, .90f, Ramp(.5, 3))
             : FMath::Max(28.f * Scale / FaceInkPerLineBox, ChildLabelPx * StyleScale * Scale * NearFarScale(FMath::Sqrt(DistanceRatioSq)));
         // Two atlases: the township name and the village names never overlap in size, and
         // rasterising both from one 64 px bitmap is what made the big ones soft.
@@ -3333,7 +3324,6 @@ void AGeoHUD::DrawHUD()
         // A village that has already been toured. Cesium painted these white and
         // outlined them in black at any distance; a grey body under a black rim reads
         // as a hole in the map rather than a label, so the body goes white here too.
-        const bool RetiredVillage = !Label.Parent && !CurrentVillage;
         // The box the declutter pass reasons about is the ink, not the line box. A Canvas
         // line box is 1/0.70 times the letter, so measuring with it made every name look
         // 40 % taller than it is and the closing overview dropped names that had room to
@@ -3341,10 +3331,7 @@ void AGeoHUD::DrawHUD()
         const float InkHeight = Height * NotoInkPerLineBox;
         FVector2D Extent = FVector2D(Label.Parent ? Width + TrackingTotal : Width, InkHeight) * TextScale * .5
                            + (CurrentVillage ? FVector2D(12, 6) : FVector2D(5, 3)) * Scale;
-        const FLinearColor Color = (RetiredVillage ? FLinearColor::White
-                                                  : FMath::Lerp(FLinearColor(.86, .91, .94), FLinearColor::White,
-                                                                Primary ? 1.f : Emphasis))
-                                       .CopyWithNewOpacity(Opacity);
+        const FLinearColor Color = FLinearColor::White.CopyWithNewOpacity(Opacity);
         // The town's name is plain text on the map, like the Cesium build: no pin and no
         // plaque. Villages keep the pin because they are the subject of their own shot.
         // 225 = 150 x 1.5. The pin artwork is the cube-over-rings icon
@@ -3378,7 +3365,7 @@ void AGeoHUD::DrawHUD()
         DrawLabels.Add({Label.Id, Label.Name, Label.PlatePath, Point, Extent, Color, TextScale, Emphasis,
                         IconSize, PlateHeight, PlateTexture, CurrentVillage ? 2 : Label.Parent ? 1 : 0,
                         CharCount, Tracking * TextScale, (Width + TrackingTotal) * TextScale, Label.Parent, Font,
-                        Community, Rank, Height * TextScale, CurrentVillage ? PlateFade : 1.f});
+                        Community, Rank, Height * TextScale});
     }
     DrawLabels.Sort([this](const FLabelDraw &A, const FLabelDraw &B) {
         if (A.Priority != B.Priority)
@@ -3448,16 +3435,17 @@ void AGeoHUD::DrawHUD()
                                                 FMath::Max(Other.Min.Y - Footprint.Max.Y, Footprint.Min.Y - Other.Max.Y));
             Clearance = FMath::Min(Clearance, Separation);
         }
-        const double LayoutAlpha = ClearanceAlpha(Clearance);
-        if (LayoutAlpha <= 0)
+        if (Clearance <= 0)
             continue;
-        Label.Color.A *= LayoutAlpha;
+        // Only the township title keeps its soft edge; village names are opaque or hidden.
+        if (Label.Animated)
+            Label.Color.A *= ClearanceAlpha(Clearance);
         if (Pinned && LabelPin)
         {
             const float IconSize = Label.IconSize;
             const FVector2D IconMin(Label.Anchor.X - IconSize * .5f, Label.Anchor.Y - IconSize);
             FCanvasTileItem Icon(IconMin, FVector2D(IconSize, IconSize),
-                                 FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.08f) * Label.Fade));
+                                 FLinearColor(1, 1, 1, Label.Color.A));
             Icon.Texture = LabelPin->GetResource();
             Icon.BlendMode = SE_BLEND_Translucent;
             Canvas->DrawItem(Icon);
@@ -3468,7 +3456,7 @@ void AGeoHUD::DrawHUD()
         if (Label.PlateTexture)
         {
             FCanvasTileItem Plate(Position - Label.Extent, Label.Extent * 2,
-                                  FLinearColor(1, 1, 1, FMath::Min(1.f, Label.Color.A * 1.05f) * Label.Fade));
+                                  FLinearColor(1, 1, 1, 1.f));
             Plate.Texture = Label.PlateTexture->GetResource();
             Plate.BlendMode = SE_BLEND_Translucent;
             Canvas->DrawItem(Plate);
@@ -3524,24 +3512,6 @@ void AGeoHUD::DrawHUD()
     }
     Map->HudLabelMs = FMath::Lerp(Map->HudLabelMs, (FPlatformTime::Seconds() - LayoutDone) * 1000., .1);
     LabelPlacements = MoveTemp(Placements);
-    const auto Clouds = O(F, TEXT("clouds"));
-    const double Raw = N(Clouds, TEXT("raw"), 1);
-    auto CloudLayer = [this](UTexture2D *Texture, double Alpha, double Zoom, double X, double Y) {
-        if (!Texture || Alpha < .001)
-            return;
-        const FVector2D Extent(Canvas->SizeX * Zoom, Canvas->SizeY * Zoom);
-        const FVector2D Position((Canvas->SizeX - Extent.X) / 2 + X * Canvas->SizeX / 1080,
-                                 (Canvas->SizeY - Extent.Y) / 2 + Y * Canvas->SizeY / 1920);
-        FCanvasTileItem Tile(Position, Texture->GetResource(), Extent, FLinearColor(1, 1, 1, Alpha));
-        Tile.BlendMode = SE_BLEND_Translucent;
-        Canvas->DrawItem(Tile);
-    };
-    if (!Map->UsesNativeClouds())
-    {
-        CloudLayer(Map->CloudDeck, N(Clouds, TEXT("deck")), 1.05 + Raw * .16, (Raw - .5) * -28, (Raw - .5) * 20);
-        CloudLayer(Map->CloudDeck, N(Clouds, TEXT("volume")) * .18, 1.5 + Raw * .8, (Raw - .5) * 100, (Raw - .5) * -70);
-        CloudLayer(Map->CloudPass, N(Clouds, TEXT("veil")), 1.06 + Raw * .13, (Raw - .5) * -31, (Raw - .5) * 17);
-    }
     // 影像署名（Mapbox/Cesium/Esri 等拼接的文字带）已按需求从画面移除（2026-11-11）；
     // ImageryAttribution 仍在 LoadScene 时读取，供诊断日志使用，但不再绘制到 HUD。
 }

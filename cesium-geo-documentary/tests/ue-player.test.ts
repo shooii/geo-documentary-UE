@@ -65,7 +65,8 @@ test('UE keeps the displayed camera and label when jumping to a nonadjacent vill
   const revealing = frameAt(scene, stops, 33, 'portrait', 4.4, false, from);
   const settled = frameAt(scene, stops, 34, 'portrait', 4.4, false, from);
   assert.ok(revealing.labels.c!.scale < settled.labels.c!.scale);
-  assert.ok(revealing.labels.c!.alpha < settled.labels.c!.alpha);
+  assert.equal(revealing.labels.c!.alpha, 1);
+  assert.equal(settled.labels.c!.alpha, 1);
   assert.deepEqual(settled.camera, camera(stops[2]!.cameraPreset));
 
   const returned = frameAt(scene, stops, 45, 'portrait', 4.4);

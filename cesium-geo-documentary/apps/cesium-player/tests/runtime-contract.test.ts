@@ -172,11 +172,16 @@ test("Cesium runtime exposes the deterministic render contract", async () => {
   assert.match(source, /const LABEL_OUTLINE_MAX_ALPHA = 1/);
   assert.match(source, /const LABEL_OUTLINE_ALPHA_RATIO = 1\.05/);
   assert.match(source, /const readableLabelOutlineAlpha = \(fillAlpha\) =>/);
-  assert.match(source, /const readableChildLabelOutlineAlpha = \(fillAlpha\) =>/);
   assert.match(source, /outlineWidth: Math\.max\(1\.25, scaledVisualPx\(LABEL_OUTLINE_WIDTH\)\)/);
   assert.match(source, /outlineWidth: Math\.max\(1\.5, scaledVisualPx\(CHILD_LABEL_OUTLINE_WIDTH\)\)/);
   assert.match(source, /PARENT_LABEL_OUTLINE\.withAlpha\(readableLabelOutlineAlpha\(parentLabelStrength\)\)/);
-  assert.match(source, /CHILD_LABEL_OUTLINE\.withAlpha\(returnState[\s\S]*?readableChildLabelOutlineAlpha\(presentation\.alpha\)\)/);
+  assert.match(source, /setColorProperty\(properties\[0\], Cesium\.Color\.WHITE\);\s*setColorProperty\(properties\[1\], CHILD_LABEL_OUTLINE\);/);
+  assert.match(source, /const labelAlpha = value > \.05 \? 1 : 0;/);
+  for (const id of ['id: `child-label-', 'id: `${key}-label-']) {
+    const entry = source.slice(source.indexOf(id)).split('disableDepthTestDistance:')[0]!;
+    assert.ok(entry.startsWith(id));
+    assert.doesNotMatch(entry, /translucencyByDistance/);
+  }
   assert.match(source, /const PARENT_LABEL_FILL = Cesium\.Color\.WHITE/);
   assert.match(source, /id: `parent-topic-label-\$\{region\.id\}`,[\s\S]*?showBackground:\s*false/);
   assert.match(source, /id: `child-label-\$\{featureId\}`,[\s\S]*?showBackground:\s*false/);

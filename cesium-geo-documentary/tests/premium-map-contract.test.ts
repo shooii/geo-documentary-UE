@@ -191,14 +191,11 @@ test("parent and child administrative names use a restrained black outline witho
   assert.match(source, /const LABEL_OUTLINE_MAX_ALPHA = 1;/);
   assert.match(source, /const LABEL_OUTLINE_ALPHA_RATIO = 1\.05/);
   assert.match(source, /const CHILD_LABEL_OUTLINE_WIDTH = 3\.4/);
-  assert.match(source, /const CHILD_LABEL_OUTLINE_MAX_ALPHA = 1;/);
   assert.match(source, /const RETURN_CHILD_LABEL_OUTLINE_WIDTH = 5\.4/);
-  assert.match(source, /const RETURN_CHILD_LABEL_OUTLINE_ALPHA_RATIO = 1\.45/);
   assert.match(source, /returnState\s*\? RETURN_CHILD_LABEL_OUTLINE_WIDTH\s*:\s*CHILD_LABEL_OUTLINE_WIDTH/);
-  assert.match(source, /presentation\.alpha \* RETURN_CHILD_LABEL_OUTLINE_ALPHA_RATIO/);
   assert.match(source, /outlineWidth: Math\.max\(1\.25, scaledVisualPx\(LABEL_OUTLINE_WIDTH\)\)/);
   assert.match(source, /PARENT_LABEL_OUTLINE\.withAlpha\(readableLabelOutlineAlpha\(parentLabelStrength\)\)/);
-  assert.match(source, /:\s*readableChildLabelOutlineAlpha\(presentation\.alpha\)\)\s*\n\s*\);/);
+  assert.match(source, /setColorProperty\(properties\[1\], CHILD_LABEL_OUTLINE\);/);
   assert.match(source, /const PARENT_LABEL_FILL = Cesium\.Color\.WHITE/);
   assert.match(source, /id: `parent-topic-label-\$\{region\.id\}`,[\s\S]*?showBackground:\s*false/);
   assert.match(source, /id: `child-label-\$\{featureId\}`,[\s\S]*?showBackground:\s*false/);

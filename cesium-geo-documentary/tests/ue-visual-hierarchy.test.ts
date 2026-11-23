@@ -53,11 +53,35 @@ test('current village remains named even when absent from the overview represent
   assert.ok(frame.labels['3']!.alpha > .5);
 });
 
-test('结尾总览不再把非代表村压成半亮灰字', () => {
-  const source = readFileSync(new URL('../apps/ue-player/presentation.ts', import.meta.url), 'utf8');
-  assert.match(source, /const closingShot = returnProgress !== null \|\| overviewProgress !== undefined/);
-  assert.match(source, /if \(closingShot\) \{\s*label\.alpha = label\.alpha > \.01 \? \.88 : 0;/);
-  assert.match(source, /else if \(id !== current && !representatives\.has\(id\)\)/);
+test('村名在飞行、宽景、预览切换和两条返航链路中只会全亮或隐藏', () => {
+  const pose = {lon: 110, lat: 22, height: 10000, heading: 0, pitch: -64};
+  const scene = {region: {cameraPreset: pose, openingDescent: {enabled: false}}};
+  const stops = Array.from({length: 9}, (_, id) => ({id: String(id), start: id * 10,
+    end: (id + 1) * 10, flightDuration: 4, cameraPreset: {...pose, lon: 110 + id * .003}}));
+  const origin = frameAt(scene, stops, 75, 'portrait', 4.4);
+  assert.equal(origin.labels['7']?.alpha, 1);
+  for (const profile of ['portrait', 'landscape']) {
+    for (let time = 0; time <= 96; time += .125) {
+      for (const frame of [frameAt(scene, stops, time, profile, 4.4), frameAt(scene, stops, time, profile, 4.4, false, origin)]) {
+        assert.ok(Object.values(frame.labels).every(({alpha}) => alpha === 0 || alpha === 1), `${profile} ${time}`);
+      }
+    }
+    for (const progress of [0, .1, .3, .5, .9, 1]) {
+      const frame = frameAt(scene, stops, 90, profile, 4.4, false, origin, progress);
+      assert.ok(Object.values(frame.labels).every(({alpha}) => alpha === 0 || alpha === 1));
+      assert.equal(frame.current, '');
+    }
+    assert.deepEqual(frameAt(scene, stops, 15, profile, 4.4, true, origin, .1).labels, {});
+  }
+});
+
+test('UE 村名字色、名牌和避让不再施加透明度', () => {
+  const source = readFileSync(new URL('../unreal/GeoDocumentary/Source/GeoDocumentary/GeoMap.cpp', import.meta.url), 'utf8');
+  assert.match(source, /LabelsReveal > \.05 \? 1\.f : 0\.f/);
+  assert.match(source, /FLinearColor::White\.CopyWithNewOpacity\(Opacity\)/);
+  assert.match(source, /if \(Clearance <= 0\)\s*continue;[^]*?if \(Label\.Animated\)\s*Label\.Color\.A \*= ClearanceAlpha/);
+  assert.match(source, /FCanvasTileItem Plate[^]*?FLinearColor\(1, 1, 1, 1\.f\)/);
+  assert.doesNotMatch(source, /FadingPlateId|PlateFade/);
 });
 
 test('村域色块等镜头落稳后才渐入，飞行途中保持干净', () => {
