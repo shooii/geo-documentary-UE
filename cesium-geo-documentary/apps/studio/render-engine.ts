@@ -9,7 +9,7 @@ import { copyFile, cp, lstat, mkdir, readFile, readdir, readlink, rename, rm, rm
 import { basename, dirname, extname, join, relative, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
 import { buildRenderSpec, parseSrt, planVisualClip, selectSceneAssetsForRender, updateProjectMeasuredDurations, type RenderSpec } from "../../packages/render-spec/index.js";
-import { normalizeSemanticText, validateVideoProject, type StudioScene, type VideoProject } from "../../packages/project-schema/index.js";
+import { normalizeKeywordList, normalizeSemanticText, validateVideoProject, type StudioScene, type VideoProject } from "../../packages/project-schema/index.js";
 import { buildProjectRenderSpec, geometrySignature, makeProject, mapRendererSignature } from "./project-service.js";
 import { snapshotFile } from "./boundary-snapshot.js";
 import { runGoldenQa } from "./golden-qa.js";
@@ -658,7 +658,7 @@ async function writeVisualsManifest(sandbox: string, project: VideoProject, spec
         sourceType: asset.sourceType,
         narrationCueIndex: asset.cueStartIndex,
         narrationCueEndIndex: asset.cueEndIndex,
-        requiredKeywords: asset.requiredKeywords,
+        requiredKeywords: normalizeKeywordList(asset.requiredKeywords),
         leadSeconds: asset.leadSeconds,
         tailSeconds: asset.tailSeconds,
         minimumDisplaySeconds: plan.minimumDisplaySeconds,

@@ -243,6 +243,20 @@ export function normalizeSemanticText(value: string): string {
   return value.normalize("NFKC").replace(/[^\p{L}\p{N}]+/gu, "").toLowerCase();
 }
 
+/**
+ * A placement's `requiredKeywords` is an array by contract, but apply scripts and
+ * older project revisions have stored a bare string ("狮子" instead of ["狮子"]).
+ * A string has no `.filter`/`.join`, so the bad shape only surfaced late — in
+ * compose's keyword self-heal, after narration synthesis and UE capture had
+ * already been paid for (2026-11-24, 黄略镇). Every consumer coerces through this
+ * helper so a single keyword behaves as a one-element list.
+ */
+export function normalizeKeywordList(value: string[] | string | null | undefined): string[] {
+  if (Array.isArray(value)) return value.filter((keyword): keyword is string => typeof keyword === "string" && keyword.length > 0);
+  if (typeof value === "string" && value.length > 0) return [value];
+  return [];
+}
+
 function finiteRange(value: number, minimum: number, maximum: number, label: string): void {
   if (!Number.isFinite(value) || value < minimum || value > maximum) throw new Error(`${label} must be between ${minimum} and ${maximum}`);
 }

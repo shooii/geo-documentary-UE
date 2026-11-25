@@ -12,7 +12,7 @@ import { GOLD_WASH_STYLE, goldWashAnimation } from "../../../../packages/content
 import { mediaKindForPath } from "../../../../packages/content-engine/media.js";
 import { COMPOSITION_TRACKS, musicTrack, visualTrack } from "../../../../packages/content-engine/tracks.js";
 import { normalizeAnchorText } from "../../../../packages/content-engine/visual-anchoring.js";
-import type { AssetFit } from "../../../../packages/project-schema/index.js";
+import { normalizeKeywordList, type AssetFit } from "../../../../packages/project-schema/index.js";
 import { DEFAULT_TARGET_DISPLAY_SECONDS } from "../../../../packages/render-spec/visual-timeline.js";
 import { generateCoverAsset, resolveCoverDefinition } from "./cover.js";
 
@@ -548,7 +548,7 @@ function resolveVisualTiming(
     // sentences), self-heal by re-anchoring to the measured cue that mentions
     // it instead of aborting the whole export. Keep the original range only as
     // a last resort (soft render with a diagnostic warning).
-    const requiredKeywords = visual.requiredKeywords ?? [];
+    const requiredKeywords = normalizeKeywordList(visual.requiredKeywords);
     const keywordWarnings: string[] = [];
     let adjustedFirst = first;
     let adjustedLast = last;
@@ -688,7 +688,7 @@ async function writeVisualSyncReport(
       narrationCueIndex: visual.narrationCueIndex ?? null,
       narrationCueEndIndex: visual.narrationCueEndIndex ?? visual.narrationCueIndex ?? null,
       cueText: visual.cueText ?? null,
-      requiredKeywords: visual.requiredKeywords ?? [],
+      requiredKeywords: normalizeKeywordList(visual.requiredKeywords),
       keywordWarnings: visual.keywordWarnings ?? [],
       audioRelativeCueStart: visual.cueStart ?? null,
       audioRelativeCueEnd: visual.cueEnd ?? null,

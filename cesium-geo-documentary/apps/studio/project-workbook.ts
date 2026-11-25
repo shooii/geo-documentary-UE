@@ -40,6 +40,7 @@ import { mkdir, readdir, readFile } from "node:fs/promises";
 import { basename, join, normalize } from "node:path";
 import sharp from "sharp";
 import {
+  normalizeKeywordList,
   validateVideoProject,
   type AssetPlacement,
   type SceneType,
@@ -1036,7 +1037,7 @@ function rebuildPlacements(
        would quietly strip every anchoring keyword in the scheme on the next
        import -- the one failure mode this round-trip must never have. When the
        column is absent the placement keeps what it already had. */
-    const keywords = keywordsEditable ? [...(groups[position] ?? [])] : [...(base.requiredKeywords ?? [])];
+    const keywords = keywordsEditable ? [...(groups[position] ?? [])] : normalizeKeywordList(base.requiredKeywords);
     const placement = { ...structuredClone(base), assetId, requiredKeywords: keywords };
     if (materialize) placement.includeInRender = true;
     placements.push(placement);
@@ -1056,19 +1057,19 @@ function sceneFieldsChanged(original: StudioScene, edited: StudioScene): boolean
   if (original.narration !== edited.narration) return true;
   if (original.subtitle !== edited.subtitle) return true;
   if (original.assetIds.join("\u0000") !== edited.assetIds.join("\u0000")) return true;
-  const before = (original.placements ?? []).map((placement) => placement.assetId + "\u0000" + placement.requiredKeywords.join("\u0001")).join("\u0002");
-  const after = (edited.placements ?? []).map((placement) => placement.assetId + "\u0000" + placement.requiredKeywords.join("\u0001")).join("\u0002");
+  const before = (original.placements ?? []).map((placement) => placement.assetId + "\u0000" + normalizeKeywordList(placement.requiredKeywords).join("\u0001")).join("\u0002");
+  const after = (edited.placements ?? []).map((placement) => placement.assetId + "\u0000" + normalizeKeywordList(placement.requiredKeywords).join("\u0001")).join("\u0002");
   return before !== after;
 }
 
 function collectKeywordRemovals(original: StudioScene, edited: StudioScene, rowNumber: number, into: KeywordRemoval[]): void {
   const before = new Map<string, number>();
   for (const placement of original.placements ?? []) {
-    for (const keyword of placement.requiredKeywords ?? []) before.set(keyword, (before.get(keyword) ?? 0) + 1);
+    for (const keyword of normalizeKeywordList(placement.requiredKeywords)) before.set(keyword, (before.get(keyword) ?? 0) + 1);
   }
   const after = new Set<string>();
   for (const placement of edited.placements ?? []) {
-    for (const keyword of placement.requiredKeywords ?? []) after.add(keyword);
+    for (const keyword of normalizeKeywordList(placement.requiredKeywords)) after.add(keyword);
   }
   for (const [keyword, count] of before) {
     if (!after.has(keyword)) into.push({ row: rowNumber, title: original.title, keyword, count });

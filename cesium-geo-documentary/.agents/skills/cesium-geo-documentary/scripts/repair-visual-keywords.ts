@@ -27,8 +27,9 @@
  */
 
 import { normalizeAnchorText } from "../../../../packages/content-engine/visual-anchoring.js";
+import { normalizeKeywordList } from "../../../../packages/project-schema/index.js";
 
-interface Placement { requiredKeywords?: string[] }
+interface Placement { requiredKeywords?: string[] | string }
 interface Scene { id: string; title?: string; childName?: string; narration?: string; placements?: Placement[] }
 interface Project { id: string; name?: string; revision?: number; scenes?: Scene[] }
 interface ProjectSummary { id: string; name?: string; revision?: number }
@@ -93,7 +94,7 @@ function planProject(project: Project) {
     const others = narrations.filter((_, other) => other !== index);
     const counts = new Map<string, number>();
     for (const placement of scene.placements ?? []) {
-      for (const keyword of placement.requiredKeywords ?? []) {
+      for (const keyword of normalizeKeywordList(placement.requiredKeywords)) {
         if (!normal(keyword)) continue;
         counts.set(keyword, (counts.get(keyword) ?? 0) + 1);
       }
@@ -118,10 +119,10 @@ function applyPlan(project: Project, repairs: ReturnType<typeof planProject>["re
     if (!sceneRepairs) continue;
     const mapping = new Map(sceneRepairs.map((repair) => [repair.from, repair.to]));
     for (const placement of scene.placements ?? []) {
-      const keywords = placement.requiredKeywords;
-      if (!Array.isArray(keywords)) continue;
-      const next = keywords.map((keyword) => mapping.get(keyword) ?? keyword);
-      if (next.some((keyword, index) => keyword !== keywords[index])) { placement.requiredKeywords = next; changed += 1; }
+      const current = normalizeKeywordList(placement.requiredKeywords);
+      if (current.length === 0) continue;
+      const next = current.map((keyword) => mapping.get(keyword) ?? keyword);
+      if (next.some((keyword, index) => keyword !== current[index])) { placement.requiredKeywords = next; changed += 1; }
     }
   }
   return changed;
